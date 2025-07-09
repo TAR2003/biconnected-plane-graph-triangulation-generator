@@ -49,13 +49,13 @@ def main():
     #     print("}")
     # print()
     
-    all_compatible_sets = []
+    all_compatible_sets = set()  # Use set of frozensets for uniqueness
     sequence_sets = {}  # Dictionary to track which sets belong to which sequence
     
     # For each sequence, find compatible sequences and build combined sets
     for i in range(num_sequences):
         compatible = []
-        sequence_sets[i + 1] = []  # Initialize list for this sequence
+        sequence_sets[i + 1] = set()  # Initialize set for this sequence
         
         # First, show all available sequences for this sequence
         print(f"Results for Sequence {i + 1}:")
@@ -82,9 +82,9 @@ def main():
                 # Create combined set of pairs from both sequences
                 combined_set = set(sequences[i])
                 combined_set.update(sequences[j])
-                combined_list = sorted(list(combined_set))
-                all_compatible_sets.append(combined_list)
-                sequence_sets[i + 1].append(combined_list)  # Track which sequence this set belongs to
+                combined_frozenset = frozenset(combined_set)
+                all_compatible_sets.add(combined_frozenset)
+                sequence_sets[i + 1].add(combined_frozenset)  # Track which sequence this set belongs to
         
         # Then show the compatible sequences
         print(f"Compatible sequences ({len(compatible)}): ", end="")
@@ -104,20 +104,17 @@ def main():
         
         print()
     
-    # Remove duplicate sets while preserving which sequence they came from
+    # Convert frozensets back to sorted lists for display and count unique sets
     unique_sets_by_sequence = {}
-    seen_sets = []
     
-    for seq_num, sets_list in sequence_sets.items():
+    for seq_num, frozenset_collection in sequence_sets.items():
         unique_sets_by_sequence[seq_num] = []
-        for s in sets_list:
-            set_tuple = tuple(s)
-            # if set_tuple not in seen_sets:
-            seen_sets.append(set_tuple)
-            unique_sets_by_sequence[seq_num].append(s)
+        for frozen_set in frozenset_collection:
+            sorted_list = sorted(list(frozen_set))
+            unique_sets_by_sequence[seq_num].append(sorted_list)
     
     # Count total unique sets
-    total_unique_sets = sum(len(sets) for sets in unique_sets_by_sequence.values())
+    total_unique_sets = len(all_compatible_sets)
     
     # Print all unique compatible sets grouped by sequence
     print(f"\nAll Unique Compatible Sets ({total_unique_sets}):")
