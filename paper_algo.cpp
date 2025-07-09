@@ -108,51 +108,52 @@ bool checkLeftmostBlockingChord(ll root, ll n, set<pair<ll, ll>> &chords, pair<l
         {
             break;
         }
-        else {
+        else
+        {
             currentBlockedChord = i;
         }
     }
     // cout << "Current Blocking vertex is : " << currentBlockedChord << endl;
-    set<pair<ll,ll>> leftBlockingChords;
-    for(auto a: chords)
+    set<pair<ll, ll>> leftBlockingChords;
+    for (auto a : chords)
     {
-        if(a.second == currentBlockedChord && a.first > root)
+        if (a.second == currentBlockedChord && a.first > root)
         {
             leftBlockingChords.insert(a);
         }
     }
-    pair<ll,ll> leftmostChord = *leftBlockingChords.begin();
+    pair<ll, ll> leftmostChord = *leftBlockingChords.begin();
     if (leftmostChord.first == chord.first && leftmostChord.second == chord.second)
     {
         return true;
     }
-    else    
+    else
     {
         return false;
     }
 }
 
-pair<ll,ll> flipChord(ll root, ll n, set<pair<ll, ll>> &chords, set<pair<ll, ll>> &allPairs, pair<ll,ll> chord)
+pair<ll, ll> flipChord(ll root, ll n, set<pair<ll, ll>> &chords, set<pair<ll, ll>> &allPairs, pair<ll, ll> chord)
 {
     set<ll> assocOfFirst, assocOfSecond;
-    for(auto a:allPairs)
+    for (auto a : allPairs)
     {
-        if(a.first == chord.first)
+        if (a.first == chord.first)
         {
             assocOfFirst.insert(a.second);
         }
-        if(a.second == chord.first)
+        if (a.second == chord.first)
         {
             assocOfFirst.insert(a.first);
         }
     }
-    for(auto a:allPairs)
+    for (auto a : allPairs)
     {
-        if(a.first == chord.second)
+        if (a.first == chord.second)
         {
             assocOfSecond.insert(a.second);
         }
-        if(a.second == chord.second)
+        if (a.second == chord.second)
         {
             assocOfSecond.insert(a.first);
         }
@@ -172,9 +173,9 @@ pair<ll,ll> flipChord(ll root, ll n, set<pair<ll, ll>> &chords, set<pair<ll, ll>
     // cout << endl;
 
     vector<ll> commons;
-    for(auto a:assocOfFirst)
+    for (auto a : assocOfFirst)
     {
-        if(assocOfSecond.find(a) != assocOfSecond.end())
+        if (assocOfSecond.find(a) != assocOfSecond.end())
         {
             commons.push_back(a);
         }
@@ -186,7 +187,7 @@ pair<ll,ll> flipChord(ll root, ll n, set<pair<ll, ll>> &chords, set<pair<ll, ll>
     return make_pair(commons[0], commons[1]);
 }
 
-void generateAllTriangulations(ll root, ll n, set<pair<ll, ll>> &allPairs, set<pair<ll, ll>> &chords, set<set<pair<ll,ll>>> &answers)
+void generateAllTriangulations(ll root, ll n, set<pair<ll, ll>> &allPairs, set<pair<ll, ll>> &chords, set<set<pair<ll, ll>>> &answers)
 {
     if (n < 3)
     {
@@ -204,65 +205,150 @@ void generateAllTriangulations(ll root, ll n, set<pair<ll, ll>> &allPairs, set<p
     // printAllPairs(chords);
     answers.insert(chords);
 
-    for(auto a: chords)
+    for (auto a : chords)
     {
         set<pair<ll, ll>> allPairsCopy = copySetOfPairs(allPairs);
         set<pair<ll, ll>> chordsCopy = copySetOfPairs(chords);
         auto pair = flipChord(root, n, chordsCopy, allPairsCopy, a);
         bool isLeftmostBlockingChord = checkLeftmostBlockingChord(root, n, chordsCopy, pair);
-        if(isLeftmostBlockingChord)
+        if (isLeftmostBlockingChord)
         {
-            
+
             generateAllTriangulations(root, n, allPairsCopy, chordsCopy, answers);
         }
-        
     }
+}
 
-
-
-    // cout << "here we are" << endl;
-    // flipChord(root, n , chords, allPairs, make_pair(0,2));
-    // cout << "Printing all pairs " << endl;
-    // printAllPairs(allPairs);
-    // cout << "Printing all chords " << endl;
-    // printAllPairs(chords);
-    // if(checkLeftmostBlockingChord(root, n, chords, make_pair(1, 3)))
+void printAllTriangulations(set<set<pair<ll, ll>>> &answers)
+{
+    cout << "Total triangulations found: " << answers.size() << endl;
+    // cout << "Printing all triangulations" << endl;
+    // for(auto a: answers)
     // {
-    //     cout << "It is aLeftmost blocking chord" << endl;
-    // }
-    // else
-    // {
-    //     cout << "It is not a leftmost blocking chord" << endl;
-    // }
-    // flipChord(root, n, chords, allPairs, make_pair(0, 3));
-    // cout << "Printing all pairs " << endl;
-    // printAllPairs(allPairs);
-    // cout << "Printing all chords " << endl;
-    // printAllPairs(chords);
-    // if(checkLeftmostBlockingChord(root, n, chords, make_pair(1, 3)))
-    // {
-    //     cout << "It is a leftmost blocking chord" << endl;
-    // }
-    // else
-    // {
-    //     cout << "It is not a leftmost blocking chord" << endl;
+    //     cout << "{ ";
+    //     for(auto b: a)
+    //     {
+    //         cout << "( " << b.first << " , " << b.second << " ) ";
+    //     }
+    //     cout << "}" << endl;
     // }
 }
 
-
-void printAllTriangulations(set<set<pair<ll,ll>>> &answers)
+ll findHighestSafeRoot(ll n, set<pair<ll, ll>> &innerchords)
 {
-    cout << "Total triangulations found: " << answers.size() << endl;
-    cout << "Printing all triangulations" << endl;
-    for(auto a: answers)
+    set<ll> s;
+    for (ll i = 0; i < n; i++)
     {
-        cout << "{ ";
-        for(auto b: a)
-        {
-            cout << "( " << b.first << " , " << b.second << " ) ";
-        }
-        cout << "}" << endl;
+        s.insert(i);
     }
+    for (auto a : innerchords)
+    {
+        if (s.find(a.first) != s.end())
+        {
+            s.erase(a.first);
+        }
+        if (s.find(a.second) != s.end())
+        {
+            s.erase(a.second);
+        }
+    }
+    return *s.rbegin();
+}
+bool compare(pair<ll, ll> a, pair<ll, ll> b)
+{
+    if (a.first < b.first)
+    {
+        return true;
+    }
+    else if (a.first == b.first && a.second < b.second)
+    {
+        return true;
+    }
+    return false;
+}
+
+void generateOuterTriangulationsFromAnInnerTriangulation(ll root, ll n, set<pair<ll, ll>> &allPairs, set<pair<ll, ll>> &chords, set<pair<ll,ll>> &innerChords,  set<set<pair<ll, ll>>> &answers)
+{
+    if (n < 3)
+    {
+        cout << "Invalid input for triangulation" << endl;
+        return;
+    }
+
+    if (n == 3)
+    {
+        cout << "Base case: Triangulation of a triangle" << endl;
+        return;
+    }
+
+    // cout << "Found a valid Triangulation::" << endl;
+    // printAllPairs(chords);
+    auto minimumChord = *chords.begin();
+    auto minimumInnerChord = *innerChords.begin();
+    if(compare(minimumChord, minimumInnerChord))
+    {
+        return;
+    }
+    set<pair<ll, ll>> allChords;
+    for(auto a: chords){
+        allChords.insert(a);
+    }
+    for(auto a: innerChords){
+        allChords.insert(a);
+    }
+    ll rightlength = (n - 3) << 1;
+    if(allChords.size() < rightlength)
+    {
+        return;
+    }
+
+    answers.insert(chords);
+
+    for (auto a : chords)
+    {
+        set<pair<ll, ll>> allPairsCopy = copySetOfPairs(allPairs);
+        set<pair<ll, ll>> chordsCopy = copySetOfPairs(chords);
+        auto pair = flipChord(root, n, chordsCopy, allPairsCopy, a);
+        bool isLeftmostBlockingChord = checkLeftmostBlockingChord(root, n, chordsCopy, pair);
+        if (isLeftmostBlockingChord)
+        {
+            generateOuterTriangulationsFromAnInnerTriangulation(root, n, allPairsCopy, chordsCopy, innerChords, answers);
+        }
+    }
+}
+
+void generateAllTriangulationsForBiconnectedGraph(ll root, ll n, set<pair<ll, ll>> &allPairs, set<pair<ll, ll>> &chords, set<set<pair<ll, ll>>> &answers)
+{
+    set<set<pair<ll, ll>>> tempAnswers;
+    set<pair<ll, ll>> innerChords;
+    set<pair<ll, ll>> tempAllPairs = copySetOfPairs(allPairs);
+    for(ll i = 2; i < n - 1; i++)
+    {
+        innerChords.insert(make_pair(0, i));
+        tempAllPairs.insert(make_pair(0, i));
+    }
+    generateAllTriangulations(root, n, tempAllPairs, innerChords, tempAnswers);
+    for (auto a : tempAnswers)
+    {
+        set<pair<ll, ll>> innerChordsCopy = copySetOfPairs(a);
+        tempAllPairs = copySetOfPairs(allPairs);
+        ll highestSafeRoot = findHighestSafeRoot(n, innerChordsCopy);
+        // cout << "Highest safe root is: " << highestSafeRoot << endl; 
+        for(ll i = 2; i < n - 1; i++)
+        {
+            innerChordsCopy.insert(make_pair(highestSafeRoot, (highestSafeRoot + i) % n));
+            tempAllPairs.insert(make_pair(highestSafeRoot, (highestSafeRoot + i) % n));
+        }
+        set<set<pair<ll,ll>>> temptempAnswers;
+        generateOuterTriangulationsFromAnInnerTriangulation(highestSafeRoot, n, tempAllPairs, innerChordsCopy, innerChords, temptempAnswers);
+        for(auto b: tempAnswers)
+        {
+            answers.insert(b);
+        }
+
+    }
+    
+    // printAllTriangulations(tempAnswers);
 }
 
 int main()
@@ -271,20 +357,20 @@ int main()
     cin.sync_with_stdio(0);
     cout.tie(0);
     cout.sync_with_stdio(0);
-    ll n = 12;
+    ll n = 6;
     set<pair<ll, ll>> allPairs;
     set<pair<ll, ll>> chords;
-    set<set<pair<ll,ll>>> answers;
+    set<set<pair<ll, ll>>> answers;
     for (ll i = 0; i < n; i++)
     {
         allPairs.insert(make_pair(i, (i + 1) % n));
     }
-    for(ll i = 2; i < n - 1; i++)
-    {
-        chords.insert(make_pair(0, i));
-        allPairs.insert(make_pair(0, i));
-    }
-    generateAllTriangulations(0, n, allPairs, chords, answers);
+    // for(ll i = 2; i < n - 1; i++)
+    // {
+    //     chords.insert(make_pair(0, i));
+    //     allPairs.insert(make_pair(0, i));
+    // }
+    generateAllTriangulationsForBiconnectedGraph(0, n, allPairs, chords, answers);
     printAllTriangulations(answers);
     return 0;
 }
