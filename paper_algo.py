@@ -36,12 +36,12 @@ def printStructure(t) -> None:
     print(' '.join(map(str, t)))
     
 def printAllPairs(s: Set[Tuple[int, int]]) -> None:
-    print(' '.join([f"({x[0]},{x[1]})" for x in s]]))
+    print(' '.join([f"({x[0]},{x[1]})" for x in s]))
     
 def copySetOfPairs(src: Set[Tuple[int, int]]) -> Set[Tuple[int, int]]:
     return {makepair(x[0], x[1]) for x in src}
 
-def checkLeftmostBlockingChord(root: int, n: int, chords: Set[Tuple[int, int]], chord: Tuple[int, int]]) -> bool:
+def checkLeftmostBlockingChord (root: int, n: int, chords: Set[Tuple[int, int]], chord: Tuple[int, int]) -> bool:
     global findLeftMostBlockingChordCall
     findLeftMostBlockingChordCall += 1
     
@@ -76,7 +76,7 @@ def checkLeftmostBlockingChord(root: int, n: int, chords: Set[Tuple[int, int]], 
     leftmostChord = min(leftBlockingChords)
     return leftmostChord[0] == normalizedChord[0] and leftmostChord[1] == normalizedChord[1]
 
-def flipChord(root: int, n: int, chords: Set[Tuple[int, int]], allPairs: Set[Tuple[int, int]], chord: Tuple[int, int]]) -> Tuple[int, int]:
+def flipChord(root: int, n: int, chords: Set[Tuple[int, int]], allPairs: Set[Tuple[int, int]], chord: Tuple[int, int]) -> Tuple[int, int]:
     global flipChordCall
     flipChordCall += 1
     

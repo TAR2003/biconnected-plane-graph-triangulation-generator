@@ -89,5 +89,5 @@ def print_triangulations(n):
     print(f"Data written to a.txt")
 
 # Example usage:
-n = 6 # You can change this to any n ≥ 3
+n = 5 # You can change this to any n ≥ 3
 print_triangulations(n)
