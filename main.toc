@@ -1,0 +1,7 @@
+\beamer@sectionintoc {1}{Introduction and Problem Definition}{3}{0}{1}
+\beamer@sectionintoc {2}{Algorithm Design}{5}{0}{2}
+\beamer@sectionintoc {3}{Complexity Analysis}{8}{0}{3}
+\beamer@sectionintoc {4}{Correctness Proof}{10}{0}{4}
+\beamer@sectionintoc {5}{Theoretical Guarantees}{13}{0}{5}
+\beamer@sectionintoc {6}{Implementation \& Applications}{18}{0}{6}
+\beamer@sectionintoc {7}{Conclusion}{20}{0}{7}
