@@ -99,11 +99,17 @@ def generate_all_triangulations(n):
 
     return result
 
-# Example usage: print all triangulations of a hexagon (n=6)
+# # Example usage: print all triangulations of a hexagon (n=6)
+# if __name__ == "__main__":
+#     for n in range(4, 13):
+#         triangulations = generate_all_triangulations(n)
+#         print(f"All triangulations of a labeled {n}-cycle:")
+#         # for i, triangulation in enumerate(triangulations, 1):
+#         #     print(f"{i}: {triangulation}")
+#         print(f"Number of triangulations: {len(triangulations)}\n")
+
 if __name__ == "__main__":
-    for n in range(4, 13):
-        triangulations = generate_all_triangulations(n)
-        print(f"All triangulations of a labeled {n}-cycle:")
-        # for i, triangulation in enumerate(triangulations, 1):
-        #     print(f"{i}: {triangulation}")
-        print(f"Number of triangulations: {len(triangulations)}\n")
+    triangulations = generate_all_triangulations(6)
+    for i, triangulation in enumerate(triangulations, 1):
+        print(f"{i}: {triangulation}")
+    print(f"Number of triangulations: {len(triangulations)}\n")
