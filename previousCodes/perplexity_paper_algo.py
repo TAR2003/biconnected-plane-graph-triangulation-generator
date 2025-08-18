@@ -1,3 +1,9 @@
+from functools import reduce
+import operator
+
+def total_triangulations(all_triangulations):
+    counts = [len(triangs) for triangs in all_triangulations]
+    return reduce(operator.mul, counts, 1)
 from collections import deque
 
 def generate_all_triangulations(n):
@@ -110,7 +116,7 @@ def generate_all_triangulations(n):
 
 def findtriangulationforaface(face):
     triangulations = generate_all_triangulations(len(face))
-    # print(triangulations)
+    print(triangulations)
     mapped_triangulations = []
     for triangulation in triangulations:
         mapped = []
@@ -128,9 +134,54 @@ def findAll(faces):
             results.append(triangulation)
     return results
 
+
+from functools import reduce
+import operator
+
+def total_triangulations(all_triangulations):
+    counts = [len(triangs) for triangs in all_triangulations]
+    return reduce(operator.mul, counts, 1)
+
 if __name__ == "__main__":
-    faces = [[1,2,3,4,5],[2,3,4,5,6],[1,2,3,4]]
+    faces = [[1,2,3,4,5]]
     results = findAll(faces)
     print("Triangulations found:")
     for triangulation in results:
-       print(triangulation)
+        print(triangulation)
+    total = total_triangulations(results)
+    print(f"Total cross-multiplied triangulations: {total}")
+
+    # Print all combinations of triangulations (cross-multiplied)
+    from itertools import product
+    print("\nAll triangulation combinations:")
+    all = product(*results)
+    tempall = []
+    for combo in all:
+        # print(combo)
+        tempall.append(combo)
+    all = tempall
+    temp = []
+    for a in all:
+        temparr = []
+        for b in a:
+            for c in b:
+                temparr.append(c)
+        temp.append(temparr)
+    # print(temp)
+    # print(len(temp))
+    for i in temp:
+        print(i)
+    all = []
+    for i in temp:
+        s = set()
+        for j in i:
+            s.add(j)
+        print("i: " , i)
+        print("s: ", s)
+        if(len(i) == len(s)):
+            all.append(i)
+            print('another one added ')
+        # all.append(s)
+    print("\nUnique triangulations:")
+    for s in all:
+        print(s)

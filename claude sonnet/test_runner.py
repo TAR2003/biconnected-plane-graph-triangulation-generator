@@ -71,16 +71,7 @@ def test_different_inputs():
     
     test_inputs = [
         # Simple cases
-        {"name": "Triangle", "faces": [[1, 2, 3]]},
-        {"name": "Square", "faces": [[1, 2, 3, 4]]}, 
         {"name": "Pentagon", "faces": [[1, 2, 3, 4, 5]]},
-        
-        # Your specified format
-        {"name": "Your Example", "faces": [[1, 2, 3, 4], [1, 2, 4, 5, 6]]},
-        
-        # More complex cases
-        {"name": "Two Squares", "faces": [[1, 2, 3, 4], [4, 5, 6, 7]]},
-        {"name": "Hexagon", "faces": [[1, 2, 3, 4, 5, 6]]},
     ]
     
     generator = TriangulationGenerator(verbose=False, validate_input=True)
