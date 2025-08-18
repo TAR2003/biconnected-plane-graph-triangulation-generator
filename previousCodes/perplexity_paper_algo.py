@@ -108,8 +108,29 @@ def generate_all_triangulations(n):
 #         #     print(f"{i}: {triangulation}")
 #         print(f"Number of triangulations: {len(triangulations)}\n")
 
+def findtriangulationforaface(face):
+    triangulations = generate_all_triangulations(len(face))
+    # print(triangulations)
+    mapped_triangulations = []
+    for triangulation in triangulations:
+        mapped = []
+        for edge in triangulation:
+            mapped_edge = (face[edge[0] - 1], face[edge[1] - 1])
+            mapped.append(mapped_edge)
+        mapped_triangulations.append(mapped)
+    return mapped_triangulations
+
+def findAll(faces):
+    results = []
+    for face in faces:
+        triangulation = findtriangulationforaface(face)
+        if triangulation:
+            results.append(triangulation)
+    return results
+
 if __name__ == "__main__":
-    triangulations = generate_all_triangulations(6)
-    for i, triangulation in enumerate(triangulations, 1):
-        print(f"{i}: {triangulation}")
-    print(f"Number of triangulations: {len(triangulations)}\n")
+    faces = [[1,2,3,4,5],[2,3,4,5,6],[1,2,3,4]]
+    results = findAll(faces)
+    print("Triangulations found:")
+    for triangulation in results:
+       print(triangulation)
