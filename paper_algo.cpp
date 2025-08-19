@@ -1,74 +1,114 @@
-//-----------------Tawkir Aziz Rahman - Optimized with Original Logic---------------------//
+//-----------------Tawkir Aziz Rahman---------------------//
 
 #include <bits/stdc++.h>
+#define input(arr, n)          \
+    for (ll i = 0; i < n; i++) \
+        cin >> arr[i];
+#define output(arr, n)             \
+    {                              \
+        for (ll i = 0; i < n; i++) \
+        {                          \
+            cout << arr[i] << " "; \
+        }                          \
+    }
 using namespace std;
 typedef long long ll;
+// policy based data structure
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+template <class T>
+using indexed_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+template <class T>
+using indexed_multiset = tree<T, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
-// Optimized data structures to replace sets
-class FastEdgeSet
+// for printing normal 1D vector
+template <typename T>
+void printVector(vector<T> &v, ll st = -1, ll fin = -1)
 {
-private:
-    vector<vector<bool>> adj;
-    vector<pair<ll, ll>> edges;
-    ll n;
-
-public:
-    FastEdgeSet(ll size) : n(size)
+    if (st == -1)
+        st = 0;
+    if (fin == -1)
+        fin = v.size();
+    for (ll i = st; i < fin; i++)
     {
-        adj.assign(size, vector<bool>(size, false));
+        cout << v[i] << " ";
     }
-
-    void insert(pair<ll, ll> edge)
-    {
-        ll u = min(edge.first, edge.second);
-        ll v = max(edge.first, edge.second);
-        if (!adj[u][v])
-        {
-            adj[u][v] = true;
-            edges.push_back({u, v});
-        }
-    }
-
-    void erase(pair<ll, ll> edge)
-    {
-        ll u = min(edge.first, edge.second);
-        ll v = max(edge.first, edge.second);
-        if (adj[u][v])
-        {
-            adj[u][v] = false;
-            edges.erase(remove(edges.begin(), edges.end(), make_pair(u, v)), edges.end());
-        }
-    }
-
-    bool find(pair<ll, ll> edge)
-    {
-        ll u = min(edge.first, edge.second);
-        ll v = max(edge.first, edge.second);
-        return u < n && v < n && adj[u][v];
-    }
-
-    vector<pair<ll, ll>> &getEdges() { return edges; }
-
-    FastEdgeSet copy()
-    {
-        FastEdgeSet result(n);
-        result.edges = edges;
-        result.adj = adj;
-        return result;
-    }
-};
-
-pair<ll, ll> make_pair_ordered(ll first, ll second)
-{
-    return make_pair(min(first, second), max(first, second));
+    cout << endl;
+    return;
 }
 
-bool checkLeftmostBlockingChord(ll root, ll n, FastEdgeSet &chords, pair<ll, ll> chord)
+template <typename T1, typename T2>
+void printVectorPair(vector<pair<T1, T2>> &v, ll st = -1, ll fin = -1)
+{
+    if (st == -1)
+        st = 0;
+    if (fin == -1)
+        fin = v.size();
+    for (ll i = st; i < fin; i++)
+    {
+        cout << "( " << v[i].first << " , " << v[i].second << " ) ";
+    }
+    cout << endl;
+    return;
+}
+
+// for printing 2D vectors (matrix)
+template <typename T>
+void printMatrix(vector<T> &v, ll st = -1, ll fin = -1)
+{
+    if (st == -1)
+        st = 0;
+    if (fin == -1)
+        fin = v.size();
+    for (ll i = st; i < fin; i++)
+    {
+        printVector(v[i]);
+    }
+    // cout << endl;
+    return;
+}
+
+// for printing other STL structures
+template <typename T>
+void printStructure(T &t)
+{
+    for (auto itr = t.begin(); itr != t.end(); itr++)
+    {
+        cout << *itr << " ";
+    }
+    cout << endl;
+}
+
+void printAllPairs(set<pair<ll, ll>> &s)
+{
+    for (auto it = s.begin(); it != s.end(); it++)
+    {
+        cout << "( " << it->first << " , " << it->second << " ) ";
+    }
+    cout << endl;
+}
+
+pair<ll,ll> make_pair(ll a, ll b) {
+    return std::make_pair(min(a,b), max(a,b));
+}
+
+set<pair<ll, ll>> copySetOfPairs(set<pair<ll, ll>> &src)
+{
+    set<pair<ll, ll>> dest;
+    for (auto it = src.begin(); it != src.end(); it++)
+    {
+        dest.insert(make_pair(it->first, it->second));
+    }
+    return dest;
+}
+
+bool checkLeftmostBlockingChord(ll root, ll n, set<pair<ll, ll>> &chords, pair<ll, ll> chord)
 {
     ll currentBlockedChord = n - 1;
     for (ll i = n - 2; i >= 0; i--)
     {
-        if (!chords.find(make_pair_ordered(root, i)))
+        if (chords.find(make_pair(root, i)) == chords.end())
         {
             break;
         }
@@ -77,135 +117,212 @@ bool checkLeftmostBlockingChord(ll root, ll n, FastEdgeSet &chords, pair<ll, ll>
             currentBlockedChord = i;
         }
     }
-
-    vector<pair<ll, ll>> leftBlockingChords;
-    for (auto &a : chords.getEdges())
+    // cout << "Current Blocking vertex is : " << currentBlockedChord << endl;
+    set<pair<ll, ll>> leftBlockingChords;
+    for (auto a : chords)
     {
         if (a.second == currentBlockedChord && a.first > root)
         {
-            leftBlockingChords.push_back(a);
+            leftBlockingChords.insert(a);
         }
     }
-
-    if (leftBlockingChords.empty())
+    pair<ll, ll> leftmostChord = *leftBlockingChords.begin();
+    if (leftmostChord.first == chord.first && leftmostChord.second == chord.second)
+    {
+        return true;
+    }
+    else
+    {
         return false;
-
-    pair<ll, ll> leftmostChord = *min_element(leftBlockingChords.begin(), leftBlockingChords.end());
-    return (leftmostChord.first == chord.first && leftmostChord.second == chord.second);
+    }
 }
 
-pair<ll, ll> flipChord(ll root, ll n, FastEdgeSet &chords, FastEdgeSet &allPairs, pair<ll, ll> chord)
+pair<ll, ll> flipChord(ll root, ll n, set<pair<ll, ll>> &chords, set<pair<ll, ll>> &allPairs, pair<ll, ll> chord)
 {
-    vector<ll> assocOfFirst, assocOfSecond;
-
-    // Find neighbors of chord.first
-    for (auto &a : allPairs.getEdges())
+    set<ll> assocOfFirst, assocOfSecond;
+    for (auto a : allPairs)
     {
         if (a.first == chord.first)
         {
-            assocOfFirst.push_back(a.second);
+            assocOfFirst.insert(a.second);
         }
         if (a.second == chord.first)
         {
-            assocOfFirst.push_back(a.first);
+            assocOfFirst.insert(a.first);
         }
     }
-
-    // Find neighbors of chord.second
-    for (auto &a : allPairs.getEdges())
+    for (auto a : allPairs)
     {
         if (a.first == chord.second)
         {
-            assocOfSecond.push_back(a.second);
+            assocOfSecond.insert(a.second);
         }
         if (a.second == chord.second)
         {
-            assocOfSecond.push_back(a.first);
+            assocOfSecond.insert(a.first);
+        }
+    }
+    // cout << "Printing assocOfFirst" << endl;
+    // for(auto a:assocOfFirst)
+    // {
+    //     cout << a << " ";
+    // }
+    // cout << endl;
+
+    // // cout << "Printing assocOfSecond" << endl;
+    // for(auto a:assocOfSecond)
+    // {
+    //     cout << a << " ";
+    // }
+    // cout << endl;
+
+    vector<ll> commons;
+    for (auto a : assocOfFirst)
+    {
+        if (assocOfSecond.find(a) != assocOfSecond.end())
+        {
+            commons.push_back(a);
+        }
+    }
+    chords.erase(chords.find(chord));
+    allPairs.erase(allPairs.find(chord));
+    chords.insert(make_pair(commons[0], commons[1]));
+    allPairs.insert(make_pair(commons[0], commons[1]));
+    return make_pair(commons[0], commons[1]);
+}
+
+void generateAllTriangulations(ll root, ll n, set<pair<ll, ll>> &allPairs, set<pair<ll, ll>> &chords, set<set<pair<ll, ll>>> &answers)
+{
+    if (n < 3)
+    {
+        cout << "Invalid input for triangulation" << endl;
+        return;
+    }
+
+    if (n == 3)
+    {
+        cout << "Base case: Triangulation of a triangle" << endl;
+        return;
+    }
+
+    // cout << "Found a valid Triangulation::" << endl;
+    // printAllPairs(chords);
+    answers.insert(chords);
+
+    for (auto a : chords)
+    {
+        set<pair<ll, ll>> allPairsCopy = copySetOfPairs(allPairs);
+        set<pair<ll, ll>> chordsCopy = copySetOfPairs(chords);
+        auto pair = flipChord(root, n, chordsCopy, allPairsCopy, a);
+        bool isLeftmostBlockingChord = checkLeftmostBlockingChord(root, n, chordsCopy, pair);
+        if (isLeftmostBlockingChord)
+        {
+
+            generateAllTriangulations(root, n, allPairsCopy, chordsCopy, answers);
         }
     }
 
-    vector<ll> commons;
-    sort(assocOfFirst.begin(), assocOfFirst.end());
-    sort(assocOfSecond.begin(), assocOfSecond.end());
-
-    set_intersection(assocOfFirst.begin(), assocOfFirst.end(),
-                     assocOfSecond.begin(), assocOfSecond.end(),
-                     back_inserter(commons));
-
-    chords.erase(chord);
-    allPairs.erase(chord);
-
-    pair<ll, ll> newChord = make_pair_ordered(commons[0], commons[1]);
-    chords.insert(newChord);
-    allPairs.insert(newChord);
-
-    return newChord;
+    // cout << "here we are" << endl;
+    // flipChord(root, n , chords, allPairs, make_pair(0,2));
+    // cout << "Printing all pairs " << endl;
+    // printAllPairs(allPairs);
+    // cout << "Printing all chords " << endl;
+    // printAllPairs(chords);
+    // if(checkLeftmostBlockingChord(root, n, chords, make_pair(1, 3)))
+    // {
+    //     cout << "It is aLeftmost blocking chord" << endl;
+    // }
+    // else
+    // {
+    //     cout << "It is not a leftmost blocking chord" << endl;
+    // }
+    // flipChord(root, n, chords, allPairs, make_pair(0, 3));
+    // cout << "Printing all pairs " << endl;
+    // printAllPairs(allPairs);
+    // cout << "Printing all chords " << endl;
+    // printAllPairs(chords);
+    // if(checkLeftmostBlockingChord(root, n, chords, make_pair(1, 3)))
+    // {
+    //     cout << "It is a leftmost blocking chord" << endl;
+    // }
+    // else
+    // {
+    //     cout << "It is not a leftmost blocking chord" << endl;
+    // }
 }
 
-void generateAllTriangulations(ll root, ll n, FastEdgeSet allPairs, FastEdgeSet chords,
-                               vector<vector<pair<ll, ll>>> &answers)
+void printAllTriangulations(set<set<pair<ll, ll>>> &answers)
 {
-    if (n < 3)
-        return;
-    if (n == 3)
-        return;
-
-    // Add current triangulation
-    answers.push_back(chords.getEdges());
-
-    // Try flipping each chord
-    auto currentChords = chords.getEdges();
-    for (auto &chord : currentChords)
+    cout << "Total triangulations found: " << answers.size() << endl;
+    cout << "Printing all triangulations" << endl;
+    for (auto a : answers)
     {
-        FastEdgeSet allPairsCopy = allPairs.copy();
-        FastEdgeSet chordsCopy = chords.copy();
-
-        auto newChord = flipChord(root, n, chordsCopy, allPairsCopy, chord);
-
-        bool isLeftmostBlockingChord = checkLeftmostBlockingChord(root, n, chordsCopy, newChord);
-        if (isLeftmostBlockingChord)
+        cout << "{ ";
+        for (auto b : a)
         {
-            generateAllTriangulations(root, n, allPairsCopy, chordsCopy, answers);
+            cout << "( " << b.first << " , " << b.second << " ) ";
         }
+        cout << "}" << endl;
+    }
+}
+
+void printAllTriangulations(vector<vector<pair<ll, ll>>> &answers)
+{
+    cout << "Total triangulations found: " << answers.size() << endl;
+    cout << "Printing all triangulations" << endl;
+    for (auto a : answers)
+    {
+        cout << "{ ";
+        for (auto b : a)
+        {
+            cout << "( " << b.first << " , " << b.second << " ) ";
+        }
+        cout << "}" << endl;
+    }
+}
+
+void printAllTriangulationsOfFaces(vector<vector<vector<pair<ll, ll>>>> &allTriangulations)
+{
+    cout << "Total faces found: " << allTriangulations.size() << endl;
+    for (size_t i = 0; i < allTriangulations.size(); i++)
+    {
+        cout << "Face " << i + 1 << ": " << endl;
+        printAllTriangulations(allTriangulations[i]);
     }
 }
 
 vector<vector<pair<ll, ll>>> generateTriangulationsForFace(vector<ll> &face)
 {
+    vector<pair<ll, ll>> triangulations;
     ll n = face.size();
-    FastEdgeSet allPairs(n);
-    FastEdgeSet chords(n);
-    vector<vector<pair<ll, ll>>> answers;
-
-    // Add boundary edges
+    set<pair<ll, ll>> allPairs;
+    set<pair<ll, ll>> chords;
+    set<set<pair<ll, ll>>> answers;
     for (ll i = 0; i < n; i++)
     {
-        allPairs.insert(make_pair_ordered(i, (i + 1) % n));
+        allPairs.insert(make_pair(i, (i + 1) % n));
     }
-
-    // Add initial fan triangulation
     for (ll i = 2; i < n - 1; i++)
     {
-        chords.insert(make_pair_ordered(0, i));
-        allPairs.insert(make_pair_ordered(0, i));
+        chords.insert(make_pair(0, i));
+        allPairs.insert(make_pair(0, i));
     }
-
     generateAllTriangulations(0, n, allPairs, chords, answers);
-
-    // Map indices to actual face vertices
-    vector<vector<pair<ll, ll>>> result;
-    for (const auto &triangulation : answers)
+    vector<vector<pair<ll, ll>>> allTriangulations;
+    for (const auto &a : answers)
     {
-        vector<pair<ll, ll>> mappedTriangulation;
-        for (const auto &edge : triangulation)
+        vector<pair<ll, ll>> triangulation;
+        for (const auto &b : a)
         {
-            mappedTriangulation.push_back(make_pair_ordered(face[edge.first], face[edge.second]));
+            triangulation.push_back(make_pair(face[b.first], face[b.second]));
         }
-        result.push_back(mappedTriangulation);
+        allTriangulations.push_back(triangulation);
     }
-
-    return result;
+    // printAllTriangulations(answers);
+    return allTriangulations;
 }
+
+
 
 // Fast combination generator
 void generateAllCombinations(vector<vector<vector<pair<ll, ll>>>> &allTriangulations,
@@ -270,7 +387,7 @@ vector<vector<pair<ll, ll>>> eradicateMultiEdge(vector<vector<pair<ll, ll>>> &al
         set<pair<ll, ll>> uniqueEdges;
         for (auto &p : combination)
         {
-            uniqueEdges.insert(make_pair_ordered(p.first, p.second));
+            uniqueEdges.insert(make_pair(p.first, p.second));
         }
         if (uniqueEdges.size() == standard)
         {
@@ -283,11 +400,20 @@ vector<vector<pair<ll, ll>>> eradicateMultiEdge(vector<vector<pair<ll, ll>>> &al
 
 int main()
 {
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);
-
+    cin.tie(0);
+    cin.sync_with_stdio(0);
+    cout.tie(0);
+    cout.sync_with_stdio(0);
+    ll n = 5;
     vector<vector<ll>> faces;
-    faces.push_back({1, 2, 3, 4, 5, 6});
+    vector<ll> temp;
+    temp = {1, 2, 3, 4, 5, 6, 7, 8};
+    faces.push_back(temp);
+    temp = {2, 3, 4, 5, 6, 9};
+    faces.push_back(temp);
+    temp = {1, 2, 9, 6, 7, 8};
+    faces.push_back(temp);
+    
 
     vector<vector<vector<pair<ll, ll>>>> allTriangulations;
     for (auto &face : faces)
@@ -306,9 +432,12 @@ int main()
 
     vector<vector<pair<ll, ll>>> allCombinations;
     generateAllCombinations(allTriangulations, allCombinations);
-    cout << "Total combinations generated: " << allCombinations.size() << endl;
+
+
 
     allCombinations = eradicateMultiEdge(allCombinations);
+
+    cout << "Total combinations generated: " << allCombinations.size() << endl;
 
     // Sort for consistency
     for (auto &combination : allCombinations)
@@ -323,11 +452,7 @@ int main()
 
     cout << "Final unique combinations: " << allCombinations.size() << endl;
 
-    // Print results if reasonable size
-    if (allCombinations.size() <= 50)
-    {
-        printAllTriangulations(allCombinations);
-    }
+    
 
     return 0;
 }
