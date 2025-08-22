@@ -457,9 +457,9 @@ int main()
 
     temp = {1, 2, 3, 4};
     faces.push_back(temp);
-    temp = {1, 2, 4, 6, 5};
+    temp = {1, 2, 3, 4, 5, 6};
     faces.push_back(temp);
-    temp = {1, 5, 6, 4};
+    temp = {1, 4, 5, 6};
     faces.push_back(temp);
 
     // temp = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -504,7 +504,7 @@ int main()
     allCombinations.erase(last, allCombinations.end());
 
     cout << "Final unique combinations: " << allCombinations.size() << endl;
-    // printCombinations(allCombinations);
+    printCombinations(allCombinations);
 
     return 0;
 }
