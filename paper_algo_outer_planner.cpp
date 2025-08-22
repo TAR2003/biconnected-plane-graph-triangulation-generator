@@ -402,14 +402,32 @@ vector<vector<pair<ll, ll>>> removePairsContainingAPair(vector<vector<pair<ll, l
     vector<vector<pair<ll, ll>>> result;
     for (auto &combination : combinations)
     {
-        combination.erase(remove_if(combination.begin(), combination.end(),
-                                      [&p](const pair<ll, ll> &edge) {
-                                          return edge.first == p.first || edge.second == p.second;
-                                      }),
-                          combination.end());
-        result.push_back(combination);
+        bool b = false;
+        for (auto &edge : combination)
+        {
+            if (edge.first == p.first && edge.second == p.second)
+            {
+                b = true;
+                break;
+            }
+        }
+        if (!b)
+            result.push_back(combination);
     }
     return result;
+}
+
+void printCombinations(const vector<vector<pair<ll, ll>>> &combinations)
+{
+    for (size_t i = 0; i < combinations.size(); i++)
+    {
+        cout << "Combination " << i + 1 << ": { ";
+        for (const auto &edge : combinations[i])
+        {
+            cout << "( " << edge.first << " , " << edge.second << " ) ";
+        }
+        cout << "}" << endl;
+    }
 }
 
 int main()
@@ -430,11 +448,18 @@ int main()
     // temp = {1, 2, 3, 4};
     // faces.push_back(temp);
 
-    temp = {1, 2, 3, 5, 6};
-    faces.push_back(temp);
+    // temp = {1, 2, 3, 4, 5, 6, 7};
+    // faces.push_back(temp);
+    // temp = {1, 2, 3, 4, 5};
+    // faces.push_back(temp);
+    // temp = {1, 5, 6, 7};
+    // faces.push_back(temp);
+
     temp = {1, 2, 3, 4};
     faces.push_back(temp);
-    temp = {1, 4, 5, 6};
+    temp = {1, 2, 4, 6, 5};
+    faces.push_back(temp);
+    temp = {1, 5, 6, 4};
     faces.push_back(temp);
 
     // temp = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -443,7 +468,7 @@ int main()
     // faces.push_back(temp);
     // temp = {1, 2, 9, 6, 7, 8};
     // faces.push_back(temp);
-
+    ll pos = 1;
     vector<vector<vector<pair<ll, ll>>>> allTriangulations;
     for (auto &face : faces)
     {
@@ -461,11 +486,12 @@ int main()
 
     vector<vector<pair<ll, ll>>> allCombinations;
     generateAllCombinations(allTriangulations, allCombinations);
+    allCombinations = removePairsContainingAPair(allCombinations, {1, 4});
     cout << "Total combinations generated before removing multiedge: " << allCombinations.size() << endl;
     allCombinations = eradicateMultiEdge(allCombinations);
 
-    cout << "Total combinations generated: " << allCombinations.size() << endl;
-
+    cout << "Total combinations generated after removing multiedge : " << allCombinations.size() << endl;
+    // printCombinations(allCombinations);
     // Sort for consistency
     for (auto &combination : allCombinations)
     {
@@ -478,30 +504,7 @@ int main()
     allCombinations.erase(last, allCombinations.end());
 
     cout << "Final unique combinations: " << allCombinations.size() << endl;
-    ll pos = 1;
-    // for(auto &combination : allCombinations)
-    // {
-    //     cout << pos++ << ": ";
-    //     cout << "{ ";
-    //     for(const auto &edge : combination)
-    //     {
-    //         cout << "( " << edge.first << " , " << edge.second << " ) ";
-    //     }
-    //     cout << "}" << endl;
-    // }
-    // allCombinations = removePairsContainingAPair(allCombinations, {1, 4});
-    cout << "Final unique combinations: " << allCombinations.size() << endl;
-    pos = 1;
-    // for (auto &combination : allCombinations)
-    // {
-    //     cout << pos++ << ": ";
-    //     cout << "{ ";
-    //     for (const auto &edge : combination)
-    //     {
-    //         cout << "( " << edge.first << " , " << edge.second << " ) ";
-    //     }
-    //     cout << "}" << endl;
-    // }
+    // printCombinations(allCombinations);
 
     return 0;
 }
