@@ -403,9 +403,10 @@ vector<vector<pair<ll, ll>>> removePairsContainingAPair(vector<vector<pair<ll, l
     for (auto &combination : combinations)
     {
         combination.erase(remove_if(combination.begin(), combination.end(),
-                                      [&p](const pair<ll, ll> &edge) {
-                                          return edge.first == p.first || edge.second == p.second;
-                                      }),
+                                    [&p](const pair<ll, ll> &edge)
+                                    {
+                                        return edge.first == p.first || edge.second == p.second;
+                                    }),
                           combination.end());
         result.push_back(combination);
     }
@@ -430,11 +431,11 @@ int main()
     // temp = {1, 2, 3, 4};
     // faces.push_back(temp);
 
-    temp = {1, 2, 3, 5, 6};
+    temp = {1, 2, 5, 4};
     faces.push_back(temp);
     temp = {1, 2, 3, 4};
     faces.push_back(temp);
-    temp = {1, 4, 5, 6};
+    temp = {2, 3, 4, 5};
     faces.push_back(temp);
 
     // temp = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -464,7 +465,7 @@ int main()
     cout << "Total combinations generated before removing multiedge: " << allCombinations.size() << endl;
     allCombinations = eradicateMultiEdge(allCombinations);
 
-    cout << "Total combinations generated: " << allCombinations.size() << endl;
+    cout << "Total combinations generated after removing multiedge: " << allCombinations.size() << endl;
 
     // Sort for consistency
     for (auto &combination : allCombinations)
