@@ -1,8 +1,7 @@
-// Optimized version using doubly linked lists for GS and OP
-// to achieve linear time complexity for erase and add operations
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 
@@ -27,27 +26,17 @@ struct DoublyLinkedNode {
     T data;
     DoublyLinkedNode* prev;
     DoublyLinkedNode* next;
-    int index; // Keep track of logical index for easy access
     
-    DoublyLinkedNode(const T& value) : data(value), prev(nullptr), next(nullptr), index(-1) {}
+    DoublyLinkedNode(const T& value) : data(value), prev(nullptr), next(nullptr) {}
 };
 
-// Doubly linked list implementation with O(1) insert/delete and O(n) access by index
+// Doubly linked list implementation with O(1) insert/delete
 template<typename T>
 class DoublyLinkedList {
 private:
     DoublyLinkedNode<T>* head;
     DoublyLinkedNode<T>* tail;
     int size_count;
-    
-    void updateIndices() {
-        int idx = 0;
-        DoublyLinkedNode<T>* current = head;
-        while (current != nullptr) {
-            current->index = idx++;
-            current = current->next;
-        }
-    }
     
 public:
     DoublyLinkedList() : head(nullptr), tail(nullptr), size_count(0) {}
@@ -74,7 +63,7 @@ public:
         return size_count == 0;
     }
     
-    void push_back(const T& value) {
+    DoublyLinkedNode<T>* push_back(const T& value) {
         DoublyLinkedNode<T>* newNode = new DoublyLinkedNode<T>(value);
         if (tail == nullptr) {
             head = tail = newNode;
@@ -83,8 +72,8 @@ public:
             newNode->prev = tail;
             tail = newNode;
         }
-        newNode->index = size_count;
         size_count++;
+        return newNode;
     }
     
     void pop_back() {
@@ -100,35 +89,9 @@ public:
             delete temp;
         }
         size_count--;
-        if (size_count > 0) updateIndices();
     }
     
-    // O(n) access by index - acceptable since we need to traverse anyway
-    T& operator[](int index) {
-        if (index < 0 || index >= size_count) {
-            throw out_of_range("Index out of bounds");
-        }
-        
-        DoublyLinkedNode<T>* current = head;
-        for (int i = 0; i < index; i++) {
-            current = current->next;
-        }
-        return current->data;
-    }
-    
-    const T& operator[](int index) const {
-        if (index < 0 || index >= size_count) {
-            throw out_of_range("Index out of bounds");
-        }
-        
-        DoublyLinkedNode<T>* current = head;
-        for (int i = 0; i < index; i++) {
-            current = current->next;
-        }
-        return current->data;
-    }
-    
-    // O(1) erase at specific node - this is the key optimization
+    // O(1) erase at specific node
     void erase(DoublyLinkedNode<T>* node) {
         if (node == nullptr) return;
         
@@ -146,68 +109,6 @@ public:
         
         delete node;
         size_count--;
-        updateIndices(); // Update indices after removal
-    }
-    
-    // O(n) erase by index - finds node first, then O(1) delete
-    void erase(int index) {
-        if (index < 0 || index >= size_count) return;
-        
-        DoublyLinkedNode<T>* current = head;
-        for (int i = 0; i < index; i++) {
-            current = current->next;
-        }
-        erase(current);
-    }
-    
-    // O(n) insert at index - finds position, then O(1) insert
-    void insert(int index, const T& value) {
-        if (index < 0 || index > size_count) return;
-        
-        if (index == size_count) {
-            push_back(value);
-            return;
-        }
-        
-        if (index == 0) {
-            DoublyLinkedNode<T>* newNode = new DoublyLinkedNode<T>(value);
-            newNode->next = head;
-            if (head != nullptr) {
-                head->prev = newNode;
-            }
-            head = newNode;
-            if (tail == nullptr) {
-                tail = newNode;
-            }
-            size_count++;
-            updateIndices();
-            return;
-        }
-        
-        DoublyLinkedNode<T>* current = head;
-        for (int i = 0; i < index; i++) {
-            current = current->next;
-        }
-        
-        DoublyLinkedNode<T>* newNode = new DoublyLinkedNode<T>(value);
-        newNode->next = current;
-        newNode->prev = current->prev;
-        current->prev->next = newNode;
-        current->prev = newNode;
-        
-        size_count++;
-        updateIndices();
-    }
-    
-    // Get node at index for O(1) operations later
-    DoublyLinkedNode<T>* getNode(int index) {
-        if (index < 0 || index >= size_count) return nullptr;
-        
-        DoublyLinkedNode<T>* current = head;
-        for (int i = 0; i < index; i++) {
-            current = current->next;
-        }
-        return current;
     }
     
     // Convert to vector for easy iteration
@@ -220,6 +121,10 @@ public:
         }
         return result;
     }
+    
+    // Get head for iteration
+    DoublyLinkedNode<T>* getHead() const { return head; }
+    DoublyLinkedNode<T>* getTail() const { return tail; }
 };
 
 class ParvezRahmanNakano {
@@ -240,73 +145,109 @@ public:
         }
     }
 
-    void flipit(const DoublyLinkedList<Pair>& GS, DoublyLinkedList<Pair>& OP, const Pair& newChord, const Pair& oldChord, int pos) {
-        if (pos < 0 || pos >= GS.size()) return;
+    void flipit(DoublyLinkedNode<Pair>* gsNode, DoublyLinkedNode<Pair>* opNode, 
+                const Pair& newChord, const Pair& oldChord) {
+        if (!gsNode || !opNode) return;
         
         int oldPoint = oldChord.first;
-        if (oldPoint == GS[pos].first || oldPoint == GS[pos].second) {
+        if (oldPoint == gsNode->data.first || oldPoint == gsNode->data.second) {
             oldPoint = oldChord.second;
         }
         int newPoint = newChord.first;
-        if (newPoint == GS[pos].first || newPoint == GS[pos].second) {
+        if (newPoint == gsNode->data.first || newPoint == gsNode->data.second) {
             newPoint = newChord.second;
         }
 
-        if (OP[pos].first == oldPoint) {
-            OP[pos] = Pair(newPoint, OP[pos].second);
+        if (opNode->data.first == oldPoint) {
+            opNode->data = Pair(newPoint, opNode->data.second);
         } else {
-            OP[pos] = Pair(OP[pos].first, newPoint);
+            opNode->data = Pair(opNode->data.first, newPoint);
         }
     }
 
-    void flip(DoublyLinkedList<Pair>& GS, DoublyLinkedList<Pair>& OP, int i) {
-        Pair newChord(OP[i].first, OP[i].second);
-        Pair oldChord(GS[i].first, GS[i].second);
+    void flip(DoublyLinkedNode<Pair>* gsNode, DoublyLinkedNode<Pair>* opNode) {
+        if (!gsNode || !opNode) return;
+        
+        Pair newChord(opNode->data.first, opNode->data.second);
+        Pair oldChord(gsNode->data.first, gsNode->data.second);
 
-        flipit(GS, OP, newChord, oldChord, i - 1);
-        flipit(GS, OP, newChord, oldChord, i + 1);
+        // Get adjacent nodes
+        DoublyLinkedNode<Pair>* prevGsNode = gsNode->prev;
+        DoublyLinkedNode<Pair>* nextGsNode = gsNode->next;
+        DoublyLinkedNode<Pair>* prevOpNode = opNode->prev;
+        DoublyLinkedNode<Pair>* nextOpNode = opNode->next;
 
-        GS[i] = newChord;
-        OP[i] = oldChord;
+        // Update adjacent nodes - O(1) operations
+        if (prevGsNode && prevOpNode) {
+            flipit(prevGsNode, prevOpNode, newChord, oldChord);
+        }
+        if (nextGsNode && nextOpNode) {
+            flipit(nextGsNode, nextOpNode, newChord, oldChord);
+        }
+
+        // Swap the chords - O(1)
+        gsNode->data = newChord;
+        opNode->data = oldChord;
     }
 
-    void addTriangulation(vector<vector<Pair>>& allTriangulations, const DoublyLinkedList<Pair>& GS, const vector<Pair>& T) {
+    void addTriangulation(vector<vector<Pair>>& allTriangulations, 
+                         const DoublyLinkedList<Pair>& GS, const vector<Pair>& T) {
         vector<Pair> gsVec = GS.toVector();
         vector<Pair> temp = gsVec;
         temp.insert(temp.end(), T.begin(), T.end());
         allTriangulations.push_back(move(temp));
     }
 
-    void generateChildTriangulations(vector<vector<Pair>>& allTriangulations, DoublyLinkedList<Pair>& GS, DoublyLinkedList<Pair>& OP, vector<Pair>& T, int leftmost) {
+    void generateChildTriangulations(vector<vector<Pair>>& allTriangulations, 
+                                   DoublyLinkedList<Pair>& GS, DoublyLinkedList<Pair>& OP, 
+                                   vector<Pair>& T, int leftmost) {
         addTriangulation(allTriangulations, GS, T);
         
-        for (int i = 0; i < GS.size(); ++i) {
-            if (GS[i].first != 0) continue;
-            if (OP[i].second < leftmost) continue;
-            
-            int newleftmost = OP[i].second;
-            Pair oldChord = Pair(GS[i].first, GS[i].second);
-            Pair newChord = Pair(OP[i].first, OP[i].second);
-
-            flip(GS, OP, i);
-
-            // Store the values before removing
-            Pair gsValue = GS[i];
-            Pair opValue = OP[i];
-            
-            // Remove at i - this is now more efficient with our linked list
-            GS.erase(i);
-            OP.erase(i);
-
-            T.push_back(newChord);
-            generateChildTriangulations(allTriangulations, GS, OP, T, newleftmost);
-            T.pop_back();
-
-            // Restore - insert back at position i
-            GS.insert(i, gsValue);
-            OP.insert(i, opValue);
-
-            flip(GS, OP, i);
+        // Iterate through GS linked list directly
+        DoublyLinkedNode<Pair>* gsCurrent = GS.getHead();
+        DoublyLinkedNode<Pair>* opCurrent = OP.getHead();
+        
+        while (gsCurrent && opCurrent) {
+            if (gsCurrent->data.first == 0 && opCurrent->data.second >= leftmost) {
+                int newleftmost = opCurrent->data.second;
+                
+                // Store current state for restoration
+                Pair oldGsData = gsCurrent->data;
+                Pair oldOpData = opCurrent->data;
+                
+                // Perform flip - O(1)
+                flip(gsCurrent, opCurrent);
+                
+                // Store nodes for removal and restoration
+                DoublyLinkedNode<Pair>* gsToRemove = gsCurrent;
+                DoublyLinkedNode<Pair>* opToRemove = opCurrent;
+                
+                // Get next nodes before removal
+                DoublyLinkedNode<Pair>* nextGs = gsCurrent->next;
+                DoublyLinkedNode<Pair>* nextOp = opCurrent->next;
+                
+                // Remove nodes - O(1)
+                GS.erase(gsCurrent);
+                OP.erase(opCurrent);
+                
+                T.push_back(oldOpData); // The new chord after flip
+                generateChildTriangulations(allTriangulations, GS, OP, T, newleftmost);
+                T.pop_back();
+                
+                // Restore nodes at their original positions - O(1)
+                DoublyLinkedNode<Pair>* restoredGs = GS.push_back(oldGsData);
+                DoublyLinkedNode<Pair>* restoredOp = OP.push_back(oldOpData);
+                
+                // Restore flip to original state - O(1)
+                flip(restoredGs, restoredOp);
+                
+                // Continue with next nodes
+                gsCurrent = nextGs;
+                opCurrent = nextOp;
+            } else {
+                gsCurrent = gsCurrent->next;
+                opCurrent = opCurrent->next;
+            }
         }
     }
 
