@@ -161,7 +161,7 @@ public class TweakedAlgoCycle {
         }
         ArrayList<Integer> currentface = vertices.get(faceno);
         int n = currentface.size();
-        if (n < 4) generateAllTriangulations(faceno + 1);
+        if (n < 4) {generateAllTriangulations(faceno + 1);return;}
         int root = 0;
         if (faceno > 0) root = saferoot(currentface);
         ArrayList<Integer> adjustedFace = new ArrayList<>(currentface);

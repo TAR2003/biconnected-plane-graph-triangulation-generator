@@ -10,7 +10,7 @@ public class TweakedAlgo {
     ArrayList<ArrayList<Integer>> vertices;
 
     TweakedAlgo(ArrayList<ArrayList<Integer>> vertices) {
-//        this.n = n;
+        // this.n = n;
         this.vertices = vertices;
         allTriangulations = new ArrayList<>(2);
         permanentChords = new HashSet<>();
@@ -24,9 +24,9 @@ public class TweakedAlgo {
         }
     }
 
-
     void flipit(ArrayList<Pair> GS, ArrayList<Pair> OP, Pair newChord, Pair oldChord, int pos) {
-        if (pos < 0 || pos >= GS.size()) return;
+        if (pos < 0 || pos >= GS.size())
+            return;
         int oldPoint = oldChord.first;
         if (oldPoint == GS.get(pos).first || oldPoint == GS.get(pos).second) {
             oldPoint = oldChord.second;
@@ -42,11 +42,10 @@ public class TweakedAlgo {
         }
     }
 
-
     void flip(ArrayList<Pair> GS, ArrayList<Pair> OP, int i) {
-//        System.out.println("Before flipping");
-//        System.out.println(GS);
-//        System.out.println(OP);
+        // System.out.println("Before flipping");
+        // System.out.println(GS);
+        // System.out.println(OP);
 
         // Create fresh copies
         Pair newChord = new Pair(OP.get(i).first, OP.get(i).second);
@@ -58,13 +57,13 @@ public class TweakedAlgo {
         GS.set(i, newChord);
         OP.set(i, oldChord);
 
-//        System.out.println("After flipping");
-//        System.out.println(GS);
-//        System.out.println(OP);
+        // System.out.println("After flipping");
+        // System.out.println(GS);
+        // System.out.println(OP);
     }
 
-
-    void generateChildTriangulations(ArrayList<ArrayList<Pair>> allTriangulations, ArrayList<Pair> GS, ArrayList<Pair> OP, ArrayList<Pair> T, int leftmost, ArrayList<Integer> adjustedFace, int faceno) {
+    void generateChildTriangulations(ArrayList<ArrayList<Pair>> allTriangulations, ArrayList<Pair> GS,
+            ArrayList<Pair> OP, ArrayList<Pair> T, int leftmost, ArrayList<Integer> adjustedFace, int faceno) {
 
         generateAllTriangulations(faceno + 1);
         for (int i = 0; i < GS.size(); i++) {
@@ -81,17 +80,17 @@ public class TweakedAlgo {
             Pair newChord = new Pair(OP.get(i).first, OP.get(i).second);
             Pair oldGlobalChord = new Pair(adjustedFace.get(GS.get(i).first), adjustedFace.get(GS.get(i).second));
             Pair newGlobalChord = new Pair(adjustedFace.get(OP.get(i).first), adjustedFace.get(OP.get(i).second));
-            if(chords.contains(newGlobalChord)) {
+            if (chords.contains(newGlobalChord)) {
                 continue;
             }
-            if(permanentChords.contains(newGlobalChord)) {
+            if (permanentChords.contains(newGlobalChord)) {
                 continue;
             }
             chords.remove(oldGlobalChord);
             chords.add(newGlobalChord);
-//            System.out.println("Front Flip------- " + i);
+            // System.out.println("Front Flip------- " + i);
             flip(GS, OP, i);
-//            System.out.println("Front flip ends--------- " + i);
+            // System.out.println("Front flip ends--------- " + i);
             GS.remove(i);
             OP.remove(i);
             T.add(newChord);
@@ -101,9 +100,9 @@ public class TweakedAlgo {
             OP.add(i, oldChord);
             chords.add(oldGlobalChord);
             chords.remove(newGlobalChord);
-//            System.out.println("Back flip ------------ " + i);
+            // System.out.println("Back flip ------------ " + i);
             flip(GS, OP, i);
-//            System.out.println("Back flip ends---------------- " + i);
+            // System.out.println("Back flip ends---------------- " + i);
 
         }
     }
@@ -111,12 +110,12 @@ public class TweakedAlgo {
     public void getPermanentChords() {
         for (int i = 0; i < vertices.size(); i++) {
             ArrayList<Integer> arr = vertices.get(i);
-//            System.out.println("arr: " + arr);
+            // System.out.println("arr: " + arr);
             for (int j = 0; j < arr.size(); j++) {
                 Pair p = new Pair(arr.get(j), arr.get((j + 1) % arr.size()));
-//                System.out.println(p);
+                // System.out.println(p);
                 permanentChords.add(p);
-//                System.out.println("Successfully added chord");
+                // System.out.println("Successfully added chord");
             }
         }
     }
@@ -141,26 +140,26 @@ public class TweakedAlgo {
         return start;
     }
 
-    void addTriangulation()
-    {
+    void addTriangulation() {
         ArrayList<Pair> temp = new ArrayList<>();
-        for(var v : chords)
-        {
+        for (var v : chords) {
             temp.add(v);
         }
         allTriangulations.add(temp);
 
     }
 
-
     void generateAllTriangulations(int faceno) {
-        if(faceno >= vertices.size()) {
+        if (faceno >= vertices.size()) {
             addTriangulation();
             return;
         }
         ArrayList<Integer> currentface = vertices.get(faceno);
         int n = currentface.size();
-        if (n < 4) generateAllTriangulations(faceno + 1);
+        if (n < 4) {
+            generateAllTriangulations(faceno + 1);
+            return;
+        }
         int root = saferoot(currentface);
         ArrayList<Integer> adjustedFace = new ArrayList<>(currentface);
         for (int i = 0; i < n; i++) {
@@ -181,13 +180,13 @@ public class TweakedAlgo {
         for (int i = 2; i < n - 1; i++) {
             chords.remove(new Pair(adjustedFace.get(0), adjustedFace.get(i)));
         }
-//        printAllTriangulations(allTriangulations);
-//        System.out.println("Total Triangulation number for n=" + n + " : " + allTriangulations.size());
+        // printAllTriangulations(allTriangulations);
+        // System.out.println("Total Triangulation number for n=" + n + " : " +
+        // allTriangulations.size());
 
     }
 
-    String getResult()
-    {
+    String getResult() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(allTriangulations.size());
         stringBuilder.append('\n');
@@ -198,7 +197,8 @@ public class TweakedAlgo {
             int n = Math.min(list1.size(), list2.size());
             for (int i = 0; i < n; i++) {
                 int cmp = list1.get(i).compareTo(list2.get(i));
-                if (cmp != 0) return cmp; // first differing element decides order
+                if (cmp != 0)
+                    return cmp; // first differing element decides order
             }
             return Integer.compare(list1.size(), list2.size()); // shorter list first if all equal
         });
