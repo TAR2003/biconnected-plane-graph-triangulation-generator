@@ -12,14 +12,23 @@ public class Test {
             System.out.println("No input files found in 'input' folder.");
             return;
         }
-
+        System.out.println("Total input files: " + files.length);
+        int match = 0;
         // Loop through all the files
         for (File file : files) {
             String filename = file.getPath(); // full path (or file.getName() if only name needed)
             System.out.println("Processing file: " + filename);
             BiconnectedGraph.solve(filename);
             CrossResult.solve(filename);
-            FileCompare.solve();
+            boolean b = FileCompare.solve();
+            if (b) {
+                match++;
+            }
+        }
+        if(match == files.length) {
+            System.out.println("All " + match + " files matched!");
+        } else {
+            System.out.println("Some files did not match. " + match + " out of " + files.length + " files matched.");
         }
     }
 }

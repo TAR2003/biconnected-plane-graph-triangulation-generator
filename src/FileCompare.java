@@ -3,9 +3,10 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class FileCompare {
-    public static void solve() {
+    public static boolean solve() {
         File file1 = new File("output.txt");
         File file2 = new File("output2.txt");
+        boolean ret = false;
 
         try {
             Scanner sc1 = new Scanner(file1);
@@ -30,6 +31,7 @@ public class FileCompare {
 
             if (match) {
                 System.out.println("✅ Files match exactly!");
+                ret = true;
             }
 
             sc1.close();
@@ -37,6 +39,7 @@ public class FileCompare {
         } catch (FileNotFoundException e) {
             System.out.println("❌ One of the files was not found.");
         }
+        return ret;
     }
 
     public static void main(String[] args) {

@@ -73,7 +73,7 @@ public class BiconnectedGraph {
 
     public static void main(String[] args) {
 //        solve("inputbiconnected.txt");
-        // solve("inputcycle.txt");3
-        solve("./input/simple_triangle.txt");
+        // solve("inputcycle.txt");
+        solve("./input/k4.txt");
     }
 }
