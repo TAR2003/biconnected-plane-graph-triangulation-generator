@@ -1,0 +1,192 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usetikzlibrary{graphs, arrows.meta, positioning, shapes.geometric, calc}
+
+\title{A Fast Algorithm for Generating All Triangulations of Biconnected Plane Graphs}
+\author{Tawkir Aziz Rahman}
+\institute{CSE, BUET}
+\date{}
+
+\lstset{
+    language=C++,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green},
+    numbers=left,
+    frame=single,
+    breaklines=true
+}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}{Overview}
+    \tableofcontents
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Introduction}
+    \textbf{The Problem:}
+    \begin{itemize}
+        \item Generate \textbf{all possible triangulations} of biconnected plane graphs
+        \item Previous methods fail with complex structures due to multi-edge creation
+        \item Important applications in graphics, engineering, and chip design
+    \end{itemize}
+    
+    \vspace{0.5cm}
+    \textbf{Our Contribution:}
+    \begin{itemize}
+        \item Novel algorithm with \textbf{constant time per triangulation}
+        \item Solves the multi-edge problem using \textbf{safe root} concept
+        \item Practical for real-world applications
+    \end{itemize}
+\end{frame}
+
+\section{Algorithm for Cycle Graphs}
+
+
+
+\section{Graph Examples}
+\begin{frame}{Example Graphs}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \textbf{Simple Biconnected Graph}
+        \begin{tikzpicture}[scale=0.8]
+            \node[circle, draw, fill=blue!20] (a) at (0,0) {A};
+            \node[circle, draw, fill=blue!20] (b) at (1.5,1) {B};
+            \node[circle, draw, fill=blue!20] (c) at (2,-1) {C};
+            \node[circle, draw, fill=blue!20] (d) at (0.5,-1.5) {D};
+            
+            \draw[thick] (a) -- (b) -- (c) -- (d) -- (a);
+            \draw[thick] (a) -- (c);
+            \draw[thick] (b) -- (d);
+        \end{tikzpicture}
+        
+        \column{0.5\textwidth}
+        \textbf{Complex Graph with Curved Edges}
+        \begin{tikzpicture}[scale=1.3]
+            \node[circle, draw, fill=red!20] (1) at (0,0) {1};
+            \node[circle, draw, fill=red!20] (2) at (1.5,0.5) {2};
+            \node[circle, draw, fill=red!20] (3) at (2,-0.5) {3};
+            \node[circle, draw, fill=red!20] (4) at (1,-1) {4};
+            \node[circle, draw, fill=red!20] (5) at (-0.5,-0.5) {5};
+            
+            \draw[thick] (1) -- (2) -- (3) -- (4) -- (5) -- (1);
+            \draw[thick, bend left=15] (1) to (3);
+            \draw[thick, bend right=10] (2) to (4);
+            \draw[thick, bend left=70] (3) to (5);
+        \end{tikzpicture}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Triangulation Process}
+    \textbf{Step-by-step triangulation example:}
+    
+    \begin{center}
+    \begin{tikzpicture}[scale=0.7]
+        % Original polygon
+        \node[draw, circle, fill=blue!30] (A) at (0,0) {A};
+        \node[draw, circle, fill=blue!30] (B) at (2,1) {B};
+        \node[draw, circle, fill=blue!30] (C) at (3,-1) {C};
+        \node[draw, circle, fill=blue!30] (D) at (1,-2) {D};
+        \node[draw, circle, fill=blue!30] (E) at (-1,-1) {E};
+        
+        \draw[thick] (A) -- (B) -- (C) -- (D) -- (E) -- (A);
+        \draw[thick, red, dashed] (A) -- (C);
+        \draw[thick, red, dashed] (A) -- (D);
+        
+        \node[above] at (0,1) {Original Polygon};
+    \end{tikzpicture}
+    \hspace{1cm}
+    \begin{tikzpicture}[scale=0.7]
+        % Triangulated polygon
+        \node[draw, circle, fill=green!30] (A) at (0,0) {A};
+        \node[draw, circle, fill=green!30] (B) at (2,1) {B};
+        \node[draw, circle, fill=green!30] (C) at (3,-1) {C};
+        \node[draw, circle, fill=green!30] (D) at (1,-2) {D};
+        \node[draw, circle, fill=green!30] (E) at (-1,-1) {E};
+        
+        \draw[thick] (A) -- (B) -- (C) -- (D) -- (E) -- (A);
+        \draw[thick, green] (A) -- (C);
+        \draw[thick, green] (A) -- (D);
+        
+        \node[above] at (0,1) {Triangulated};
+    \end{tikzpicture}
+    \end{center}
+    
+    \vspace{0.5cm}
+    \textbf{Non-straight edge example:}
+    \begin{center}
+    \begin{tikzpicture}
+        \node[circle, draw, fill=yellow!20] (X) at (0,0) {X};
+        \node[circle, draw, fill=yellow!20] (Y) at (3,1) {Y};
+        \node[circle, draw, fill=yellow!20] (Z) at (2,-1) {Z};
+        
+        \draw[thick, blue, ->] (X) to[bend left=20] (Y);
+        \draw[thick, red, ->] (Y) to[bend right=15] (Z);
+        \draw[thick, green, ->] (Z) to[bend left=10] (X);
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Algorithm Visualization}
+    \textbf{Tree structure of triangulations:}
+    
+    \begin{center}
+    \begin{tikzpicture}[
+        level distance=1.5cm,
+        level 1/.style={sibling distance=3cm},
+        level 2/.style={sibling distance=1.5cm},
+        node style/.style={draw, circle, fill=orange!20, minimum size=8mm}
+    ]
+        \node[node style] (Root) {Root}
+            child {
+                node[node style] {T1}
+                child { node[node style] {T1.1} }
+                child { node[node style] {T1.2} }
+            }
+            child {
+                node[node style] {T2}
+                child { node[node style] {T2.1} }
+                child { node[node style] {T2.2} }
+            }
+            child {
+                node[node style] {T3}
+                child { node[node style] {T3.1} }
+                child { node[node style] {T3.2} }
+            };
+    \end{tikzpicture}
+    \end{center}
+    
+    \vspace{0.5cm}
+    \textbf{Graph with curved edges:}
+    \begin{center}
+    \begin{tikzpicture}
+        \node[circle, draw, fill=purple!20] (a) at (0,0) {A};
+        \node[circle, draw, fill=purple!20] (b) at (2,1) {B};
+        \node[circle, draw, fill=purple!20] (c) at (3,-1) {C};
+        \node[circle, draw, fill=purple!20] (d) at (1,-2) {D};
+        
+        \draw[thick, bend left=15] (a) to (b);
+        \draw[thick, bend right=10] (b) to (c);
+        \draw[thick, bend left=30] (c) to (d);
+        \draw[thick, bend right=20] (d) to (a);
+        \draw[thick, bend left=15] (a) to (c);
+        \draw[thick, bend right=25] (b) to (d);
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\end{document}

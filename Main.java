@@ -1,7 +1,4 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-
-import static java.util.Collections.swap;
 
 class Pair {
     int first;
@@ -33,9 +30,9 @@ class ParvezRahmanNakano {
         }
     }
 
-
     void flipit(ArrayList<Pair> GS, ArrayList<Pair> OP, Pair newChord, Pair oldChord, int pos) {
-        if (pos < 0 || pos >= GS.size()) return;
+        if (pos < 0 || pos >= GS.size())
+            return;
         int oldPoint = oldChord.first;
         if (oldPoint == GS.get(pos).first || oldPoint == GS.get(pos).second) {
             oldPoint = oldChord.second;
@@ -51,11 +48,10 @@ class ParvezRahmanNakano {
         }
     }
 
-
     void flip(ArrayList<Pair> GS, ArrayList<Pair> OP, int i) {
-//        System.out.println("Before flipping");
-//        System.out.println(GS);
-//        System.out.println(OP);
+        // System.out.println("Before flipping");
+        // System.out.println(GS);
+        // System.out.println(OP);
 
         // Create fresh copies
         Pair newChord = new Pair(OP.get(i).first, OP.get(i).second);
@@ -67,9 +63,9 @@ class ParvezRahmanNakano {
         GS.set(i, newChord);
         OP.set(i, oldChord);
 
-//        System.out.println("After flipping");
-//        System.out.println(GS);
-//        System.out.println(OP);
+        // System.out.println("After flipping");
+        // System.out.println(GS);
+        // System.out.println(OP);
     }
 
     void addTriangulation(ArrayList<ArrayList<Pair>> allTriangulations, ArrayList<Pair> GS, ArrayList<Pair> T) {
@@ -78,7 +74,8 @@ class ParvezRahmanNakano {
         allTriangulations.add(temp);
     }
 
-    void generateChildTriangulations(ArrayList<ArrayList<Pair>> allTriangulations, ArrayList<Pair> GS, ArrayList<Pair> OP, ArrayList<Pair> T, int leftmost) {
+    void generateChildTriangulations(ArrayList<ArrayList<Pair>> allTriangulations, ArrayList<Pair> GS,
+            ArrayList<Pair> OP, ArrayList<Pair> T, int leftmost) {
         addTriangulation(allTriangulations, GS, T);
         for (int i = 0; i < GS.size(); i++) {
 
@@ -91,9 +88,9 @@ class ParvezRahmanNakano {
             int newleftmost = OP.get(i).second;
             Pair oldChord = new Pair(GS.get(i).first, GS.get(i).second);
             Pair newChord = new Pair(OP.get(i).first, OP.get(i).second);
-//            System.out.println("Front Flip------- " + i);
+            // System.out.println("Front Flip------- " + i);
             flip(GS, OP, i);
-//            System.out.println("Front flip ends--------- " + i);
+            // System.out.println("Front flip ends--------- " + i);
             GS.remove(i);
             OP.remove(i);
             T.add(newChord);
@@ -101,9 +98,9 @@ class ParvezRahmanNakano {
             T.remove(T.size() - 1);
             GS.add(i, newChord);
             OP.add(i, oldChord);
-//            System.out.println("Back flip ------------ " + i);
+            // System.out.println("Back flip ------------ " + i);
             flip(GS, OP, i);
-//            System.out.println("Back flip ends---------------- " + i);
+            // System.out.println("Back flip ends---------------- " + i);
 
         }
     }
@@ -118,13 +115,13 @@ class ParvezRahmanNakano {
         }
         ArrayList<ArrayList<Pair>> allTriangulations = new ArrayList<>(2);
         generateChildTriangulations(allTriangulations, GS, OP, T, 0);
-//        printAllTriangulations(allTriangulations);
+        // printAllTriangulations(allTriangulations);
         System.out.println("Total Triangulation number for n=" + n + " : " + allTriangulations.size());
 
     }
 }
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
+// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
