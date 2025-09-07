@@ -7,11 +7,11 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usepackage{algorithm}
+\usepackage{algorithmic}
 \usepackage{algpseudocode}
 \usetikzlibrary{graphs, arrows.meta, positioning, shapes.geometric, calc}
 
-\title{A Fast Algorithm for Generating All Triangulations of Biconnected Plane Graphs}
+\title{A Fast Algorithm for Generating All Triangulations of Biconnected Labeled Plane Graphs}
 \author{Tawkir Aziz Rahman}
 \institute{CSE, BUET}
 \date{}
@@ -54,8 +54,35 @@
     \end{itemize}
 \end{frame}
 
-\section{Algorithm for Cycle Graphs}
+\begin{frame}
+    \frametitle{Algorithm}
+    The complete algorithm will need us different methods
+    \begin{itemize}
+        \item Cycle Graphs
+        \item Biconnected Graphs
+        \item find all the triangulations of a biconnected graph
+        \item find a safe root for a biconnected graph
+        \item find all the triangulations of a biconnected graph using safe root
+        \item find all the triangulations of a biconnected graph using safe root in constant time
+    \end{itemize}
+\end{frame}
 
+\begin{frame}{Find All triangulations}
+    \begin{algorithmic}
+        \STATE find all child triangulations of the root
+        \STATE for each child triangulation
+        \STATE 
+    \end{algorithmic}
+    
+\end{frame}
+
+\section{Algorithm for Cycle Graphs}
+\begin{frame}
+    \frametitle{Cycle Graphs}
+    \begin{algorithmic}[1]
+        \STATE find all child triangulations of the root
+    \end{algorithmic}
+\end{frame}
 
 
 \section{Graph Examples}

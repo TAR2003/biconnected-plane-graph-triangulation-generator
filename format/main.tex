@@ -1,0 +1,123 @@
+\documentclass{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usetikzlibrary{graphs, arrows.meta, positioning, shapes.geometric, calc}
+
+\title{A Fast Algorithm for Generating All Triangulations of Biconnected Plane Graphs}
+\author{Tawkir Aziz Rahman}
+\institute{CSE, BUET}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Overview}
+	\tableofcontents
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Introduction}
+	\textbf{The Problem:}
+	\begin{itemize}
+		\item Generate \textbf{all possible triangulations} of biconnected plane graphs
+		\item Previous methods fail with complex structures due to multi-edge creation
+		\item Important applications in graphics, engineering, and chip design
+	\end{itemize}
+
+	\vspace{0.5cm}
+	\textbf{Our Contribution:}
+	\begin{itemize}
+		\item Novel algorithm with \textbf{constant time per triangulation}
+		\item Solves the multi-edge problem using \textbf{safe root} concept
+		\item Practical for real-world applications
+	\end{itemize}
+\end{frame}
+
+\section{Algorithm for Cycle Graphs}
+
+\begin{frame}{Algorithm}
+	There will be a lot of different methods in this algorithm
+	\begin{itemize}
+		\item find all triangulations
+		\item find all child triangulations
+		\item find safe root vertex
+		\item checking if the new chord will be valid
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Find All Child Triangulations}
+	\begin{algorithmic}[1]
+		\Procedure{find-all-child-triangulations-cycle}{$T$}
+		\State Output $T$
+		\If {$T$ has no generating chords}
+		\State \Return
+		\EndIf
+		\State Let $(v_b, v_{b'})$ be the leftmost blocking chord of $T$
+		\For {$j \geq b$}
+		\If {$(v_1, v_j)$ is a chord of $T$}
+		\State \Call{find-all-child-triangulations-cycle}{$T(v_1, v_j)$}
+		\EndIf
+		\EndFor
+		\EndProcedure
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}{Find All Triangulations Cycle}
+	\begin{algorithmic}[1]
+		\Procedure{find-all-triangulations-cycle}{$n$}
+		\State Output root $T_r$
+		\State $T = T_r$
+		\For {$j = n-1$ \textbf{to} $3$}
+		\State \Call{find-all-child-triangulations-cycle}{$T(v_1, v_j)$}
+		\EndFor
+		\EndProcedure
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}{For all }
+	\begin{algorithmic}[1]
+		\Procedure{find-all-child-triangulations}{$T, i$}
+		\State
+		\State Let $E_G$ be the set of generating edges of $T(F_i)$
+		\If {$E_G$ is empty}
+		\State \Return
+		\EndIf
+		\ForAll {$e \in E_G$}
+		\State Flip $e$ to find a new triangulation $T'$
+		\State Output $T'$
+		\State
+		\For {$j = 1$ \textbf{to} $i$}
+		\State \Call{find-all-child-triangulations}{$T', j$}
+		\EndFor
+		\EndFor
+		\EndProcedure
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}{continue}
+	\begin{algorithmic}[1]
+		\Procedure{find-all-triangulations}{$G, k$}
+		\State
+		\State Label the faces $F_1, F_2, \cdots, F_k$ arbitrarily
+		\State Find root triangulation $T_R$ of $\mathcal{T}(G)$
+		\State Output \textit{root} $T_R$
+		\State
+		\For {$i = 1$ \textbf{to} $k$}
+		\State \Call{find-all-child-triangulations}{$T_R, i$}
+		\EndFor
+		\EndProcedure
+	\end{algorithmic}
+\end{frame}
+
+\end{document}
