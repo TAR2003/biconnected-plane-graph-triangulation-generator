@@ -72,8 +72,13 @@ public class BiconnectedGraph {
     }
 
     public static void main(String[] args) {
-//        solve("inputbiconnected.txt");
+    //    solve("./input/inputbiconnected.txt");
         // solve("inputcycle.txt");
-        solve("./input/k4.txt");
+        // solve("./input/share_face_vertices.txt");
+        // solve("./input/hexagon.txt");
+        // solve("./input/9_gon.txt");
+        // solve("./big.txt");
+        // solve("./complex.txt");
+        solve("./supercomplex2.txt");
     }
 }

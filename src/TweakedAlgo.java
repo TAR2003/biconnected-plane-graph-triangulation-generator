@@ -8,6 +8,7 @@ public class TweakedAlgo {
     HashSet<Pair> permanentChords;
     HashSet<Pair> chords;
     ArrayList<ArrayList<Integer>> vertices;
+    long totaliterations = 0;
 
     TweakedAlgo(ArrayList<ArrayList<Integer>> vertices) {
         // this.n = n;
@@ -88,6 +89,7 @@ public class TweakedAlgo {
             }
             chords.remove(oldGlobalChord);
             chords.add(newGlobalChord);
+            totaliterations++;
             // System.out.println("Front Flip------- " + i);
             flip(GS, OP, i);
             // System.out.println("Front flip ends--------- " + i);
@@ -175,7 +177,7 @@ public class TweakedAlgo {
             OP.add(new Pair(i - 1, (i + 1) % n));
             chords.add(new Pair(adjustedFace.get(0), adjustedFace.get(i)));
         }
-
+        totaliterations += n;
         generateChildTriangulations(allTriangulations, GS, OP, T, 0, adjustedFace, faceno);
         for (int i = 2; i < n - 1; i++) {
             chords.remove(new Pair(adjustedFace.get(0), adjustedFace.get(i)));
@@ -187,6 +189,8 @@ public class TweakedAlgo {
     }
 
     String getResult() {
+        System.out.println("Total iterations: " + totaliterations );
+        System.out.println("Total Triangulations: " + allTriangulations.size());
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(allTriangulations.size());
         stringBuilder.append('\n');
