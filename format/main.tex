@@ -44,78 +44,95 @@
 	\end{itemize}
 \end{frame}
 
-\section{Algorithm for Cycle Graphs}
+\section{Algorithm}
 
-\begin{frame}{Algorithm}
-	There will be a lot of different methods in this algorithm
-	\begin{itemize}
-		\item find all triangulations
-		\item find all child triangulations
-		\item find safe root vertex
-		\item checking if the new chord will be valid
-	\end{itemize}
-\end{frame}
 
-\begin{frame}{Find All Child Triangulations}
-	\begin{algorithmic}[1]
-		\Procedure{find-all-child-triangulations-cycle}{$T$}
-		\State Output $T$
-		\If {$T$ has no generating chords}
-		\State \Return
-		\EndIf
-		\State Let $(v_b, v_{b'})$ be the leftmost blocking chord of $T$
-		\For {$j \geq b$}
-		\If {$(v_1, v_j)$ is a chord of $T$}
-		\State \Call{find-all-child-triangulations-cycle}{$T(v_1, v_j)$}
-		\EndIf
-		\EndFor
-		\EndProcedure
-	\end{algorithmic}
-\end{frame}
 
 \begin{frame}{Find All Triangulations Cycle}
 	\begin{algorithmic}[1]
-		\Procedure{find-all-triangulations-cycle}{$n$}
-		\State Output root $T_r$
-		\State $T = T_r$
-		\For {$j = n-1$ \textbf{to} $3$}
-		\State \Call{find-all-child-triangulations-cycle}{$T(v_1, v_j)$}
-		\EndFor
-		\EndProcedure
-	\end{algorithmic}
-\end{frame}
-
-\begin{frame}{For all }
-	\begin{algorithmic}[1]
-		\Procedure{find-all-child-triangulations}{$T, i$}
-		\State
-		\State Let $E_G$ be the set of generating edges of $T(F_i)$
-		\If {$E_G$ is empty}
+		\Procedure{find-all-child-triangulations-cycle}{$T_i, T, i$}
+		\State \Call{output-triangulation}{$T, T_{ir}, i$}
+		\If{$T_i$ has no generating chords}
 		\State \Return
 		\EndIf
-		\ForAll {$e \in E_G$}
-		\State Flip $e$ to find a new triangulation $T'$
-		\State Output $T'$
-		\State
-		\For {$j = 1$ \textbf{to} $i$}
-		\State \Call{find-all-child-triangulations}{$T', j$}
-		\EndFor
+		\State Let $(v_{b},v_{b^{\prime}})$ be the leftmost blocking chord of $T_i$
+		\ForAll{$j\geq b$}
+		\If{$(v_1, v_j)$ is a chord of $T_i$ $\lor$ $(v_1, v_j) \notin \textit{GlobalChordSet}$}
+        \State add chord $(v_{1},v_{j})$ to GlobalChordSet
+		\State \Call{find-all-child-triangulations-cycle}{$T(v_{1},v_{j})$}
+        \State remove chord $(v_{1},v_{j})$ fromz  GlobalChordSet
+		\EndIf
 		\EndFor
 		\EndProcedure
 	\end{algorithmic}
 \end{frame}
 
-\begin{frame}{continue}
+\begin{frame}{Find All Triangulations}
 	\begin{algorithmic}[1]
-		\Procedure{find-all-triangulations}{$G, k$}
-		\State
-		\State Label the faces $F_1, F_2, \cdots, F_k$ arbitrarily
-		\State Find root triangulation $T_R$ of $\mathcal{T}(G)$
-		\State Output \textit{root} $T_R$
-		\State
-		\For {$i = 1$ \textbf{to} $k$}
-		\State \Call{find-all-child-triangulations}{$T_R, i$}
+		\Procedure{find-all-triangulations-cycle}{$F, T, i$}
+		\State n $\gets$ number of vertices for $F_i$
+		\State $T_{ir}$ $\gets$ \Call{find-safe-root}{$F, i$} \Comment{Time O(1)}
+        \State Add All Chords of the root to GlobalChordSet \Comment{Time O(n)}
+		\State \Call{output-triangulation}{$T, T_{ir}, i$}
+		\State $T_i = T_{ir}$
+		\For{$j=n-1$ \textbf{to} $3$}
+        \State add chord $(v_{1},v_{j})$ to GlobalChordSet
+		\State \Call{find-all-child-triangulations-cycle}{$T_i(v_{1},v_{j}), T, i$}
+        \State Remove chord $(v_{1},v_{j})$ from GlobalChordSet
 		\EndFor
+        \State Remove All Chords of the root From GlobalChordSet \Comment{Time O(n)}
+		\EndProcedure
+	\end{algorithmic}
+\end{frame}
+
+\begin{frame}{Output}
+    \begin{algorithmic}[1]
+        \Procedure{Output-triangulation}{$T, T_i, i$}
+            \State $T = T + T_i$
+            \If{$i == \text{face.length}$} 
+                \State \textbf{output}($T$)
+            \Else 
+                \State \Call{find-all-triangulation-cycle}{$F, T, i + 1$}
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{frame}
+
+
+\begin{frame}{Find Safe Root}
+	\small
+	\begin{algorithmic}[1]
+		\Procedure{find-safe-root}{$F, index$}
+		\State \Call{find-safe-root-vertex}{$F, index$}
+		\State add chords from the safe root vertex
+		\State \Return
+		\EndProcedure
+	\end{algorithmic}
+
+	\vspace{0.1cm}
+	\begin{algorithmic}[1]
+		\Procedure{find-safe-root-vertex}{$F, index$}
+		\State startindex $\gets n - 1$
+		\State endIndex $\gets 0$
+		\While{startindex $>$ endIndex + 1}
+		\If{chord exists between $V_{startindex}$ and $V_{endIndex}$}
+		\State startindex $\gets$ startindex $- 1$
+		\Else
+		\State endIndex $\gets$ endIndex $+ 1$
+		\EndIf
+		\EndWhile
+		\EndProcedure
+	\end{algorithmic}
+
+\end{frame}
+
+
+
+\begin{frame}{Start Triangulation Process}
+	\begin{algorithmic}[1]
+		\Procedure{start-triangulation}{$G, k$}
+		\State Label the faces $F_1, F_2, \cdots, F_k$ arbitrarily
+		\State \Call{find-all-triangulations}{$F, 0$}
 		\EndProcedure
 	\end{algorithmic}
 \end{frame}
