@@ -1,33 +1,32 @@
-\documentclass[a4paper]{article}
+\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
 \usepackage{graphicx}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,shapes.geometric,decorations.pathreplacing,calc}
 \usepackage{algorithm}
-\usepackage{algorithmic}
+\usepackage{algpseudocode}
 \usepackage{geometry}
 \usepackage{hyperref}
 \usepackage{cite}
-\usepackage{array}
-\usepackage{booktabs}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.18}
-\usepackage{subcaption}
 
 \geometry{margin=1in}
 
 \newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
 \newtheorem{definition}{Definition}
-\newtheorem{example}{Example}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
 
 \title{A Fast Algorithm for Generating All Triangulations of Biconnected Plane Graphs}
-
-\author{
-Author Name\\
-}
-
+\author{Tawkir Aziz Rahman\\
+Department of Computer Science and Engineering\\
+Bangladesh University of Engineering and Technology (BUET)\\
+Dhaka-1000, Bangladesh}
 \date{\today}
 
 \begin{document}
@@ -35,1446 +34,892 @@ Author Name\\
 \maketitle
 
 \begin{abstract}
-    We present a new algorithm that can generate all possible triangulations of biconnected plane graphs very quickly. Our method builds on previous work but solves the key problem of avoiding invalid edges (multi-edges) that previous methods couldn't handle. The algorithm runs in constant time per triangulation after a simple preprocessing step, making it practical for real applications in mesh generation, chip design, and graph visualization.
+We present a novel algorithm for generating all triangulations of biconnected plane graphs with constant time complexity per triangulation. Previous algorithms for triconnected plane graphs achieve $O(1)$ time per triangulation, but extending these methods to biconnected graphs introduces the fundamental challenge of multi-edge creation during chord flipping operations. Our algorithm addresses this challenge through two key innovations: (1) a \textbf{safe root vertex selection} strategy that ensures initial triangulations avoid conflicting chords, and (2) a \textbf{local genealogical tree} structure that processes each face independently while maintaining global chord consistency. We prove that our algorithm generates all valid triangulations without duplications, has amortized $O(1)$ time complexity per triangulation, and uses $O(n)$ space, where $n$ is the number of vertices. This work extends the theoretical foundation established by Parvez, Rahman, and Nakano~\cite{parvez2011} for triconnected graphs to the more general class of biconnected plane graphs, with applications in computational geometry, VLSI floorplanning, and graph drawing.
 \end{abstract}
 
 \section{Introduction}
 
-\subsection{What is the Problem?}
+Triangulation of planar graphs is a fundamental problem in computational geometry with diverse applications in VLSI floorplanning~\cite{kozminski1985}, graph drawing~\cite{nishizeki2004}, and mesh generation~\cite{berg2008}. A \emph{triangulation} of a plane graph is a maximal planar subdivision where every face is bounded by exactly three edges. The problem of generating \emph{all possible triangulations} of a given plane graph presents significant algorithmic challenges due to the exponential number of triangulations and the need to avoid duplications efficiently.
 
-Imagine you have a polygon drawn on paper, and you want to divide it into triangles by drawing lines between vertices. There are usually many ways to do this - this is called \textbf{triangulation}. Our goal is to find \emph{all} possible ways to triangulate a given shape efficiently.
+\subsection{Background and Motivation}
 
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.2]
-            % Original pentagon
-            \node[circle,draw,fill=blue!20] (A) at (0,0) {A};
-            \node[circle,draw,fill=blue!20] (B) at (2,0) {B};
-            \node[circle,draw,fill=blue!20] (C) at (2.5,1.5) {C};
-            \node[circle,draw,fill=blue!20] (D) at (1,2.5) {D};
-            \node[circle,draw,fill=blue!20] (E) at (-0.5,1.5) {E};
+Classical enumeration algorithms either generate objects with duplications and filter them afterward, or use orderly generation~\cite{read1978} to ensure canonical representation. These approaches require substantial memory to store previously generated objects or complex isomorphism checking. The reverse search paradigm~\cite{avis1996} addresses memory concerns by implicitly defining a spanning tree over the solution space, but typically requires $O(n^2)$ time per solution for triangulation problems.
 
-            \draw[thick,blue] (A) -- (B) -- (C) -- (D) -- (E) -- (A);
+For the specific case of \emph{triconnected} plane graphs, Parvez, Rahman, and Nakano~\cite{parvez2011} developed an elegant algorithm that generates all triangulations in $O(1)$ time per triangulation by establishing a tree structure among triangulations and using edge flipping operations. Their algorithm decomposes the triconnected graph into faces (cycles), triangulates each face independently, and combines these face triangulations to produce complete graph triangulations.
 
-            \node at (1,-0.8) {\textbf{Original Pentagon}};
-            \node at (1,-1.2) {Need to add diagonals};
-        \end{tikzpicture}
-        \caption{Original shape}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.2]
-            % Triangulated pentagon - option 1
-            \node[circle,draw,fill=green!20] (A) at (0,0) {A};
-            \node[circle,draw,fill=green!20] (B) at (2,0) {B};
-            \node[circle,draw,fill=green!20] (C) at (2.5,1.5) {C};
-            \node[circle,draw,fill=green!20] (D) at (1,2.5) {D};
-            \node[circle,draw,fill=green!20] (E) at (-0.5,1.5) {E};
+However, extending this approach to \emph{biconnected} plane graphs—which lack the strong connectivity guarantees of triconnected graphs—introduces a critical obstacle: the \textbf{multi-edge problem}. When faces share more than just boundary edges, chord flipping operations can inadvertently create multiple edges between the same pair of vertices, violating the simple graph property. This makes the triconnected algorithm inapplicable to general biconnected graphs.
 
-            \draw[thick] (A) -- (B) -- (C) -- (D) -- (E) -- (A);
-            \draw[red,thick,dashed] (A) -- (C);
-            \draw[red,thick,dashed] (A) -- (D);
+\subsection{Contributions}
 
-            \node at (1,-0.8) {\textbf{Triangulation 1}};
-            \node[red] at (1,-1.2) {Added diagonals AC, AD};
-        \end{tikzpicture}
-        \caption{First triangulation}
-    \end{subfigure}
+In this paper, we present the first algorithm for generating all triangulations of biconnected plane graphs with constant amortized time complexity. Our main contributions are:
 
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.2]
-            % Triangulated pentagon - option 2
-            \node[circle,draw,fill=green!20] (A) at (0,0) {A};
-            \node[circle,draw,fill=green!20] (B) at (2,0) {B};
-            \node[circle,draw,fill=green!20] (C) at (2.5,1.5) {C};
-            \node[circle,draw,fill=green!20] (D) at (1,2.5) {D};
-            \node[circle,draw,fill=green!20] (E) at (-0.5,1.5) {E};
-
-            \draw[thick] (A) -- (B) -- (C) -- (D) -- (E) -- (A);
-            \draw[red,thick,dashed] (B) -- (D);
-            \draw[red,thick,dashed] (B) -- (E);
-
-            \node at (1,-0.8) {\textbf{Triangulation 2}};
-            \node[red] at (1,-1.2) {Added diagonals BD, BE};
-        \end{tikzpicture}
-        \caption{Second triangulation}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.2]
-            % Triangulated pentagon - option 3
-            \node[circle,draw,fill=green!20] (A) at (0,0) {A};
-            \node[circle,draw,fill=green!20] (B) at (2,0) {B};
-            \node[circle,draw,fill=green!20] (C) at (2.5,1.5) {C};
-            \node[circle,draw,fill=green!20] (D) at (1,2.5) {D};
-            \node[circle,draw,fill=green!20] (E) at (-0.5,1.5) {E};
-
-            \draw[thick] (A) -- (B) -- (C) -- (D) -- (E) -- (A);
-            \draw[red,thick,dashed] (C) -- (E);
-            \draw[red,thick,dashed] (C) -- (A);
-
-            \node at (1,-0.8) {\textbf{Triangulation 3}};
-            \node[red] at (1,-1.2) {Added diagonals CE, CA};
-        \end{tikzpicture}
-        \caption{Third triangulation}
-    \end{subfigure}
-
-    \caption{Different ways to triangulate a pentagon - our goal is to find ALL possible triangulations}
-\end{figure}
-
-This problem is important for:
-\begin{itemize}
-    \item \textbf{Computer Graphics}: Creating 3D meshes for games and simulations
-    \item \textbf{Engineering}: Analyzing structures using finite element methods
-    \item \textbf{Chip Design}: Optimizing layouts for computer processors
-    \item \textbf{Scientific Computing}: Solving partial differential equations
-\end{itemize}
-
-\subsection{Why is This Hard?}
-
-Previous algorithms work well for simple cases but fail when the graph has a more complex structure. The main problem is that when we try to add new edges to create triangles, we might accidentally create \textbf{parallel edges} (multiple edges between the same two points), which is not allowed.
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.4]
-        % Show the multi-edge problem step by step
-        \begin{scope}
-            \node[circle,draw,fill=blue!20] (A) at (0,0) {A};
-            \node[circle,draw,fill=blue!20] (B) at (3,0) {B};
-            \node[circle,draw,fill=blue!20] (C) at (3,2) {C};
-            \node[circle,draw,fill=blue!20] (D) at (0,2) {D};
-
-            \draw[thick,blue] (A) -- (B) -- (C) -- (D) -- (A);
-            \draw[thick,green] (A) -- (C) node[midway,above,sloped] {existing edge};
-
-            \node at (1.5,-0.8) {\textbf{Step 1: Original graph}};
-            \node at (1.5,-1.2) {Green edge exists outside the face};
-        \end{scope}
-
-        \begin{scope}[xshift=5cm]
-            \node[circle,draw,fill=blue!20] (A) at (0,0) {A};
-            \node[circle,draw,fill=blue!20] (B) at (3,0) {B};
-            \node[circle,draw,fill=blue!20] (C) at (3,2) {C};
-            \node[circle,draw,fill=blue!20] (D) at (0,2) {D};
-
-            \draw[thick,blue] (A) -- (B) -- (C) -- (D) -- (A);
-            \draw[thick,green] (A) -- (C);
-            \draw[red,thick,dashed] (A) to[bend right=20] (C);
-
-            \node[red] at (1.5,-0.8) {\textbf{Step 2: Problem!}};
-            \node[red] at (1.5,-1.2) {Adding AC creates parallel edges};
-
-            % Add warning symbol
-            \node[red,scale=2] at (4,1) {$\times$};
-        \end{scope}
-
-        \begin{scope}[yshift=-4cm]
-            \node[circle,draw,fill=blue!20] (A) at (0,0) {A};
-            \node[circle,draw,fill=blue!20] (B) at (3,0) {B};
-            \node[circle,draw,fill=blue!20] (C) at (3,2) {C};
-            \node[circle,draw,fill=blue!20] (D) at (0,2) {D};
-
-            \draw[thick,blue] (A) -- (B) -- (C) -- (D) -- (A);
-            \draw[thick,green] (A) -- (C);
-            \draw[blue,thick,dashed] (B) -- (D);
-
-            \node[blue] at (1.5,-0.8) {\textbf{Step 3: Solution}};
-            \node[blue] at (1.5,-1.2) {Use different diagonal BD instead};
-
-            % Add checkmark
-            \node[green,scale=2] at (4,1) {$\checkmark$};
-        \end{scope}
-    \end{tikzpicture}
-    \caption{The multi-edge problem and how we solve it}
-\end{figure}
-
-\subsection{Our Solution Overview}
-
-We solve this by introducing the concept of a \textbf{"safe root"} - a special vertex from which we can safely start triangulation without creating parallel edges.
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.3]
-        % Show the solution concept
-        \node[circle,draw,fill=yellow!30,thick] (v1) at (0,0) {1};
-        \node[circle,draw,fill=blue!20] (v2) at (2.5,0) {2};
-        \node[circle,draw,fill=blue!20] (v3) at (3.5,2) {3};
-        \node[circle,draw,fill=blue!20] (v4) at (2,3) {4};
-        \node[circle,draw,fill=blue!20] (v5) at (-0.5,2.5) {5};
-        \node[circle,draw,fill=blue!20] (v6) at (-1,1) {6};
-
-        \draw[thick] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
-
-        % Show safe connections from vertex 1
-        \draw[green,thick,dashed,->] (v1) -- (v3) node[midway,above] {safe};
-        \draw[green,thick,dashed,->] (v1) -- (v4) node[midway,above] {safe};
-        \draw[green,thick,dashed,->] (v1) -- (v5) node[midway,above] {safe};
-
-        % Highlight safe root
-        \node[yellow,font=\bfseries] at (0,-0.8) {SAFE ROOT};
-        \node at (1.5,-2) {Vertex 1 can connect to vertices 3, 4, 5 without problems};
-
-        % Add arrow pointing to safe root
-        \draw[->,thick,yellow] (-2,0) -- (-1.2,0) node[left] {Start here!};
-    \end{tikzpicture}
-    \caption{Safe root concept: vertex 1 can safely connect to multiple non-adjacent vertices}
-\end{figure}
-
-\section{Background and Definitions}
-
-Let's start with the basic concepts we need, illustrated with clear examples.
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}{0.3\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=0.8]
-            \node[circle,draw] (A) at (0,0) {A};
-            \node[circle,draw] (B) at (1,0) {B};
-            \node[circle,draw] (C) at (1,1) {C};
-            \node[circle,draw] (D) at (0,1) {D};
-            \draw (A) -- (B) -- (C) -- (D) -- (A);
-            \node at (0.5,-0.5) {\textbf{Graph}};
-            \node at (0.5,-0.8) {Vertices + Edges};
-        \end{tikzpicture}
-        \caption{Basic graph}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.3\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=0.8]
-            \node[circle,draw] (A) at (0,0) {A};
-            \node[circle,draw] (B) at (1.5,0) {B};
-            \node[circle,draw] (C) at (1.5,1.5) {C};
-            \node[circle,draw] (D) at (0,1.5) {D};
-            \draw (A) -- (B) -- (C) -- (D) -- (A);
-            % Shade the face
-            \fill[green!20,opacity=0.5] (A.center) -- (B.center) -- (C.center) -- (D.center) -- cycle;
-            \node at (0.75,-0.5) {\textbf{Face}};
-            \node at (0.75,-0.8) {Interior region};
-        \end{tikzpicture}
-        \caption{Face (shaded)}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.3\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=0.8]
-            \node[circle,draw] (A) at (0,0) {A};
-            \node[circle,draw] (B) at (1.5,0) {B};
-            \node[circle,draw] (C) at (1.5,1.5) {C};
-            \node[circle,draw] (D) at (0,1.5) {D};
-            \draw (A) -- (B) -- (C) -- (D) -- (A);
-            \draw[red,dashed] (A) -- (C);
-            % Shade triangular faces
-            \fill[blue!20,opacity=0.5] (A.center) -- (B.center) -- (C.center) -- cycle;
-            \fill[yellow!20,opacity=0.5] (A.center) -- (C.center) -- (D.center) -- cycle;
-            \node at (0.75,-0.5) {\textbf{Triangulation}};
-            \node at (0.75,-0.8) {All faces are triangles};
-        \end{tikzpicture}
-        \caption{Triangulated}
-    \end{subfigure}
-    \caption{Basic concepts illustrated}
-\end{figure}
-
-\begin{definition}[Biconnected Graph]
-    A graph is biconnected if removing any single vertex still leaves the graph connected. This means the graph has no "bottleneck" vertices.
-\end{definition}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.2]
-            % Not biconnected - has articulation point
-            \node[circle,draw,fill=red!30] (A) at (0,1) {A};
-            \node[circle,draw] (B) at (-1,0) {B};
-            \node[circle,draw] (C) at (1,0) {C};
-            \node[circle,draw] (D) at (2,1) {D};
-            \node[circle,draw] (E) at (2,2) {E};
-
-            \draw (A) -- (B);
-            \draw (A) -- (C);
-            \draw (A) -- (D);
-            \draw (D) -- (E);
-
-            % Show the problem
-            \node[red] at (1,-1) {\textbf{NOT Biconnected}};
-            \node[red] at (1,-1.4) {Remove A $\Rightarrow$ graph breaks};
-
-            % Add X to show breaking
-            \draw[red,thick] (-0.3,0.7) -- (0.3,1.3);
-            \draw[red,thick] (-0.3,1.3) -- (0.3,0.7);
-        \end{tikzpicture}
-        \caption{Not biconnected}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.2]
-            % Biconnected graph
-            \node[circle,draw,fill=green!30] (A) at (0,0) {A};
-            \node[circle,draw,fill=green!30] (B) at (2,0) {B};
-            \node[circle,draw,fill=green!30] (C) at (2,2) {C};
-            \node[circle,draw,fill=green!30] (D) at (0,2) {D};
-            \node[circle,draw,fill=green!30] (E) at (1,1) {E};
-
-            \draw (A) -- (B) -- (C) -- (D) -- (A);
-            \draw (A) -- (E) -- (C);
-            \draw (B) -- (E) -- (D);
-
-            \node[green] at (1,-1) {\textbf{Biconnected}};
-            \node[green] at (1,-1.4) {Remove any vertex $\Rightarrow$ still connected};
-        \end{tikzpicture}
-        \caption{Biconnected graph}
-    \end{subfigure}
-    \caption{Biconnected vs non-biconnected graphs}
-\end{figure}
-
-\section{The Safe Root Method}
-
-\subsection{What is a Safe Root?}
-
-\begin{definition}[Safe Root]
-    For a face $F$ with $n \geq 4$ vertices, a vertex $v$ in $F$ is a \textbf{safe root} if we can connect $v$ to all non-adjacent vertices in $F$ without creating any parallel edges.
-\end{definition}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.4]
-        % Show safe vs unsafe root
-        \begin{scope}
-            % Hexagon with external edge
-            \node[circle,draw] (v1) at (0,0) {1};
-            \node[circle,draw] (v2) at (1.5,0) {2};
-            \node[circle,draw] (v3) at (2.5,1) {3};
-            \node[circle,draw] (v4) at (2,2.5) {4};
-            \node[circle,draw] (v5) at (0.5,2.5) {5};
-            \node[circle,draw] (v6) at (-0.5,1) {6};
-
-            % Face boundary
-            \draw[thick,blue] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
-
-            % External edge that causes problems
-            \draw[thick,green] (v1) to[bend left=40] (v4) node[midway,above] {external edge};
-
-            % Show unsafe root
-            \fill[red!30] (v1) circle (0.15);
-            \node[red,font=\bfseries] at (v1) {1};
-
-            % Show problematic connections
-            \draw[red,dashed,thick] (v1) -- (v3) node[midway,right] {×};
-            \draw[red,dashed,thick] (v1) -- (v5) node[midway,left] {×};
-
-            \node[red] at (1,-1) {\textbf{Vertex 1: UNSAFE}};
-            \node[red] at (1,-1.4) {Would create parallel edge to 4};
-        \end{scope}
-
-        \begin{scope}[xshift=6cm]
-            % Same hexagon
-            \node[circle,draw] (v1) at (0,0) {1};
-            \node[circle,draw] (v2) at (1.5,0) {2};
-            \node[circle,draw] (v3) at (2.5,1) {3};
-            \node[circle,draw] (v4) at (2,2.5) {4};
-            \node[circle,draw] (v5) at (0.5,2.5) {5};
-            \node[circle,draw] (v6) at (-0.5,1) {6};
-
-            \draw[thick,blue] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
-            \draw[thick,green] (v1) to[bend left=40] (v4);
-
-            % Show safe root
-            \fill[lime!50] (v2) circle (0.15);
-            \node[black,font=\bfseries] at (v2) {2};
-
-            % Show safe connections
-            \draw[lime,dashed,thick] (v2) -- (v4) node[midway,above] {\checkmark};
-            \draw[lime,dashed,thick] (v2) -- (v5) node[midway,above] {\checkmark};
-            \draw[lime,dashed,thick] (v2) -- (v6) node[midway,below] {\checkmark};
-
-
-            \node[green] at (1,-1) {\textbf{Vertex 2: SAFE}};
-            \node[green] at (1,-1.4) {No parallel edges created};
-        \end{scope}
-    \end{tikzpicture}
-    \caption{Safe vs unsafe roots: vertex 1 would create parallel edges, vertex 2 is safe}
-\end{figure}
-
-\subsection{Finding Safe Roots: The Two-Pointer Algorithm}
-
-The core of our method is an efficient, linear-time algorithm for identifying a safe root within a face $F$ with $n \geq 4$ vertices. The algorithm operates on the cyclic sequence of vertices $V = (v_0, v_1, v_2, \ldots, v_{n-1})$ defining the face $F$.
-
-\textbf{Intuition:} The algorithm checks potential ``candidate'' edges from vertices on one side of the cyclic sequence to vertices on the other. It uses two pointers, \textit{left} and \textit{right}, to traverse the list of vertices. The goal is to find a vertex $v_i$ such that the ``long'' chord $(v_i, v_j)$ for a distant $j$ does not yet exist in the graph.
-
-\textbf{Algorithm: findSafeRoot}
-
-\textbf{Input:} A list \textit{vertices} of size $n$ (with $n \geq 4$) representing the vertices of face $F$ in cyclic order. A global hash table \textit{edgeTable} for $O(1)$ lookups of existing edges.
-
-\textbf{Output:} The index $i$ of a safe root vertex $v_i$, or $-1$ if no safe root is found.
-
-\textbf{Initialization:}
-\begin{itemize}
-    \item Let $left = 0$. This pointer advances from the start of the list.
-    \item Let $right = n - 2$. This pointer retreats from the end. We use $n-2$ because the vertex at index $n-1$ is adjacent to vertex at index $0$.
-\end{itemize}
-
-\textbf{Main Loop:}
-While $(right - left > 1)$:
 \begin{enumerate}
-    \item Let $u = vertices[left]$ and $v = vertices[right]$.
-    \item Check if edge $(u, v)$ exists in $edgeTable$.
-    \item If $edgeTable.contains(u, v)$ is TRUE: Move $left$ forward ($left++$).
-    \item If $edgeTable.contains(u, v)$ is FALSE: Move $right$ backward ($right--$).
+\item \textbf{Safe Root Selection Strategy:} We introduce the concept of a \emph{safe root vertex} for each face—a vertex from which all initial chords can be added without creating multi-edges. We prove that every face in a biconnected plane graph contains at least two safe root vertices, ensuring our algorithm always has a valid starting point.
+
+\item \textbf{Local Genealogical Trees:} Instead of a single global tree of triangulations, we construct local genealogical trees for each face. This enables independent face processing while a global chord set prevents multi-edge conflicts across faces.
+
+\item \textbf{Theoretical Guarantees:} We rigorously prove that our algorithm:
+\begin{itemize}
+    \item Generates all valid triangulations without duplications (completeness)
+    \item Always finds a safe root triangulation for any face (existence)
+    \item Achieves amortized $O(1)$ time per triangulation (efficiency)
+    \item Uses $O(n)$ space (space efficiency)
+\end{itemize}
+
+\item \textbf{Practical Implementation:} We provide a complete implementation demonstrating the algorithm's effectiveness on real-world graph instances.
 \end{enumerate}
 
-\textbf{Termination:} Return $left$ when pointers are at most one index apart.
+\subsection{Organization}
 
-\textbf{Why this works:} Upon termination, the left pointer has converged to a vertex $v_l$ for which connecting to all non-adjacent vertices is safe. The movement ensures that if a blocking chord existed for a previous candidate, we correctly skip that candidate.
+The remainder of this paper is organized as follows. Section~\ref{sec:preliminaries} provides necessary definitions and notation. Section~\ref{sec:related} discusses related work. Section~\ref{sec:algorithm} presents our algorithm in detail. Section~\ref{sec:correctness} proves correctness and completeness. Section~\ref{sec:complexity} analyzes time and space complexity. Section~\ref{sec:implementation} describes implementation details and experimental results. Section~\ref{sec:conclusion} concludes with future research directions.
 
-\textbf{Complexity:} $O(n)$ time with $O(1)$ hash table lookups.
+\section{Preliminaries}
+\label{sec:preliminaries}
 
-Here's our algorithm illustrated step-by-step:
+We begin by establishing the graph-theoretic foundations necessary for our algorithm.
+
+\begin{definition}[Planar Graph and Plane Graph]
+A graph $G = (V, E)$ is \emph{planar} if it can be embedded in the plane such that no two edges intersect except at vertices. A \emph{plane graph} is a planar graph with a fixed embedding, dividing the plane into connected regions called \emph{faces}. The unbounded region is the \emph{outer face}; all other faces are \emph{inner faces}.
+\end{definition}
+
+\begin{definition}[Connectivity]
+The \emph{connectivity} $\kappa(G)$ of a graph $G$ is the minimum number of vertices whose removal disconnects $G$ or reduces it to a single vertex. A graph is \emph{$k$-connected} if $\kappa(G) \geq k$. In particular:
+\begin{itemize}
+    \item A graph is \emph{biconnected} if $\kappa(G) \geq 2$ (no cut vertices).
+    \item A graph is \emph{triconnected} if $\kappa(G) \geq 3$ (no cut vertex pairs).
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Cycle and Chord]
+A \emph{cycle} $C$ in a plane graph $G$ is a sequence of distinct vertices $v_1, v_2, \ldots, v_k$ such that $(v_i, v_{i+1}) \in E$ for $1 \leq i < k$ and $(v_k, v_1) \in E$. We denote $C = \langle v_1, v_2, \ldots, v_k \rangle$ with vertices in counterclockwise order.
+
+A \emph{chord} of cycle $C$ is an edge $(v_i, v_j)$ connecting two non-consecutive vertices of $C$ that lies entirely within the face bounded by $C$.
+\end{definition}
+
+\begin{definition}[Triangulation of a Cycle]
+A \emph{triangulation} $T$ of a cycle $C$ with $n$ vertices is a maximal set of non-crossing chords that decomposes the interior region of $C$ into triangles. Every triangulation of an $n$-vertex cycle contains exactly $n - 3$ chords and produces $n - 2$ triangles.
+\end{definition}
+
+\begin{definition}[Triangulation of a Plane Graph]
+A \emph{triangulation} of a plane graph $G$ is a plane graph $T$ obtained by adding chords to $G$ such that every face of $T$ is bounded by exactly three edges. We say $T$ is a \emph{triangulation of} $G$.
+\end{definition}
+
+\begin{definition}[Labeled and Unlabeled Triangulations]
+If the vertices of a cycle $C$ are numbered sequentially from $v_1$ to $v_n$, then triangulations of $C$ are called \emph{labeled triangulations}. If vertices are not numbered, triangulations are called \emph{unlabeled triangulations}.
+\end{definition}
+
+\begin{definition}[Visibility]
+In a triangulation $T$ of a cycle $C$, we say vertex $v_j$ is \emph{visible from} vertex $v_i$ if there exists a chord $(v_i, v_j)$ in $T$.
+\end{definition}
+
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Triangulation Enumeration}
+
+Early work on triangulation enumeration focused on specific graph classes. Chazelle~\cite{chazelle1991} gave a linear-time algorithm for finding \emph{a} triangulation of a simple polygon, but not for enumerating all triangulations.
+
+Hurtado and Noy~\cite{hurtado1999} studied the graph of triangulations of convex polygons, where vertices represent triangulations and edges represent edge flips. They established theoretical properties but did not provide efficient enumeration algorithms for arbitrary $n$-vertex polygons without first generating all smaller cases.
+
+Li and Nakano~\cite{li2001} developed an algorithm for generating all biconnected plane triangulations with at most $n$ vertices, but this requires generating all smaller triangulations first—inefficient when only triangulations of exactly $n$ vertices are needed.
+
+\subsection{Reverse Search and Tree-Based Enumeration}
+
+The reverse search paradigm~\cite{avis1996} has been successfully applied to many enumeration problems. Avis presented algorithms for enumerating triangulations using reverse search, but these achieve $O(n^2)$ time per triangulation for cycles~\cite{avis1996}.
+
+Orderly generation~\cite{read1978} avoids duplicates by outputting only canonical representations, but requires expensive isomorphism testing.
+
+\subsection{The Parvez-Rahman-Nakano Algorithm}
+
+The breakthrough work of Parvez, Rahman, and Nakano~\cite{parvez2011} introduced the \emph{tree of triangulations} for triconnected plane graphs, achieving $O(1)$ time per triangulation. Their key insights include:
+
+\begin{itemize}
+    \item \textbf{Tree Structure:} Triangulations form a tree where each child is generated from its parent by a single edge flip.
+    \item \textbf{Root Triangulation:} The tree is rooted at a triangulation where all chords emanate from a single vertex.
+    \item \textbf{Generating Chord:} Each triangulation has a unique \emph{generating chord}—the leftmost chord that can be flipped.
+    \item \textbf{Parent-Child Relationship:} Flipping the generating chord produces the parent, ensuring unique relationships and no duplicates.
+\end{itemize}
+
+However, this algorithm is specifically designed for \emph{triconnected} graphs. The triconnectivity guarantee ensures that faces share only boundary edges, preventing multi-edge conflicts. For biconnected graphs without this guarantee, the algorithm fails.
+
+\subsection{The Multi-Edge Problem}
+
+In biconnected graphs, faces can share internal chords from previous triangulation steps. When triangulating a new face, adding a chord that already exists as a chord in a different face creates a multi-edge, violating the simple graph property. This is the fundamental barrier preventing direct application of the Parvez-Rahman-Nakano algorithm to biconnected graphs.
+
+Our algorithm solves this problem through safe root selection and global chord tracking.
+
+\subsection{Comparison: Triconnected vs. Biconnected Approach}
+
+The key differences between the Parvez-Rahman-Nakano algorithm for triconnected graphs and our algorithm for biconnected graphs are:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
+\hline
+\textbf{Aspect} & \textbf{Triconnected (PRN)} & \textbf{Biconnected (Ours)} \\
+\hline
+Tree Structure & Single global tree of triangulations & Local trees per face + DFS combination \\
+\hline
+Root Selection & Any vertex can be root & Must find safe root vertex \\
+\hline
+Multi-edge Problem & Does not occur (guaranteed by triconnectivity) & Explicitly handled via GlobalChordSet \\
+\hline
+Face Processing & Can process independently & Must process sequentially with backtracking \\
+\hline
+Chord Conflicts & No conflicts between faces & Dynamic conflict checking required \\
+\hline
+Complexity & $O(1)$ per triangulation & $O(1)$ amortized per triangulation \\
+\hline
+Applicability & Only triconnected graphs & All biconnected graphs \\
+\hline
+\end{tabular}
+\caption{Comparison of triconnected and biconnected triangulation algorithms}
+\label{tab:comparison}
+\end{table}
+
+Our algorithm generalizes the triconnected case: when applied to a triconnected graph, every vertex is a safe root (since no chords exist between faces), and the algorithm behaves similarly to the Parvez-Rahman-Nakano algorithm.
+
+\section{The Algorithm}
+\label{sec:algorithm}
+
+\subsection{Algorithm Overview}
+
+Our algorithm generates all triangulations of a biconnected plane graph $G$ with $k$ faces $F_1, F_2, \ldots, F_k$ using a recursive depth-first search (DFS) strategy. The key idea is to:
+
+\begin{enumerate}
+    \item Process faces sequentially from $F_1$ to $F_k$.
+    \item For each face $F_i$, construct a \emph{local genealogical tree} of all its valid triangulations.
+    \item Maintain a \emph{global chord set} to prevent multi-edge conflicts.
+    \item Recursively combine face triangulations to produce complete graph triangulations.
+\end{enumerate}
+
+\subsection{Key Innovations}
+
+Our algorithm introduces three key innovations to extend the Parvez-Rahman-Nakano framework from triconnected to biconnected graphs:
+
+\subsubsection{Innovation 1: Local Genealogical Trees}
+
+Instead of constructing a single global genealogical tree for the entire graph (which fails for biconnected graphs due to multi-edge conflicts), we build \emph{local genealogical trees} for each face independently.
+
+\begin{itemize}
+    \item Each face $F_i$ has its own tree $\mathcal{T}(F_i)$ of triangulations
+    \item The root of $\mathcal{T}(F_i)$ is the safe root triangulation
+    \item Parent-child relationships are defined by edge flips within the face
+    \item Local trees are explored via DFS during recursive face processing
+\end{itemize}
+
+This decomposition enables independent triangulation of each face while maintaining global consistency through the chord set.
+
+\subsubsection{Innovation 2: Safe Root Vertex Selection}
+
+To ensure that the root triangulation of each face does not create multi-edges with previously triangulated faces, we introduce the concept of a \emph{safe root vertex}.
+
+The safe root vertex is chosen such that all initial chords from this vertex to non-neighboring vertices of the face do not conflict with chords already in the global set. This guarantees a valid starting point for the local genealogical tree.
+
+We prove (Theorem~\ref{thm:safe_root_exists}) that every face, regardless of how many previous faces have been triangulated, contains at least two safe root vertices.
+
+\subsubsection{Innovation 3: Global Chord Set with Dynamic Management}
+
+The \emph{global chord set} $S$ tracks all chords currently used in the partial triangulation being explored. It serves two purposes:
+
+\begin{enumerate}
+    \item \textbf{Conflict Detection:} Before adding any chord to a face triangulation, check if it already exists in $S$
+    \item \textbf{Safe Root Finding:} Used to identify which vertices can serve as safe roots for the current face
+\end{enumerate}
+
+The set is managed dynamically during DFS:
+\begin{itemize}
+    \item \textbf{Push:} When exploring a triangulation, add its chords to $S$
+    \item \textbf{Recurse:} Process next face with updated $S$
+    \item \textbf{Pop:} After exploring all descendants, remove chords from $S$ (backtrack)
+\end{itemize}
+
+This ensures that $S$ always reflects exactly the chords in the current exploration path.
+
+\subsection{Safe Root Vertex Selection}
+
+The first critical innovation is identifying a \emph{safe root vertex} for each face.
+
+\begin{definition}[Safe Root Vertex]
+A vertex $r$ of a face $F_i$ is a \emph{safe root vertex} if adding chords from $r$ to all non-neighboring vertices of $F_i$ does not create any edge that already exists in the global chord set (from previous faces $F_1, \ldots, F_{i-1}$).
+\end{definition}
 
 \begin{algorithm}
-    \caption{Find Safe Root - Visual Walkthrough}
-    \begin{algorithmic}[1]
-        \REQUIRE Face $F$ with vertices $v_1, v_2, \ldots, v_n$ (in order around the face)
-        \REQUIRE Hash table $H$ containing all existing edges
-        \ENSURE A safe root vertex
-        \STATE $left \leftarrow 1$ \COMMENT{Start from first vertex}
-        \STATE $right \leftarrow n-1$ \COMMENT{Start from second-to-last vertex}
-        \WHILE{right - left > 1} 
-            \STATE $u \leftarrow v_{left}$ 
-            \STATE $v \leftarrow v_{right}$ 
-            \IF{edge (u, v) in H}
-                \STATE $left \leftarrow left + 1$ \COMMENT{Move left pointer right}
-            \ELSE
-                \STATE $right \leftarrow right - 1$ \COMMENT{Move right pointer left}
-            \ENDIF
-        \ENDWHILE
-        \STATE \textbf{return} $v_{left}$ \COMMENT{This vertex is safe to use}
-    \end{algorithmic}
+\caption{Finding a Safe Root Vertex}
+\label{alg:safe_root}
+\begin{algorithmic}[1]
+\Require Face $F$ with vertices $v_1, v_2, \ldots, v_n$, global chord set $S$
+\Ensure A safe root vertex $r$
+\For{$i = 1$ to $n$}
+    \State $\text{safe} \gets \texttt{true}$
+    \For{each non-neighbor $v_j$ of $v_i$ in $F$}
+        \If{$(v_i, v_j) \in S$}
+            \State $\text{safe} \gets \texttt{false}$
+            \State \textbf{break}
+        \EndIf
+    \EndFor
+    \If{$\text{safe}$}
+        \State \Return $v_i$
+    \EndIf
+\EndFor
+\end{algorithmic}
 \end{algorithm}
 
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=0.9]
-        % Step-by-step visualization of two-pointer algorithm
-        % Step 1
-        \begin{scope}
-            \node[circle,draw] (v1) at (0,0) {1};
-            \node[circle,draw] (v2) at (1.5,0) {2};
-            \node[circle,draw] (v3) at (2.5,1) {3};
-            \node[circle,draw] (v4) at (2,2.5) {4};
-            \node[circle,draw] (v5) at (0.5,2.5) {5};
-            \node[circle,draw] (v6) at (-0.5,1) {6};
+We will prove in Section~\ref{sec:correctness} that every face has at least two safe root vertices.
 
-            \draw[thick] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
+\subsection{Root Triangulation}
 
-            % Pointers
-            \fill[red] (v1) circle (0.1);
-            \fill[blue] (v5) circle (0.1);
-            \node[red] at (v1) [below] {L};
-            \node[blue] at (v5) [above] {R};
+Once a safe root vertex $r$ is identified, we construct the \emph{root triangulation} of the face by adding chords from $r$ to all non-neighboring vertices:
 
-            % Check connection
-            \draw[purple,dashed,thick] (v1) -- (v5);
-            \node[purple] at (1.25,1.25) {check};
+\begin{definition}[Root Triangulation]
+The \emph{root triangulation} $T_r$ of a face $F$ with safe root $r$ is the triangulation formed by adding all chords $(r, v)$ for every vertex $v \in F$ that is not a neighbor of $r$ on the cycle boundary.
+\end{definition}
 
-            \node at (1,-1.2) {\textbf{Step 1: left=1, right=5}};
-        \end{scope}
+\subsection{Local Genealogical Tree}
 
-        % Step 2
-        \begin{scope}[xshift=4cm]
-            \node[circle,draw] (v1) at (0,0) {1};
-            \node[circle,draw] (v2) at (1.5,0) {2};
-            \node[circle,draw] (v3) at (2.5,1) {3};
-            \node[circle,draw] (v4) at (2,2.5) {4};
-            \node[circle,draw] (v5) at (0.5,2.5) {5};
-            \node[circle,draw] (v6) at (-0.5,1) {6};
+For each face, we build a \emph{local genealogical tree} of triangulations rooted at the safe root triangulation. The tree structure is defined by parent-child relationships based on edge flipping:
 
-            \draw[thick] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
+\begin{definition}[Generating Chord]
+In a triangulation $T$ of a face with root vertex $r$, a chord $(v_i, v_j)$ is a \emph{generating chord} if:
+\begin{enumerate}
+    \item Neither $v_i$ nor $v_j$ is the root vertex $r$, and
+    \item $(v_i, v_j)$ is the leftmost such chord (smallest index among non-root chords).
+\end{enumerate}
+\end{definition}
 
-            % External edge exists
-            \draw[green,thick] (v1) to[bend right=30] (v5) node[midway,right] {exists!};
+\begin{definition}[Parent-Child Relationship]
+Let $T$ be a triangulation with generating chord $(v_i, v_j)$ forming two triangles $(v_i, v_j, v_p)$ and $(v_i, v_j, v_q)$ on opposite sides. The \emph{parent} of $T$ is the triangulation obtained by flipping $(v_i, v_j)$ to $(v_p, v_q)$, provided this flip does not create a multi-edge.
+\end{definition}
 
-            \fill[red] (v2) circle (0.1);
-            \fill[blue] (v5) circle (0.1);
-            \node[red] at (v2) [below] {L};
-            \node[blue] at (v5) [above] {R};
+\subsection{Main Algorithm}
 
-            \node at (1,-1.2) {\textbf{Step 2: left=2, right=5}};
-            \node[red] at (1,-1.6) {Edge (1,5) exists, move left};
-        \end{scope}
+\begin{algorithm}
+\caption{Generate All Triangulations of Biconnected Plane Graph}
+\label{alg:main}
+\begin{algorithmic}[1]
+\Require Biconnected plane graph $G$ with faces $F_1, \ldots, F_k$
+\Ensure All triangulations of $G$
+\State Initialize global chord set $S \gets \emptyset$
+\State \Call{ProcessFace}{$1, \emptyset, S$}
 
-        % Step 3
-        \begin{scope}[xshift=8cm]
-            \node[circle,draw] (v1) at (0,0) {1};
-            \node[circle,draw] (v2) at (1.5,0) {2};
-            \node[circle,draw] (v3) at (2.5,1) {3};
-            \node[circle,draw] (v4) at (2,2.5) {4};
-            \node[circle,draw] (v5) at (0.5,2.5) {5};
-            \node[circle,draw] (v6) at (-0.5,1) {6};
+\Procedure{ProcessFace}{$i, T_{\text{current}}, S$}
+    \If{$i > k$}
+        \State \textbf{output} $T_{\text{current}}$ \Comment{All faces triangulated}
+        \State \Return
+    \EndIf
+    \State $r \gets$ \Call{FindSafeRoot}{$F_i, S$}
+    \State $T_{\text{root}} \gets$ \Call{RootTriangulation}{$F_i, r$}
+    \State \Call{Explore}{$F_i, T_{\text{root}}, i, T_{\text{current}}, S$}
+\EndProcedure
 
-            \draw[thick] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
-            \draw[green,thick] (v1) to[bend right=30] (v5);
+\Procedure{Explore}{$F, T, i, T_{\text{current}}, S$}
+    \State Add chords of $T$ to $S$
+    \State \Call{ProcessFace}{$i + 1, T_{\text{current}} \cup T, S$}
+    \State Remove chords of $T$ from $S$
+    
+    \For{each child $T'$ of $T$ in local tree}
+        \If{chords of $T'$ do not conflict with $S$}
+            \State \Call{Explore}{$F, T', i, T_{\text{current}}, S$}
+        \EndIf
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
-            \draw[purple,dashed,thick] (v2) -- (v5);
-            \node[purple] at (1.25,1.25) {safe!};
+The algorithm performs a depth-first exploration where:
+\begin{itemize}
+    \item At each level $i$, we process face $F_i$
+    \item For each valid triangulation $T$ of $F_i$, we recursively process $F_{i+1}$
+    \item Backtracking removes chords from $S$ to explore alternative triangulations
+    \item Complete triangulations are output when $i > k$
+\end{itemize}
 
-            \fill[red] (v2) circle (0.1);
-            \fill[blue] (v5) circle (0.1);
-            \node[red] at (v2) [below] {L};
-            \node[blue] at (v5) [above] {R};
+\subsection{Child Generation via Edge Flipping}
 
-            \node at (1,-1.2) {\textbf{Step 3: Edge (2,5) is safe}};
-            \node[green] at (1,-1.6) {Move right pointer};
-        \end{scope}
+To generate children in the local genealogical tree, we flip the generating chord:
 
-        % Step 4
-        \begin{scope}[yshift=-4cm]
-            \node[circle,draw] (v1) at (0,0) {1};
-            \node[circle,draw] (v2) at (1.5,0) {2};
-            \node[circle,draw] (v3) at (2.5,1) {3};
-            \node[circle,draw] (v4) at (2,2.5) {4};
-            \node[circle,draw] (v5) at (0.5,2.5) {5};
-            \node[circle,draw] (v6) at (-0.5,1) {6};
+\begin{algorithm}
+\caption{Generate Children of Triangulation}
+\label{alg:children}
+\begin{algorithmic}[1]
+\Require Triangulation $T$ of face $F$ with root $r$
+\Ensure All children of $T$ in the local tree
+\State Find generating chord $(v_i, v_j)$ of $T$
+\If{no generating chord exists}
+    \State \Return $\emptyset$ \Comment{$T$ is a leaf node}
+\EndIf
+\State Find $v_p, v_q$ forming triangles with $(v_i, v_j)$
+\State $T' \gets T \setminus \{(v_i, v_j)\} \cup \{(v_p, v_q)\}$
+\State \Return $\{T'\}$
+\end{algorithmic}
+\end{algorithm}
 
-            \draw[thick] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
-            \draw[green,thick] (v1) to[bend right=30] (v5);
+\subsection{Complete Algorithm Pseudocode}
 
-            \fill[red] (v2) circle (0.1);
-            \fill[blue] (v4) circle (0.1);
-            \node[red] at (v2) [below] {L};
-            \node[blue] at (v4) [above] {R};
+For completeness, we provide detailed pseudocode for all major components:
 
-            \draw[purple,dashed,thick] (v2) -- (v4);
+\begin{algorithm}
+\caption{Find Safe Root Vertex}
+\label{alg:find_safe_root}
+\begin{algorithmic}[1]
+\Procedure{FindSafeRootVertex}{$F, S$}
+    \State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$
+    \For{$i = 1$ to $n$}
+        \State $\text{isSafe} \gets \texttt{true}$
+        \For{$j = 1$ to $n$}
+            \If{$|i - j| > 1$ and $|i - j| < n - 1$} \Comment{$v_j$ is non-neighbor}
+                \If{$(v_i, v_j) \in S$}
+                    \State $\text{isSafe} \gets \texttt{false}$
+                    \State \textbf{break}
+                \EndIf
+            \EndIf
+        \EndFor
+        \If{$\text{isSafe}$}
+            \State \Return $v_i$
+        \EndIf
+    \EndFor
+    \State \Return \texttt{null} \Comment{Should never reach here by Theorem~\ref{thm:safe_root_exists}}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
-            \node at (1,-1.2) {\textbf{Step 4: left=2, right=4}};
-            \node[green] at (1,-1.6) {Edge (2,4) safe, move right};
-        \end{scope}
+\begin{algorithm}
+\caption{Construct Root Triangulation}
+\label{alg:root_triangulation}
+\begin{algorithmic}[1]
+\Procedure{RootTriangulation}{$F, r$}
+    \State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$
+    \State $T \gets \emptyset$
+    \For{each vertex $v_j \in F$}
+        \If{$v_j \neq r$ and $v_j$ is not a neighbor of $r$ on $F$}
+            \State $T \gets T \cup \{(r, v_j)\}$
+        \EndIf
+    \EndFor
+    \State \Return $T$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
-        % Final step
-        \begin{scope}[xshift=4cm,yshift=-4cm]
-            \node[circle,draw] (v1) at (0,0) {1};
-            \node[circle,draw,fill=yellow!50] (v2) at (1.5,0) {2};
-            \node[circle,draw] (v3) at (2.5,1) {3};
-            \node[circle,draw] (v4) at (2,2.5) {4};
-            \node[circle,draw] (v5) at (0.5,2.5) {5};
-            \node[circle,draw] (v6) at (-0.5,1) {6};
+\begin{algorithm}
+\caption{Find All Triangulations of a Cycle}
+\label{alg:all_triangulations_cycle}
+\begin{algorithmic}[1]
+\Procedure{FindAllTriangulationsCycle}{$F, T, i, T_{\text{current}}, S$}
+    \State Add all chords of $T$ to $S$
+    \If{$i = k$} \Comment{All faces processed}
+        \State \textbf{output} $T_{\text{current}} \cup T$
+    \Else
+        \State \Call{ProcessFace}{$i + 1, T_{\text{current}} \cup T, S$}
+    \EndIf
+    \State Remove all chords of $T$ from $S$
+    
+    \State Find all child triangulations of $T$
+    \For{each child $T'$ of $T$}
+        \State \Call{FindAllTriangulationsCycle}{$F, T', i, T_{\text{current}}, S$}
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
-            \draw[thick] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
-            \draw[green,thick] (v1) to[bend right=30] (v5);
+\begin{algorithm}
+\caption{Start Triangulation Process}
+\label{alg:start}
+\begin{algorithmic}[1]
+\Procedure{StartTriangulation}{$G$}
+    \State Decompose $G$ into faces $F_1, F_2, \ldots, F_k$
+    \State Initialize global chord set $S \gets \emptyset$
+    \State \Call{ProcessFace}{$1, \emptyset, S$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
-            \fill[red] (v2) circle (0.1);
-            \fill[blue] (v3) circle (0.1);
-            \node[red] at (v2) [below] {L};
-            \node[blue] at (v3) [above] {R};
+\section{Correctness and Completeness}
+\label{sec:correctness}
 
-            \node at (1,-1.2) {\textbf{Final: left=2, right=3}};
-            \node[yellow] at (1,-1.6) {\textbf{Vertex 2 is SAFE ROOT!}};
-        \end{scope}
-    \end{tikzpicture}
-    \caption{Step-by-step execution of the two-pointer safe root algorithm}
-\end{figure}
+We now prove that our algorithm correctly generates all triangulations without duplicates.
 
-\subsection{Why This Works: The Mathematical Foundation}
+\subsection{Existence of Safe Root Vertices}
 
-The correctness of our two-pointer algorithm rests on a fundamental property of planar graphs and the structure of blocking chords. We provide a rigorous analysis of why the algorithm always terminates at a safe root.
+\begin{theorem}[Existence of Safe Root]
+\label{thm:safe_root_exists}
+In any face of a biconnected plane graph during the triangulation process, there exist at least two safe root vertices.
+\end{theorem}
 
-\begin{lemma}[Convergence Property]
-    The two-pointer algorithm always terminates and finds a safe root in $O(n)$ steps.
+\begin{proof}
+Consider a face $F$ with $n$ vertices $v_1, v_2, \ldots, v_n$ listed in counterclockwise order. Let $S$ be the global chord set from previously processed faces.
+
+\textbf{Case 1:} If $S$ contains no chords with both endpoints in $F$, then all $n$ vertices are safe roots.
+
+\textbf{Case 2:} Assume $S$ contains at least one chord with both endpoints in $F$. Consider a chord $(v_a, v_b) \in S$. Due to planarity, no other chord can cross $(v_a, v_b)$.
+
+The chord $(v_a, v_b)$ divides the cycle $F$ into two segments:
+\begin{itemize}
+    \item $S_1 = \langle v_a, v_{a+1}, \ldots, v_b \rangle$
+    \item $S_2 = \langle v_b, v_{b+1}, \ldots, v_a \rangle$
+\end{itemize}
+
+Each segment forms a substructure $T_m$ where $m$ is the number of internal vertices (vertices excluding the endpoints).
+
+\textbf{Base Case: $T_1$}
+
+If $S_1$ has one internal vertex $v_c$ between $v_a$ and $v_b$, then both $v_a$ and $v_b$ are neighbors of $v_c$ on the boundary. Any potential chord from $v_c$ would go to one of its neighbors, which is not allowed. Therefore, $v_c$ has no conflicting chords and is a safe root.
+
+\textbf{Base Case: $T_2$}
+
+If $S_1$ has two internal vertices $v_c$ and $v_d$ (with $v_c$ between $v_a$ and $v_d$, and $v_d$ between $v_c$ and $v_b$), then:
+\begin{itemize}
+    \item The only non-neighbor of $v_c$ is $v_b$
+    \item The only non-neighbor of $v_d$ is $v_a$
+\end{itemize}
+
+If $(v_c, v_b) \in S$, this creates a $T_1$ structure containing only $v_d$, making $v_d$ safe.
+If $(v_d, v_a) \in S$, this creates a $T_1$ structure containing only $v_c$, making $v_c$ safe.
+If neither chord exists, both $v_c$ and $v_d$ are safe.
+
+\textbf{Inductive Case: $T_m$ for $m > 2$}
+
+We use an iterative reduction strategy. Consider the first internal vertex $v_{a+1}$:
+\begin{itemize}
+    \item Its neighbors on the boundary are $v_a$ and $v_{a+2}$
+    \item Possible conflicting chords: $(v_{a+1}, v_{a+3}), \ldots, (v_{a+1}, v_b)$
+\end{itemize}
+
+Check from $v_b$ downward:
+\begin{itemize}
+    \item If $(v_{a+1}, v_b) \in S$, the structure reduces to $T_{m-1}$ with vertices $v_{a+2}, \ldots, v_b$
+    \item If $(v_{a+1}, v_{b-k}) \in S$ for some $k > 0$, the structure reduces to $T_{m-k-1}$
+    \item If no such chord exists, $v_{a+1}$ is a safe root
+\end{itemize}
+
+This process either finds a safe root or reduces $m$, eventually reaching $T_1$ or $T_2$, both of which contain safe roots.
+
+\textbf{Finding Safe Vertices in $O(n)$ Time:}
+
+The above iterative process can be implemented efficiently:
+
+\begin{enumerate}
+    \item Consider vertex $v_{a+1}$ (first internal vertex)
+    \item $v_{a+1}$ cannot create chords with neighbors $v_a$ and $v_{a+2}$
+    \item Possible chord partners: $\{v_{a+3}, \ldots, v_b\}$
+    \item Check from $v_b$ downward using a hash set ($O(1)$ per check)
+    \item If a chord $(v_{a+1}, v_{b-k})$ is found, reduce to subproblem $T_{m-k-1}$
+    \item If no chord is found after checking all candidates, $v_{a+1}$ is safe
+\end{enumerate}
+
+Each iteration either:
+\begin{itemize}
+    \item Finds a safe root vertex (algorithm terminates successfully), or
+    \item Reduces the problem size by at least 1, eventually reaching $T_1$ or $T_2$
+\end{itemize}
+
+Since $T_1$ and $T_2$ are proven to contain safe vertices, and each reduction step decreases $m$, the algorithm is guaranteed to find a safe vertex in $O(n)$ time.
+
+\textbf{Two Complementary $T_m$ Structures:}
+
+The face $F$ is divided by chord $(v_a, v_b)$ into two segments:
+\begin{itemize}
+    \item Structure 1: $S_1 = \langle v_a, v_{a+1}, \ldots, v_b \rangle$ with $m_1$ internal vertices
+    \item Structure 2: $S_2 = \langle v_b, v_{b+1}, \ldots, v_a \rangle$ with $m_2$ internal vertices
+\end{itemize}
+
+Note that $m_1 + m_2 = n - 2$ (total vertices minus the two endpoints of the constraining chord).
+
+By the analysis above, each structure $S_1$ and $S_2$ contains at least one safe vertex. Therefore, every face has at least two safe root vertices—one from each complementary segment.
+
+Since both segments $S_1$ and $S_2$ contain safe roots by this argument, every face has at least two safe root vertices.
+\end{proof}
+
+\begin{remark}
+The existence of at least two safe root vertices is crucial for the algorithm's flexibility. It ensures that even in highly constrained faces with many pre-existing chords from previous face triangulations, we can always find a valid starting point for the local genealogical tree.
+\end{remark}
+
+\subsection{Completeness via Pruning}
+
+\begin{theorem}[Completeness]
+\label{thm:completeness}
+The algorithm generates all valid triangulations of the biconnected plane graph without duplications.
+\end{theorem}
+
+\begin{proof}
+We must show two properties:
+\begin{enumerate}
+    \item Every valid triangulation is generated (completeness)
+    \item No triangulation is generated twice (no duplicates)
+\end{enumerate}
+
+\textbf{Pruning Preserves Validity:}
+
+When the algorithm prunes a branch (because a chord would create a multi-edge), we must verify that all children of that branch would also be invalid.
+
+Consider a triangulation $T$ with a blocking chord $(v_a, v_b)$ that already exists in the global set $S$. Since $T$ is a complete triangulation of the face, there exist two vertices $v_p$ and $v_q$ forming triangles $(v_a, v_b, v_p)$ and $(v_a, v_b, v_q)$ on opposite sides of the chord.
+
+We now prove that a blocking chord is \emph{never flipped} in any child of the triangulation tree, by analyzing all possible positions of the vertices relative to the root vertex $r$.
+
+\textbf{Case 1: $v_p$ is on the left of the root vertex $r$}
+
+Flipping the $(v_a, v_b)$ chord would result in a $(v_p, v_q)$ chord. However, before this flip, the $(v_b, v_p)$ chord was also a blocking chord positioned to the left of $(v_a, v_b)$ (by the ordering of vertices). This means $(v_a, v_b)$ could not be the leftmost blocking chord. 
+
+Consequently, after flipping to create the new $(v_p, v_q)$ chord, this new chord cannot be the leftmost blocking chord either, because the $(v_p, v_b)$ chord still exists and remains to the left of the $(v_q, v_p)$ chord. 
+
+Therefore, flipping the $(v_a, v_b)$ blocking chord is not permitted by the algorithm in this case, as the algorithm only flips the leftmost generating chord.
+
+\textbf{Case 2: $v_p$ is on the right of the root vertex $r$}
+
+Flipping the $(v_a, v_b)$ chord would produce a $(v_p, v_q)$ chord. However, the $(v_a, v_p)$ chord exists and is positioned to the left of where the new $(v_p, v_q)$ chord would be. Since $(v_a, v_p)$ is more to the left than $(v_p, v_q)$, the flip is invalid according to the algorithm's leftmost-chord-first policy.
+
+\textbf{Case 3: $v_p$ is at the root vertex $r$}
+
+Flipping the $(v_a, v_b)$ chord would create a $(r, v_q)$ chord, where $r$ is the root vertex. This would give the child triangulation's root vertex better visibility than the parent—the root would be able to see $v_q$ through a chord, which contradicts the tree construction where chords from the root are only added in the root triangulation.
+
+This violates the algorithm's fundamental constraint that all chords emanating from the root vertex are established in the root triangulation and are never created through flipping operations in descendant triangulations.
+
+\textbf{Conclusion:}
+
+In all three cases, flipping a blocking chord in a triangulation tree is impossible according to the algorithm's rules. Therefore, if $(v_a, v_b)$ is a blocking chord (duplicate from previous faces), it will be present in all descendants of $T$ in the local tree, making all descendants invalid. 
+
+By pruning such branches, we eliminate no valid triangulations, preserving completeness.
+
+\textbf{No Duplicates:}
+
+The local genealogical tree structure for each face ensures unique parent-child relationships: each triangulation (except the root) has exactly one parent obtained by flipping its generating chord. This defines a tree (not a DAG), preventing cycles and duplicates within a single face's triangulation space.
+
+Across faces, the recursive DFS exploration with backtracking ensures that each combination of face triangulations is explored exactly once. The global chord set $S$ is updated and restored correctly during backtracking, maintaining consistency.
+
+Therefore, the algorithm generates all valid triangulations exactly once.
+\end{proof}
+
+\section{Complexity Analysis}
+\label{sec:complexity}
+
+\subsection{Time Complexity}
+
+\begin{theorem}[Amortized Constant Time per Triangulation]
+\label{thm:time_complexity}
+The algorithm has amortized $O(1)$ time complexity per triangulation.
+\end{theorem}
+
+\begin{proof}
+Let the biconnected graph have $k$ faces with $n_1, n_2, \ldots, n_k$ vertices respectively. Each face $F_i$ has at least $O(n_i)$ triangulations (proven in Lemma~\ref{lem:min_triangulations}).
+
+\textbf{Building Time:}
+
+For face $F_i$ with $n_i$ vertices:
+\begin{itemize}
+    \item Finding a safe root: $O(n_i)$ time (Algorithm~\ref{alg:safe_root})
+    \item Constructing root triangulation: $O(n_i)$ time
+    \item Total building time: $B_i = O(n_i)$
+\end{itemize}
+
+\textbf{Total Triangulations:}
+
+The total number of complete graph triangulations is at least:
+\begin{align}
+T \geq \prod_{i=1}^{k} (n_i - 3) = \Omega\left(\prod_{i=1}^{k} n_i\right)
+\end{align}
+
+\textbf{Amortized Analysis:}
+
+The total building time across all faces and all recursive calls is:
+\begin{align}
+B_{\text{total}} &= \sum_{i=1}^{k} B_i \cdot \prod_{j=1}^{i-1} n_j \\
+&= B_1 + B_2 \cdot n_1 + B_3 \cdot n_1 \cdot n_2 + \cdots + B_k \cdot n_1 \cdot n_2 \cdots n_{k-1}
+\end{align}
+
+\textbf{Two-Face Analysis ($k = 2$):}
+
+For $k = 2$ faces:
+\begin{align}
+B_{\text{total}} &= n_1 + n_1 \cdot n_2 \\
+T &= n_1 \cdot n_2
+\end{align}
+
+Since $n_2 \geq 3$ (minimum cycle size):
+\begin{align}
+n_1 \cdot 1 &< n_1 \cdot n_2 \\
+n_1 + n_1 \cdot n_2 &< n_1 \cdot n_2 + n_1 \cdot n_2 \\
+B_{\text{total}} &< 2 \cdot n_1 \cdot n_2 = 2T
+\end{align}
+
+\textbf{Three-Face Analysis ($k = 3$):}
+
+For $k = 3$ faces with $n_1$, $n_2$, $n_3$ vertices:
+\begin{align}
+B_{\text{total}} &= n_1 + n_1 \cdot n_2 + n_1 \cdot n_2 \cdot n_3 \\
+T &= n_1 \cdot n_2 \cdot n_3
+\end{align}
+
+From the two-face case, we know: $n_1 + n_1 \cdot n_2 < 2 \cdot n_1 \cdot n_2$
+
+Therefore:
+\begin{align}
+B_{\text{total}} &< 2 \cdot n_1 \cdot n_2 + n_1 \cdot n_2 \cdot n_3
+\end{align}
+
+Since $n_3 \geq 3$, we have $2 < n_3$:
+\begin{align}
+2 \cdot n_1 \cdot n_2 &< n_1 \cdot n_2 \cdot n_3 \\
+B_{\text{total}} &< n_1 \cdot n_2 \cdot n_3 + n_1 \cdot n_2 \cdot n_3 \\
+&= 2T
+\end{align}
+
+\textbf{General Case (Induction):}
+
+\begin{lemma}[Building Time Bound]
+For any number of faces $k \geq 2$ where each face has at least 3 vertices:
+\begin{align}
+B_{\text{total}} < 2T
+\end{align}
+\end{lemma}
+
+\begin{proof}[Proof by Induction]
+\emph{Base case:} $k = 2$ is proven above.
+
+\emph{Inductive hypothesis:} Assume for $k - 1$ faces:
+\begin{align}
+n_1 + n_1 \cdot n_2 + \cdots + n_1 \cdot n_2 \cdots n_{k-1} < 2 \cdot n_1 \cdot n_2 \cdots n_{k-1}
+\end{align}
+
+\emph{Inductive step:} For $k$ faces:
+\begin{align}
+B_{\text{total}} &= n_1 + n_1 \cdot n_2 + \cdots + n_1 \cdot n_2 \cdots n_{k-1} + n_1 \cdot n_2 \cdots n_k \\
+&< 2 \cdot n_1 \cdot n_2 \cdots n_{k-1} + n_1 \cdot n_2 \cdots n_k \quad \text{(by hypothesis)}
+\end{align}
+
+Since $n_k \geq 3$:
+\begin{align}
+2 \cdot n_1 \cdot n_2 \cdots n_{k-1} &< n_1 \cdot n_2 \cdots n_{k-1} \cdot n_k \\
+B_{\text{total}} &< n_1 \cdot n_2 \cdots n_k + n_1 \cdot n_2 \cdots n_k \\
+&= 2 \cdot n_1 \cdot n_2 \cdots n_k = 2T
+\end{align}
+\end{proof}
+
+Including output time (constant per triangulation), the total time is $< 3T$, yielding amortized $O(1)$ time per triangulation.
+\end{proof}
+
+\begin{corollary}[Amortized Linear Time]
+For any biconnected planar graph with $k$ faces, the algorithm takes total time $< 3 \times (\text{number of triangulations})$. Therefore, the algorithm has amortized linear time complexity: $O(1)$ per triangulation, or $O(T)$ overall where $T$ is the total number of triangulations.
+\end{corollary}
+
+\begin{lemma}[Minimum Triangulation Count]
+\label{lem:min_triangulations}
+A face with $n$ vertices has at least $n - 3$ distinct triangulations.
 \end{lemma}
 
 \begin{proof}
-    We analyze the algorithm's behavior by considering the movement of pointers and the structure of blocking chords.
+By Theorem~\ref{thm:safe_root_exists}, every face has at least two safe root vertices $v_a$ and $v_c$. The $v_a$-root triangulation has all chords emanating from $v_a$, while the $v_c$-root triangulation has all chords from $v_c$.
 
-    \textbf{Termination:} Each iteration either increments $left$ or decrements $right$. Since $left$ starts at $0$ and $right$ starts at $n-2$, and we stop when $right - left \leq 1$, the algorithm terminates in at most $n-2$ steps.
+At most one chord $(v_a, v_c)$ can appear in both triangulations. All other $n - 4$ chords differ. Transforming one into the other via edge flips requires at least $n - 4$ flips, each producing a distinct valid triangulation.
 
-    \textbf{Correctness:} We prove that the final value of $left$ points to a safe root. Consider the final state where $left = k$ and the algorithm terminates.
-
-    \textit{Key Insight:} The algorithm's pointer movements encode information about the planarity structure. When we encounter a blocking chord $(v_l, v_r)$, moving $left$ forward means we are ``avoiding'' the vertex that would create multi-edges.
-
-    Let $r = v_k$ be the vertex at position $left$ when the algorithm terminates. We claim that $r$ is safe for triangulation.
-
-    \textit{Case Analysis:} Suppose, for contradiction, that $r$ is not safe. Then there exists some non-adjacent vertex $v_j$ such that edge $(r, v_j)$ already exists in the graph.
-
-    During the algorithm's execution, there must have been a step where $left = k$ and $right = j$ (or the algorithm would have detected this blocking chord). At that step, the algorithm would have found $(v_k, v_j)$ exists and moved $left$ forward, contradicting the fact that the algorithm terminated with $left = k$.
-
-    Therefore, no such blocking chord exists for $r$, making it a safe root. \qed
+Including the root: at least $n - 3$ triangulations exist.
 \end{proof}
 
-The key insight is that planarity constraints create natural ``barriers'' that limit where problematic edges can exist. The algorithm exploits this structure to efficiently navigate to a safe starting point.
+\subsection{Space Complexity}
 
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.3]
-        % Show planarity constraint visualization
-        \begin{scope}
-            % Face vertices
-            \node[circle,draw,fill=blue!20] (v1) at (0,0) {1};
-            \node[circle,draw,fill=blue!20] (v2) at (3,0) {2};
-            \node[circle,draw,fill=blue!20] (v3) at (4,2) {3};
-            \node[circle,draw,fill=blue!20] (v4) at (3,3.5) {4};
-            \node[circle,draw,fill=blue!20] (v5) at (0.5,3.5) {5};
-            \node[circle,draw,fill=blue!20] (v6) at (-0.5,1.5) {6};
-
-            % Face boundary
-            \draw[thick,blue] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
-
-            % External edge creating partition
-            \draw[red,very thick] (v1) to[bend left=50] (v4) node[midway,above] {external edge};
-
-            % Show partition regions
-            \fill[green!20,opacity=0.6] (0,0) -- (3,0) -- (4,2) -- (3,3.5) -- cycle;
-            \fill[yellow!20,opacity=0.6] (0,0) -- (-0.5,1.5) -- (0.5,3.5) -- (3,3.5) -- cycle;
-
-            \node[green,font=\bfseries] at (2.5,1.2) {Region A};
-            \node[green] at (2.5,0.8) {Vertices 2, 3};
-
-            \node[yellow,font=\bfseries] at (0.5,2.5) {Region B};
-            \node[yellow] at (0.5,2.1) {Vertices 5, 6};
-
-            % Show the barrier effect
-            \draw[red,thick,<->] (1.5,1.75) -- (1.5,1.75) node[above] {Planarity Barrier};
-            \draw[red,thick] (1,1.2) -- (2,2.3);
-            \node[red] at (1.8,3.8) {No vertex in Region A};
-            \node[red] at (1.8,4.2) {can connect to Region B};
-            \node[red] at (1.8,4.6) {outside the face!};
-
-            \node at (1.7,-1) {\textbf{Planarity creates natural partitions}};
-        \end{scope}
-    \end{tikzpicture}
-    \caption{How external edges create planarity barriers that limit problematic connections}
-\end{figure}
-
-\begin{theorem}[Safe Root Existence]
-    Every face with 4 or more vertices has at least one safe root.
+\begin{theorem}[Linear Space Complexity]
+\label{thm:space_complexity}
+The algorithm uses $O(n)$ space, where $n$ is the total number of vertices.
 \end{theorem}
 
 \begin{proof}
-    Let the vertices of the face $F$ in cyclic order be $v_0, v_1, v_2, \ldots, v_{n-1}$ where $n \geq 4$. A vertex $v_i$ is a safe root if, for every vertex $v_j$ non-adjacent to $v_i$ in $F$, the edge $(v_i, v_j)$ is not already present in the graph $G$.
-
-    We prove the existence of a safe root by contradiction, leveraging the planarity and biconnectivity of $G$.
-
-    \textbf{1. Assumption for Contradiction:}
-    Assume, for the sake of contradiction, that no vertex in $F$ is a safe root. This means that for every vertex $v_i \in F$, there exists at least one non-adjacent vertex $v_j$ such that the edge $(v_i, v_j)$ already exists in $G$.
-
-    \textbf{2. Identifying Problematic Edges:}
-    For each vertex $v_i$, identify one such "problematic" non-adjacent vertex $v_{k(i)}$ such that the edge $e_i = (v_i, v_{k(i)})$ exists in $G$. Since $v_i$ and $v_{k(i)}$ are non-adjacent in $F$, the edge $e_i$ must be a chord of the face $F$.
-
-    \textbf{3. Analyzing the Implied Structure:}
-    Consider the chord $e_0 = (v_0, v_j)$ for the starting vertex $v_0$ (where $j \notin \{n-1, 1\}$). This chord divides the face $F$ into two regions: $R_1$ (containing vertices $v_1, \ldots, v_{j-1}$) and $R_2$ (containing vertices $v_{j+1}, \ldots, v_{n-1}$).
-
-    \textbf{4. The Contradiction:}
-    Consider a vertex $v_r$ in $R_2$. By our assumption, it must have a chord $e_r = (v_r, v_s)$. If $v_s$ is in $R_1$, then the edge $e_r$ would cross the chord $e_0$, violating planarity. Therefore, all chords incident to vertices in $R_2$ must connect to other vertices in $R_2$.
-
-    This means the chord $e_0 = (v_0, v_j)$ acts as a separating pair. If we remove vertices $v_0$ and $v_j$, the graph becomes disconnected: vertices in $R_2$ are isolated from vertices in $R_1$ and the rest of the graph. This contradicts the biconnectivity of $G$.
-
-    \textbf{5. Conclusion:}
-    Our assumption leads to a violation of biconnectivity. Therefore, there must exist at least one safe root in face $F$. \qed
-\end{proof}
-
-\section{Complete Algorithm with Multi-Edge Detection}
-
-Now let's see how everything fits together in our complete algorithm.
-
-\subsection{Hash-Based Edge Management}
-
-We maintain a hash table to track all edges and detect multi-edges efficiently:
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.2]
-        % Show hash table concept
-        \begin{scope}
-            % Graph
-            \node[circle,draw] (A) at (0,2) {A};
-            \node[circle,draw] (B) at (2,2) {B};
-            \node[circle,draw] (C) at (2,0) {C};
-            \node[circle,draw] (D) at (0,0) {D};
-
-            \draw[thick,blue] (A) -- (B) -- (C) -- (D) -- (A);
-            \draw[thick,green] (A) -- (C);
-
-            \node at (1,-1) {\textbf{Current Graph}};
-        \end{scope}
-
-        % Hash table
-        \begin{scope}[xshift=5cm]
-            \draw[thick] (0,0) rectangle (3,3);
-            \node at (1.5,3.3) {\textbf{Hash Table}};
-
-            \node at (0.3,2.5) {(A,B)};
-            \node at (2.7,2.5) {\color{green}$\checkmark$};
-
-            \node at (0.3,2) {(B,C)};
-            \node at (2.7,2) {\color{green}$\checkmark$};
-
-            \node at (0.3,1.5) {(C,D)};
-            \node at (2.7,1.5) {\color{green}$\checkmark$};
-
-            \node at (0.3,1) {(D,A)};
-            \node at (2.7,1) {\color{green}$\checkmark$};
-
-            \node at (0.3,0.5) {(A,C)};
-            \node at (2.7,0.5) {\color{green}$\checkmark$};
-
-            \draw[gray] (0,2.3) -- (3,2.3);
-            \draw[gray] (0,1.8) -- (3,1.8);
-            \draw[gray] (0,1.3) -- (3,1.3);
-            \draw[gray] (0,0.8) -- (3,0.8);
-        \end{scope}
-
-        % Check operation
-        \begin{scope}[xshift=9cm]
-            \draw[thick] (0,1) rectangle (2.5,2.5);
-            \node at (1.25,3) {\textbf{Before Adding (B,D)}};
-
-            \node at (1.25,2) {Check: (B,D) in table?};
-            \node[green] at (1.25,1.5) {No → Safe to add};
-
-            \draw[->,thick,red] (1.25,0.5) -- (1.25,1);
-            \node[red] at (1.25,0.2) {O(1) lookup time};
-        \end{scope}
-    \end{tikzpicture}
-    \caption{Hash table efficiently tracks existing edges and detects multi-edge conflicts in O(1) time}
-\end{figure}
-
-\subsection{Complete Algorithm Flowchart}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[
-            node distance=1.5cm,
-            box/.style={rectangle, draw, fill=blue!20, text width=3cm, text centered, minimum height=1cm},
-            decision/.style={diamond, draw, fill=yellow!20, text width=2.5cm, text centered, minimum height=1cm},
-            arrow/.style={->,>=stealth,thick}
-        ]
-
-        \node[box] (start) {Start: Input biconnected plane graph};
-        \node[box, below of=start] (preprocess) {Preprocessing: Extract faces, build hash table};
-        \node[box, below of=preprocess] (findface) {Find face with $\geq 4$ vertices};
-        \node[decision, below of=findface] (hasface) {Face found?};
-        \node[box, right of=hasface, xshift=3cm] (done) {Done: All faces triangulated};
-        \node[box, below of=hasface, yshift=-0.5cm] (findsafe) {Run safe root algorithm};
-        \node[box, below of=findsafe] (triangulate) {Triangulate from safe root};
-        \node[decision, below of=triangulate] (multiedge) {Multi-edge detected?};
-        \node[box, left of=multiedge, xshift=-3cm] (backtrack) {Backtrack: Try different approach};
-        \node[box, below of=multiedge, yshift=-0.5cm] (generate) {Generate triangulation};
-        \node[box, below of=generate] (output) {Output triangulation};
-
-        \draw[arrow] (start) -- (preprocess);
-        \draw[arrow] (preprocess) -- (findface);
-        \draw[arrow] (findface) -- (hasface);
-        \draw[arrow] (hasface) -- node[above] {No} (done);
-        \draw[arrow] (hasface) -- node[right] {Yes} (findsafe);
-        \draw[arrow] (findsafe) -- (triangulate);
-        \draw[arrow] (triangulate) -- (multiedge);
-        \draw[arrow] (multiedge) -- node[above] {Yes} (backtrack);
-        \draw[arrow] (backtrack) |- (findsafe);
-        \draw[arrow] (multiedge) -- node[right] {No} (generate);
-        \draw[arrow] (generate) -- (output);
-        \draw[arrow] (output.south) -| node[below] {Continue} (findface.south);
-
-    \end{tikzpicture}
-    \caption{Complete algorithm flowchart showing the main steps and decision points}
-\end{figure}
-
-\section{Performance Analysis with Visual Examples}
-
-\subsection{Time Complexity Breakdown}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}
-        % Timeline showing algorithm phases
-        \draw[thick,->] (0,0) -- (12,0) node[right] {Time};
-
-        % Preprocessing phase
-        \draw[blue,thick] (1,0) -- (1,2);
-        \draw[blue,thick] (3,0) -- (3,2);
-        \draw[blue,fill=blue!20] (1,0) rectangle (3,2);
-        \node[blue] at (2,1) {\textbf{Preprocessing}};
-        \node[blue] at (2,0.5) {O(n) time};
-        \node[blue] at (2,1.5) {Once per graph};
-
-        % Generation phase
-        \draw[green,thick] (4,0) -- (4,1.5);
-        \draw[green,thick] (11,0) -- (11,1.5);
-        \draw[green,fill=green!20] (4,0) rectangle (11,1.5);
-        \node[green] at (7.5,0.75) {\textbf{Triangulation Generation}};
-        \node[green] at (7.5,0.25) {O(1) time per triangulation};
-
-        % Individual triangulations
-        \foreach \x in {4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5} {
-                \draw[red] (\x,0.1) -- (\x,1.4);
-            }
-        \node[red] at (7.5,-0.8) {Each bar = one triangulation generated in O(1) time};
-
-        % Labels
-        \node at (2,-1.5) {Setup phase};
-        \node at (7.5,-1.5) {Output generation phase};
-
-    \end{tikzpicture}
-    \caption{Timeline showing O(n) preprocessing followed by O(1) time per triangulation}
-\end{figure}
-
-\subsection{Space Usage Visualization}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.1]
-        % Memory usage diagram
-        \draw[thick] (0,0) rectangle (10,4);
-        \node at (5,4.3) {\textbf{Memory Layout - O(n) Total Space}};
-
-        % Hash table
-        \draw[fill=blue!30] (0.5,0.5) rectangle (4,3.5);
-        \node[blue] at (2.25,2) {\textbf{Hash Table}};
-        \node[blue] at (2.25,1.5) {Edges: O(n)};
-        \node[blue] at (2.25,1) {Fast lookup};
-
-        % Face data
-        \draw[fill=green!30] (4.5,0.5) rectangle (7,3.5);
-        \node[green] at (5.75,2) {\textbf{Face Data}};
-        \node[green] at (5.75,1.5) {Vertices: O(n)};
-        \node[green] at (5.75,1) {Safe roots};
-
-        % Working space
-        \draw[fill=yellow!30] (7.5,0.5) rectangle (9.5,3.5);
-        \node[yellow] at (8.5,2) {\textbf{Working}};
-        \node[yellow] at (8.5,1.5) {\textbf{Space}};
-        \node[yellow] at (8.5,1) {O(1)};
-
-        % Growth arrows
-        \draw[->,thick,red] (2.25,-0.8) -- (2.25,-0.3);
-        \draw[->,thick,red] (5.75,-0.8) -- (5.75,-0.3);
-        \node[red] at (4,-1.2) {Grows with n};
-
-        \draw[->,thick,green] (8.5,-0.8) -- (8.5,-0.3);
-        \node[green] at (8.5,-1.2) {Constant};
-    \end{tikzpicture}
-    \caption{Memory usage breakdown - total space remains O(n) regardless of output size}
-\end{figure}
-
-\section{Comprehensive Experimental Results}
-
-\subsection{Performance Comparison Chart}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}
-        \begin{axis}[
-                title={\textbf{Triangulations Generated Per Second}},
-                xlabel={Number of Vertices},
-                ylabel={Triangulations/Second},
-                xmin=4, xmax=20,
-                ymin=0, ymax=80000,
-                xtick={4,6,8,10,12,14,16,18,20},
-                ytick={0,20000,40000,60000,80000},
-                legend pos=north east,
-                ymajorgrids=true,
-                grid style=dashed,
-                width=12cm,
-                height=8cm
-            ]
-
-            \addplot[
-                color=blue,
-                mark=square,
-                thick,
-                mark size=4pt
-            ] coordinates {
-                    (4,75000)
-                    (6,42000)
-                    (8,28000)
-                    (10,22000)
-                    (12,18500)
-                    (14,15800)
-                    (16,13400)
-                    (18,11900)
-                    (20,10800)
-                };
-            
-
-            \addplot[
-                color=red,
-                mark=triangle,
-                thick,
-                mark size=4pt,
-                dashed
-            ] coordinates {
-                    (4,25000)
-                    (6,12000)
-                    (8,5500)
-                    (10,2800)
-                    (12,1200)
-                    (14,500)
-                    (16,200)
-                    (18,80)
-                    (20,30)
-                };
-            
-
-        \end{axis}
-    \end{tikzpicture}
-    \caption{Performance comparison showing consistent high-speed generation}
-\end{figure}
-
-\subsection{Detailed Results Table with Correctness Verification}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}
-        % Create a detailed results table
-        \node at (0,0) {
-            \begin{tabular}{|c|c|c|c|c|c|}
-                \hline
-                \textbf{Vertices} & \textbf{Avg \#}         & \textbf{Generation}     & \textbf{Preprocessing} & \textbf{Memory} & \textbf{Correctness} \\
-                \textbf{(n)}      & \textbf{Triangulations} & \textbf{Rate (per sec)} & \textbf{Time (ms)}     & \textbf{(KB)}   & \textbf{Verified}    \\
-                \hline
-                4                 & 2.1                     & 75,000                  & 0.08                   & 0.8             & 100\%                \\
-                \hline
-                6                 & 8.3                     & 42,000                  & 0.19                   & 1.2             & 100\%                \\
-                \hline
-                8                 & 42.7                    & 28,000                  & 0.35                   & 1.9             & 100\%                \\
-                \hline
-                10                & 183.2                   & 22,000                  & 0.67                   & 2.8             & 100\%                \\
-                \hline
-                12                & 694.5                   & 18,500                  & 1.2                    & 3.9             & 100\%                \\
-                \hline
-                14                & 2,341.8                 & 15,800                  & 2.1                    & 5.2             & 100\%                \\
-                \hline
-                16                & 7,203.4                 & 13,400                  & 3.8                    & 6.8             & 99.9\%               \\
-                \hline
-                18                & 19,584.7                & 11,900                  & 6.7                    & 8.7             & 99.8\%               \\
-                \hline
-                20                & 48,239.1                & 10,800                  & 11.2                   & 11.1            & 99.7\%               \\
-                \hline
-            \end{tabular}
-        };
-
-        % Add visual indicators
-        \draw[green,thick] (-3.5,-4) -- (3.5,-4);
-        \node[green] at (0,-4.5) {High correctness maintained across all sizes};
-
-        \draw[blue,thick] (-3.5,3.5) -- (3.5,3.5);
-        \node[blue] at (0,4) {Consistent performance scaling};
-    \end{tikzpicture}
-    \caption{Comprehensive experimental results (averaged over 100 instances per vertex count)}
-\end{figure}
-
-\section{Real-World Applications}
-
-\subsection{Finite Element Mesh Generation}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.2]
-        % Show application to mesh generation
-        \begin{scope}
-            % Original domain
-            \draw[thick,blue] (0,0) -- (3,0) -- (3.5,1.5) -- (2.5,3) -- (0.5,3) -- (-0.5,1.5) -- cycle;
-            \node at (1.5,-0.8) {\textbf{Original Domain}};
-            \node at (1.5,-1.2) {Complex shape to analyze};
-        \end{scope}
-
-        \begin{scope}[xshift=5cm]
-            % Triangulated mesh
-            \draw[thick,blue] (0,0) -- (3,0) -- (3.5,1.5) -- (2.5,3) -- (0.5,3) -- (-0.5,1.5) -- cycle;
-
-            % Internal triangulation
-            \draw[red] (1.5,1.5) -- (0,0);
-            \draw[red] (1.5,1.5) -- (3,0);
-            \draw[red] (1.5,1.5) -- (3.5,1.5);
-            \draw[red] (1.5,1.5) -- (2.5,3);
-            \draw[red] (1.5,1.5) -- (0.5,3);
-            \draw[red] (1.5,1.5) -- (-0.5,1.5);
-
-            \node[circle,draw,fill=red!30] at (1.5,1.5) {C};
-
-            \node at (1.5,-0.8) {\textbf{Triangulated Mesh}};
-            \node at (1.5,-1.2) {Ready for finite element analysis};
-        \end{scope}
-
-        % Benefits
-        \node at (2.5,-2.5) {\textbf{Benefits of Complete Enumeration:}};
-        \node at (2.5,-3) {• Find optimal mesh quality};
-        \node at (2.5,-3.4) {• Compare different triangulations};
-        \node at (2.5,-3.8) {• Choose best for specific physics};
-    \end{tikzpicture}
-    \caption{Application to finite element mesh generation - finding the best triangulation}
-\end{figure}
-
-\subsection{VLSI Chip Layout Optimization}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.1]
-        % Show chip layout application
-        \begin{scope}
-            % Chip outline
-            \draw[thick] (0,0) rectangle (4,3);
-
-            % Components
-            \draw[fill=blue!30] (0.5,0.5) rectangle (1.5,1.5);
-            \node at (1,1) {CPU};
-
-            \draw[fill=green!30] (2,0.5) rectangle (3.5,1);
-            \node at (2.75,0.75) {Memory};
-
-            \draw[fill=yellow!30] (2,1.5) rectangle (3.5,2.5);
-            \node at (2.75,2) {Cache};
-
-            \draw[fill=red!30] (0.5,2) rectangle (1.5,2.5);
-            \node at (1,2.25) {I/O};
-
-            \node at (2,-0.8) {\textbf{Chip Components}};
-        \end{scope}
-
-        \begin{scope}[xshift=6cm]
-            % Triangulated layout
-            \draw[thick] (0,0) rectangle (4,3);
-
-            % Same components
-            \draw[fill=blue!30] (0.5,0.5) rectangle (1.5,1.5);
-            \node at (1,1) {\tiny CPU};
-
-            \draw[fill=green!30] (2,0.5) rectangle (3.5,1);
-            \node at (2.75,0.75) {\tiny Memory};
-
-            \draw[fill=yellow!30] (2,1.5) rectangle (3.5,2.5);
-            \node at (2.75,2) {\tiny Cache};
-
-            \draw[fill=red!30] (0.5,2) rectangle (1.5,2.5);
-            \node at (1,2.25) {\tiny I/O};
-
-            % Triangulation for routing
-            \draw[purple,dashed] (1,1) -- (2.75,0.75);
-            \draw[purple,dashed] (1,1) -- (2.75,2);
-            \draw[purple,dashed] (1,2.25) -- (2.75,2);
-            \draw[purple,dashed] (1,2.25) -- (2.75,0.75);
-
-            \node at (2,-0.8) {\textbf{Routing Triangulation}};
-            \node[purple] at (2,-1.2) {Purple: optimal wire paths};
-        \end{scope}
-    \end{tikzpicture}
-    \caption{VLSI application - triangulation helps find optimal component connections}
-\end{figure}
-
-\section{Limitations and Future Work}
-
-\subsection{Current Limitations}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}
-        % Scalability chart
-        \begin{axis}[
-                title={\textbf{Exponential Growth Challenge}},
-                xlabel={Number of Vertices},
-                ylabel={Number of Triangulations (log scale)},
-                ymode=log,
-                xmin=4, xmax=25,
-                ymin=1, ymax=1000000,
-                xtick={4,6,8,10,12,14,16,18,20,22,24},
-                legend pos=north west,
-                ymajorgrids=true,
-                grid style=dashed,
-                width=12cm,
-                height=8cm
-            ]
-
-            \addplot[
-                color=red,
-                mark=square,
-                thick,
-                mark size=4pt
-            ] coordinates {
-                    (4,2)
-                    (6,8)
-                    (8,43)
-                    (10,183)
-                    (12,695)
-                    (14,2342)
-                    (16,7203)
-                    (18,19585)
-                    (20,48239)
-                    (22,115000)
-                    (24,270000)
-                };
-
-            % Mark practical limit
-            \draw[blue,thick,dashed] (axis cs:22,1) -- (axis cs:22,1000000);
-            \node[blue] at (axis cs:18,100000) {Practical limit};
-            \node[blue] at (axis cs:18,50000) {around 20-25 vertices};
-
-        \end{axis}
-    \end{tikzpicture}
-    \caption{Exponential growth in number of triangulations limits practical applicability}
-\end{figure}
-
-\subsection{Future Research Directions}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[
-            box/.style={rectangle, draw, fill=blue!20, text width=2.8cm, text centered, minimum height=2cm},
-            arrow/.style={->,>=stealth,thick}
-        ]
-
-        % Current algorithm
-        \node[box,fill=green!30] (current) at (0,0) {\textbf{Current Algorithm}\\Complete enumeration\\O(1) per triangulation};
-
-        % Future directions
-        \node[box] (parallel) at (-3,4) {\textbf{Parallel Processing}\\Multi-core generation\\Genealogical tree partitioning};
-
-        \node[box] (approx) at (0,4) {\textbf{Approximation Methods}\\Find good triangulations\\Skip exhaustive search};
-
-        \node[box] (quality) at (3,4) {\textbf{Quality Metrics}\\Geometric optimization\\Application-specific ranking};
-
-        \node[box] (dynamic) at (-3,-4) {\textbf{Dynamic Updates}\\Handle graph changes\\Incremental triangulation};
-
-        \node[box] (larger) at (0,-4) {\textbf{Larger Graphs}\\Hierarchical decomposition\\Divide and conquer};
-
-        \node[box] (ml) at (3,-4) {\textbf{Machine Learning}\\Smart triangulation selection\\Pattern recognition};
-
-        % Arrows
-        \draw[arrow,blue] (current) -- (parallel);
-        \draw[arrow,blue] (current) -- (approx);
-        \draw[arrow,blue] (current) -- (quality);
-        \draw[arrow,blue] (current) -- (dynamic);
-        \draw[arrow,blue] (current) -- (larger);
-        \draw[arrow,blue] (current) -- (ml);
-
-    \end{tikzpicture}
-    \caption{Future research directions building on our foundational algorithm}
-\end{figure}
-
-\section{Conclusion}
-
-\subsection{Summary of Contributions}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[scale=1.1]
-        % Visual summary of contributions
-        \draw[thick] (0,0) rectangle (12,8);
-        \node at (6,8.3) {\textbf{Key Contributions Summary}};
-
-        % Contribution 1: Safe Root Theory
-        \draw[fill=blue!20] (0.5,6.5) rectangle (5.5,7.5);
-        \node[blue] at (3,7) {\textbf{1. Safe Root Discovery Algorithm}};
-        \draw[blue,thick] (1,6) -- (5,6);
-        \node at (3,5.5) {O(n) two-pointer method};
-        \node at (3,5.1) {Guaranteed to find safe starting vertex};
-
-        % Contribution 2: Multi-edge handling
-        \draw[fill=green!20] (6.5,6.5) rectangle (11.5,7.5);
-        \node[green] at (9,7) {\textbf{2. Multi-Edge Prevention}};
-        \draw[green,thick] (7,6) -- (11,6);
-        \node at (9,5.5) {Hash-based detection};
-        \node at (9,5.1) {Maintains completeness guarantee};
-
-        % Contribution 3: Performance
-        \draw[fill=yellow!20] (0.5,3.5) rectangle (5.5,4.5);
-        \node[orange] at (3,4) {\textbf{3. Optimal Performance}};
-        \draw[orange,thick] (1,3) -- (5,3);
-        \node at (3,2.5) {O(1) time per triangulation};
-        \node at (3,2.1) {O(n) space complexity};
-
-        % Contribution 4: Practical impact
-        \draw[fill=red!20] (6.5,3.5) rectangle (11.5,4.5);
-        \node[purple] at (9,4) {\textbf{4. Real-World Applications}};
-        \draw[purple,thick] (7,3) -- (11,3);
-        \node at (9,2.5) {Mesh generation, VLSI design};
-        \node at (9,2.1) {Validated on realistic problems};
-
-        % Overall impact
-        \draw[thick,green] (2,0.5) rectangle (10,1.5);
-        \node[green,font=\bfseries] at (6,1) {First complete O(1) triangulation algorithm};
-        \node[green] at (6,0.6) {with multi-edge prevention and theoretical guarantees};
-
-    \end{tikzpicture}
-    \caption{Visual summary of the four main contributions of this work}
-\end{figure}
-
-Our algorithm represents a significant advance in computational geometry. We have shown that:
-
-\begin{enumerate}
-    \item \textbf{The safe root problem can be solved efficiently}: Our two-pointer algorithm finds safe starting vertices in O(n) time with mathematical guarantees.
-
-    \item \textbf{Multi-edge detection is practical}: Hash-based edge tracking prevents invalid triangulations while maintaining completeness.
-
-    \item \textbf{Optimal per-triangulation performance is achievable}: O(1) time per output makes enumeration practical for real applications.
-
-    \item \textbf{Real-world problems can benefit}: Applications in mesh generation and VLSI design validate the practical utility of complete triangulation enumeration.
-\end{enumerate}
-
-\subsection{Impact and Significance}
-
-This work opens the door to new applications where complete triangulation enumeration was previously impractical. The combination of theoretical rigor and practical performance makes it possible to:
-
+The algorithm stores:
 \begin{itemize}
-    \item Find optimal triangulations for specific quality metrics
-    \item Analyze geometric properties across all possible triangulations
-    \item Build more sophisticated mesh generation algorithms
-    \item Enable exhaustive search in chip layout optimization
+    \item Vertex information for all faces: $O(n)$
+    \item Global chord set $S$: A planar graph has at most $3n - 6$ edges, so $O(n)$ chords
+    \item Recursion stack depth: $O(k)$ where $k$ is the number of faces, and $k \leq n$
+    \item Current triangulation chords: $O(n)$
 \end{itemize}
 
-While exponential growth still limits scalability to graphs with 20-25 vertices, this range covers many important practical problems and provides a solid foundation for future approximation algorithms.
+Total space: $O(n)$.
+\end{proof}
+
+\section{Implementation and Experimental Results}
+\label{sec:implementation}
+
+We implemented the algorithm in Python, with comprehensive testing on various biconnected plane graphs. The implementation is available at \url{https://github.com/TAR2003/ThesisGraph}.
+
+\subsection{Implementation Details}
+
+Key implementation aspects include:
+\begin{itemize}
+    \item \textbf{Face Representation:} Each face is stored as a list of vertices in counterclockwise order
+    \item \textbf{Global Chord Set:} Implemented using a hash set for $O(1)$ lookup and insertion
+    \item \textbf{Triangulation Representation:} Each triangulation is a set of chords (vertex pairs)
+    \item \textbf{Edge Flipping:} Efficiently computed by identifying the generating chord and its adjacent triangles
+    \item \textbf{Canonical Form:} Each triangulation is stored in a canonical form (sorted chord list) to facilitate duplicate detection and verification
+\end{itemize}
+
+\subsection{DFS Exploration Tree Structure}
+
+The algorithm explores triangulations using a depth-first search (DFS) tree where:
+
+\begin{itemize}
+    \item \textbf{Level 0:} Root node (no faces processed yet)
+    \item \textbf{Level $i$ ($1 \leq i \leq k$):} Nodes represent partial triangulations where faces $F_1, \ldots, F_i$ are triangulated
+    \item \textbf{Level $k$:} Leaf nodes represent complete triangulations (all faces processed)
+\end{itemize}
+
+At each level $i$, the algorithm:
+\begin{enumerate}
+    \item Finds a safe root vertex for face $F_i$
+    \item Constructs the root triangulation
+    \item Explores the local genealogical tree of face $F_i$ via DFS
+    \item For each triangulation of $F_i$, recursively processes face $F_{i+1}$
+    \item Backtracks by removing chords from the global set
+\end{enumerate}
+
+This creates a multi-level tree where each path from root to leaf represents one complete triangulation of the entire graph.
+
+\subsection{GlobalChordSet Management}
+
+The GlobalChordSet $S$ plays a crucial role in preventing multi-edge creation:
+
+\begin{itemize}
+    \item \textbf{Initialization:} $S = \emptyset$ before processing any face
+    \item \textbf{Addition:} When exploring a triangulation $T$ of face $F_i$, add all chords of $T$ to $S$
+    \item \textbf{Checking:} Before adding any chord, verify it does not already exist in $S$
+    \item \textbf{Removal:} After processing all descendants (backtracking), remove chords of $T$ from $S$
+    \item \textbf{Restoration:} This ensures correct state for exploring alternative triangulations
+\end{itemize}
+
+The dynamic addition and removal of chords during DFS ensures that $S$ always contains exactly the chords from the current path in the exploration tree, enabling efficient conflict detection.
+
+\subsection{Test Cases}
+
+We tested the algorithm on various graph structures:
+\begin{itemize}
+    \item \textbf{Simple polygons:} Triangle, square, pentagon, hexagon, heptagon, octagon, nonagon
+    \item \textbf{Biconnected graphs with 2 faces:} Various configurations including bow-tie, double-square patterns
+    \item \textbf{Complex biconnected structures:} Graphs with 3+ faces sharing edges
+    \item \textbf{Graphs with varying connectivity:} From minimal biconnected to near-triconnected graphs
+    \item \textbf{Degenerate cases:} Graphs with many pre-existing chords from the input
+    \item \textbf{Stress tests:} Large graphs with dozens of vertices and multiple faces
+\end{itemize}
+
+Example test inputs from our test suite:
+\begin{itemize}
+    \item \textbf{Hexagon:} Single 6-vertex cycle, expected: 14 triangulations
+    \item \textbf{Bow-tie:} Two squares sharing a vertex, 2 faces
+    \item \textbf{Double-square:} Two squares sharing an edge, 2 faces
+    \item \textbf{Complex wheel:} Hub vertex connected to outer cycle with 5 spokes
+\end{itemize}
+
+\subsection{Performance Results}
+
+Experimental results confirm the theoretical analysis:
+\begin{itemize}
+    \item \textbf{Completeness:} All triangulations were generated without duplicates (verified by exhaustive enumeration for small instances and canonical form checking for larger instances)
+    \item \textbf{Efficiency:} Average time per triangulation remained constant as graph size increased, confirming $O(1)$ amortized time
+    \item \textbf{Scalability:} The algorithm successfully handled graphs with dozens of vertices and multiple faces, generating thousands of triangulations efficiently
+    \item \textbf{Memory usage:} Linear space complexity confirmed—memory usage scaled linearly with the number of vertices
+    \item \textbf{Safe root finding:} Always found safe root vertices in $O(n)$ time, with most faces having multiple safe root options
+\end{itemize}
+
+\subsection{Verification and Validation}
+
+To ensure correctness, we implemented several validation mechanisms:
+
+\begin{enumerate}
+    \item \textbf{Triangulation Validity:} Each output is verified to be a valid triangulation (all faces are triangles, no crossing chords)
+    \item \textbf{Duplicate Detection:} Hash-based duplicate detection confirms no triangulation is output twice
+    \item \textbf{Completeness Checking:} For small graphs, we compare output count with known theoretical bounds
+    \item \textbf{Multi-edge Detection:} Verify that no multi-edges exist in any output triangulation
+    \item \textbf{Planarity Verification:} Confirm all generated triangulations maintain planarity
+\end{enumerate}
+
+All tests passed successfully, confirming the algorithm's correctness and efficiency.
+
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+We have presented the first algorithm for generating all triangulations of biconnected plane graphs with constant amortized time complexity. Our algorithm extends the elegant tree-of-triangulations framework of Parvez, Rahman, and Nakano~\cite{parvez2011} from triconnected to biconnected graphs by introducing safe root selection and local genealogical trees.
+
+\subsection{Key Achievements}
+
+\begin{enumerate}
+\item \textbf{Theoretical Foundation:} We have provided rigorous proofs establishing:
+    \begin{itemize}
+        \item Existence of at least two safe root vertices in every face (Theorem~\ref{thm:safe_root_exists})
+        \item Completeness of the algorithm without duplications (Theorem~\ref{thm:completeness})
+        \item Amortized $O(1)$ time complexity per triangulation (Theorem~\ref{thm:time_complexity})
+        \item Linear $O(n)$ space complexity (Theorem~\ref{thm:space_complexity})
+    \end{itemize}
+
+\item \textbf{Practical Algorithm:} Efficient implementation suitable for real-world applications with extensive experimental validation
+
+\item \textbf{Novel Techniques:} Safe root selection and global chord management strategies that can extend to other enumeration problems involving planar graph decompositions
+
+\item \textbf{Broader Applicability:} Extension from triconnected to the more general class of biconnected plane graphs, significantly expanding the scope of graphs that can be processed efficiently
+\end{enumerate}
+
+\subsection{Theoretical Significance}
+
+This work makes several theoretical contributions:
+
+\begin{itemize}
+    \item \textbf{Generalization:} We show that constant-time triangulation enumeration is achievable beyond the restrictive triconnected case
+    \item \textbf{Multi-edge Resolution:} Our safe root concept provides a general strategy for handling chord conflicts in face-decomposed planar graphs
+    \item \textbf{Amortized Analysis:} The detailed amortized analysis demonstrates that building time is dominated by output size even with complex face interactions
+    \item \textbf{Structural Insights:} The $T_m$ structure analysis reveals fundamental properties of planar graph faces under chord constraints
+\end{itemize}
+
+\subsection{Future Directions}
+
+Several promising research directions remain:
+
+\begin{enumerate}
+\item \textbf{General Planar Graphs:} Extend the algorithm to simply connected (but not biconnected) planar graphs by handling cut vertices. This would require decomposing the graph at cut vertices and combining triangulations across components.
+
+\item \textbf{Constrained Triangulations:} Generate triangulations satisfying additional constraints such as:
+    \begin{itemize}
+        \item Minimum angle constraints (for quality mesh generation)
+        \item Delaunay property (empty circle criterion)
+        \item Weight minimization (for optimal triangulations)
+        \item Forbidden edge constraints
+    \end{itemize}
+
+\item \textbf{Parallel Enumeration:} Exploit the tree structure for parallel generation of triangulations. The local genealogical trees for different faces can potentially be explored in parallel, with synchronization on the global chord set.
+
+\item \textbf{Applications:} Apply the algorithm to:
+    \begin{itemize}
+        \item Mesh generation for finite element analysis
+        \item VLSI layout and floorplanning optimization
+        \item Graph visualization and aesthetic drawing
+        \item Computational origami and folding patterns
+        \item Computational biology (protein structure analysis)
+    \end{itemize}
+
+\item \textbf{Unlabeled Triangulations:} Extend to generate unlabeled triangulations modulo graph isomorphism, reducing redundancy for symmetric graphs
+
+\item \textbf{Counting Triangulations:} Develop efficient algorithms for \emph{counting} (without enumerating) all triangulations, potentially using dynamic programming on the face structure
+
+\item \textbf{Random Sampling:} Design algorithms for uniformly random sampling from the space of all triangulations, useful for probabilistic analysis and Monte Carlo methods
+
+\item \textbf{Dynamic Triangulation:} Investigate online algorithms that maintain the set of triangulations under graph modifications (edge/vertex additions/deletions)
+\end{enumerate}
+
+\subsection{Impact}
+
+This work contributes to the theoretical understanding of planar graph triangulations and provides a practical tool for computational geometry applications. By solving the multi-edge problem inherent in biconnected graphs, we have broadened the applicability of constant-time triangulation enumeration beyond the restrictive triconnected case.
+
+The safe root vertex concept and local genealogical tree structure introduced here may find applications in other graph enumeration problems where global constraints must be maintained across local decompositions. The techniques developed for managing the global chord set during recursive exploration are applicable to any decomposition-based enumeration algorithm.
+
+\subsection{Open Problems}
+
+We conclude by highlighting several open questions:
+
+\begin{enumerate}
+    \item What is the exact number of safe root vertices in a face as a function of its size and the number of constraining chords?
+    \item Can the safe root finding algorithm be improved to $o(n)$ time through preprocessing or advanced data structures?
+    \item Is there a closed-form formula for the number of triangulations of a biconnected graph given its face structure?
+    \item Can the algorithm be adapted to non-planar graphs with a fixed embedding on other surfaces (torus, projective plane)?
+\end{enumerate}
 
 \section*{Acknowledgments}
 
-We thank the anonymous reviewers for their constructive feedback and suggestions that improved the clarity and presentation of this work. We also acknowledge the computational resources provided by [Institution Name] that made extensive experimental validation possible.
+The author gratefully acknowledges the foundational work of Mohammad Tanvir Parvez, Md. Saidur Rahman, and Shin-ichi Nakano, whose elegant algorithm for triconnected plane graphs inspired this research. Special thanks to the faculty and students at the Department of Computer Science and Engineering, Bangladesh University of Engineering and Technology (BUET), for their valuable feedback and support.
 
-% Note: You would need to create a references.bib file with your actual citations
-% Here are some example entries for common citations in computational geometry:
-
-\begin{thebibliography}{10}
-
-    \bibitem{avis1996reverse}
-    David Avis and Komei Fukuda.
-    \newblock Reverse search for enumeration.
-    \newblock \emph{Discrete Applied Mathematics}, 65(1-3):21--46, 1996.
-
-    \bibitem{bose1999generating}
-    Prosenjit Bose and Ferran Hurtado.
-    \newblock Flips in planar graphs.
-    \newblock \emph{Computational Geometry}, 12(3-4):113--140, 1999.
-
-    \bibitem{de2008computational}
-    Mark de Berg, Otfried Cheong, Marc van Kreveld, and Mark Overmars.
-    \newblock \emph{Computational Geometry: Algorithms and Applications}.
-    \newblock Springer, 3rd edition, 2008.
-
-    \bibitem{eppstein1999triangulating}
-    David Eppstein.
-    \newblock Triangulating polygons without large angles.
-    \newblock \emph{International Journal of Computational Geometry \& Applications}, 9(4-5):471--487, 1999.
-
-    \bibitem{lawson1977software}
-    Charles L. Lawson.
-    \newblock Software for $C^1$ surface interpolation.
-    \newblock In John R. Rice, editor, \emph{Mathematical Software III}, pages 161--194. Academic Press, 1977.
-
-    \bibitem{nakano2001efficient}
-    Shin-ichi Nakano.
-    \newblock Efficient generation of plane triangulations without repetitions.
-    \newblock \emph{International Journal of Computational Geometry \& Applications}, 11(1):1--14, 2001.
-
-    \bibitem{preparata1985computational}
-    Franco P. Preparata and Michael Ian Shamos.
-    \newblock \emph{Computational Geometry: An Introduction}.
-    \newblock Springer-Verlag, 1985.
-
-    \bibitem{parvez2011generating}
-    Md. Saidur Rahman, Shin-ichi Nakano, and Takao Nishizeki.
-    \newblock A linear algorithm for bend-optimal orthogonal drawings of triconnected cubic plane graphs.
-    \newblock \emph{Journal of Graph Algorithms and Applications}, 15(2):133--167, 2011.
-
-    \bibitem{shewchuk1996triangle}
-    Jonathan Richard Shewchuk.
-    \newblock Triangle: Engineering a 2D quality mesh generator and Delaunay triangulator.
-    \newblock In Ming C. Lin and Dinesh Manocha, editors, \emph{Applied Computational Geometry Towards Geometric Engineering}, pages 203--222. Springer, 1996.
-
-    \bibitem{tamassia1989handbook}
-    Roberto Tamassia, editor.
-    \newblock \emph{Handbook of Graph Drawing and Visualization}.
-    \newblock CRC Press, 2013.
-
-\end{thebibliography}
-
-\appendix
-
-\section{Implementation Details}
-
-\subsection{Data Structures}
-
-Our implementation uses the following key data structures:
-
-\begin{verbatim}
-// Hash table for edge detection
-struct EdgeHash {
-    unordered_set<pair<int,int>> edges;
-    bool contains(int u, int v) { 
-        return edges.count({min(u,v), max(u,v)}) > 0; 
-    }
-    void insert(int u, int v) { 
-        edges.insert({min(u,v), max(u,v)}); 
-    }
-};
-
-// Face representation
-struct Face {
-    vector<int> vertices;  // vertices in order around face
-    int findSafeRoot();    // returns index of safe root
-};
-
-// Main triangulation generator
-class TriangulationGenerator {
-    EdgeHash edgeTable;
-    vector<Face> faces;
-    void generateFromRoot(int faceId, int rootId);
-};
-\end{verbatim}
-
-\subsection{Safe Root Algorithm Implementation}
-
-\begin{verbatim}
-int Face::findSafeRoot() {
-    int n = vertices.size();
-    if (n < 4) return -1;  // Cannot triangulate
-    
-    int left = 0, right = n - 2;
-    
-    while (right - left > 1) {
-        int u = vertices[left];
-        int v = vertices[right];
-        
-        if (edgeTable.contains(u, v)) {
-            left++;  // Edge exists, try next left vertex
-        } else {
-            right--; // Edge safe, try next right vertex  
-        }
-    }
-    
-    return left;  // Safe root found
-}
-\end{verbatim}
-
-\subsection{Performance Optimization Notes}
-
-\begin{itemize}
-    \item Use fast hash functions for edge lookup (e.g., polynomial rolling hash)
-    \item Implement face adjacency lists for efficient face traversal
-    \item Use memory pools to avoid frequent allocation/deallocation
-    \item Consider parallel processing for independent subproblems
-\end{itemize}
-
-\section{Additional Experimental Data}
-
-\subsection{Memory Usage Analysis}
-
-\begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}
-        \begin{axis}[
-                title={\textbf{Memory Usage vs Graph Size}},
-                xlabel={Number of Vertices},
-                ylabel={Memory Usage (KB)},
-                xmin=4, xmax=20,
-                ymin=0, ymax=15,
-                xtick={4,6,8,10,12,14,16,18,20},
-                ytick={0,3,6,9,12,15},
-                legend pos=north west,
-                ymajorgrids=true,
-                grid style=dashed,
-                width=10cm,
-                height=6cm
-            ]
-
-            \addplot[
-                color=blue,
-                mark=square,
-                thick,
-                mark size=3pt
-            ] coordinates {
-                    (4,0.8)
-                    (6,1.2)
-                    (8,1.9)
-                    (10,2.8)
-                    (12,3.9)
-                    (14,5.2)
-                    (16,6.8)
-                    (18,8.7)
-                    (20,11.1)
-                };
-
-            % Show linear growth
-            \addplot[
-                color=red,
-                dashed,
-                domain=4:20
-            ] {0.5*x - 1.2};
-            
-
-        \end{axis}
-    \end{tikzpicture}
-    \caption{Memory usage grows linearly with input size, confirming O(n) space complexity}
-\end{figure}
-
-\subsection{Error Analysis}
-
-The small percentage of "incorrect" triangulations in our results table (99.7\%-99.9\% for larger graphs) are due to:
-
-\begin{itemize}
-    \item Floating-point precision errors in geometric predicates
-    \item Extremely rare hash collisions in edge detection
-    \item Implementation bugs in boundary case handling
-\end{itemize}
-
-These issues can be addressed through:
-\begin{itemize}
-    \item Exact arithmetic using rational numbers
-    \item Cryptographic hash functions for perfect collision resistance
-    \item More comprehensive test case generation
-\end{itemize}
-
-\section{Theorems on Algorithm Properties}
-
-\begin{theorem}[Persistence of Blocking Chords]
-    Let $G$ be a biconnected plane graph, and let $T$ be a triangulation of $G$ generated by our algorithm. Let $e = (a,b)$ be a blocking chord in $T$---an edge discovered during the safe root finding process that prevents a flip operation. If $T'$ is any descendant of $T$ in the enumeration tree, then the chord $e$ is also present in $T'$. Furthermore, $e$ will never be flipped or removed in the lineage from $T$ to $T'$.
-\end{theorem}
-
-\begin{proof}
-    We prove this by analyzing the algorithmic construction and the irrevocable nature of decisions in our enumeration process.
-
-    \textbf{1. The Enumeration Tree as a Decision Tree:}
-    The algorithm generates triangulations by recursively adding chords to faces. Each node represents a partially triangulated graph. The path from root to leaf represents the sequence of chords added to reach that triangulation.
-
-    \textbf{2. The Blocking Chord Event:}
-    Consider a face $F$ with vertices in cyclic order. During the execution of findSafeRoot, the two-pointer algorithm initializes $left = 0$ and $right = n-2$, representing vertices $v_l$ and $v_r$. The critical event occurs when the algorithm finds that chord $e = (a,b) = (v_l, v_r)$ already exists in the graph. This causes the left pointer to advance: $left++$.
-
-    Let $r$ be the eventual safe root found, and let $c$ be any vertex non-adjacent to $r$ in $F$. The presence of blocking chord $(a,b)$ fundamentally constrains the triangulation process.
-
-    \textbf{3. Impossibility of Flip in Descendants:}
-    Consider any descendant triangulation $T'$ of $T$. For the flip of $(a,b)$ to become possible in $T'$, the quadrilateral $(a,c,b,d)$ must form a face where the flip would replace $(a,b)$ with $(c,d)$. However:
-
-    \begin{itemize}
-        \item The chord $(c,d)$ already exists in the graph (this is why $(a,b)$ was blocking).
-        \item The genealogical tree construction only adds edges, never removes them.
-        \item Therefore, $(c,d)$ remains present in every descendant $T'$.
-    \end{itemize}
-
-    The flip operation is only defined for creating a new edge, not for creating a multi-edge. Since $(c,d)$ already exists, flipping $(a,b)$ would create a parallel edge, which is invalid in simple graphs.
-
-    \textbf{4. Ancestral Decisions Constrain Descendants:}
-    The chord $e$ is an ancestral decision for all triangulations in the subtree rooted at $T$. The safe root $r$ was chosen precisely because it could connect to vertex $c$ without creating multi-edges, but the blocking chord $(a,b)$ demonstrates that alternative connection patterns are forbidden.
-
-    Once face $F$ is subdivided by adding chords from $r$, these decisions create permanent separators. The algorithm generates all triangulations of the resulting sub-faces independently, but the blocking constraint persists throughout.
-
-    \textbf{5. Formal Inductive Argument:}
-
-    \textit{Base Case:} In $T$, the flip of $(a,b)$ is invalid because $(c,d)$ exists.
-
-    \textit{Inductive Step:} Assume that in descendant $T_k$, the flip is still invalid. When adding a new chord to form $T_{k+1}$, the existing chord $(c,d)$ cannot be removed---only new chords are added. Therefore, the obstruction remains, and the flip of $(a,b)$ stays invalid in $T_{k+1}$.
-
-    \textbf{Conclusion:} By induction, chord $(a,b)$ cannot be flipped in any descendant of $T$. Since our algorithm is based on adding edges (not flipping them), $e$ remains permanently fixed in all descendants. The blocking property is inherited throughout the entire subtree. \qed
-\end{proof}
-
-\begin{theorem}[Completeness Preservation]
-    The pruning strategy based on multi-edge detection does not eliminate any valid triangulations from the genealogical tree.
-\end{theorem}
-
-\begin{proof}
-    This follows directly from Theorem 2. If a triangulation $T$ contains a blocking chord whose flip would create a multi-edge, then this chord can never be flipped in any descendant of $T$. Consequently, pruning the entire subtree rooted at $T$ is correct---it contains no valid triangulations that are not reachable through other branches of the enumeration tree.
-
-    The key insight is that our algorithm explores all valid triangulation paths. When a blocking chord prevents a certain triangulation from being generated in one branch, the same triangulation (if valid) must be reachable through a different sequence of choices in another branch where that blocking condition does not arise. \qed
-\end{proof}
+\bibliographystyle{plain}
+\bibliography{references}
 
 \end{document}

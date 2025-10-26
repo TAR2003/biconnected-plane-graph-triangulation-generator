@@ -430,424 +430,475 @@
 	\end{algorithmic}
 \end{frame}
 
-
-
 \section{Proofs}
 
-\begin{frame}{Proof Strategy Overview}
-	\textbf{Three Main Theorems to Prove:}
+\subsection{Proof of Completeness}
+
+\begin{frame}{Proof of Completeness: Pruning Strategy}
+	\textbf{Pruning Operations:}
+	\begin{itemize}
+		\item Algorithm prunes triangulations where blocking chord is a duplicate chord
+		\item Duplicate chord = chord that occurred in earlier faces
+		\item Prune entire branch when duplication detected
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Theorem (Completeness via Pruning):}
+	\begin{block}{}
+		All children of a pruned branch would have been invalid triangulations.
+	\end{block}
+
+	\vspace{0.3cm}
+	\textbf{Key Insight:}
+	\begin{itemize}
+		\item Need to prove: blocking chord is never flipped in children
+		\item If blocking chord persists in all children, and it's a duplicate
+		\item Then all children are invalid, so pruning is safe
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Proof of Completeness: Blocking Chord Analysis}
+	\textbf{Setup:}
+	\begin{itemize}
+		\item Let chord $a$-$b$ be a blocking chord in triangulation tree node
+		\item Two points form triangles with $a$-$b$ chord on both sides:
+		      \begin{itemize}
+			      \item $c$: point on opposite side of root vertex
+			      \item $r$: point on root side
+		      \end{itemize}
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Three Cases Based on Position of $r$:}
 	\begin{enumerate}
-		\item \textbf{Completeness:} Algorithm generates all valid triangulations
-		\item \textbf{Safe Root Existence:} Every face has at least one safe root vertex
-		\item \textbf{Amortized Complexity:} $O(1)$ time per triangulation
-		\item \textbf{O(n) space complexity:} O(n) space complexity
+		\item $r$ is on the left of root vertex
+		\item $r$ is on the right of root vertex
+		\item $r$ is at the root
 	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Proof of Completeness: Case 1}
+	\textbf{Case 1: $r$ is on the left of the root vertex}
+
+	\begin{itemize}
+		\item Flipping $a$-$b$ chord $\Rightarrow$ results in $r$-$c$ chord
+		\item Before flipping: $b$-$r$ chord was also a blocking chord
+		\item $b$-$r$ positioned to the left of $a$-$b$
+		\item Therefore: $a$-$b$ could not be leftmost blocking chord
+		\item After flip: $r$-$b$ chord still exists and remains left of $c$-$r$
+		\item Consequence: new $r$-$c$ chord cannot be leftmost blocking chord
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Conclusion:}
+	\begin{block}{}
+		Flipping $a$-$b$ blocking chord is NOT permitted by algorithm in this case.
+	\end{block}
+\end{frame}
+
+\begin{frame}{Proof of Completeness: Cases 2 \& 3}
+	\textbf{Case 2: $r$ is on the right of the root vertex}
+	\begin{itemize}
+		\item Flipping $a$-$b$ chord $\Rightarrow$ produces $r$-$c$ chord
+		\item However: $a$-$r$ chord is more to the left than $r$-$c$ chord
+		\item This flip is invalid according to the algorithm
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Case 3: $r$ is at the root}
+	\begin{itemize}
+		\item Flipping $a$-$b$ chord $\Rightarrow$ creates root-$c$ chord
+		\item This gives child triangulation's root vertex better visibility than parent
+		\item Violates the algorithm's constraints
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Final Conclusion:}
+	\begin{block}{}
+		In all three cases, flipping a blocking chord is impossible. If blocking chord is duplicate, all children are invalid. Pruning is safe and complete.
+	\end{block}
+\end{frame}
+
+\subsection{Existence of Valid Root Triangulation}
+
+\begin{frame}{Existence of Valid Root: Definitions}
+	\textbf{Definition (Root Triangulation):}
+	\begin{block}{}
+		Root of the tree of triangulations, constructed by selecting a root vertex and adding chords from this root vertex to all non-neighboring vertices of the current face.
+	\end{block}
+
+	\vspace{0.3cm}
+	\textbf{Definition (Safe Root Vertex):}
+	\begin{block}{}
+		A vertex from which adding chords to every other non-neighboring node will NOT create a multi-edge problem. None of the previous faces share a chord where one endpoint is the root vertex and the other is a vertex of the current face.
+	\end{block}
+\end{frame}
+
+\begin{frame}{Existence of Valid Root: Main Theorem}
+	\textbf{Theorem (Existence of Safe Root):}
+	\begin{block}{}
+		In any face of a biconnected planar graph, there always exist at least two safe vertices that can serve as root vertices for valid triangulations.
+	\end{block}
+
+	\vspace{0.3cm}
+	\textbf{Proof Strategy:}
+	\begin{itemize}
+		\item Consider a face with $n$ vertices, numbered 1 to $n$
+		\item Since planar graph, chords can only exist in outer plane
+		\item Analyze two cases:
+		      \begin{enumerate}
+			      \item No chords from previous faces
+			      \item At least one chord from previous faces
+		      \end{enumerate}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Existence of Valid Root: Case 1}
+	\textbf{Case 1: No chords from previous faces}
+
+	\begin{itemize}
+		\item If no chords from previous faces with both endpoints inside current face
+		\item Then all $n$ vertices are eligible to be safe vertices
+	\end{itemize}
 
 	\vspace{0.5cm}
-	\textbf{Proof Structure:}
+	\textbf{Simple but important base case!}
+\end{frame}
+
+\begin{frame}{Existence of Valid Root: Case 2 Setup}
+	\textbf{Case 2: At least one chord from previous faces}
+
 	\begin{itemize}
-		\item Use properties of planar graphs and chord non-crossing constraints
-		\item Leverage safe root concept to avoid multi-edge conflicts
-		\item Mathematical induction for existence proofs
-		\item Amortization analysis for time complexity bounds
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Proof 1: Completeness - Non-Root Chord Analysis}
-	\textbf{Theorem:} Algorithm generates all valid triangulations without missing any.
-	Here we only prune a branch if a blocking chord is detected in the alreadt existent chord list.
-	So, our main proof in this cause is, for a geneological tree of triangulation for a face, a blocking chord will never be flipped (in its children).
-	For this proof, we have to prove that, in any position in the tree node, a flip of the blocking chord will be invalid.
-	Guess there is a triangulation, where a,b are the blocking chord. Now this face is triangulated, that means there will surely be
-
-	\begin{tikzpicture}[scale=1]
-
-		% Explicit coordinates (decagon on unit circle)
-		\coordinate (P1)  at (1, -1.5);
-		\coordinate (P2)  at (1.5, -0.8);
-		\coordinate (P3)  at (0,     1);
-		\coordinate (P4)  at (-0.588,0.809);
-		\coordinate (P5)  at (-0.951,0.309);
-		\coordinate (P6)  at (0,-0.5);
-
-		% Draw polygon edges
-		\draw (P1)--(P2)--(P3)--(P4)--(P5)--
-		(P6)--(P1)--cycle;
-
-		% Internal chord (example: 1--6)
-		% \draw[red, thick] (P1)--(P6);
-
-		% Draw the points
-		\filldraw (P1) circle (0.5pt);
-		\filldraw (P2) circle (0.5pt);
-		\filldraw (P3) circle (0.5pt);
-		\filldraw (P4) circle (0.5pt);
-		\filldraw (P5) circle (0.5pt);
-		\filldraw (P6) circle (0.5pt);
-
-		% Manual labels with precise positioning
-		\node[above right] at (P1) {1};
-		\node[above right] at (P2) {2};
-		\node[above] at (P3) {3};
-		\node[above left] at (P4) {4};
-		\node[above left] at (P5) {5};
-		\node[below left] at (P6) {6};
-
-	\end{tikzpicture}
-
-\end{frame}
-
-\begin{frame}{Proof 1: Completeness - Root Position Analysis}
-	\textbf{Case Analysis:} Position of vertex $r$ relative to root affects chord flipping validity.
-
-	\vspace{0.3cm}
-	\centering
-	\resizebox{0.95\textwidth}{!}{%
-		\begin{tikzpicture}[scale=0.8]
-			\tikzset{
-				case/.style={rectangle, draw, rounded corners, minimum width=3cm, minimum height=2cm, align=center}
-			}
-
-			% Case 1: r is root
-			\node[case, fill=red!20] (case1) at (0,0) {
-				\textbf{Case 1:} $r =$ root\\
-				Flipping invalid\\
-				(creates multi-edge)
-			};
-
-			% Case 2: r left of root  
-			\node[case, fill=yellow!20] (case2) at (4,0) {
-				\textbf{Case 2:} $r$ left of root\\
-				$(b,r)$ is leftmost\\
-				blocking chord
-			};
-
-			% Case 3: r right of root
-			\node[case, fill=blue!20] (case3) at (8,0) {
-				\textbf{Case 3:} $r$ right of root\\
-				$(a,r)$ is leftmost\\
-				blocking chord
-			};
-		\end{tikzpicture}%
-	}
-
-	\vspace{0.3cm}
-	\small
-	\textbf{Conclusion:} In all cases, chord $(a,b)$ where neither endpoint\\is root cannot be flipped, ensuring no valid triangulations are missed\\when we reject multi-edge creating flips.
-
-	\vspace{0.2cm}
-	\textbf{Completeness Achieved:} Algorithm explores all reachable\\triangulations without missing valid ones.
-\end{frame}
-
-\begin{frame}{Proof 2: Safe Root Existence - Multi-Edge Partitioning}
-	\textbf{Theorem:} Every face in a biconnected plane graph has at least one safe root vertex.
-
-	\vspace{0.3cm}
-	\textbf{Setup:} Consider a face with $n$ vertices and potential multi-edges outside the cycle.
-
-	\vspace{0.3cm}
-	\centering
-	\begin{tikzpicture}[scale=1.0]
-		% Draw a hexagon face
-		\coordinate (v1) at (0,2);
-		\coordinate (v2) at (1.5,2.5);
-		\coordinate (v3) at (3,2);
-		\coordinate (v4) at (3,0);
-		\coordinate (v5) at (1.5,-0.5);
-		\coordinate (v6) at (0,0);
-
-		% Draw face boundary
-		\draw[thick, black] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- cycle;
-
-		% Draw a multi-edge (example between v1 and v3)
-		\draw[red, thick, dashed] (v1) -- (v3);
-
-		% Label vertices
-		\node[left] at (v1) {$v_1$};
-		\node[above] at (v2) {$v_2$};
-		\node[right] at (v3) {$v_3$};
-		\node[right] at (v4) {$v_4$};
-		\node[below] at (v5) {$v_5$};
-		\node[left] at (v6) {$v_6$};
-
-		% Show partitions
-		\draw[green, ultra thick] plot [smooth, tension=0.7] coordinates {(v1) (0.5,1.8) (v2) (1.2,2.3) (v3)};
-		\draw[blue, ultra thick] plot [smooth, tension=0.7] coordinates {(v3) (3,1) (v4) (2,0) (v5) (0.5,0) (v6) (0,1) (v1)};
-
-		\node[green] at (1, 2.8) {$T_1$ section};
-		\node[blue] at (2, -0.8) {$T_2$ section};
-	\end{tikzpicture}
-
-	\vspace{0.2cm}
-	\small
-	\textbf{Key Insight:} Multi-edge $(v_1, v_3)$ partitions face into two sections\\$T_1$ and $T_2$. By planarity, no chord can cross between sections.
-\end{frame}
-
-\begin{frame}{Proof 2: Safe Root Existence - Inductive Construction}
-	\textbf{Base Cases:}
-	\begin{itemize}
-		\item \textbf{$T_1$ (3 vertices):} Contains $v_1, v_2, v_3$ where $v_2$ is safe root (no chords possible)
-		\item \textbf{$T_2$ (remaining vertices):} If any multi-edge exists within $T_2$, it creates further partitioning
+		\item Suppose chord $a$-$b$ on outer plane from previous face
+		\item Both $a$ and $b$ are disqualified from being safe vertices
+		\item Due to planarity: chords cannot cross each other
+		\item Since $a$-$b$ chord exists, no chord on outer plane can overtake it
 	\end{itemize}
 
 	\vspace{0.3cm}
-	\textbf{Inductive Step:} For any partition $T_k$ with multi-edge:
-
-	\centering
-	\resizebox{0.9\textwidth}{!}{%
-		\begin{tikzpicture}[scale=0.9]
-			% Show recursive partitioning
-			\node[draw, rectangle, fill=green!20, minimum width=2cm, minimum height=1cm, align=center] (t1) at (0,0) {$T_1$\\(Safe Root)};
-			\node[draw, rectangle, fill=blue!20, minimum width=2cm, minimum height=1cm, align=center] (t2) at (3,0) {$T_2$\\(Check Multi-edges)};
-			\node[draw, rectangle, fill=yellow!20, minimum width=1.5cm, minimum height=0.8cm, align=center] (t21) at (5.5,0.5) {$T_{2a}$};
-			\node[draw, rectangle, fill=orange!20, minimum width=1.5cm, minimum height=0.8cm, align=center] (t22) at (5.5,-0.5) {$T_{2b}$};
-
-			\draw[->, thick] (t2) -- (t21);
-			\draw[->, thick] (t2) -- (t22);
-
-			\node[above] at (1.5, 0.3) {Multi-edge};
-			\node[above] at (4.2, 0.3) {Partition};
-		\end{tikzpicture}%
-	}
-
-	\vspace{0.3cm}
-	\small
-	\textbf{Conclusion by Induction:} Every partition eventually contains\\safe vertices. Since original face is partitioned, it must contain at\\least two safe root vertices.
-
-	\vspace{0.2cm}
-	\textbf{Safe Root Existence Proven:} Every face has $\geq 2$\\safe  root vertices.
-\end{frame}
-
-\begin{frame}{Proof 2: Algorithm Correctness - Safe Root Finding}
-	\textbf{Algorithm Verification:} Our safe root finding procedure correctly identifies safe vertices.
-
-	\vspace{0.3cm}
-	\textbf{Procedure Analysis:}
+	\textbf{Consequence:}
 	\begin{itemize}
-		\item Start with \texttt{start = n-1}, \texttt{end = 0}
-		\item If multi-edge exists between \texttt{start} and \texttt{end}, decrease \texttt{start}
-		\item Otherwise, increase \texttt{end}
-		\item Continue until \texttt{start = end + 1}
+		\item Nodes $(a+1, a+2, \ldots)$ might have connections between them
+		\item They CANNOT have chords with nodes $(a-1, \ldots, b+1)$
+		\item (Would violate planarity by crossing $a$-$b$ chord)
 	\end{itemize}
 
 	\vspace{0.3cm}
-	\centering
-	\begin{tikzpicture}[scale=1.1]
-		% Show the algorithm process
-		\draw[thick] (0,0) circle (1.5);
-
-		% Vertices around circle
-		\foreach \i/\angle in {0/90, 1/45, 2/0, 3/315, 4/270, 5/225, 6/180, 7/135} {
-				\coordinate (v\i) at (\angle:1.5);
-				\fill (v\i) circle (2pt);
-				\node at (\angle:1.8) {$v_{\i}$};
-			}
-
-		% Show multi-edge
-		\draw[red, thick, dashed] (v0) -- (v4);
-
-		% Show safe region
-		\draw[green, ultra thick, ->] (v0) arc (90:270:1.5);
-		\node[green] at (2.5,0) {Safe Region};
-
-		% Algorithm pointers
-		\draw[blue, <-] (v7) -- (-0.5, 2) node[left] {\texttt{start}};
-		\draw[orange, <-] (v1) -- (0.5, 2) node[right] {\texttt{end}};
-	\end{tikzpicture}
-
-	\vspace{0.2cm}
-	\textbf{Correctness:} Algorithm converges to safe region in $O(n)$ time by planarity constraints.
+	\textbf{This creates $T_n$ structure:}
+	\begin{itemize}
+		\item $n$ = number of internal vertices between endpoints of constraining chord
+	\end{itemize}
 \end{frame}
 
-\begin{frame}{Proof 3: Amortized Complexity - Minimum Triangulations}
-	\textbf{Theorem:} Algorithm achieves $O(1)$ amortized time per triangulation.
+\begin{frame}{$T_n$ Structures Analysis}
+	\textbf{Current face contains two complementary $T_n$ structures:}
+	\begin{enumerate}
+		\item Structure 1: $a, a+1, \ldots, b$
+		\item Structure 2: $a, a-1, \ldots, b$
+	\end{enumerate}
 
 	\vspace{0.3cm}
-	\textbf{Key Insight:} Every face generates at least $O(n)$ triangulations, where $n$ is the number of vertices.
+	\textbf{Internal vertices:} numbered $1, \ldots, n-3$
 
 	\vspace{0.3cm}
-	\textbf{Minimum Triangulation Count:}
+	\textbf{Range:}
 	\begin{itemize}
-		\item Face has $\geq 2$ safe root vertices: $v_1$ and $v_2$
-		\item Each safe root creates fan triangulation with $n-3$ chords
-		\item Path from $v_1$-root to $v_2$-root requires $\geq (n-4)$ chord flips
-		\item Total unique triangulations: $1 + (n-4) = n-3 \geq \Omega(n)$
+		\item Minimum: $T_1$ (since $T_0$ would mean $a$ and $b$ are neighbors)
+		\item Maximum: $T_{n-3}$ (accounting for endpoints and complementary structure)
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{$T_n$ Structures: Base Cases}
+	\textbf{Base Case: $T_1$}
+	\begin{itemize}
+		\item One internal vertex $c$ between $a$ and $b$
+		\item Both $a$ and $b$ are neighbors of $c$
+		\item Any chord from $c$ is impossible
+		\item Therefore: $c$ is a safe vertex 
 	\end{itemize}
 
 	\vspace{0.3cm}
-	\centering
-	\begin{tikzpicture}[scale=0.8]
-		% Show two fan triangulations
-		\coordinate (center1) at (0,0);
-		\coordinate (center2) at (4,0);
-
-		% First fan (v1 as root)
-		\foreach \i/\angle in {1/60, 2/120, 3/180, 4/240, 5/300} {
-				\coordinate (u\i) at (\angle:1.2);
-				\draw[blue] (center1) -- (u\i);
-			}
-		\draw[thick] (u1) -- (u2) -- (u3) -- (u4) -- (u5) -- cycle;
-		\fill[red] (center1) circle (3pt);
-		\node[below] at (center1) {$v_1$ root};
-
-		% Second fan (v2 as root)  
-		\foreach \i/\angle in {1/60, 2/120, 3/180, 4/240, 5/300} {
-				\coordinate (w\i) at ($(center2) + (\angle:1.2)$);
-				\draw[green] (center2) -- (w\i);
-			}
-		\draw[thick] (w1) -- (w2) -- (w3) -- (w4) -- (w5) -- cycle;
-		\fill[red] (center2) circle (3pt);
-		\node[below] at (center2) {$v_2$ root};
-
-		% Show transition
-		\draw[->, thick, dashed] (1.5, 0) -- (2.5, 0);
-		\node[above] at (2, 0) {$n-4$ flips};
-	\end{tikzpicture}
+	\textbf{Base Case: $T_2$}
+	\begin{itemize}
+		\item Vertices $c$ and $d$ between $a$ and $b$
+		\item If $c$ has a chord, it must be with $b$ (only non-neighbor)
+		      \begin{itemize}
+			      \item Creates $T_1$ structure containing $d$, making $d$ safe 
+		      \end{itemize}
+		\item If $d$ has a chord, it must be with $a$
+		      \begin{itemize}
+			      \item Creates $T_1$ structure containing $c$, making $c$ safe 
+		      \end{itemize}
+	\end{itemize}
 \end{frame}
 
-\begin{frame}{Proof 3: Amortized Complexity - Final Analysis}
-	\small
-	\textbf{Amortization Calculation:}
+\begin{frame}{$T_n$ Structures: General Case Algorithm}
+	\textbf{Finding a Safe Vertex in $T_n$ in $O(n)$ time:}
 
-	\vspace{0.2cm}
-	\textbf{Per Face:}
+	\begin{enumerate}
+		\item Consider vertex $a+1$
+		\item $a+1$ cannot create chords with neighbors $a$ and $a+2$
+		\item Possible chord partners: $\{a+3, \ldots, b\}$
+		\item Check from $b$ downward using hashset ($O(1)$ per check)
+	\end{enumerate}
+
+	\vspace{0.3cm}
+	\textbf{Three outcomes:}
 	\begin{itemize}
-		\item Setup cost: $O(n)$ for safe root finding
-		\item Minimum triangulations generated: $n-3 \geq \Omega(n)$
-		\item Amortized cost per triangulation: $\frac{O(n)}{\Omega(n)} = O(1)$
+		\item If chord $(a+1, b)$ exists: Structure becomes $T_{n-1}$ with vertices $a+2, \ldots, b-1$
+		\item If chord $(a+1, b-k)$ exists for some $k > 0$: Structure becomes $T_{n-k-1}$
+		\item Else: $a+1$ is a safe vertex (no chords with any candidate) 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{$T_n$ Structures: Conclusion}
+	\textbf{In each iteration:}
+	\begin{itemize}
+		\item If chord found: $n$ decreases, eventually reaching $T_1$ or $T_2$
+		\item If no chord found: vertex is safe
 	\end{itemize}
 
-	\vspace{0.2cm}
-	\textbf{Global Analysis:}
-	\scriptsize
+	\vspace{0.3cm}
+	\textbf{Since:}
+	\begin{itemize}
+		\item Every check reduces problem size or finds safe vertex
+		\item We've proven $T_1$ and $T_2$ contain safe vertices
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Therefore:}
+	\begin{block}{}
+		Every $T_n$ structure contains at least one safe vertex.
+	\end{block}
+
+	\vspace{0.3cm}
+	\textbf{Final Conclusion:}
+	\begin{itemize}
+		\item Face with no multi-edges: all $n$ vertices can be safe
+		\item Face with at least one multi-edge: at least two complementary $T_n$ structures, each with at least one safe vertex
+		\item \textbf{Every face has at least two safe vertices} 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Completeness Summary}
+	\textbf{We have established:}
+	\begin{enumerate}
+		\item \textbf{Pruning preserves all valid triangulations}
+		      \begin{itemize}
+			      \item Blocking chords never flip in children
+			      \item Duplicate blocking chords make all children invalid
+			      \item Safe to prune entire branches
+		      \end{itemize}
+
+		      \vspace{0.2cm}
+		\item \textbf{Safe root triangulations always exist}
+		      \begin{itemize}
+			      \item Every face has at least two safe vertices
+			      \item Can always find valid starting triangulation
+			      \item Independent of calculation order
+		      \end{itemize}
+	\end{enumerate}
+
+	\vspace{0.3cm}
+	\begin{block}{Conclusion}
+		Our algorithm covers ALL valid planar triangulations of any planar biconnected graph.
+	\end{block}
+\end{frame}
+
+\subsection{Time Complexity Analysis}
+
+\begin{frame}{Time Complexity: Main Theorem}
+	\textbf{Theorem (Amortized Linear Time Complexity):}
+	\begin{block}{}
+		The algorithm has amortized $O(1)$ time complexity per triangulation, or amortized linear time complexity overall.
+	\end{block}
+
+	\vspace{0.3cm}
+	\textbf{Definition (Building Time):}
+	\begin{itemize}
+		\item Time required to calculate safe root and construct chords from root vertex for a single face
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Components:}
+	\begin{itemize}
+		\item Finding a safe vertex: $O(n)$
+		\item Adding all chords from the root: $O(n)$
+		\item Total building time for face with $n$ vertices: $O(n)$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Time Complexity: Lower Bound on Triangulations}
+	\textbf{Lemma (Lower Bound on Triangulation Count):}
+	\begin{block}{}
+		For a face with $n$ vertices, there are at least $O(n)$ valid triangulations.
+	\end{block}
+
+	\vspace{0.3cm}
+	\textbf{Proof:}
+	\begin{itemize}
+		\item Every face has at least two safe vertices: $a$ and $c$
+		\item Can reach $c$-root triangulation from $a$-root through chord flips
+		\item Each flip produces a valid triangulation
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Comparing $a$-root and $c$-root:}
+	\begin{itemize}
+		\item $a$-root: all chords have endpoint $a$
+		\item $c$-root: all chords have endpoint $c$
+		\item Only one chord may be shared: $a$-$c$
+		\item All other $n-4$ chords must be different
+		\item Requires $n-4$ flips $\Rightarrow$ at least $n-3$ triangulations
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Time Complexity: Two-Face Graph}
+	\textbf{Let $n_1$ and $n_2$ be vertices in faces 1 and 2:}
+
 	\begin{align*}
-		\text{Total Cost}    & = \sum_{i=1}^{k} O(n_i) + T \cdot O(1)    \\
-		                     & = O\left(\sum_{i=1}^{k} n_i\right) + O(T) \\
-		\text{Total Tri: } T & \geq \sum_{i=1}^{k} \Omega(n_i)           \\
-		\text{Amortized}     & = \frac{O(\sum n_i) + O(T)}{T} = O(1)
+		\text{Total building time: } B & = n_1 + n_1 \cdot n_2           \\
+		\text{Total triangulations: } T & = n_1 \cdot n_2
+	\end{align*}
+
+	\vspace{0.3cm}
+	\textbf{Since $n_2 \geq 3$:}
+	\begin{align*}
+		n_1 \cdot 1               & < n_1 \cdot n_2                   \\
+		B = n_1 + n_1 \cdot n_2   & < n_1 \cdot n_2 + n_1 \cdot n_2   \\
+		                          & = 2 \cdot n_1 \cdot n_2           \\
+		                          & = 2T
+	\end{align*}
+
+	\vspace{0.3cm}
+	\textbf{Total time complexity: $< 3T$}
+\end{frame}
+
+\begin{frame}{Time Complexity: Three-Face Graph}
+	\textbf{Let $n_1$, $n_2$, $n_3$ be vertices in three faces:}
+
+	\begin{align*}
+		B & = n_1 + n_1 \cdot n_2 + n_1 \cdot n_2 \cdot n_3 \\
+		T & = n_1 \cdot n_2 \cdot n_3
 	\end{align*}
 
 	\vspace{0.2cm}
-	\small
-	\textbf{Complexity Achieved:} \ $O(1)$ amortized time per\\triangulation generation.
-
-	\vspace{0.1cm}
-	\textbf{All Proofs Complete:} Algorithm is complete, correct, and optimal.
-\end{frame}
-
-
-\section{Time Complexity Analysis}
-
-\begin{frame}{Time Complexity Analysis: Operation Breakdown}
-	\textbf{Per-Face Operations:}
-	\begin{itemize}
-		\item \textbf{Safe Root Finding:} $O(n)$ time per face with $n$ vertices
-		      \begin{itemize}
-			      \item[$\circ$] Binary search-like approach in \texttt{find-safe-root-vertex}
-			      \item[$\circ$] Worst case: $O(n)$ iterations to find valid root position
-		      \end{itemize}
-		\item \textbf{GlobalChordSet Operations:} $O(1)$ per chord operation
-		      \begin{itemize}
-			      \item[$\circ$] Hash-based lookup and insertion
-			      \item[$\circ$] Add/remove chords during DFS traversal
-		      \end{itemize}
-		\item \textbf{Local Tree Construction:} $O(1)$ per triangulation
-		      \begin{itemize}
-			      \item[$\circ$] Genealogical tree traversal with chord flipping
-			      \item[$\circ$] Parent-child relationship maintenance
-		      \end{itemize}
-	\end{itemize}
-
-	\vspace{0.3cm}
-	\textbf{Per-Triangulation Operations:}
-	\begin{itemize}
-		\item Chord validation and GlobalChordSet updates: $O(1)$
-		\item Output generation: $O(1)$
-		\item Backtracking (add/remove chords): $O(1)$
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Time Complexity Analysis: Amortized Analysis}
-	\textbf{Key Insight:} The expensive $O(n)$ safe root finding is amortized over multiple triangulation generations.
-
-	\vspace{0.3cm}
-	\textbf{Amortization Argument:}
-	\begin{itemize}
-		\item For a face $F_i$ with $n$ vertices:
-		      \begin{itemize}
-			      \item[$\circ$] Setup cost: $O(n)$ for safe root finding
-			      \item[$\circ$] Generates $\geq \Omega(n)$ triangulations (proven empirically)
-			      \item[$\circ$] Each triangulation requires $O(1)$ additional work
-		      \end{itemize}
-		\item \textbf{Amortized cost per triangulation from face $F_i$:}
-		      $$\frac{O(n) \text{ setup cost}}{\Omega(n) \text{ triangulations}} = O(1)$$
-	\end{itemize}
-
-	\vspace{0.3cm}
-	\textbf{Global Analysis:}
-	\begin{itemize}
-		\item Total setup cost across all $k$ faces: $O(\sum_{i=1}^{k} n_i)$
-		\item Total triangulations generated: $T \geq \Omega(\sum_{i=1}^{k} n_i)$
-		\item \textbf{Overall amortized complexity:} $\frac{O(\sum n_i) + O(T)}{T} = O(1)$
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Time Complexity Analysis: Empirical Validation}
-	\textbf{Minimum Triangulations per Face (Worst-Case Constraints):}
+	\textbf{From two-face case:} $n_1 + n_1 \cdot n_2 < 2 \cdot n_1 \cdot n_2$
 
 	\vspace{0.2cm}
-	\centering
-	\begin{tabular}{|c|c|c|c|}
-		\hline
-		\textbf{Vertices (n)} & \textbf{Setup Cost} & \textbf{Min Triangulations} & \textbf{Amortized Cost} \\
-		\hline
-		4                     & $O(4)$              & 1                           & $4/1 = O(1)$            \\
-		\hline
-		5                     & $O(5)$              & 2                           & $5/2 = O(1)$            \\
-		\hline
-		6                     & $O(6)$              & 4                           & $6/4 = O(1)$            \\
-		\hline
-		7                     & $O(7)$              & 11                          & $7/11 < 1$              \\
-		\hline
-		8                     & $O(8)$              & 26                          & $8/26 < 1$              \\
-		\hline
-		9                     & $O(9)$              & 79                          & $9/79 < 1$              \\
-		\hline
-		10                    & $O(10)$             & 202                         & $10/202 < 1$            \\
-		\hline
-		11                    & $O(11)$             & 636                         & $11/636 < 1$            \\
-		\hline
-	\end{tabular}
+	\textbf{Therefore:}
+	\begin{align*}
+		B & < 2 \cdot n_1 \cdot n_2 + n_1 \cdot n_2 \cdot n_3
+	\end{align*}
 
-	\vspace{0.3cm}
-	\textbf{Key Observation:} For $n \geq 7$, minimum triangulations \textbf{exceed} setup cost, ensuring amortized $O(1)$ performance even under maximum multi-edge constraints.
+	\textbf{Since $n_3 \geq 3$, we have $2 < n_3$:}
+	\begin{align*}
+		2 \cdot n_1 \cdot n_2 & < n_1 \cdot n_2 \cdot n_3                                     \\
+		B                      & < n_1 \cdot n_2 \cdot n_3 + n_1 \cdot n_2 \cdot n_3          \\
+		                       & = 2T
+	\end{align*}
+
+	\textbf{Total time complexity: $< 3T$}
 \end{frame}
 
-\begin{frame}{Time Complexity Analysis: Final Complexity}
-	\textbf{Algorithm Components:}
+\begin{frame}{Time Complexity: General Case}
+	\textbf{For $k$ faces where each has at least 3 vertices:}
+
+	\begin{align*}
+		B & = n_1 + n_1 \cdot n_2 + \cdots + n_1 \cdot n_2 \cdots n_k \\
+		T & = n_1 \cdot n_2 \cdots n_k
+	\end{align*}
+
+	\vspace{0.3cm}
+	\textbf{Pattern holds by induction:}
+	\begin{align*}
+		n_1 + n_1 \cdot n_2 + \cdots + n_1 \cdot n_2 \cdots n_{k-1} & < 2 \cdot n_1 \cdot n_2 \cdots n_{k-1}
+	\end{align*}
+
+	\vspace{0.2cm}
+	\textbf{Since $n_k \geq 3$:}
+	\begin{align*}
+		2 \cdot n_1 \cdot n_2 \cdots n_{k-1} & < n_1 \cdot n_2 \cdots n_k \\
+		B                                     & < 2T
+	\end{align*}
+
+	\vspace{0.2cm}
+	\textbf{Total time complexity: $< 3T$}
+
+	\vspace{0.3cm}
+	\begin{block}{Corollary}
+		For any biconnected planar graph, algorithm takes total time $< 3 \times$ (number of triangulations). Therefore, amortized linear time complexity.
+	\end{block}
+\end{frame}
+
+\subsection{Space Complexity Analysis}
+
+\begin{frame}{Space Complexity}
+	\textbf{Theorem (Linear Space Complexity):}
+	\begin{block}{}
+		The algorithm has $O(n)$ space complexity, where $n$ is the total number of vertices.
+	\end{block}
+
+	\vspace{0.3cm}
+	\textbf{Proof:}
+
+	When processing face $i$, must store information for faces $1, \ldots, i$:
+
+	\begin{itemize}
+		\item \textbf{Vertex information:} $n_1 + n_2 + \cdots + n_i$ vertices
+		\item \textbf{Chord information:} For planar graph, $n-3$ chords total
+		\item \textbf{Hashset for chord lookup:} Current chord information
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Analysis:}
+	\begin{itemize}
+		\item Total vertices across all faces: $O(n)$
+		\item Number of chords in planar graph: $O(n)$
+		\item Hashset for current chord information: $O(n)$
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\textbf{Therefore: entire algorithm uses $O(n)$ space complexity.}
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}{Conclusion}
+	\textbf{We have rigorously proven our algorithm:}
+
 	\begin{enumerate}
-		\item \textbf{Face Decomposition:} $O(V + E)$ preprocessing
-		\item \textbf{Safe Root Finding:} $O(n)$ per face, amortized to $O(1)$ per triangulation
-		\item \textbf{Tree Construction \& Traversal:} $O(1)$ per triangulation
-		\item \textbf{GlobalChordSet Management:} $O(1)$ per operation
-		\item \textbf{Output Generation:} $O(1)$ per triangulation
+		\item \textbf{Is Complete:}
+		      \begin{itemize}
+			      \item Finds all valid planar triangulations
+			      \item Proper pruning of invalid branches
+		      \end{itemize}
+
+		      \vspace{0.2cm}
+		\item \textbf{Always Has a Starting Point:}
+		      \begin{itemize}
+			      \item At least two safe root vertices exist in every face
+			      \item Independent of calculation order
+		      \end{itemize}
+
+		      \vspace{0.2cm}
+		\item \textbf{Is Efficient in Time:}
+		      \begin{itemize}
+			      \item Amortized $O(1)$ time per triangulation
+			      \item Amortized linear time overall
+		      \end{itemize}
+
+		      \vspace{0.2cm}
+		\item \textbf{Is Efficient in Space:}
+		      \begin{itemize}
+			      \item $O(n)$ space complexity
+		      \end{itemize}
 	\end{enumerate}
 
 	\vspace{0.3cm}
-	\textbf{Overall Time Complexity:}
-	\begin{itemize}
-		\item \textbf{Preprocessing:} $O(V + E)$ for graph decomposition
-		\item \textbf{Triangulation Generation:} $\mathbf{O(1)}$ \textbf{amortized per triangulation}
-		\item \textbf{Total Runtime:} $O(V + E + T)$ where $T$ is the number of triangulations
-	\end{itemize}
-
-	\vspace{0.3cm}
-	\textbf{Significance:}
-	\begin{itemize}
-		\item First algorithm to achieve constant amortized time per triangulation for biconnected plane graphs
-		\item Solves multi-edge problem while maintaining optimal time complexity
-		\item Practical for real-world applications with large-scale graphs
-	\end{itemize}
+	\begin{block}{}
+		These properties make the algorithm both theoretically sound and practically efficient for enumerating all planar triangulations of biconnected planar graphs.
+	\end{block}
 \end{frame}
 
 \end{document}
