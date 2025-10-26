@@ -1,3 +1,5 @@
 \beamer@sectionintoc {1}{Introduction}{3}{0}{1}
-\beamer@sectionintoc {2}{Algorithm for Cycle Graphs}{6}{0}{2}
-\beamer@sectionintoc {3}{Graph Examples}{7}{0}{3}
+\beamer@sectionintoc {2}{Our Approach}{4}{0}{2}
+\beamer@sectionintoc {3}{Algorithm}{13}{0}{3}
+\beamer@sectionintoc {4}{Proofs}{18}{0}{4}
+\beamer@sectionintoc {5}{Time Complexity Analysis}{26}{0}{5}
