@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex main"] 1761507245.97459 "main.aux" "main.bbl" "main" 1761507249.05566 0
+["bibtex main"] 1761832971.49143 "main.aux" "main.bbl" "main" 1761832991.17112 0
   "./references.bib" 1761505259 2801 f0b3910f89481fffab74ab4971240dfc ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/bibtex/bst/bibtex/plain.bst" 1291864736 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1761507247 8987 bfbc3a434650eddf8863d8eb73ff86fc "pdflatex"
+  "main.aux" 1761832990 11132 37d5fe78dcfc27d7c929b96adbd4e705 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1761507246.41062 "c:/Users/TAWKIR/Documents/GitHub/ThesisGraph/paper/main.tex" "main.pdf" "main" 1761507249.05687 0
-  "C:/Users/TAWKIR/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1759232271 229457 49ca68e6665cc8defdcf9a7c42fbab78 ""
+["pdflatex"] 1761832989.45703 "c:/Users/TAWKIR/Documents/GitHub/ThesisGraph/paper/main.tex" "main.pdf" "main" 1761832991.1719 0
+  "C:/Users/TAWKIR/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1761831841 229457 49ca68e6665cc8defdcf9a7c42fbab78 ""
   "C:/Users/TAWKIR/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1200.pk" 1757160037 14064 c57b59af83fdcb1a5658205866a67457 ""
   "C:/Users/TAWKIR/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1757160032 13257826 88ac9faf8003347f75b71f2822e63a59 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/tfm/jknappen/ec/tcrm1200.tfm" 993062508 1444 95ffe0f19b974d50849790c8225c7ef7 ""
@@ -34,6 +34,7 @@
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmsy10.tfm" 1136765053 1124 6c73e740cf17375f03eec0ee63599741 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmsy6.tfm" 1136765053 1116 933a60c408fc0a863a92debe84b2d294 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmsy8.tfm" 1136765053 1120 8b7d695260f3cff42e636090a8002094 ""
+  "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti10.tfm" 1136765053 1480 aa8e34af0eb6a2941b776984cf1dfdc4 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti12.tfm" 1136765053 1484 ed72f8f5cf654cda15ecc8e32bfcbee5 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti7.tfm" 1136765053 1492 86331993fe614793f5e7e755835c31c5 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti8.tfm" 1136765053 1504 1747189e0441d1c18f3ea56fafc1c480 ""
@@ -51,7 +52,9 @@
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb" 1247596666 32362 bc3f3eec7ab7d65fe700963d4017d32c ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb" 1247596667 32726 39f0f9e62e84beb801509898a605dbd5 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1247596667 32569 5e5ddc8df908dea60932f3c484a54c0d ""
+  "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb" 1247596667 32587 65067f817f408bc71a7312f3d9828a9b ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb" 1247596667 32626 5abc8bb2f28aa647d4c70f8ea38cc0d3 ""
+  "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb" 1247596667 37944 359e864bd06cde3b1cf57bb20757fb06 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb" 1247596667 36118 fad905eba93cff5bce1e185fe980a177 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti8.pfb" 1247596666 35660 fb24af7afbadb71801619f1415838111 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb" 1247596666 24252 1e4e051947e12dfb50fee0b7f4e26e3a ""
@@ -176,11 +179,11 @@
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/tex/latex/rerunfilecheck/rerunfilecheck.sty" 1751104012 9684 a33a14b82ce60d6e77cb9be689d79ee6 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/tex/latex/url/url.sty" 1388490452 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
-  "c:/Users/TAWKIR/Documents/GitHub/ThesisGraph/paper/main.tex" 1761507242 49608 092bd627c213e32311fe610037a05b88 ""
-  "main.aux" 1761507247 8987 bfbc3a434650eddf8863d8eb73ff86fc "pdflatex"
-  "main.bbl" 1761507246 1791 9648b50b38727c1f5f314a8a2c716d92 "bibtex main"
-  "main.out" 1761507247 7514 057e99cb338dc56ef664eb84bc6d9c4d "pdflatex"
-  "main.tex" 1761507242 49608 092bd627c213e32311fe610037a05b88 ""
+  "c:/Users/TAWKIR/Documents/GitHub/ThesisGraph/paper/main.tex" 1761832988 60986 6602b1d2eecb1e66d6f56f0202dcee03 ""
+  "main.aux" 1761832990 11132 37d5fe78dcfc27d7c929b96adbd4e705 "pdflatex"
+  "main.bbl" 1761832971 1791 9648b50b38727c1f5f314a8a2c716d92 "bibtex main"
+  "main.out" 1761832990 10353 1a3fd50a9ed837ee7453f8d1ebfc2645 "pdflatex"
+  "main.tex" 1761832988 60986 6602b1d2eecb1e66d6f56f0202dcee03 ""
   (generated)
   "main.aux"
   "main.log"

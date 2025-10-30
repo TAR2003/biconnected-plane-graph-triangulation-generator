@@ -10,6 +10,8 @@
 \usepackage{geometry}
 \usepackage{hyperref}
 \usepackage{cite}
+\usepackage{float}
+
 
 \geometry{margin=1in}
 
@@ -34,86 +36,65 @@ Dhaka-1000, Bangladesh}
 \maketitle
 
 \begin{abstract}
-We present a novel algorithm for generating all triangulations of biconnected plane graphs with constant time complexity per triangulation. Previous algorithms for triconnected plane graphs achieve $O(1)$ time per triangulation, but extending these methods to biconnected graphs introduces the fundamental challenge of multi-edge creation during chord flipping operations. Our algorithm addresses this challenge through two key innovations: (1) a \textbf{safe root vertex selection} strategy that ensures initial triangulations avoid conflicting chords, and (2) a \textbf{local genealogical tree} structure that processes each face independently while maintaining global chord consistency. We prove that our algorithm generates all valid triangulations without duplications, has amortized $O(1)$ time complexity per triangulation, and uses $O(n)$ space, where $n$ is the number of vertices. This work extends the theoretical foundation established by Parvez, Rahman, and Nakano~\cite{parvez2011} for triconnected graphs to the more general class of biconnected plane graphs, with applications in computational geometry, VLSI floorplanning, and graph drawing.
+In this paper, we deal with the problem of generating all triangulations for biconnected planar graph. We give an algorithm for generating all triangulations for a biconnected planar graph G of n vertices. Our algorithm establishes a double recursive tree structure among all triangulations of G, and generates each triangulation in O(1) amortized time using O(n) space. This is the first algorithm that achieves constant time generation for biconnected planar graphs. The key innovations of our algorithm are: (1) the concept of \emph{safe root vertex} for each face, which guarantees the existence of a root triangulation that does not create multi-edges when combined with previously triangulated faces; (2) the use of local genealogical trees for each face, allowing independent face processing while maintaining global chord consistency; and (3) a dynamic global chord set to efficiently track and prevent multi-edge conflicts during the triangulation process. We prove the correctness, completeness, and efficiency of our algorithm, and provide implementation details demonstrating its practical effectiveness.
 \end{abstract}
 
 \section{Introduction}
 
-Triangulation of planar graphs is a fundamental problem in computational geometry with diverse applications in VLSI floorplanning~\cite{kozminski1985}, graph drawing~\cite{nishizeki2004}, and mesh generation~\cite{berg2008}. A \emph{triangulation} of a plane graph is a maximal planar subdivision where every face is bounded by exactly three edges. The problem of generating \emph{all possible triangulations} of a given plane graph presents significant algorithmic challenges due to the exponential number of triangulations and the need to avoid duplications efficiently.
+Triangulation of planar graphs is a fundamental problem in computational geometry with wide-ranging applications in VLSI floorplanning~\cite{kozminski1985}, computational geometry~\cite{berg2008}, and graph drawing~\cite{nishizeki2004}. While finding a single triangulation of a planar graph can be done efficiently, the problem of \emph{generating all} triangulations presents significant computational challenges. This paper addresses the problem of exhaustively generating all triangulations of biconnected planar graphs—a problem that has remained open despite substantial progress on restricted graph classes.
 
-\subsection{Background and Motivation}
+\subsection{Motivation and Challenges}
 
-Classical enumeration algorithms either generate objects with duplications and filter them afterward, or use orderly generation~\cite{read1978} to ensure canonical representation. These approaches require substantial memory to store previously generated objects or complex isomorphism checking. The reverse search paradigm~\cite{avis1996} addresses memory concerns by implicitly defining a spanning tree over the solution space, but typically requires $O(n^2)$ time per solution for triangulation problems.
+The enumeration of all triangulations is crucial for applications requiring exploration of the entire solution space, such as finding optimal triangulations under various cost metrics, studying structural properties of triangulation spaces, and analyzing the diameter of triangulation graphs. However, several fundamental difficulties make this problem challenging:
 
-For the specific case of \emph{triconnected} plane graphs, Parvez, Rahman, and Nakano~\cite{parvez2011} developed an elegant algorithm that generates all triangulations in $O(1)$ time per triangulation by establishing a tree structure among triangulations and using edge flipping operations. Their algorithm decomposes the triconnected graph into faces (cycles), triangulates each face independently, and combines these face triangulations to produce complete graph triangulations.
+\textbf{Exponential solution space.} The number of triangulations for a given graph can be exponential in the number of vertices, making explicit storage and exhaustive enumeration computationally expensive. Any practical algorithm must generate triangulations on-the-fly without storing all of them simultaneously.
 
-However, extending this approach to \emph{biconnected} plane graphs—which lack the strong connectivity guarantees of triconnected graphs—introduces a critical obstacle: the \textbf{multi-edge problem}. When faces share more than just boundary edges, chord flipping operations can inadvertently create multiple edges between the same pair of vertices, violating the simple graph property. This makes the triconnected algorithm inapplicable to general biconnected graphs.
+\textbf{Duplicate avoidance.} Naive enumeration approaches often generate the same triangulation multiple times. Traditional methods for avoiding duplicates require storing previously generated triangulations and performing isomorphism checks, which introduces substantial memory overhead (often exponential space) and adds at least logarithmic time complexity per triangulation for lookup operations.
 
-\subsection{Contributions}
+\textbf{Efficiency requirements.} For enumeration algorithms, the gold standard is to achieve output-sensitive time complexity, ideally constant or polynomial time per generated solution. This requires careful algorithm design to avoid redundant computation.
 
-In this paper, we present the first algorithm for generating all triangulations of biconnected plane graphs with constant amortized time complexity. Our main contributions are:
+\subsection{Prior Work and the Triconnected Case}
+
+Classical enumeration algorithms employ various strategies to address these challenges. The generate-and-filter approach produces candidate objects and removes duplicates through filtering, but requires significant memory. Orderly generation~\cite{read1978} ensures canonical representations through sophisticated techniques but involves expensive isomorphism testing. The reverse search paradigm~\cite{avis1996} addresses memory concerns by implicitly defining a spanning tree over the solution space, enabling polynomial-space enumeration, but typically requires $O(n^2)$ time per solution for triangulation problems.
+
+For the restricted case of \emph{convex polygons}, Hurtado and Noy~\cite{hurtado1999} constructed a graph representing all triangulations and studied its structural properties, though their approach requires generating all triangulations of smaller polygons first. For more general graphs, Li and Nakano~\cite{li2001} presented an algorithm for generating all biconnected ``based'' plane triangulations with at most $n$ vertices, but it builds incrementally from graphs with fewer vertices, making it inefficient when only triangulations of a specific $n$-vertex graph are needed.
+
+The breakthrough for \emph{triconnected} plane graphs came from Parvez, Rahman, and Nakano~\cite{parvez2011}, who developed an elegant algorithm achieving $O(1)$ time per triangulation using $O(n)$ space. Their key insight is to organize all triangulations into a tree structure where parent-child relationships correspond to single edge flip operations. By carefully defining a unique \emph{generating chord} for each triangulation, they ensure that flipping this chord produces a unique parent, thereby avoiding duplicates without explicit storage or isomorphism testing. The algorithm decomposes the graph into faces, triangulates each face independently, and combines results efficiently.
+
+\subsection{The Multi-Edge Problem in Biconnected Graphs}
+
+The Parvez-Rahman-Nakano algorithm critically relies on the graph being \emph{triconnected}. Triconnectivity guarantees that any two faces share at most their boundary edges—they cannot share internal chords. This property enables independent face triangulation without conflicts.
+
+However, for general \emph{biconnected} graphs (which have connectivity exactly 2), this guarantee fails. Biconnected graphs may contain \emph{separation pairs}—pairs of vertices whose removal disconnects the graph. Faces separated by such pairs can share internal structure beyond boundary edges. When triangulating faces independently, chords added in one face may conflict with chords needed in another face, potentially creating \textbf{multi-edges} (multiple edges between the same vertex pair), which violates the simple graph property.
+
+This \textbf{multi-edge problem} is the fundamental obstacle preventing direct application of the triconnected algorithm to biconnected graphs. Simply applying the face-by-face triangulation approach of Parvez et al. to biconnected graphs can yield invalid triangulations with parallel edges, making the extension non-trivial.
+
+\subsection{Our Contribution}
+
+In this paper, we present the first algorithm that generates all triangulations of biconnected planar graphs in $O(1)$ amortized time per triangulation using $O(n)$ space. Our algorithm successfully extends the tree-of-triangulations framework to the biconnected case by introducing novel techniques to resolve the multi-edge problem:
 
 \begin{enumerate}
-\item \textbf{Safe Root Selection Strategy:} We introduce the concept of a \emph{safe root vertex} for each face—a vertex from which all initial chords can be added without creating multi-edges. We prove that every face in a biconnected plane graph contains at least two safe root vertices, ensuring our algorithm always has a valid starting point.
-
-\item \textbf{Local Genealogical Trees:} Instead of a single global tree of triangulations, we construct local genealogical trees for each face. This enables independent face processing while a global chord set prevents multi-edge conflicts across faces.
-
-\item \textbf{Theoretical Guarantees:} We rigorously prove that our algorithm:
-\begin{itemize}
-    \item Generates all valid triangulations without duplications (completeness)
-    \item Always finds a safe root triangulation for any face (existence)
-    \item Achieves amortized $O(1)$ time per triangulation (efficiency)
-    \item Uses $O(n)$ space (space efficiency)
-\end{itemize}
-
-\item \textbf{Practical Implementation:} We provide a complete implementation demonstrating the algorithm's effectiveness on real-world graph instances.
+    \item \textbf{Safe root vertex selection:} For each face, we introduce the concept of a \emph{safe root vertex}—a vertex from which all initial chords can be drawn without creating multi-edges with previously triangulated faces. We prove that such vertices always exist and provide an efficient method to find them.
+    
+    \item \textbf{Local genealogical trees:} Instead of a single global tree, we construct \emph{local genealogical trees} for each face, organizing all valid triangulations of that face. These local trees are explored via depth-first search during recursive face processing.
+    
+    \item \textbf{Dynamic global chord tracking:} We maintain a \emph{global chord set} that tracks all chords added across all faces during the recursive process. This enables efficient detection and prevention of multi-edge conflicts when triangulating each face.
 \end{enumerate}
 
-\subsection{Organization}
-
-The remainder of this paper is organized as follows. Section~\ref{sec:preliminaries} provides necessary definitions and notation. Section~\ref{sec:related} discusses related work. Section~\ref{sec:algorithm} presents our algorithm in detail. Section~\ref{sec:correctness} proves correctness and completeness. Section~\ref{sec:complexity} analyzes time and space complexity. Section~\ref{sec:implementation} describes implementation details and experimental results. Section~\ref{sec:conclusion} concludes with future research directions.
-
-\section{Preliminaries}
-\label{sec:preliminaries}
-
-We begin by establishing the graph-theoretic foundations necessary for our algorithm.
-
-\begin{definition}[Planar Graph and Plane Graph]
-A graph $G = (V, E)$ is \emph{planar} if it can be embedded in the plane such that no two edges intersect except at vertices. A \emph{plane graph} is a planar graph with a fixed embedding, dividing the plane into connected regions called \emph{faces}. The unbounded region is the \emph{outer face}; all other faces are \emph{inner faces}.
-\end{definition}
-
-\begin{definition}[Connectivity]
-The \emph{connectivity} $\kappa(G)$ of a graph $G$ is the minimum number of vertices whose removal disconnects $G$ or reduces it to a single vertex. A graph is \emph{$k$-connected} if $\kappa(G) \geq k$. In particular:
+We rigorously prove that our algorithm guarantees:
 \begin{itemize}
-    \item A graph is \emph{biconnected} if $\kappa(G) \geq 2$ (no cut vertices).
-    \item A graph is \emph{triconnected} if $\kappa(G) \geq 3$ (no cut vertex pairs).
+    \item \textbf{Completeness:} Every valid triangulation is generated exactly once (no duplicates, no omissions).
+    \item \textbf{Correctness:} All generated triangulations are valid (no multi-edges, proper triangulation).
+    \item \textbf{Efficiency:} $O(1)$ amortized time per triangulation with $O(n)$ space.
 \end{itemize}
-\end{definition}
 
-\begin{definition}[Cycle and Chord]
-A \emph{cycle} $C$ in a plane graph $G$ is a sequence of distinct vertices $v_1, v_2, \ldots, v_k$ such that $(v_i, v_{i+1}) \in E$ for $1 \leq i < k$ and $(v_k, v_1) \in E$. We denote $C = \langle v_1, v_2, \ldots, v_k \rangle$ with vertices in counterclockwise order.
+We also provide implementation details and experimental results demonstrating the algorithm's practical effectiveness on various graph instances.
 
-A \emph{chord} of cycle $C$ is an edge $(v_i, v_j)$ connecting two non-consecutive vertices of $C$ that lies entirely within the face bounded by $C$.
-\end{definition}
+\subsection{Paper Organization}
 
-\begin{definition}[Triangulation of a Cycle]
-A \emph{triangulation} $T$ of a cycle $C$ with $n$ vertices is a maximal set of non-crossing chords that decomposes the interior region of $C$ into triangles. Every triangulation of an $n$-vertex cycle contains exactly $n - 3$ chords and produces $n - 2$ triangles.
-\end{definition}
+The remainder of this paper is organized as follows: Section 2 provides essential definitions and preliminaries on planar graphs and triangulations. Section 3 presents our algorithm in detail, including the safe root vertex selection, local genealogical tree construction, and the main recursive enumeration procedure. Section 4 provides rigorous proofs of correctness and completeness. Section 5 analyzes time and space complexity. Section 6 discusses implementation details and experimental results. Section 7 concludes with future research directions.
 
-\begin{definition}[Triangulation of a Plane Graph]
-A \emph{triangulation} of a plane graph $G$ is a plane graph $T$ obtained by adding chords to $G$ such that every face of $T$ is bounded by exactly three edges. We say $T$ is a \emph{triangulation of} $G$.
-\end{definition}
 
-\begin{definition}[Labeled and Unlabeled Triangulations]
-If the vertices of a cycle $C$ are numbered sequentially from $v_1$ to $v_n$, then triangulations of $C$ are called \emph{labeled triangulations}. If vertices are not numbered, triangulations are called \emph{unlabeled triangulations}.
-\end{definition}
-
-\begin{definition}[Visibility]
-In a triangulation $T$ of a cycle $C$, we say vertex $v_j$ is \emph{visible from} vertex $v_i$ if there exists a chord $(v_i, v_j)$ in $T$.
-\end{definition}
-
-\section{Related Work}
-\label{sec:related}
 
 \subsection{Triangulation Enumeration}
 
@@ -152,7 +133,7 @@ Our algorithm solves this problem through safe root selection and global chord t
 
 The key differences between the Parvez-Rahman-Nakano algorithm for triconnected graphs and our algorithm for biconnected graphs are:
 
-\begin{table}[h]
+\begin{table}
 \centering
 \small
 \begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
@@ -179,6 +160,86 @@ Applicability & Only triconnected graphs & All biconnected graphs \\
 \end{table}
 
 Our algorithm generalizes the triconnected case: when applied to a triconnected graph, every vertex is a safe root (since no chords exist between faces), and the algorithm behaves similarly to the Parvez-Rahman-Nakano algorithm.
+
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+In this section, we establish the fundamental graph-theoretic concepts and notation used throughout this paper.
+
+\subsection{Basic Graph Theory}
+
+Let $G = (V,E)$ denote a connected simple graph with vertex set $V$ and edge set $E$. We denote an edge connecting vertices $v_i$ and $v_j$ in $V$ by $(v_i,v_j)$. The \emph{degree} of a vertex $v$ is the number of edges incident to $v$ in $G$. 
+
+The \emph{connectivity} $\kappa(G)$ of a graph $G$ is the minimum number of vertices whose removal results in either a disconnected graph or a single-vertex graph. A graph is \emph{$k$-connected} if $\kappa(G) \geq k$. In particular, a graph is \emph{biconnected} if it is 2-connected (i.e., it has no cut vertices) and \emph{triconnected} if it is 3-connected (i.e., it has no separation pairs).
+
+\subsection{Planar Graphs and Plane Embeddings}
+
+A graph $G$ is \emph{planar} if it can be embedded in the plane such that no two edges intersect geometrically except at vertices to which they are both incident. A \emph{plane graph} is a planar graph with a fixed embedding in the plane. A plane graph divides the plane into connected regions called \emph{faces}. The unbounded face is called the \emph{outer face}, and all other faces are called \emph{inner faces}. 
+
+A plane graph is called a \emph{plane triangulation} if every face boundary contains exactly three edges. In this paper, we allow edges to be represented as non-straight curves, as is standard in topological graph theory.
+
+\subsection{Cycles and Chords}
+
+A \emph{cycle} $C$ in a graph $G$ is a sequence of distinct vertices $v_1,v_2,\ldots,v_k$ such that $(v_1,v_k) \in E$ and $(v_i,v_{i+1}) \in E$ for $1 \leq i < k$. In a plane graph, a cycle $C$ divides the plane into two regions: the \emph{inner region} (the region enclosed by $C$) and the \emph{outer region} (the region outside $C$). When a graph $G$ itself forms a cycle, both its inner and outer regions are faces.
+
+Let $C$ be a cycle corresponding to the boundary of a face $F$ in a plane graph $G$, and let $v_1, v_2, \ldots, v_n$ denote the vertices on $C$ in counterclockwise order. We represent $C$ by listing its vertices as $C = \langle v_1,v_2,\ldots,v_n \rangle$. 
+
+An edge $(v_i, v_j)$ between two vertices $v_i$ and $v_j$ on $C$ is called a \emph{chord} of $C$ if:
+\begin{itemize}
+    \item $(v_i,v_j) \notin E(C)$ (i.e., it is not an edge of the cycle), and
+    \item $(v_i,v_j)$ is contained entirely within the face $F$ bounded by $C$.
+\end{itemize}
+
+A chord $(v_i,v_j)$ partitions the cycle $C$ into two smaller cycles: one containing vertices $v_i,v_{i+1},\ldots,v_j$ and the other containing vertices $v_j,v_{j+1},\ldots,v_i$.
+
+\subsection{Triangulations}
+
+A \emph{triangulation of a cycle} $C$ is a maximal set of non-crossing chords that decomposes the inner region of $C$ into triangles. In a triangulation $T$ of $C$, the chord set is maximal in the sense that any chord not in $T$ must intersect at least one chord in $T$. The sides of the resulting triangles are either chords from $T$ or edges from the original cycle $C$.
+
+For a cycle $C$ with $n$ vertices, any triangulation contains exactly $n-3$ chords and produces exactly $n-2$ triangular faces. We represent each triangulation $T$ of $C$ by the set of its chords. Given this chord set, the triangulation can be uniquely reconstructed.
+
+A triangulation of a cycle $C$ is called a \emph{labeled triangulation} if the vertices of $C$ are explicitly numbered sequentially from $v_1$ to $v_n$. If the vertices are not numbered, the triangulations are called \emph{unlabeled triangulations}.
+
+\subsection{Visibility in Triangulations}
+
+In a triangulation $T$ of a cycle $C$, we say that a vertex $y$ is \emph{visible from} a vertex $x$ if there exists a chord $(x,y)$ in $T$. This notion of visibility is fundamental to the structure of triangulations and plays a key role in our algorithm's construction of root triangulations.
+
+\subsection{Key Definitions for Our Algorithm}
+
+We now introduce several specialized definitions that are central to our algorithm for biconnected graphs.
+
+\begin{definition}[Multi-edge]
+A \emph{multi-edge} occurs when two or more distinct edges connect the same pair of vertices in a graph. A \emph{simple graph} contains no multi-edges or self-loops. All triangulations considered in this paper must be simple graphs.
+\end{definition}
+
+\begin{definition}[Separation Pair]
+A \emph{separation pair} in a biconnected graph $G$ is an unordered pair of vertices $\{u,v\}$ whose removal disconnects $G$ into two or more components.
+\end{definition}
+
+\begin{definition}[Safe Root Vertex]
+A vertex $r$ in a face $F$ of a biconnected plane graph is called a \emph{safe root vertex} if the star triangulation rooted at $r$ (where all chords emanate from $r$) does not create any multi-edge with the chords already present in previously triangulated faces.
+\end{definition}
+
+\begin{definition}[Genealogical Tree]
+A \emph{genealogical tree} of triangulations for a cycle $C$ is a rooted tree structure where:
+\begin{itemize}
+    \item Each node represents a distinct triangulation of $C$,
+    \item The root is the star triangulation from a designated root vertex,
+    \item Each edge represents a single chord flip operation that transforms one triangulation into another, and
+    \item The parent-child relationship is defined by a unique generating chord.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Global Chord Set]
+The \emph{global chord set} is a dynamic data structure (typically implemented as a hash set) that maintains all chords currently present in the partially triangulated graph during the recursive enumeration process. This set enables constant-time detection and prevention of multi-edge formation.
+\end{definition}
+
+\begin{definition}[Hash Set]
+A \emph{hash set} is a data structure implementing the set abstract data type using a hash table, providing average-case $O(1)$ time complexity for insertion, deletion, and membership testing operations.
+\end{definition}
+
+These definitions provide the foundation for understanding our algorithm's approach to handling the multi-edge problem in biconnected graphs.
+
 
 \section{The Algorithm}
 \label{sec:algorithm}
@@ -337,7 +398,8 @@ The algorithm performs a depth-first exploration where:
 
 \subsection{Child Generation via Edge Flipping}
 
-To generate children in the local genealogical tree, we flip the generating chord:
+To generate children in the local genealogical tree, we flip the generating chordd:
+This
 
 \begin{algorithm}
 \caption{Generate Children of Triangulation}
@@ -355,84 +417,178 @@ To generate children in the local genealogical tree, we flip the generating chor
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Complete Algorithm Pseudocode}
+\subsection{Complete Algorithm Specification}
 
-For completeness, we provide detailed pseudocode for all major components:
+We now present the complete algorithm for generating all triangulations of a biconnected plane graph. The algorithm consists of five main procedures that work together to achieve duplicate-free enumeration.
 
-\begin{algorithm}
-\caption{Find Safe Root Vertex}
-\label{alg:find_safe_root}
-\begin{algorithmic}[1]
-\Procedure{FindSafeRootVertex}{$F, S$}
-    \State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$
-    \For{$i = 1$ to $n$}
-        \State $\text{isSafe} \gets \texttt{true}$
-        \For{$j = 1$ to $n$}
-            \If{$|i - j| > 1$ and $|i - j| < n - 1$} \Comment{$v_j$ is non-neighbor}
-                \If{$(v_i, v_j) \in S$}
-                    \State $\text{isSafe} \gets \texttt{false}$
-                    \State \textbf{break}
-                \EndIf
-            \EndIf
-        \EndFor
-        \If{$\text{isSafe}$}
-            \State \Return $v_i$
-        \EndIf
-    \EndFor
-    \State \Return \texttt{null} \Comment{Should never reach here by Theorem~\ref{thm:safe_root_exists}}
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
 
-\begin{algorithm}
-\caption{Construct Root Triangulation}
-\label{alg:root_triangulation}
-\begin{algorithmic}[1]
-\Procedure{RootTriangulation}{$F, r$}
-    \State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$
-    \State $T \gets \emptyset$
-    \For{each vertex $v_j \in F$}
-        \If{$v_j \neq r$ and $v_j$ is not a neighbor of $r$ on $F$}
-            \State $T \gets T \cup \{(r, v_j)\}$
-        \EndIf
-    \EndFor
-    \State \Return $T$
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{Find All Triangulations of a Cycle}
-\label{alg:all_triangulations_cycle}
-\begin{algorithmic}[1]
-\Procedure{FindAllTriangulationsCycle}{$F, T, i, T_{\text{current}}, S$}
-    \State Add all chords of $T$ to $S$
-    \If{$i = k$} \Comment{All faces processed}
-        \State \textbf{output} $T_{\text{current}} \cup T$
-    \Else
-        \State \Call{ProcessFace}{$i + 1, T_{\text{current}} \cup T, S$}
-    \EndIf
-    \State Remove all chords of $T$ from $S$
-    
-    \State Find all child triangulations of $T$
-    \For{each child $T'$ of $T$}
-        \State \Call{FindAllTriangulationsCycle}{$F, T', i, T_{\text{current}}, S$}
-    \EndFor
-\EndProcedure
-\end{algorithmic}
-\end{algorithm}
+\subsubsection{Main Entry Point}
 
 \begin{algorithm}
 \caption{Start Triangulation Process}
 \label{alg:start}
 \begin{algorithmic}[1]
-\Procedure{StartTriangulation}{$G$}
-    \State Decompose $G$ into faces $F_1, F_2, \ldots, F_k$
+\Procedure{StartTriangulation}{$G, k$}
+    \State Label the faces $F_1, F_2, \ldots, F_k$ arbitrarily
     \State Initialize global chord set $S \gets \emptyset$
-    \State \Call{ProcessFace}{$1, \emptyset, S$}
+    \State $T \gets \emptyset$ \Comment{Empty partial triangulation}
+    \State \Call{FindAllTriangulationsCycle}{$F, T, 0$}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+
+
+\subsubsection{Face-Level Triangulation}
+
+The following procedure processes each face by finding a safe root, constructing the root triangulation, and exploring the local genealogical tree.
+
+\begin{algorithm}
+\caption{Find All Triangulations for Current Face}
+\label{alg:face_triangulation}
+\begin{algorithmic}[1]
+\Procedure{FindAllTriangulationsCycle}{$F, T, i$}
+    \State $n \gets$ number of vertices of face $F_i$
+    \State $T_{ir} \gets$ \Call{FindSafeRoot}{$F, i$} \Comment{Time: $O(n)$}
+    \State Add all chords of $T_{ir}$ to $S$ \Comment{Time: $O(n)$}
+    \State \Call{OutputTriangulation}{$T, T_{ir}, i$}
+    \State $T_i \gets T_{ir}$
+    \For{$j = n - 1$ \textbf{downto} $3$}
+        \State Add chord $(v_1, v_j)$ to $S$
+        \State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
+        \State Remove chord $(v_1, v_j)$ from $S$
+    \EndFor
+    \State Remove all chords of $T_{ir}$ from $S$ \Comment{Time: $O(n)$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\subsubsection{Recursive Child Generation}
+
+This procedure recursively generates all children in the local genealogical tree by identifying and flipping generating chords.
+
+\begin{algorithm}
+\caption{Find All Child Triangulations in Local Tree}
+\label{alg:child_triangulations}
+\begin{algorithmic}[1]
+\Procedure{FindAllChildTriangulationsCycle}{$T_i, T, i$}
+    \State \Call{OutputTriangulation}{$T, T_i, i$}
+    \If{$T_i$ has no generating chord}
+        \State \Return \Comment{Leaf node reached}
+    \EndIf
+    \State Let $(v_b, v_{b'})$ be the leftmost generating chord of $T_i$
+    \ForAll{$j \geq b$}
+        \If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $(v_1, v_j) \notin S$}
+            \State Add chord $(v_1, v_j)$ to $S$
+            \State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
+            \State Remove chord $(v_1, v_j)$ from $S$
+        \EndIf
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Output and Recursion Control}
+
+When a face is fully processed, this procedure either outputs the complete triangulation (if all faces are done) or recursively processes the next face.
+
+\begin{algorithm}
+\caption{Output Triangulation or Continue to Next Face}
+\label{alg:output}
+\begin{algorithmic}[1]
+\Procedure{OutputTriangulation}{$T, T_i, i$}
+    \If{$i = k$} \Comment{All faces triangulated}
+        \State \textbf{output} $(T \cup T_i)$
+    \Else
+        \State \Call{FindAllTriangulationsCycle}{$F, T \cup T_i, i + 1$}
+    \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Safe Root Finding}
+
+The safe root finding procedure identifies a vertex from which all chords can be drawn without creating multi-edges.
+
+\begin{algorithm}
+\caption{Find Safe Root Triangulation}
+\label{alg:safe_root_complete}
+\begin{algorithmic}[1]
+\Procedure{FindSafeRoot}{$F, \text{index}$}
+    \State $r \gets$ \Call{FindSafeRootVertex}{$F, \text{index}$}
+    \State $T_r \gets \emptyset$
+    \State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$ with $v_r = $ safe root vertex
+    \For{each vertex $v_j$ in $F$}
+        \If{$v_j$ is not adjacent to $v_r$ on the cycle boundary}
+            \State Add chord $(v_r, v_j)$ to $T_r$
+        \EndIf
+    \EndFor
+    \State \Return $T_r$
+\EndProcedure
+
+\Procedure{FindSafeRootVertex}{$F, \text{index}$}
+    \State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$
+    \State $\text{startIndex} \gets n - 1$
+    \State $\text{endIndex} \gets 0$
+    \While{$\text{startIndex} > \text{endIndex} + 1$}
+        \If{chord $(v_{\text{startIndex}}, v_{\text{endIndex}})$ exists in $S$}
+            \State $\text{startIndex} \gets \text{startIndex} - 1$
+        \Else
+            \State $\text{endIndex} \gets \text{endIndex} + 1$
+        \EndIf
+    \EndWhile
+    \State \Return $v_{\text{endIndex}}$ \Comment{Safe root vertex found}
+
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\subsection{Algorithm Walkthrough}
+
+To illustrate how the algorithm works, we provide a brief walkthrough:
+
+\begin{enumerate}
+    \item \textbf{Initialize:} Start with an empty global chord set $S$ and empty partial triangulation $T$.
+    
+    \item \textbf{Process Face $F_i$:} 
+    \begin{itemize}
+        \item Find a safe root vertex $r$ for $F_i$ using \textsc{FindSafeRootVertex}
+        \item Construct the root triangulation $T_{ir}$ with all chords from $r$
+        \item Add these chords to $S$
+    \end{itemize}
+    
+    \item \textbf{Explore Local Tree:}
+    \begin{itemize}
+        \item Starting from $T_{ir}$, traverse the local genealogical tree
+        \item At each triangulation, either output (if last face) or recurse to next face
+        \item Generate children by flipping the generating chord
+        \item Maintain $S$ through backtracking (add/remove chords)
+    \end{itemize}
+    
+    \item \textbf{Backtrack:} After exploring all descendants, remove chords from $S$ and try alternative triangulations.
+    
+    \item \textbf{Complete:} When all faces have been processed with all their triangulation combinations, output the complete triangulation.
+\end{enumerate}
+
+\subsection{Key Properties}
+
+The algorithm maintains several important invariants:
+
+\begin{itemize}
+    \item \textbf{Global Chord Set Consistency:} At any point, $S$ contains exactly the chords from the current path in the recursion tree (faces $F_1$ through $F_{i-1}$ are fully triangulated, and face $F_i$ has a specific triangulation being explored).
+    
+    \item \textbf{No Multi-edges:} Before adding any chord, we verify it is not in $S$, ensuring no multi-edges are created.
+    
+    \item \textbf{Local Tree Structure:} Each face's triangulations form a tree rooted at the safe root triangulation, ensuring systematic exploration without duplicates.
+    
+    \item \textbf{Completeness:} By exploring all branches in each local tree and all faces, every valid combination is generated exactly once.
+\end{itemize}
+
 
 \section{Correctness and Completeness}
 \label{sec:correctness}
