@@ -1140,7 +1140,8 @@ Total space: $O(n)$.
 \section{Implementation and Experimental Results}
 \label{sec:implementation}
 
-We implemented the algorithm in Python, with comprehensive testing on various biconnected plane graphs. The implementation is available at \url{https://github.com/TAR2003/ThesisGraph}.
+We implemented the algorithm in Java, with comprehensive testing on various biconnected plane graphs.
+%  The implementation is available at \url{https://github.com/TAR2003/ThesisGraph}.
 
 \subsection{Implementation Details}
 
@@ -1218,6 +1219,123 @@ Experimental results confirm the theoretical analysis:
     \item \textbf{Memory usage:} Linear space complexity confirmed—memory usage scaled linearly with the number of vertices
     \item \textbf{Safe root finding:} Always found safe root vertices in $O(n)$ time, with most faces having multiple safe root options
 \end{itemize}
+
+\subsection{Detailed Experimental Results}
+
+We conducted comprehensive experiments on 41 different graph instances representing various graph structures. Table~\ref{tab:experimental_results} presents detailed performance metrics for each test case.
+
+The graph instances include:
+\begin{itemize}
+    \item \textbf{Simple cycles:} $C_3$ (triangle), $C_4$ (square), $C_5$ (pentagon), $C_6$ (hexagon), $C_7$ (heptagon), $C_8$ (octagon), $C_9$ (nonagon)
+    \item \textbf{Wheels:} $W_4$, $W_5$ (hub vertex connected to outer cycle)
+    \item \textbf{Complete graphs:} $K_3$, $K_4$ (tetrahedron)
+    \item \textbf{Bipartite:} $K_{2,3}$
+    \item \textbf{Diamond structures:} Various diamond-shaped configurations
+    \item \textbf{Quadrilaterals:} Graphs composed of quadrilateral faces (4-quad, 7-quad, 14-quad)
+    \item \textbf{Pre-triangulated:} Graphs already containing triangular faces (4-tri, 9-tri)
+    \item \textbf{Complex structures:} Octahedron dual, general planar graphs with varying vertex/edge/face counts
+\end{itemize}
+
+\textbf{Time Complexity Metrics:}
+\begin{itemize}
+    \item \textbf{Building Time (B):} Time to construct initial triangulations. For $n = 3$, $B = 0$ (triangle is already triangulated). For $n = 4$, $B = 1$ (linear construction as mentioned in the algorithm). For $n \geq 5$, we add $n$ to the building time for each triangulation built.
+    \item \textbf{Flipping Time (F):} Each edge flip operation adds 1 to the flipping time.
+    \item \textbf{Total Iterations:} Total number of recursive calls in the DFS exploration tree.
+    \item \textbf{$(B+F)/T$ Ratio:} The ratio of total operations (building + flipping) to total triangulations, which measures amortized complexity.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Experimental Results on 41 Graph Instances}
+\label{tab:experimental_results}
+\begin{tabular}{|l|r|r|r|r|r|r|}
+\hline
+\textbf{Graph} & \textbf{Iterations} & \textbf{Triangulations ($T$)} & \textbf{Building ($B$)} & \textbf{Flipping ($F$)} & \textbf{$4 \times T$} & \textbf{$(B+F)/T$} \\
+\hline
+\multicolumn{7}{|c|}{\textit{Simple Cycles}} \\
+\hline
+$C_3$ (triangle) & 0 & 1 & 0 & 0 & 4 & 0.00 \\
+$C_4$ (square) & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+$C_5$ (pentagon) & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+$C_6$ (hexagon\_1) & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+$C_6$ (hexagon\_2) & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+$C_6$ (hexagon\_3) & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+$C_7$ (heptagon) & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+$C_8$ (octagon) & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+$C_9$ (nonagon) & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+\hline
+\multicolumn{7}{|c|}{\textit{Diamond Structures}} \\
+\hline
+diamond\_1 & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+diamond\_2 & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+diamond\_3 & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+\hline
+\multicolumn{7}{|c|}{\textit{Complete Graphs and Tetrahedra}} \\
+\hline
+$K_3$ (triangle) & 0 & 1 & 0 & 0 & 4 & 0.00 \\
+$K_4$ (tetrahedron\_1) & 0 & 1 & 0 & 0 & 4 & 0.00 \\
+$K_4$ (tetrahedron\_2) & 0 & 1 & 0 & 0 & 4 & 0.00 \\
+Octahedron dual & 0 & 1 & 0 & 0 & 4 & 0.00 \\
+\hline
+\multicolumn{7}{|c|}{\textit{Pre-triangulated Graphs}} \\
+\hline
+triangulated\_4tri\_1 & 0 & 1 & 0 & 0 & 4 & 0.00 \\
+triangulated\_4tri\_2 & 0 & 1 & 0 & 0 & 4 & 0.00 \\
+triangulated\_9tri & 0 & 1 & 0 & 0 & 4 & 0.00 \\
+\hline
+\multicolumn{7}{|c|}{\textit{Wheel Graphs}} \\
+\hline
+$W_4$ wheel & 2 & 2 & 1 & 1 & 8 & 1.00 \\
+$W_5$ wheel\_1 & 9 & 5 & 5 & 4 & 20 & 1.80 \\
+$W_5$ wheel\_2 & 9 & 5 & 5 & 4 & 20 & 1.80 \\
+\hline
+\multicolumn{7}{|c|}{\textit{Bipartite and Small Graphs}} \\
+\hline
+$K_{2,3}$ bipartite & 9 & 4 & 6 & 3 & 16 & 2.25 \\
+\hline
+\multicolumn{7}{|c|}{\textit{General Planar Graphs}} \\
+\hline
+graph\_V5E6F3 & 14 & 4 & 11 & 3 & 16 & 3.50 \\
+graph\_V5E7F3 & 6 & 2 & 5 & 1 & 8 & 3.00 \\
+graph\_V5E7F4\_1 & 6 & 2 & 5 & 1 & 8 & 3.00 \\
+graph\_V5E7F4\_2 & 1 & 1 & 1 & 0 & 4 & 1.00 \\
+graph\_V5E7F4\_3 & 6 & 2 & 5 & 1 & 8 & 3.00 \\
+graph\_V6E7F3\_1 & 46 & 20 & 27 & 19 & 80 & 2.30 \\
+graph\_V6E7F3\_2 & 58 & 24 & 35 & 23 & 96 & 2.42 \\
+graph\_V6E7F3\_3 & 46 & 20 & 27 & 19 & 80 & 2.30 \\
+graph\_V6E7F3\_4 & 46 & 20 & 27 & 19 & 80 & 2.30 \\
+graph\_V7E9F3 & 14 & 9 & 6 & 8 & 36 & 1.56 \\
+graph\_V7E11F5 & 12 & 7 & 6 & 6 & 28 & 1.71 \\
+graph\_V7E14F9 & 2 & 2 & 1 & 1 & 8 & 1.00 \\
+graph\_V8E10F4 & 94 & 40 & 55 & 39 & 160 & 2.35 \\
+graph\_V8E15F8 & 10 & 5 & 6 & 4 & 20 & 2.00 \\
+graph\_V9E10F3 & 15,075 & 13,880 & 1,196 & 13,879 & 55,520 & 1.09 \\
+graph\_V12E25F12 & 69 & 62 & 8 & 61 & 248 & 1.11 \\
+\hline
+\multicolumn{7}{|c|}{\textit{Quadrilateral-based Graphs}} \\
+\hline
+quadrilateral\_4quad & 30 & 16 & 15 & 15 & 64 & 1.88 \\
+quadrilateral\_7quad & 162 & 72 & 91 & 71 & 288 & 2.25 \\
+quadrilateral\_14quad & 32,766 & 16,384 & 16,383 & 16,383 & 65,536 & 2.00 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Key Observations:}
+\begin{enumerate}
+    \item \textbf{Already-triangulated graphs} ($K_3$, $K_4$, pre-triangulated graphs): These have $(B+F)/T = 0$ as expected, since no operations are needed.
+    
+    \item \textbf{Simple structures} (simple cycles, diamonds, $W_4$): These exhibit $(B+F)/T \approx 1$, indicating near-optimal performance with minimal overhead.
+    
+    \item \textbf{Complex structures} (graphs with multiple faces and vertices): The ratio $(B+F)/T$ ranges from 1.09 to 3.50, demonstrating that even for complex graphs, the amortized cost per triangulation remains small and bounded by a constant.
+    
+    \item \textbf{Large-scale instances} (graph\_V9E10F3 with 13,880 triangulations, quadrilateral\_14quad with 16,384 triangulations): Despite generating thousands of triangulations, the $(B+F)/T$ ratio remains low (1.09 and 2.00 respectively), confirming the $O(1)$ amortized time complexity.
+    
+    \item \textbf{Output verification}: All 41 test instances passed the verification check—output files matched exactly, confirming that the algorithm generates all triangulations correctly without duplicates.
+\end{enumerate}
+
+The experimental results strongly support the theoretical analysis, demonstrating that the algorithm achieves $O(1)$ amortized time per triangulation across a diverse range of biconnected planar graphs.
 
 \subsection{Verification and Validation}
 

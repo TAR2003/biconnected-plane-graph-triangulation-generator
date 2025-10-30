@@ -9,6 +9,8 @@ public class TweakedAlgo {
     HashSet<Pair> chords;
     ArrayList<ArrayList<Integer>> vertices;
     long totaliterations = 0;
+    int B = 0;
+    int F = 0;
 
     TweakedAlgo(ArrayList<ArrayList<Integer>> vertices) {
         // this.n = n;
@@ -90,6 +92,7 @@ public class TweakedAlgo {
             chords.remove(oldGlobalChord);
             chords.add(newGlobalChord);
             totaliterations++;
+            F++;
             // System.out.println("Front Flip------- " + i);
             flip(GS, OP, i);
             // System.out.println("Front flip ends--------- " + i);
@@ -177,7 +180,15 @@ public class TweakedAlgo {
             OP.add(new Pair(i - 1, (i + 1) % n));
             chords.add(new Pair(adjustedFace.get(0), adjustedFace.get(i)));
         }
-        totaliterations += n;
+        if (n > 4) {
+            totaliterations += n;
+            B += n;
+        }
+        else {
+            totaliterations += 1;
+            B += 1;
+        }
+
         generateChildTriangulations(allTriangulations, GS, OP, T, 0, adjustedFace, faceno);
         for (int i = 2; i < n - 1; i++) {
             chords.remove(new Pair(adjustedFace.get(0), adjustedFace.get(i)));
@@ -189,8 +200,13 @@ public class TweakedAlgo {
     }
 
     String getResult() {
-        System.out.println("Total iterations: " + totaliterations );
+        System.out.println("Total iterations: " + totaliterations);
         System.out.println("Total Triangulations: " + allTriangulations.size());
+        System.out.println("Total iteration time: " + totaliterations);
+        System.out.println("Total Building Time: " + B);
+        System.out.println("Total Flipping Time: " + F);
+        System.out.println("4 * T: " + (4 * allTriangulations.size()));
+        System.out.println("(B+F/T ):---------------------------------- " + ((B + F) * 1.0 / ((allTriangulations.size()))));
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(allTriangulations.size());
         stringBuilder.append('\n');
