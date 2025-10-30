@@ -1012,41 +1012,41 @@ To validate our theoretical bounds, we provide empirical data showing the relati
     ylabel={Number of Triangulations},
     legend pos=north west,
     grid=major,
-    width=0.9\textwidth,
-    height=0.45\textheight,
-    xmin=4, xmax=8,
-    ymin=0, ymax=150,
+    width=0.95\textwidth,
+    height=0.75\textheight,
+    xmin=4, xmax=9,
+    ymin=0, ymax=450,
     ylabel style={align=center},
-    legend style={font=\normalsize},
-    ytick={0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150},
-    yticklabels={0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150},
-    xtick={4,5,6,7,8},
-    xticklabels={4,5,6,7,8}
+    legend style={font=\large},
+    ytick={0,20,40,60,80,100,150,200,250,300,350,400,450},
+    yticklabels={0,20,40,60,80,100,150,200,250,300,350,400,450},
+    xtick={4,5,6,7,8,9},
+    xticklabels={4,5,6,7,8,9}
 ]
 
 % Theoretical lower bound: n-3
-\addplot[color=green!60!black, dashed, very thick, domain=4:8, samples=100] {x-3};
+\addplot[color=green!60!black, dashed, very thick, domain=4:9, samples=100] {x-3};
 \addlegendentry{Theoretical Bound $n-3$ (Linear)}
 
 % Linear reference: n
-\addplot[color=black, dotted, thick, domain=4:8, samples=100] {x};
+\addplot[color=black, dotted, thick, domain=4:9, samples=100] {x};
 \addlegendentry{Reference Line $n$}
 
 % Minimum practical (in biconnected graphs)
-\addplot[color=red, mark=square*, thick, mark size=4pt] coordinates {
-    (4,1) (5,2) (6,4) (7,11) (8,26)
+\addplot[color=red, mark=square*, thick, mark size=5pt] coordinates {
+    (4,1) (5,2) (6,4) (7,11) (8,26) (9,79)
 };
 \addlegendentry{Min Practical (Biconnected)}
 
 % Maximum practical / Total triangulations (Catalan numbers)
-\addplot[color=blue, mark=*, thick, mark size=4pt] coordinates {
-    (4,2) (5,5) (6,14) (7,42) (8,132)
+\addplot[color=blue, mark=*, thick, mark size=5pt] coordinates {
+    (4,2) (5,5) (6,14) (7,42) (8,132) (9,429)
 };
 \addlegendentry{Max Practical (Catalan)}
 
 \end{axis}
 \end{tikzpicture}
-\caption{Comparison of theoretical and practical triangulation bounds for $n = 4$ to $n = 8$. Key insight: The minimum practical triangulations (red squares) always exceed the theoretical lower bound $n-3$ (green dashed line), confirming that our $O(n)$ lower bound holds even in the worst case. The gap between theory and practice grows exponentially, showing the algorithm performs much better than the theoretical minimum.}
+\caption{Comparison of theoretical and practical triangulation bounds for $n = 4$ to $n = 9$. Key insight: The minimum practical triangulations (red squares) always exceed the theoretical lower bound $n-3$ (green dashed line), confirming that our $O(n)$ lower bound holds even in the worst case. The gap between theory and practice grows exponentially, showing the algorithm performs much better than the theoretical minimum.}
 \label{fig:triangulation_growth}
 \end{figure}
 
