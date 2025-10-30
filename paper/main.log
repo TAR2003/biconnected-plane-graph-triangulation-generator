@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  30 OCT 2025 21:10
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  30 OCT 2025 21:26
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -682,12 +682,12 @@ Overfull \hbox (1.94043pt too wide) in paragraph at lines 1004--1005
 [23]
 
 [24]
-Overfull \hbox (10.7422pt too wide) in paragraph at lines 1191--1192
+Overfull \hbox (10.7422pt too wide) in paragraph at lines 1195--1196
 []\OT1/cmr/bx/n/12 Simple poly-gons: \OT1/cmr/m/n/12 Tri-an-gle, square, pen-tagon, hexagon, hep-tagon, oc-tagon, nonagon 
  []
 
 
-Overfull \hbox (18.0779pt too wide) in paragraph at lines 1194--1195
+Overfull \hbox (18.0779pt too wide) in paragraph at lines 1198--1199
 []\OT1/cmr/bx/n/12 Graphs with vary-ing con-nec-tiv-ity: \OT1/cmr/m/n/12 From min-i-mal bi-con-nected to near-triconnected
  []
 
@@ -710,15 +710,15 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 670DBA87093DAF22D70A4C77377E66C5;10603.
  ) 
 Here is how much of TeX's memory you used:
- 32312 strings out of 468133
- 755570 string characters out of 5430229
- 1254562 words of memory out of 5000000
- 60202 multiletter control sequences out of 15000+600000
+ 32314 strings out of 468133
+ 755649 string characters out of 5430229
+ 1284347 words of memory out of 5000000
+ 60204 multiletter control sequences out of 15000+600000
  640626 words of font info for 93 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,19n,91p,1197b,2288s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,19n,91p,1197b,2277s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\TAWKIR\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (29 pages, 401720 bytes).
+Output written on main.pdf (29 pages, 402823 bytes).
 PDF statistics:
  687 PDF objects out of 1000 (max. 8388607)
  233 named destinations out of 1000 (max. 500000)
