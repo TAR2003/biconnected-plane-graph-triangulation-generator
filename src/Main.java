@@ -53,7 +53,10 @@ public class Main {
             }
             System.out.println("number of vertices: " + num);
             System.out.println("Total Triangulations: " + allTriangulations.size());
-            System.out.println("Minimum Triangulations for that face inside a biconnected graph without multi edge with otherr faces: " + mn);
+            System.out.println("Minimum Triangulations for that face inside a biconnected graph without multi edge with other faces: " + mn);
+            System.out.println(
+                    "maximum Triangulations for that face inside a biconnected graph without multi edge with other faces: "
+                            + allTriangulations.size());
         }
 
     }
