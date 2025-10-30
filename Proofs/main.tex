@@ -1,27 +1,14 @@
 \documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 \usepackage{amssymb}
-\usepackage{amsthm}
 \usepackage{graphicx}
-\usepackage{tikz}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
 \usepackage{geometry}
-\usepackage{hyperref}
-
+\usepackage{enumerate}
 \geometry{margin=1in}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\theoremstyle{remark}
-\newtheorem{remark}{Remark}
-
-\title{Proofs for Planar Triangulation Algorithm}
+\title{Proofs for Triangulation Algorithm}
 \author{}
 \date{}
 
@@ -29,308 +16,452 @@
 
 \maketitle
 
+\tableofcontents
+\newpage
+
 \section{Introduction}
 
-The algorithm follows a tree-like structure for generating all valid planar triangulations of a biconnected planar graph. To prove the correctness and efficiency of our algorithm, we must sequentially prove different elements: completeness, existence of valid root triangulations, and complexity analysis.
+The algorithm is like a tree. We can find that in the structure.
+
+Now to prove our algorithm we have to go sequentially to proof different element of the algorithm.
 
 \section{Proof of Completeness}
 
-\subsection{Pruning Strategy}
+Firstly, we can go with the proof for completeness. Because as we know that there are prune operations for a particular triangulation, where a blocking chord of the triangulation is a duplicate chord. Here, we prune that triangulation and the branch because of that duplication. Now we have to prove that all of the children of that branch would have been invalid.
 
-Our algorithm employs pruning operations for triangulations where a blocking chord is a duplicate chord (i.e., the chord has occurred in earlier faces). When we encounter such duplication, we prune that triangulation and its entire branch.
+Now in the matter of invalid triangulations, we only notify those triangulations invalid, where aany one of the blocking chords are a duplocate chord, meaning the chord has occurred earlier faces. Now in the below section, we have to prove that a blocking chord is never flipped in the children of a branch.
 
-\begin{theorem}[Completeness via Pruning]
-All children of a pruned branch would have been invalid triangulations.
-\end{theorem}
+\subsection{Blocking Chord Properties}
 
-\begin{proof}
-We classify triangulations as invalid when any one of their blocking chords is a duplicate chord. To prove completeness, we must demonstrate that a blocking chord is never flipped in the children of a branch.
+Let a chord be $a$-$b$ which is a blocking chord in any triangulation tree. Now as the node is a triangulation, every face will be triangulated. Meaning there will be two other points who will make triangulations with $a$-$b$ chord, in the two sides. We will select the point at the opposite side of the root vertex as $c$, and the point at the root side $r$. Now the $r$ can be in different sections.
 
-Let chord $a$-$b$ be a blocking chord in any triangulation tree node. Since the node represents a triangulation, every face is triangulated. Therefore, there exist two other points that form triangles with the $a$-$b$ chord on both sides:
-\begin{itemize}
-    \item Let $c$ be the point on the opposite side of the root vertex
-    \item Let $r$ be the point on the root side
-\end{itemize}
+\subsubsection{Case 1: $r$ on the left of root vertex}
 
-We analyze three cases based on the position of $r$:
+Now, firstly, the $r$ could be on the left of the root vertex like this 
 
-\textbf{Case 1: $r$ is on the left of the root vertex}
+In this case, flipping the $a$-$b$ chord will result in $r$-$c$ chord.
 
-Flipping the $a$-$b$ chord would result in an $r$-$c$ chord. However, before flipping, the $b$-$r$ chord was also a blocking chord positioned to the left of $a$-$b$. This means $a$-$b$ could not be the leftmost blocking chord. Consequently, the new $r$-$c$ chord cannot be the leftmost blocking chord either, because the $r$-$b$ chord still exists and remains to the left of the $c$-$r$ chord. Therefore, flipping the $a$-$b$ blocking chord is not permitted by the algorithm in this case.
+Notice that before the flipping the $b$-$r$ chord were also a blocking chord, and it was left of $a$-$b$, meaning $a$-$b$ could not be the left most blocking chord, as a result the new $r$-$c$ also cant be the left most blocking chord, because you can see that the $r$-$b$ chord is still there and still left side than the $c$-$r$ node, meaning $c$-$r$ do not have any chace for being the left most blocking chord of the triangulation. So, in this particular case, flipping $a$-$b$ blocking chord is not possible according to the algorithm.
 
-\textbf{Case 2: $r$ is on the right of the root vertex}
+\subsubsection{Case 2: $r$ on the right of root vertex}
 
-Flipping the $a$-$b$ chord would produce an $r$-$c$ chord. However, the $a$-$r$ chord is more to the left than the $r$-$c$ chord, making this flip invalid according to the algorithm.
+Also if the $r$ is on the right side of the root vertex 
 
-\textbf{Case 3: $r$ is at the root}
+Here flipping the $a$-$b$ chord will result in 
 
-Flipping the $a$-$b$ chord would create a root-$c$ chord. This would give the child triangulation's root vertex better visibility than the parent, which violates the algorithm's constraints.
+The new $r$-$c$ chord. But notice that the $a$-$r$ chord i more left than the $r$-$c$ chord, so the flipping is not valid according to the algorithm as well.
 
-In all three cases, flipping a blocking chord in a triangulation tree is impossible. Therefore, a blocking chord will be present in all of its children.
+\subsubsection{Case 3: $r$ at the root}
 
-Thus, if a blocking chord is a duplicate chord, all child triangulations will contain this chord, making all child triangulations invalid. By pruning them, we do not ignore any valid triangulations.
-\end{proof}
+Finally, if the $r$ is at the root then
 
-\subsection{Finding Valid Root Triangulations}
+In this case flipping the $a$-$b$ chord will result in 
 
-Having proved that our pruning method preserves all valid triangulations, we now address whether we can always find a root triangulation where no chord is duplicate or blocking.
+The new root-$c$ chord is making the new child triangulation's root vertex with better visibility than the parent one, so the flipping is not valid as well.
+
+\subsection{Conclusion on Blocking Chords}
+
+So we can see in the all of those 3 cases, flipping a blocking chord in a tree of triangulation is impossible. Meaning that a blocking chord will be present in all of its children. 
+
+Thus, if a blocking chord is a duplicate chord, then we can say that all of the child triangulation will contain the chord which will make all of it child triangulations invalid.
+
+So, by pruning them, we are not ignoring any valid triangulations. (Proved)
 
 \section{Existence of Valid Root Triangulation}
 
-\begin{definition}[Root Triangulation]
-A root triangulation is the root of the tree of triangulations, constructed by selecting a root vertex and adding chords from this root vertex to all non-neighboring vertices of the current face.
-\end{definition}
+Now we have proved that in our pruning method of comparing blocking chords, we have not left out any valid triangulations. 
 
-\begin{definition}[Safe Root Vertex]
-A safe root vertex is one from which adding chords to every other non-neighboring node will not create a multi-edge problem. Formally, we must find a vertex such that none of the previous faces share a chord where one endpoint is the root vertex and the other endpoint is a vertex of the current face.
-\end{definition}
+So once we can find a root triangulation, where no chord will be a duplicate or blocking chord, we can always find all of the valid triangulations via the algorithm. Now the question is can we always find such a valid root triangulation?
 
-\begin{theorem}[Existence of Safe Root]
-In any face of a biconnected planar graph, there always exist at least two safe vertices that can serve as root vertices for valid triangulations.
-\end{theorem}
+\subsection{Proof: There will always be a valid root triangulation}
 
-\begin{proof}
-Consider a face with $n$ vertices, numbered from 1 to $n$. Since we are working with a planar graph, chords can only exist in the outer plane.
+To elaborate this, we are calling a root triangulation a root of the tree of triangulations. Here we will select a root vertex and add chords from the root vertex to all of the non neighbouring chords of the root vertex. Thus we can get the root triangulation.
 
-\textbf{Case 1: No chords from previous faces}
+Now to have a root triangulation, we have find such a safe root, adding chords from it to every other non neighbouring nodes will not create multi edge problem.
 
-If there are no chords from previous faces with both endpoints inside the current face, then all $n$ vertices are eligible to be safe vertices.
+Rephrasing that, we have to prove the existence of such a root, with whom none of the previous faces share a chord where one end is the root vertex and at the other end is one of the vertices of the current face.
 
-\textbf{Case 2: At least one chord from previous faces}
+In this picture a vertex is the root vertex, adding chords with each of the non neighbouring nodes of a with `a' vertex will get us the root triangulation of the tree of triangulations.
 
-Suppose there exists a chord $a$-$b$ on the outer plane belonging to a previous face. Both $a$ and $b$ are disqualified from being safe vertices. However, this introduces an important constraint.
+So we have to prove that in this face of abcdefg, there will always be safe vertices like a, creating root triangultions basing on them will not create any multi edge problem. 
 
-Due to planarity, chords cannot cross each other. Since the $a$-$b$ chord exists, no chord on the outer plane can overtake it. Consequently:
-\begin{itemize}
-    \item Nodes $(a+1, a+2, \ldots)$ might have connections between them (if not neighbors)
-    \item They cannot have chords with nodes $(a-1, \ldots, b+1)$ as this would violate planarity by crossing the $a$-$b$ chord
-\end{itemize}
+\subsection{Analysis of Safe Vertices}
 
-This creates a specific structure we denote as $T_n$, where $n$ is the number of internal vertices between the endpoints of a constraining chord.
+Now we got a face where there are $n$ vertices, numbered from 1 to $n$. Now as it is a planar graph, there can be only chords in the outer plane. So there is one possiblity that there will not be any chords from the previous faces that will have both endpoints inside of the current face. In that particular case, all of the $n$ vertices will be eligible for being a safe vertex.
 
-\subsection{Analysis of $T_n$ Structures}
+But if there is atleast one chord on the outer plane, belonging to any of the previous faces, then
 
-The current face contains two complementary $T_n$ structures:
+Here there is a chord on the outer plane, where $a$-$b$ chord is present in one of the previous faces. Now $a$-$b$ cannot be chord in the present face, meaning both $a$ and $b$ are disqualified from being a safe vertex in the current face. Now there is a very important contraint added in the current face.
+
+As our current graph is a planar graph and we are doing planar triangulation, any chord cannot overtake any other chords. Now as we have found $a$-$b$ chord in here, that means there cannot be any chord on the outer plane that will overtake $a$-$b$ chord. As a result, here in the picture, node $(a+1, a+2)$ might have connection between them (if not neightbour) but they cant have a chord with any of the nodes $(a-1, b+1)$, because that will break the planarity constraint by overtaking the $a$-$b$ chord on the outer plane. So now to prove there will be any safe vertex, we have to just prove that between $a+1$ to $b-1$ there have to be a vertex that will not have any chord with $a , a+ 1, \ldots ,b$ on the other hand, for $a-1 \ldots B+1$, we have to prove that there will be a vertex which will not have chords with $a,a-1,\ldots,b+1,b$.
+
+\subsection{$T_n$ Structures}
+
+Now we can easily find out that our connection has become like a specific structure like this.
+
+Here the internal vertices can make chords in the inside plane, but cant cross the vertex between start and end vertices, the $a$-$b$ chord. Now there can be any number of vertices inside this particular structure. We can call them $T_n$ structures, $n$ is the number of vertices inside the $a$-$b$ vertices. 
+
+Now in this case, we have two of these $T_n$ structures here in the face
+
+One is the $a,a+1,\ldots,b$ and the other is $a,a-1,\ldots,b$ 
+
+Now the two of the $T_n$ structures has some internal vertices, $1,\ldots,n-3$
+
+The lowest possible $T_n$ is $T_1$, there cannot be any $T_0$, because that will mean $a$ and $b$ are neighbours, and no two neighbouring nodes can make a chord.
+
+So the lowest is 1, and highest number is $n - 1 - 2 = n - 3$ (there 2 nodes minus are and $b$, and the one is $T_1$ on the other end.)
+
+We can call the two $T_n$ structures as the complenting $T_n$ structures of one another. 
+
+\subsubsection{Proof for $T_1$}
+
+Now for $T_1$ we can proof that the one vertex inside it is the safe vertex, because
+
+Here $a$ and $b$ both are the neighbors of $c$, that means any chord by $c$ is impossible.
+
+\subsubsection{Proof for $T_2$}
+
+Now for $T_2$, 
+
+Here if there is a chord with $c$, it must be with $b$, because only $b$ node is not neighbor with $c$, but this will turn the $d$ vertex inside a $T_1$ structure, making it a safe vertex.
+
+The same will be true for $d$, as $d$ can only build chords with $a$, which will automatically turn the $c$ vertex inside a $T_1$, rendering $c$ as safe vertex.
+
+\subsubsection{Proof for Variable Size $T_n$}
+
+Now for a varible size $T_n$, lets check our algorithm to find the safe root
+
+Here if we check $a+1$ vertex, it can not create chord with its neighbor $a$ and $a+2$, meaning that its options are $a+3,\ldots,b$, now we start checking from $b$.
+
+For each check, we are using a hashset, so the checking time complexity is $O(1)$.
+
+Now if the check returns true, meaning there is a $a+1$ and $b$ chord, then the structure becomes a $T_{n-1}$ structure, where the $a+2,\ldots,b-1$ vertices are now inside a new $T_n$ structure. If the check returns false, then we retract and check $b-1$. In this process 
+
+Here every time based on the result of the check our $n$ gets lower, because when $a+1$ failed to make a chord with $b$, then there can only be two things:
 \begin{enumerate}
-    \item Structure 1: $a, a+1, \ldots, b$
-    \item Structure 2: $a, a-1, \ldots, b$
+    \item $A+1$ has a chord with one or more from the set $\{b-1,b-2,\ldots,a+3\}$
+    \item $A+1$ is a safe vertex, does not have a chord with anyone
 \end{enumerate}
 
-The internal vertices are numbered $1, \ldots, n-3$. The minimum structure is $T_1$ (since $T_0$ would mean $a$ and $b$ are neighbors, and neighbors cannot form chords). The maximum is $T_{n-3}$ (accounting for endpoints and the complementary structure).
+Now for the first case, lets guess $a+1$ does have a chord with one of the lower rank than $b$, then in this case, $T$ becomes $T_{n-2}$ (For $a+1, b-1$ chord)
 
-\textbf{Base Case: $T_1$}
+So in the first case the $n$ of $T_n$ is always decreasing, so that will mean eventually it will come down to $T_1$ or $T_2$ which we have already proved does contain a safe vertex. 
 
-For $T_1$, there is one internal vertex $c$ between $a$ and $b$. Both $a$ and $b$ are neighbors of $c$, making any chord from $c$ impossible. Therefore, $c$ is a safe vertex.
+And for the second case, $a+1$ is itself a valid safe vertex, meaning coming from all down to checking $b, b-1,b-2,\ldots,a+4,a+3$, neither of them has any chord with $a+1$
 
-\textbf{Base Case: $T_2$}
+So by this way, we can prove that we can get a safe vertex in $O(n)$ time, also here also proves that every $T_n$ structure must have at least one safe vertex.
 
-For $T_2$, with vertices $c$ and $d$ between $a$ and $b$:
+\subsection{Final Conclusion on Safe Vertices}
+
+As we know, from a face which have no multiedges in the previous faces, there can be all $n$ number of safe vertices. But those faces that does have at least a multi edge in one of the previous faces, will must have at least two $T_n$ structures, both of whom will must contain a safe vertex as we proved earlier.
+
+This, every face in a biconnected planar graph, regardless of calculations stage, must have at least two safe vertices. (Proved) Thus there will always be at least two safe root triangulations regardless of the calculation order of the faces.
+
+So we have both proved the completeness of our algorithm and the presence of safe root triangulation in any position of faces. Thus we can now say that our algorithm covers all of the valid planar triangulations of the planar biconnected graph.
+
+\section{Time Complexity Proofs}
+
+Now we move on into time complexity proofs. We have claimed earlier is that our algorithm is amortized $O(1)$ or amortized linear. Now to proof this claim.
+
+We need some other topics, like what is the least number of triangulations in a tree (with a initial building time)
+
+we are calling the time building time, where we calculate the safe root , and the chords of the root vertex, fiom our algorithm and proves, the time for finding the safe vertex is $O(n)$ and the time for adding all the chords is also $O(n)$, meaning the time complexity for building a initial tree structure in any face is $O(n)$.
+
+\subsection{Lower Bound on Number of Triangulations}
+
+Now we have already proved that our algorithm can find all valid triangulations in a tree structures by flipping. But the question is , how many of the valid triangulations are actually are there. I mean if there is only one valid triangulation for a building time of $n=1000$, then our algorithm is clearly not linear.
+
+So, from the proofs, we have already found out that there is at least two safe vertices in a biconnected planar graphs triangulation, in any order of calculation of the faces. 
+
+So by the proof of our algorithm, if we pick one of them as our root triangulation and then continue, we should find the other combinations, like starting with a root will must find the triangulation which have c root, and vice versa. 
+
+Now in one stage we can only flip one chord. By also flipping the one one chord we will find a triangulation that is also a valid triangulation(because if it was not, it would have been pruned and we would fail to reach the c root triangulation.)
+
+Now we see how many chords does the two a root and c root shares. 
+
+For a root triangulation all chords has one endpoint a and the other variable
+
+For c root triangulation all chords has one endpoint c and the other variable
+
+So in this case only one chord might be same $a$-$c$, but all other are different
+
+Meaning all of the $n-4$ chords must be changed to react from a root to c root triangulation.
+
+That means $n - 4$ flipping, each of them wil be a valid triangulation.
+
+That means, including the root triangulation, there will at least be $n - 4 + 1 = n - 3$ triangulations in the face. 
+
+So if $d_i$ is the number of total triangulations in the face $i$, then $d_i \geq n_i - 3$
+
+\subsection{Upper Bound on Number of Triangulations (Catalan Numbers)}
+
+And the highest limit can be when there is no edges in the previous faces that can collide with any of the possible chord in the current face, then all triangulation for the face is valid
+
+In this case $d_i$ = catalan number
+
+\textbf{Formula (Catalan numbers)}
+
+The number of distinct triangulations of a convex polygon with $n$ vertices is given by:
+\[
+T_n = C_{n-2}
+\]
+where $C_k$ is the $k$-th Catalan number, defined as:
+\[
+C_k = \frac{1}{k+1}\binom{2k}{k}
+\]
+So:
+\[
+T_n = \frac{1}{n-1}\binom{2n-4}{n-2}
+\]
+
+\textbf{Example values}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+$n$ (vertices) & Triangulations $(T_n)$ & Formula used $(C_{n-2})$ \\
+\hline
+3 & 1 & $C_1 = 1$ \\
+4 & 2 & $C_2 = 2$ \\
+5 & 5 & $C_3 = 5$ \\
+6 & 14 & $C_4 = 14$ \\
+7 & 42 & $C_5 = 42$ \\
+8 & 132 & $C_6 = 132$ \\
+9 & 429 & $C_7 = 429$ \\
+10 & 1430 & $C_8 = 1430$ \\
+$\ldots$ & $\ldots$ & $\ldots$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Explanation}
 \begin{itemize}
-    \item If $c$ has a chord, it must be with $b$ (the only non-neighbor)
-    \item This creates a $T_1$ structure containing $d$, making $d$ safe
-    \item Similarly, if $d$ has a chord, it must be with $a$
-    \item This creates a $T_1$ structure containing $c$, making $c$ safe
+    \item Every triangulation of an $n$-gon corresponds to a binary tree with $n-2$ internal nodes.
+    \item These binary trees are counted by the Catalan numbers.
+    \item Hence, $T_n = C_{n-2}$.
 \end{itemize}
 
-\textbf{General Case: $T_n$ for arbitrary $n$}
+\textbf{Final Answer}
 
-We present an algorithm to find a safe vertex in $O(n)$ time:
+For a polygon with $n \geq 3$ vertices:
+\[
+\boxed{T_n = \frac{1}{n-1}\binom{2n-4}{n-2}}
+\]
 
-\begin{algorithm}
-\caption{Finding a Safe Vertex in $T_n$}
-\begin{algorithmic}[1]
-\State Consider vertex $a+1$
-\State $a+1$ cannot create chords with neighbors $a$ and $a+2$
-\State Possible chord partners: $\{a+3, \ldots, b\}$
-\State Check from $b$ downward using a hashset (O(1) per check)
-\If{chord $(a+1, b)$ exists}
-    \State Structure becomes $T_{n-1}$ with vertices $a+2, \ldots, b-1$
-\ElsIf{chord $(a+1, b-k)$ exists for some $k > 0$}
-    \State Structure becomes $T_{n-k-1}$
-\Else
-    \State $a+1$ is a safe vertex (no chords with any candidate)
-\EndIf
-\end{algorithmic}
-\end{algorithm}
+So, $d_i = \frac{1}{n-1} \cdot \binom{n}{r}$
 
-In each iteration:
-\begin{itemize}
-    \item If a chord is found, $n$ decreases, eventually reaching $T_1$ or $T_2$
-    \item If no chord is found after checking all candidates, the vertex is safe
-\end{itemize}
+Where $n = 2n-4$ and $r = n-2$
 
-Since every check reduces the problem size or finds a safe vertex, and we've proven $T_1$ and $T_2$ contain safe vertices, every $T_n$ structure contains at least one safe vertex.
+So, $d$'s higher limit:
+\[
+T_n = \Theta\left(\frac{4^n}{n^{3/2}}\right)
+\]
 
-\textbf{Conclusion:}
+So there will at least be $O(n)$ triangulations in a face with $n$ vertices.
 
-From a face with no multi-edges in previous faces, all $n$ vertices can be safe. For faces with at least one multi-edge from previous faces, there are at least two complementary $T_n$ structures, each containing at least one safe vertex.
+\subsection{Recursive Tree Structure Analysis}
 
-Therefore, every face in a biconnected planar graph, regardless of calculation stage, has at least two safe vertices. This guarantees the existence of at least two safe root triangulations regardless of the calculation order.
-\end{proof}
+Now as we know our structure is like a recursive tree structure.
 
-\section{Completeness Summary}
+Here we have found that the $n_1, n_2, n_3$ is the number of vertices of each faces, here kind of as levels. Now we already know that in a node in the above tree , we have to do $O(n)$ work for building the tree structures of the tree of triangulations and also to find the safe vertex. So in this case, we have to find how many time this building time actually affects the final time. 
 
-We have now established:
-\begin{enumerate}
-    \item The pruning method preserves all valid triangulations
-    \item Safe root triangulations always exist
-\end{enumerate}
+\subsubsection{Analysis for 2-Face Graph}
 
-Therefore, our algorithm covers all valid planar triangulations of any planar biconnected graph.
+Now for face 1, we just have to build the tree once and we can get $n_2$ trees by flipping, so total time for going to $n_2$, is 
 
-\section{Time Complexity Analysis}
+$B = n_1 + n_2 \cdot d_1$ is the total set up time for getting $d_1 \cdot d_2$ triangulations for a 2 face biconnected graph.
 
-\begin{theorem}[Amortized Linear Time Complexity]
-The algorithm has amortized $O(1)$ time complexity per triangulation, or amortized linear time complexity overall.
-\end{theorem}
+Now notice that a very important thing 
 
-\subsection{Building Time}
+Here we are taking a $n_1$ as the number of vertices, and thus the building time as the building time is $O(n_1)$ 
 
-\begin{definition}[Building Time]
-The building time is the time required to calculate the safe root and construct the chords from the root vertex for a single face.
-\end{definition}
-
-From our algorithm and proofs:
-\begin{itemize}
-    \item Finding a safe vertex: $O(n)$
-    \item Adding all chords from the root: $O(n)$
-    \item Total building time for a face with $n$ vertices: $O(n)$
-\end{itemize}
-
-\subsection{Minimum Number of Triangulations}
-
-\begin{lemma}[Lower Bound on Triangulation Count]
-For a face with $n$ vertices, there are at least $O(n)$ valid triangulations.
-\end{lemma}
-
-\begin{proof}
-We have proven that every face has at least two safe vertices. Let vertices $a$ and $c$ be two such safe vertices.
-
-By our algorithm, starting with the $a$-root triangulation, we can reach the $c$-root triangulation through a series of chord flips. At each step, we flip exactly one chord, and each intermediate triangulation is valid (otherwise it would have been pruned).
-
-Comparing $a$-root and $c$-root triangulations:
-\begin{itemize}
-    \item $a$-root: all chords have endpoint $a$
-    \item $c$-root: all chords have endpoint $c$
-    \item Only one chord may be shared: $a$-$c$
-    \item All other $n-4$ chords must be different
-\end{itemize}
-
-Therefore, transforming from $a$-root to $c$-root requires $n-4$ flips, each producing a valid triangulation.
-
-Including the root triangulation: at least $n - 4 + 1 = n - 3$ triangulations exist.
-
-Thus, there are at least $O(n)$ triangulations for a face with $n$ vertices.
-\end{proof}
-
-\subsection{Amortized Analysis}
-
-Consider the recursive tree structure of our algorithm for a biconnected graph with multiple faces.
-
-\textbf{Two-Face Graph:}
-
-Let $n_1$ and $n_2$ be the number of vertices in faces 1 and 2, respectively.
+Here $n_i$ is the number of vertices for $i$-th face and $d_i$ is the number of triangulations for $i$-th face.
 
 \begin{align*}
-\text{Total building time: } B &= n_1 + n_1 \cdot n_2 \\
-\text{Total triangulations: } T &= n_1 \cdot n_2
+B &= n_1 + d_1 \cdot n_2
 \end{align*}
 
-Since $n_2 \geq 3$:
+Now we know $n_2 \geq 3$
+
+And $d_1 \geq O(n)$
+
+$D_1$'s lower limit is $n_1$
+
+So $n_1 \cdot 1 \leq d_1 \cdot n_2$
+
+So total building time:
 \begin{align*}
-n_1 \cdot 1 &< n_1 \cdot n_2 \\
-B = n_1 + n_1 \cdot n_2 &< n_1 \cdot n_2 + n_1 \cdot n_2 \\
-&= 2 \cdot n_1 \cdot n_2 \\
-&= 2T
+B &= n_1 + d_1 \cdot n_2 \\
+&\leq d_1 \cdot n_2 + d_1 \cdot n_2 \\
+&\leq d_1 \cdot n_2 \cdot 2
 \end{align*}
 
-Total time complexity: $< 3T$
+Also we know $d_2$'s lower limit is $n_2$
 
-\textbf{Three-Face Graph:}
-
-Let $n_1$, $n_2$, $n_3$ be the number of vertices in the three faces.
-
-\begin{align*}
-B &= n_1 + n_1 \cdot n_2 + n_1 \cdot n_2 \cdot n_3 \\
-T &= n_1 \cdot n_2 \cdot n_3
-\end{align*}
-
-From the two-face case: $n_1 + n_1 \cdot n_2 < 2 \cdot n_1 \cdot n_2$
-
-Therefore:
-\begin{align*}
-B &< 2 \cdot n_1 \cdot n_2 + n_1 \cdot n_2 \cdot n_3
-\end{align*}
-
-Since $n_3 \geq 3$, we have $2 < n_3$:
-\begin{align*}
-2 \cdot n_1 \cdot n_2 &< n_1 \cdot n_2 \cdot n_3 \\
-B &< n_1 \cdot n_2 \cdot n_3 + n_1 \cdot n_2 \cdot n_3 \\
-&= 2T
-\end{align*}
-
-Total time complexity: $< 3T$
-
-\textbf{General Case: $k$ Faces}
-
-By induction, for any number of faces where each has at least 3 vertices:
+So $n_2 \leq d_2$
 
 \begin{align*}
-B &= n_1 + n_1 \cdot n_2 + \cdots + n_1 \cdot n_2 \cdots n_k \\
-T &= n_1 \cdot n_2 \cdots n_k
+d_1 \cdot n_2 \cdot 2 &\leq d_1 \cdot d_2 \cdot 2 \\
+B &< T \cdot 2
 \end{align*}
 
-The pattern holds:
+Now the each time a triangulation have to go from one to another, there has to be a flipping operation, this could be on multiple faces
+
+So total flipping operations cost is almost the same
+
+For face 1, there will be $d_1$ flippings, (meaning total triangulations)
+
+For face 2, there will be $d_1 \cdot d_2$ flippings 
+
+Here total flipping time $d_1 + d_1 \cdot d_2$ flippings
+
+As $d_2 \geq 1$ (as they are $n$'s lower limit)
+
 \begin{align*}
-n_1 + n_1 \cdot n_2 + \cdots + n_1 \cdot n_2 \cdots n_{k-1} &< 2 \cdot n_1 \cdot n_2 \cdots n_{k-1}
+d_1 \cdot 1 &\leq d_1 \cdot d_2 \\
+d_1 + d_1 \cdot d_2 &\leq d_1 \cdot d_2 \cdot 2
 \end{align*}
 
-Since $n_k \geq 3$:
+So total flipping time $F \leq d_1 \cdot d_2 \cdot 2$
+
+$F \leq 2 \cdot T$
+
+So total time time complexity is less that (total triangulations $\times$ 4)
+
+$B + F \leq 4 \cdot T$
+
+So its amortized linear.
+
+\subsubsection{Analysis for 3-Face Graph}
+
+Now for a 3 face graph
+
+The total set up time is $n_1 + d_1 \cdot n_2 + d_1 \cdot d_2 \cdot n_3$ and the total triangulations are $d_1 \cdot d_2 \cdot d_3$
+
+Now $n_1 + d_1 \cdot n_2 + d_1 \cdot d_2 \cdot n_3 = B$ (total building time)
+
+Also $d_1 \cdot d_2 \cdot d_3 = T$ (total triangulation time)
+
+As we know $n_1 + d_1 \cdot n_2 \leq d_1 \cdot d_2 \cdot 2$
+
 \begin{align*}
-2 \cdot n_1 \cdot n_2 \cdots n_{k-1} &< n_1 \cdot n_2 \cdots n_k \\
-B &< 2T
+B &\leq d_1 \cdot d_2 \cdot 2 + d_1 \cdot d_2 \cdot n_3
 \end{align*}
 
-Total time complexity: $< 3T$
+But we also know that 
+\begin{align*}
+d_1 \cdot d_2 \cdot 2 &< d_1 \cdot d_2 \cdot n_3 \quad \text{(As $n_3$ must be more or equal to 3 for make a face)} \\
+d_1 \cdot d_2 \cdot 2 &< d_1 \cdot d_2 \cdot n_3 = d_1 \cdot d_2 \cdot d_3 \quad \text{(Because the lower bound of $d_i$ is $O(n_i)$)} \\
+d_1 \cdot d_2 \cdot 2 + d_1 \cdot d_2 \cdot d_3 &< d_1 \cdot d_2 \cdot d_3 \cdot 2
+\end{align*}
 
-\begin{corollary}
-For any biconnected planar graph, the algorithm takes total time $< 3 \times (\text{number of triangulations})$. Therefore, the algorithm has amortized linear time complexity.
-\end{corollary}
+So 
+\begin{align*}
+B &< d_1 \cdot d_2 \cdot d_3 \cdot 2 \\
+B &< T \cdot 2
+\end{align*}
 
-\section{Space Complexity Analysis}
+Now the flipping time $F$ is 
+\begin{align*}
+F &= d_1 + d_1 \cdot d_2 + d_1 \cdot d_2 \cdot d_3 \\
+d_1 + d_1 \cdot d_2 &\leq d_1 \cdot d_2 \cdot 2
+\end{align*}
 
-\begin{theorem}[Linear Space Complexity]
-The algorithm has $O(n)$ space complexity, where $n$ is the total number of vertices.
-\end{theorem}
+So, $F < d_1 \cdot d_2 \cdot 2 + d_1 \cdot d_2 \cdot d_3$
 
-\begin{proof}
-When processing face $i$, we must store information for all faces $1, \ldots, i$.
+Also, $d_1 \cdot d_2 \cdot 2 \leq d_1 \cdot d_2 \cdot d_3$ (only case where number of triangulations can be 1 is $n=4$, but we will use brute force for $n = 4$ so that for $n = 4$ it becomes linear time)
 
-The storage includes:
-\begin{itemize}
-    \item Vertex information: $n_1 + n_2 + \cdots + n_i$ vertices
-    \item Chord information: For a planar graph, there are $n-3$ chords total
-    \item A hashset for current chord lookup
-\end{itemize}
+\begin{align*}
+F &< d_1 \cdot d_2 \cdot d_3 \cdot 2 \\
+F &< 2 \cdot T
+\end{align*}
 
-Since the total number of vertices across all faces is $O(n)$ and the number of chords in a planar graph is also $O(n)$, the total space complexity is $O(n)$.
+Total triangulations time:
+\begin{align*}
+&= B + F < 4 \cdot T
+\end{align*}
 
-The hashset for storing current chord information also requires $O(n)$ space.
+Still total time time complexity is less that (total triangulations $\times$ 4)
 
-Therefore, the entire algorithm uses $O(n)$ space complexity.
-\end{proof}
+\subsection{General Proof by Induction for $k$ Faces}
 
-\section{Conclusion}
+Now we can extend it to any value $n_i$ as we want 
 
-We have rigorously proven that our planar triangulation algorithm:
+For $k$ faces, by induction we know $k-1$ faces all the equations hold
 
-\begin{enumerate}
-    \item \textbf{Is complete:} It finds all valid planar triangulations through proper pruning of invalid branches
-    \item \textbf{Always has a starting point:} At least two safe root vertices exist in every face
-    \item \textbf{Is efficient in time:} Amortized $O(1)$ time complexity per triangulation, or amortized linear overall
-    \item \textbf{Is efficient in space:} $O(n)$ space complexity
-\end{enumerate}
+Total building time:
+\[
+B = n_1 + d_1 \cdot n_2 + \ldots + d_1 \cdot \ldots \cdot d_{k-2} \cdot n_{k-1} + d_1 \cdot \ldots \cdot d_{k-1} \cdot n_k
+\]
 
-These properties make the algorithm both theoretically sound and practically efficient for enumerating all planar triangulations of biconnected planar graphs.
+By induction we know:
+\[
+n_1 + d_1 \cdot n_2 + \ldots + d_1 \cdot \ldots \cdot d_{k-2} \cdot n_{k-1} \leq d_1 \cdot \ldots \cdot d_{k-1} \cdot 2
+\]
+
+Also:
+\[
+d_1 \cdot \ldots \cdot d_{k-1} + d_1 \cdot \ldots \cdot d_{k-1} \cdot 2 \leq d_1 \cdot \ldots \cdot d_{k-1} \cdot d_k
+\]
+(for $n \geq 5$, $d_i$ must be equal or more than 2)
+
+So:
+\begin{align*}
+B &\leq d_1 \cdot \ldots \cdot d_{k-1} + d_1 \cdot \ldots \cdot d_{k-1} \cdot 2 + d_1 \cdot \ldots \cdot d_{k-1} \cdot d_k \\
+B &= d_1 \cdot \ldots \cdot d_{k-1} \cdot d_k \cdot 2 \\
+B &< T \cdot 2
+\end{align*}
+
+Also total flipping time:
+\[
+F = d_1 + d_1 \cdot d_2 + \ldots + d_1 \cdot \ldots \cdot d_k
+\]
+
+By induction we know:
+\[
+d_1 + d_1 \cdot d_2 + d_1 \cdot \ldots \cdot d_{k-1} \leq d_1 \cdot \ldots \cdot d_{k-1} \cdot 2
+\]
+
+So:
+\begin{align*}
+F &\leq d_1 \cdot \ldots \cdot d_{k-1} \cdot 2 + d_1 \cdot \ldots \cdot d_k
+\end{align*}
+
+Also $d_1 \cdot \ldots \cdot d_{k-1} \cdot 2 < d_1 \cdot \ldots \cdot d_k$
+
+So:
+\begin{align*}
+F &\leq d_1 \cdot \ldots \cdot d_k \cdot 2 \\
+F &\leq 2 \cdot T
+\end{align*}
+
+So:
+\[
+B + F \leq 4 \cdot T
+\]
+
+So total triangulation time $<$ triangulation count $\times$ 4
+
+It is true for any number of faces which has vertex number $\geq 5$, as we can use brute force constant time for $n=4$
+
+That means for any biconnected planar graph, this algorithm takes total time $<$ triangulations $\times$ 4 time complexity
+
+So this algorithm is amortized linear. (Proved)
+
+\section{Space Complexity Proof}
+
+Now the space complexity
+
+We already know from the original algorithm, that the space complexity is $O(n)$
+
+Here for a particular face
+
+Here when we move to face $i$ to face $i+1$, we have to save all information for faces $1 \ldots i$: $n_1 + \ldots + n_i$
+
+Now as we know here $n_i$ is the number of vertices, and we also know for a planar graph the total chords complexity is also $O(n)$, as $n-3$ chords will be there for a particular time. So $n_1 + \ldots + n_i$ where $i$ is the total face number will be $O(n)$ where $n$ is the total number of vertices.
+
+Also we need a hashset as well for storing the current chord information. So, we will keep a hashset as well, where it will also be $O(n)$ space complexity.
+
+As a result our whole algorithm is taking $O(n)$ space complexity and amortized $O(1)$ time complexity. (Proved)
 
 \end{document}
