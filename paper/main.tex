@@ -1579,7 +1579,7 @@ Current triangulation & $O(n)$ & Chords of partial triangulation \\
 \hline
 \textbf{Total space} & $\mathbf{O(n)}$ & \textbf{Theorem~\ref{thm:space_complexity}} \\
 \hline
-\multicolumn{3}{|c|}{\textbf{Lower Bounds (Lemma~\ref{lem:min_triangulations})} \\
+\multicolumn{3}{|c|}{\textbf{Lower Bounds (Lemma~\ref{lem:min_triangulations})}} \\
 \hline
 Triangulations per face & $\Omega(n_i)$ & $d_i \geq n_i - 3$ \\
 \hline
@@ -1809,7 +1809,7 @@ The $(B+F)/T$ ratio reveals important performance patterns across different grap
 
 \textbf{1. Already Triangulated Graphs ($K_3$, $K_4$, Pre-triangulated):}
 \begin{itemize}
-    \item Ratio = 0.00 (no operations needed) ✓
+    \item Ratio = 0.00 (no operations needed) \checkmark
     \item These graphs require no triangulation work, confirming correct handling of base cases
 \end{itemize}
 
@@ -2201,12 +2201,12 @@ All 41 test graphs used in Section~\ref{sec:implementation} (Table~\ref{tab:expe
 Test instances are organized by category:
 \begin{verbatim}
 test_instances/
-├── simple_cycles/       (C_3 through C_9)
-├── diamonds/            (3 diamond structures)
-├── wheels/              (W_4, W_5 variants)
-├── complete_graphs/     (K_3, K_4, octahedron dual)
-├── general_planar/      (various V-E-F configurations)
-└── quadrilaterals/      (4-quad, 7-quad, 14-quad)
+|-- simple_cycles/       (C_3 through C_9)
+|-- diamonds/            (3 diamond structures) 
+|-- wheels/              (W_4, W_5 variants)
+|-- complete_graphs/     (K_3, K_4, octahedron dual)
+|-- general_planar/      (various V-E-F configurations)
+`-- quadrilaterals/      (4-quad, 7-quad, 14-quad)
 \end{verbatim}
 
 \subsection{Experimental Data}
