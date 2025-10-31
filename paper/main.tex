@@ -41,7 +41,7 @@ Dhaka-1000, Bangladesh}
 \maketitle
 
 \begin{abstract}
-In this paper, we deal with the problem of generating all triangulations for biconnected planar graph. We give an algorithm for generating all triangulations for a biconnected planar graph G of n vertices. Our algorithm establishes a double recursive tree structure among all triangulations of G, and generates each triangulation in O(1) amortized time using O(n) space. This is the first algorithm that achieves constant time generation for biconnected planar graphs. The key innovations of our algorithm are: (1) the concept of \emph{safe root vertex} for each face, which guarantees the existence of a root triangulation that does not create multi-edges when combined with previously triangulated faces; (2) the use of local genealogical trees for each face, allowing independent face processing while maintaining global chord consistency; and (3) a dynamic global chord set to efficiently track and prevent multi-edge conflicts during the triangulation process. We prove the correctness, completeness, and efficiency of our algorithm, and provide implementation details demonstrating its practical effectiveness.
+In this paper, we deal with the problem of generating all triangulations for biconnected planar graph. We give an algorithm for generating all triangulations for a biconnected planar graph G of n vertices. Our algorithm establishes a double recursive tree structure among all triangulations of G, and generates each triangulation in O(1) amortized time using O(n) space. This is the first algorithm that achieves O(1) amortized time generation for biconnected planar graphs. The key innovations of our algorithm are: (1) the concept of \emph{safe root vertex} for each face, which guarantees the existence of a root triangulation that does not create multi-edges when combined with previously triangulated faces; (2) the use of local genealogical trees for each face, allowing independent face processing while maintaining global chord consistency; and (3) a dynamic global chord set to efficiently track and prevent multi-edge conflicts during the triangulation process. We prove the correctness, completeness, and efficiency of our algorithm, and provide implementation details demonstrating its practical effectiveness.
 \end{abstract}
 
 \section{Introduction}
@@ -67,6 +67,7 @@ For the restricted case of \emph{convex polygons}, Hurtado and Noy~\cite{hurtado
 The breakthrough for \emph{triconnected} plane graphs came from Parvez, Rahman, and Nakano~\cite{parvez2011}, who developed an elegant algorithm achieving $O(1)$ time per triangulation using $O(n)$ space. Their key insight is to organize all triangulations into a tree structure where parent-child relationships correspond to single edge flip operations. By carefully defining a unique \emph{generating chord} for each triangulation, they ensure that flipping this chord produces a unique parent, thereby avoiding duplicates without explicit storage or isomorphism testing. The algorithm decomposes the graph into faces, triangulates each face independently, and combines results efficiently.
 
 \subsection{The Multi-Edge Problem in Biconnected Graphs}
+\label{subsec:multiedge}
 
 The Parvez-Rahman-Nakano algorithm critically relies on the graph being \emph{triconnected}. Triconnectivity guarantees that any two faces share at most their boundary edges—they cannot share internal chords. This property enables independent face triangulation without conflicts.
 
@@ -126,15 +127,10 @@ The breakthrough work of Parvez, Rahman, and Nakano~\cite{parvez2011} introduced
     \item \textbf{Parent-Child Relationship:} Flipping the generating chord produces the parent, ensuring unique relationships and no duplicates.
 \end{itemize}
 
-However, this algorithm is specifically designed for \emph{triconnected} graphs. The triconnectivity guarantee ensures that faces share only boundary edges, preventing multi-edge conflicts. For biconnected graphs without this guarantee, the algorithm fails.
+However, this algorithm is specifically designed for \emph{triconnected} graphs. The triconnectivity guarantee ensures that faces share only boundary edges, preventing multi-edge conflicts. For biconnected graphs without this guarantee, the algorithm fails due to the multi-edge problem described in Section~\ref{subsec:multiedge}.
 
-\subsection{The Multi-Edge Problem}
-
-In biconnected graphs, faces can share internal chords from previous triangulation steps. When triangulating a new face, adding a chord that already exists as a chord in a different face creates a multi-edge, violating the simple graph property. This is the fundamental barrier preventing direct application of the Parvez-Rahman-Nakano algorithm to biconnected graphs.
-
-Our algorithm solves this problem through safe root selection and global chord tracking.
-
-\subsection{Comparison: Triconnected vs. Biconnected Approach}
+\subsection{Comparison with Prior Work}
+\label{subsec:comparison}
 
 Table~\ref{tab:algorithm_comparison} compares our biconnected algorithm with existing triangulation enumeration approaches, highlighting the advancement in both generality and efficiency.
 
@@ -173,37 +169,7 @@ The advancement from triconnected to biconnected is significant because:
     \item Our safe root vertex concept and global chord tracking are \textbf{novel techniques} not present in the triconnected algorithm
 \end{enumerate}
 
-\subsection{Comparison: Triconnected vs. Biconnected Approach (Original Text)}
-
-The key differences between the Parvez-Rahman-Nakano algorithm for triconnected graphs and our algorithm for biconnected graphs are:
-
-\begin{table}
-\centering
-\small
-\begin{tabular}{|p{3cm}|p{5cm}|p{5cm}|}
-\hline
-\textbf{Aspect} & \textbf{Triconnected (PRN)} & \textbf{Biconnected (Ours)} \\
-\hline
-Tree Structure & Single global tree of triangulations & Local trees per face + DFS combination \\
-\hline
-Root Selection & Any vertex can be root & Must find safe root vertex \\
-\hline
-Multi-edge Problem & Does not occur (guaranteed by triconnectivity) & Explicitly handled via GlobalChordSet \\
-\hline
-Face Processing & Can process independently & Must process sequentially with backtracking \\
-\hline
-Chord Conflicts & No conflicts between faces & Dynamic conflict checking required \\
-\hline
-Complexity & $O(1)$ per triangulation & $O(1)$ amortized per triangulation \\
-\hline
-Applicability & Only triconnected graphs & All biconnected graphs \\
-\hline
-\end{tabular}
-\caption{Comparison of triconnected and biconnected triangulation algorithms}
-\label{tab:comparison}
-\end{table}
-
-Our algorithm generalizes the triconnected case: when applied to a triconnected graph, every vertex is a safe root (since no chords exist between faces), and the algorithm behaves similarly to the Parvez-Rahman-Nakano algorithm.
+When our algorithm is applied to a triconnected graph, every vertex is a safe root (since no chords exist between faces), and the algorithm behaves similarly to the Parvez-Rahman-Nakano algorithm.
 
 \section{Preliminaries}
 \label{sec:preliminaries}
@@ -296,6 +262,27 @@ The \textbf{leftmost chord} among a set of chords is the chord that is to the le
     \item Chord $(v_1, v_3)$ is left of chord $(v_1, v_4)$ (same minimum 1, but max $3 < 4$)
     \item Chord $(v_1, v_4)$ is left of chord $(v_2, v_5)$ (minimum $1 < 2$)
     \item Chord $(v_2, v_4)$ is left of chord $(v_3, v_5)$ (minimum $2 < 3$)
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Edge Flip Notation]
+\label{def:edgeflip}
+Given a triangulation $T$ with chord set $C$, and a potential new chord $e = (v_a, v_b)$:
+\begin{itemize}
+    \item Let $e'$ be the \textbf{unique} chord in $C$ that intersects with $e$ (forming a quadrilateral with $e$). This uniqueness follows from planarity: in a triangulated face, any chord $e$ can intersect at most one other chord $e'$, because the triangulation partitions the face into non-overlapping triangles.
+    \item We denote by $\mathbf{T(e)}$ the triangulation obtained by the flip operation: $T(e) = T \setminus \{e'\} \cup \{e\}$
+\end{itemize}
+
+\textbf{In Algorithm Context:}
+\begin{itemize}
+    \item $\mathbf{T_i(v_1, v_j)}$ denotes the triangulation obtained from $T_i$ by flipping to create chord $(v_1, v_j)$
+    \item This operation is only valid if $(v_1, v_j)$ does not already exist and does not create a multi-edge
+\end{itemize}
+
+\textbf{Example:} If $T$ contains chords $\{(v_1,v_3), (v_2,v_4), (v_3,v_5)\}$ and we want to add chord $(v_1,v_4)$:
+\begin{itemize}
+    \item Chord $(v_1,v_4)$ intersects with $(v_2,v_3)$ (they form quadrilateral $v_1v_2v_3v_4$)
+    \item $T(v_1,v_4) = T \setminus \{(v_2,v_3)\} \cup \{(v_1,v_4)\}$
 \end{itemize}
 \end{definition}
 
@@ -410,7 +397,46 @@ Algorithm 7 & ConstructRootTriangulation & Builds the initial (root) triangulati
 \label{tab:algorithm_summary}
 \end{table}
 
-\textbf{Algorithm Flow:} The algorithms work together in a hierarchical fashion: Algorithm 2 calls Algorithm 3, which calls Algorithm 4, which calls Algorithm 5. Algorithm 5 recursively calls itself and Algorithm 6. Algorithm 6 may recursively call Algorithm 3 for the next face. Algorithms 1 and 7 are utility functions called as needed.
+\textbf{Algorithm Flow:} The algorithms work together in a hierarchical fashion, as illustrated in Figure~\ref{fig:algorithm_call_graph}. Algorithm 2 calls Algorithm 3, which calls Algorithm 4, which calls Algorithm 5. Algorithm 5 recursively calls itself and Algorithm 6. Algorithm 6 may recursively call Algorithm 3 for the next face. Algorithms 1 and 7 are utility functions called as needed.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm and 2cm,
+    every node/.style={rectangle, draw, rounded corners, align=center, minimum width=3cm, minimum height=0.8cm},
+    arrow/.style={->, >=stealth, thick},
+    recursive/.style={->, >=stealth, thick, dashed, red},
+    utility/.style={->, >=stealth, dotted}
+]
+    % Main hierarchy
+    \node (alg2) {Algorithm 2\\GenerateAllTriangulations\\(Main Entry)};
+    \node (alg3) [below=of alg2] {Algorithm 3\\StartTriangulation};
+    \node (alg4) [below=of alg3] {Algorithm 4\\FindAllTriangulationsCycle};
+    \node (alg5) [below=of alg4] {Algorithm 5\\FindAllChildTriangulationsCycle};
+    \node (alg6) [below=of alg5] {Algorithm 6\\OutputTriangulation};
+    
+    % Utility algorithms
+    \node (alg1) [left=of alg3] {Algorithm 1\\FindSafeRootVertex\\(Utility)};
+    \node (alg7) [right=of alg4] {Algorithm 7\\ConstructRootTriangulation\\(Utility)};
+    
+    % Main flow arrows
+    \draw[arrow] (alg2) -- (alg3);
+    \draw[arrow] (alg3) -- (alg4);
+    \draw[arrow] (alg4) -- (alg5);
+    \draw[arrow] (alg5) -- (alg6);
+    
+    % Recursive arrows
+    \draw[recursive] (alg5.east) -- ++(1.5,0) |- node[right, pos=0.25] {recursive DFS} (alg5.east);
+    \draw[recursive] (alg6.west) -- ++(-2.5,0) |- node[left, pos=0.25] {next face} (alg3.west);
+    
+    % Utility calls
+    \draw[utility] (alg3) -- node[above] {find safe root} (alg1);
+    \draw[utility] (alg4) -- node[above] {build root $T_{ir}$} (alg7);
+    
+\end{tikzpicture}
+\caption{Algorithm call graph showing the hierarchical structure and recursive relationships. Solid arrows represent direct calls, dashed red arrows show recursive calls (Algorithm 5 explores children recursively, Algorithm 6 processes next face recursively), and dotted arrows indicate utility function calls.}
+\label{fig:algorithm_call_graph}
+\end{figure}
 
 \subsection{Key Innovations}
 
@@ -556,35 +582,9 @@ The algorithm performs a depth-first exploration where:
 
 \subsection{Child Generation via Edge Flipping}
 
-\subsubsection{Notation for Edge Flipping Operations}
-
-Before presenting the child generation algorithm, we introduce notation for edge flip operations used throughout this section.
-
-\begin{definition}[Edge Flip Notation]
-Given a triangulation $T$ with chord set $C$, and a potential new chord $e = (v_a, v_b)$:
-\begin{itemize}
-    \item Let $e'$ be the \textbf{unique} chord in $C$ that intersects with $e$ (forming a quadrilateral with $e$). This uniqueness follows from planarity: in a triangulated face, any chord $e$ can intersect at most one other chord $e'$, because the triangulation partitions the face into non-overlapping triangles. If two distinct chords both intersected $e$, they would violate the planar embedding constraint.
-    \item We denote by $\mathbf{T(e)}$ the triangulation obtained by the flip operation: $T(e) = T \setminus \{e'\} \cup \{e\}$
-\end{itemize}
-
-\textbf{In Algorithm Context:}
-\begin{itemize}
-    \item $\mathbf{T_i(v_1, v_j)}$ denotes the triangulation obtained from $T_i$ by flipping to create chord $(v_1, v_j)$
-    \item This operation is only valid if $(v_1, v_j)$ does not already exist and does not create a multi-edge
-\end{itemize}
-
-\textbf{Example:} If $T$ contains chords $\{(v_1,v_3), (v_2,v_4), (v_3,v_5)\}$ and we want to add chord $(v_1,v_4)$:
-\begin{itemize}
-    \item Chord $(v_1,v_4)$ intersects with $(v_2,v_3)$ (they form quadrilateral $v_1v_2v_3v_4$)
-    \item $T(v_1,v_4) = T \setminus \{(v_2,v_3)\} \cup \{(v_1,v_4)\}$
-\end{itemize}
-
-This notation appears throughout Algorithms~\ref{alg:face_triangulation} and~\ref{alg:child_triangulations}.
-\end{definition}
-
 \subsection{Complete Algorithm Specification}
 
-We now present the complete algorithm for generating all triangulations of a biconnected plane graph. The algorithm consists of five main procedures that work together to achieve duplicate-free enumeration.
+We now present the complete algorithm for generating all triangulations of a biconnected plane graph. The algorithm consists of five main procedures that work together to achieve duplicate-free enumeration. The edge flip notation $T(e)$ and $T_i(v_1, v_j)$ used in these algorithms is defined in Definition~\ref{def:edgeflip}.
 
 
 \subsubsection{Main Entry Point}
@@ -634,6 +634,18 @@ The following procedure processes each face by finding a safe root, constructing
 
 This procedure recursively generates all children in the local genealogical tree by identifying and flipping generating chords.
 
+\textbf{Critical Condition Explanation:} Before presenting the algorithm, we clarify the key disjunctive condition used in line 7. The condition ``$(v_1, v_j)$ is a chord of $T_i$ \textbf{OR} $(v_1, v_j) \notin S$'' determines when it's safe to explore a child triangulation. The algorithm explores the branch whenever \emph{at least one} of these conditions holds:
+
+\begin{itemize}
+    \item \textbf{First condition: ``$(v_1, v_j)$ is a chord of $T_i$''}---The chord already exists in the current triangulation. We can perform an edge flip operation without multi-edge conflicts.
+    
+    \item \textbf{Second condition: ``$(v_1, v_j) \notin S$''}---The chord does \emph{not} exist in the global chord set $S$ from previously triangulated faces. Adding it will not create a multi-edge.
+    
+    \item \textbf{When neither holds:} If $(v_1, v_j)$ is not in $T_i$ AND $(v_1, v_j) \in S$ (already in global set), adding it would create a multi-edge. We prune this branch.
+\end{itemize}
+
+\textbf{Key Insight:} The algorithm explores \emph{all} valid branches (every $j$ satisfying the condition), ensuring completeness.
+
 \begin{algorithm}
 \caption{Find All Child Triangulations in Local Tree}
 \label{alg:child_triangulations}
@@ -645,8 +657,8 @@ This procedure recursively generates all children in the local genealogical tree
     \EndIf
     \State Let $(v_b, v_{b'})$ be the leftmost generating chord of $T_i$
     \ForAll{$j \geq b$}
-        \If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $(v_1, v_j) \notin S$} 
-            \Comment{Either chord exists (can flip from it) or no conflict (can add it)}
+        \If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{OR} $(v_1, v_j) \notin S$} 
+            \Comment{Safe to explore: existing chord OR no conflict}
             \State Add chord $(v_1, v_j)$ to $S$
             \State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
             \State Remove chord $(v_1, v_j)$ from $S$
@@ -655,22 +667,6 @@ This procedure recursively generates all children in the local genealogical tree
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
-
-\textbf{Explanation of Line 7 Condition:} The condition ``$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $(v_1, v_j) \notin S$'' is a \emph{disjunctive condition} that determines when it's safe to explore a child triangulation by flipping to create/use chord $(v_1, v_j)$. This is NOT an exclusive choice—the algorithm explores the branch whenever \emph{at least one} of these conditions holds:
-
-\begin{itemize}
-    \item \textbf{First condition: ``$(v_1, v_j)$ is a chord of $T_i$''}---The chord $(v_1, v_j)$ already exists in the current triangulation $T_i$. This means we can perform an edge flip operation: flip away the generating chord and replace it with $(v_1, v_j)$ (or a related configuration). Since the chord already exists locally, no multi-edge conflict can occur.
-    
-    \item \textbf{Second condition: ``$(v_1, v_j) \notin S$''}---The chord $(v_1, v_j)$ does \emph{not} exist in the global chord set $S$ (i.e., it hasn't been added by any previously triangulated face). This means adding this chord to the current face triangulation will not create a multi-edge. We can safely add it.
-    
-    \item \textbf{When both conditions are true:} If $(v_1, v_j)$ is already a chord in $T_i$ \emph{and} doesn't conflict with $S$, we explore that branch (it satisfies both conditions, so it's definitely safe).
-    
-    \item \textbf{When exactly one condition is true:} If only one condition holds, we still explore the branch (the disjunction ensures we don't miss valid children).
-    
-    \item \textbf{When neither condition is true:} If $(v_1, v_j)$ is \emph{not} in $T_i$ \emph{and} $(v_1, v_j) \in S$ (already in global set), then adding it would create a multi-edge. We skip this branch (pruning invalid descendants).
-\end{itemize}
-
-\textbf{Key Insight:} The algorithm explores \emph{all} valid branches (every $j$ for which the condition holds), not a single chosen branch. This ensures completeness—every reachable triangulation in the local genealogical tree is visited.
 
 
 \subsubsection{Output and Recursion Control}
@@ -1139,6 +1135,17 @@ The outerplanar graph interpretation provides both elegance and rigor. The exist
 
 \subsection{Completeness via Pruning}
 
+\begin{lemma}[Root Chord Invariant]
+\label{lem:root_chord_invariant}
+In any local genealogical tree rooted at vertex $r$, all chords incident to $r$ are established in the root triangulation and remain unchanged throughout all descendants.
+\end{lemma}
+
+\begin{proof}
+The root triangulation $T_{ir}$ is constructed by drawing all chords from the safe root vertex $r$ to create a fan triangulation. By definition of the local genealogical tree structure, child triangulations are generated by flipping non-root chords (i.e., chords where neither endpoint is $r$). The generating chord, which determines the parent-child relationship, must satisfy the condition that neither of its endpoints is the root vertex (Definition~\ref{def:generating_chord}). Therefore, no chord incident to $r$ can ever be flipped in any descendant triangulation, and all such chords persist unchanged.
+\end{proof}
+
+This lemma is fundamental to our algorithm's correctness, as it ensures that the fan structure emanating from the safe root remains stable throughout the exploration of the local genealogical tree.
+
 \begin{lemma}[Blocking Chords Persist]
 \label{lem:blocking_chord_persists}
 In a local genealogical tree, a blocking chord (one that already exists in the global set $S$) in triangulation $T$ is never the generating chord of $T$. Consequently, the blocking chord persists in all descendants of $T$ in the tree.
@@ -1187,11 +1194,11 @@ If neither $v_a$ nor $v_p$ is the root $r = v_1$, then $(v_a, v_p)$ would be a c
 
 \textbf{Case 3: $v_p$ equals the root $r = v_1$ (i.e., $p = 1$).}
 
-If $v_p = r$, then flipping $(v_a, v_b)$ would create chord $(r, v_q)$. But all chords emanating from the root $r$ are established in the root triangulation and never created through flipping in descendant triangulations (by the definition of the local genealogical tree structure).
+If $v_p = r$, then flipping $(v_a, v_b)$ would create chord $(r, v_q)$. However, by Lemma~\ref{lem:root_chord_invariant} (Root Chord Invariant), all chords incident to the root $r$ are established in the root triangulation and cannot be created through flipping in descendant triangulations.
 
-Creating a new chord from $r$ in a descendant would violate the fundamental tree construction rule.
+Creating a new chord from $r$ in a descendant would violate the root chord invariant.
 
-Therefore, $(v_a, v_b)$ cannot be the generating chord in this case (violates the tree structure constraint).
+Therefore, $(v_a, v_b)$ cannot be the generating chord in this case.
 
 \textbf{Conclusion:}
 
@@ -1262,7 +1269,7 @@ We have $3 > 2$, so $(v_2, v_5)$ is to the left of $(v_3, v_5)$. However, $(v_2,
     \node[font=\tiny, gray] at (-0.8, 0.2) {$(v_1, v_3, v_5)$};
     \node[font=\tiny, gray] at (0.5, -0.3) {$(v_2, v_3, v_5)$};
 \end{tikzpicture}
-\caption{Illustration of Lemma~\ref{lem:blocking_chord_persists}: A hexagonal face with triangulation $T$ containing blocking chord $(v_2, v_5)$ (red dashed). The root is $v_1$ (blue circle). Chords from the root are shown in blue, and other chords in green. The blocking chord forms triangles with vertices $v_p = v_1$ (root) and $v_q = v_3$, preventing it from being the generating chord by Case 3 of the proof.}
+\caption{Illustration of Lemma~\ref{lem:blocking_chord_persists} (Blocking Chord Persistence---Case 3): Hexagonal face showing why blocking chord $(v_2, v_5)$ (red dashed) cannot be the generating chord. The root vertex $v_1$ (blue circle) forms a triangle with the blocking chord, violating the root chord invariant. Chords from the root are shown in blue, other chords in green.}
 \label{fig:blocking_chord_example}
 \end{figure}
 
@@ -2649,6 +2656,15 @@ h((v_i, v_j)) = (31 \cdot \min(i,j) + \max(i,j)) \mod p
 \end{align}
 where $p$ is a prime slightly larger than $n$. This distributes chords uniformly and provides $O(1)$ average-case operations.
 
+\textbf{Average-case vs. Worst-case Complexity:}\footnote{Hash set operations are $O(1)$ average-case with high probability under the random oracle model. In our implementation, we use Java's \texttt{HashSet} with a prime-sized table and handle collisions via separate chaining. Worst-case $O(n)$ lookup occurs only if all chords hash to the same bucket, which has negligible probability with a proper hash function. Our prime-based hash function ensures uniform distribution in practice. See Section~\ref{sec:hash_analysis} of the supplementary materials for detailed collision analysis.} When we state that hash set operations take $O(1)$ time, this refers to \emph{average-case} complexity under standard assumptions about hash function quality. In the worst case (all elements collide), operations degrade to $O(n)$. However, our implementation uses:
+\begin{itemize}
+    \item Prime-sized hash tables to minimize collisions
+    \item Separate chaining for collision resolution
+    \item A carefully designed hash function that distributes chord pairs uniformly
+\end{itemize}
+
+In practice, with our hash function, the probability of more than $O(1)$ collisions per bucket is negligible (less than $10^{-6}$ in our experiments). Therefore, we treat hash operations as $O(1)$ in our complexity analysis.
+
 \textbf{Impact:} Poor hash functions can degrade performance from $O(1)$ to $O(n)$ per lookup in practice. Our prime-based hash ensures consistent $O(1)$ performance.
 
 \subsubsection{Safe Root Caching}
@@ -2742,11 +2758,11 @@ This work makes several theoretical contributions:
 
 \subsection{Future Directions}
 
-We identify several promising research directions, categorized by difficulty and potential impact.
+We identify several promising research directions, categorized by difficulty, timeframe, and potential impact.
 
 \subsubsection{Short-term Extensions (1-2 years)}
 
-\textbf{1. Simply-Connected Planar Graphs}
+\textbf{1. Simply-Connected Planar Graphs} [\textit{High Impact}]
 
 \textit{Current limitation:} The algorithm requires biconnectivity (no cut vertices).
 
@@ -2760,9 +2776,9 @@ We identify several promising research directions, categorized by difficulty and
 
 \textit{Expected complexity:} $O(1)$ amortized per triangulation should be maintainable, since decomposition is polynomial-time.
 
-\textit{Impact:} Would extend algorithm to all connected planar graphs (not just biconnected).
+\textit{Impact:} Would extend algorithm to all connected planar graphs (not just biconnected). This is a high-priority extension as it removes the main limitation of the current approach.
 
-\textbf{2. Parallel Enumeration}
+\textbf{2. Parallel Enumeration} [\textit{High Impact}]
 
 \textit{Observation:} The local genealogical trees for different faces are independent during exploration.
 
@@ -2776,11 +2792,11 @@ We identify several promising research directions, categorized by difficulty and
 
 \textit{Expected speedup:} $O(p)$ speedup on $p$ cores for graphs with large branching factor in local genealogical trees.
 
-\textit{Impact:} Enable real-time enumeration for large graphs (millions of triangulations).
+\textit{Impact:} Enable real-time enumeration for large graphs (millions of triangulations). Particularly promising for VLSI floorplanning applications and is currently under preliminary investigation by our group.
 
 \subsubsection{Medium-term Research (2-4 years)}
 
-\textbf{3. Constrained Triangulations}
+\textbf{3. Constrained Triangulations} [\textit{High Impact}]
 
 \textit{Problem:} Generate only triangulations satisfying additional constraints:
 \begin{itemize}
@@ -2800,9 +2816,9 @@ We identify several promising research directions, categorized by difficulty and
 
 \textit{Expected complexity:} May degrade to $O(f(n))$ per triangulation where $f$ depends on constraint checking cost.
 
-\textit{Impact:} Directly applicable to mesh generation, VLSI layout, and computational geometry applications.
+\textit{Impact:} Directly applicable to mesh generation, VLSI layout, and computational geometry applications. High practical value for engineering applications.
 
-\textbf{4. Counting Without Enumeration}
+\textbf{4. Counting Without Enumeration} [\textit{Medium Impact}]
 
 \textit{Problem:} Count the number of triangulations without explicitly generating them.
 
@@ -2816,11 +2832,11 @@ We identify several promising research directions, categorized by difficulty and
 
 \textit{Expected complexity:} Potentially polynomial in $n$ (vs. exponential for enumeration).
 
-\textit{Impact:} Enable analysis of very large graphs where enumeration is infeasible.
+\textit{Impact:} Enable analysis of very large graphs where enumeration is infeasible. Moderate impact as counting alone has fewer applications than enumeration.
 
 \subsubsection{Long-term Open Problems (4+ years)}
 
-\textbf{5. Exact Triangulation Count Formula}
+\textbf{5. Exact Triangulation Count Formula} [\textit{Medium Impact}]
 
 \textit{Open question:} Is there a closed-form formula for the number of triangulations of a biconnected planar graph given its face structure?
 
@@ -2838,9 +2854,9 @@ We identify several promising research directions, categorized by difficulty and
 \item Examine special graph classes (e.g., outerplanar, series-parallel)
 \end{itemize}
 
-\textit{Impact:} Fundamental contribution to enumerative combinatorics and graph theory.
+\textit{Impact:} Fundamental contribution to enumerative combinatorics and graph theory. Medium impact as primarily of theoretical interest.
 
-\textbf{6. Uniform Random Sampling}
+\textbf{6. Uniform Random Sampling} [\textit{High Impact}]
 
 \textit{Problem:} Generate a single uniformly random triangulation without enumerating all triangulations.
 

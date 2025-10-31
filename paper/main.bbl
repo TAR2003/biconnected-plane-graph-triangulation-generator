@@ -50,6 +50,8 @@ Mohammad~Tanvir Parvez, Md.~Saidur Rahman, and Shin-ichi Nakano.
 \newblock Generating all triangulations of plane graphs.
 \newblock {\em Journal of Graph Algorithms and Applications}, 15(3):457--482,
   2011.
+\newblock See Section 4 for the generating chord concept used in local
+  genealogical trees.
 
 \bibitem{read1978}
 Ronald~C Read.
