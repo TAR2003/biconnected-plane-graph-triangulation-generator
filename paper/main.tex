@@ -25,6 +25,7 @@
 \newtheorem{corollary}[theorem]{Corollary}
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
 \theoremstyle{remark}
 \newtheorem{remark}{Remark}
 
@@ -459,6 +460,7 @@ The \emph{root triangulation} $T_r$ of a face $F$ with safe root $r$ is the tria
 For each face, we build a \emph{local genealogical tree} of triangulations rooted at the safe root triangulation. The tree structure is defined by parent-child relationships based on edge flipping:
 
 \begin{definition}[Generating Chord]
+\label{def:generating_chord}
 In a triangulation $T$ of a face with root vertex $r$, a chord $(v_i, v_j)$ is a \emph{generating chord} if:
 \begin{enumerate}
     \item Neither $v_i$ nor $v_j$ is the root vertex $r$, and
@@ -747,6 +749,76 @@ By handling $n = 4$ as a base case with constant-time lookup, we ensure:
 
 This special treatment ensures the overall time complexity bound $B + F < 4T$ remains valid even when faces have only 4 vertices, as the building time per triangulation is bounded by $O(n) = O(4) = O(1)$ for quadrilaterals.
 
+\subsection{Why This Approach Works: Key Insights}
+\label{sec:why_it_works}
+
+Before diving into the formal correctness proofs, we provide intuition for why our algorithm successfully generates all triangulations without duplicates or expensive checks.
+
+\subsubsection{Safe Roots Solve the Initialization Problem}
+
+The fundamental challenge in biconnected graphs is that chords from previously processed faces create \emph{constraints}—we cannot add chords that already exist. The ``safe root'' concept solves this elegantly:
+
+\begin{itemize}
+    \item \textbf{Problem:} How do we start triangulating a face when some chords may already exist from previous faces?
+    
+    \item \textbf{Solution:} A safe root vertex $r$ is one where \emph{all possible chords from $r$ to non-neighbors can be added without conflicts}. No chord from $r$ exists in the global set $S$ yet.
+    
+    \item \textbf{Why it works:} From a safe root, we can construct a valid root triangulation by simply adding all chords $(r, v_i)$ for all non-adjacent vertices $v_i$. This gives us a guaranteed starting point.
+    
+    \item \textbf{Existence guarantee:} The outerplanar graph structure ensures at least \emph{two} safe roots always exist (vertices with degree 2 on the outer cycle of the maximal outerplanar graph formed by existing chords).
+\end{itemize}
+
+\textbf{Example:} In a hexagon where chord $(v_1, v_4)$ already exists from a previous face, vertex $v_2$ might still be safe because no chords from $v_2$ exist yet. We can start from $v_2$ even though $(v_1, v_4)$ constrains the solution space.
+
+\subsubsection{Local Trees + Global Chords Prevent Duplicates}
+
+The combination of local genealogical trees and global chord tracking eliminates duplicates without explicit storage:
+
+\begin{itemize}
+    \item \textbf{Local genealogical tree for each face:} Within a single face, all triangulations are organized in a tree where parent-child relationships are defined by flipping the ``generating chord'' (leftmost non-root chord).
+    
+    \item \textbf{Unique parent property:} Each triangulation (except the root) has \emph{exactly one} parent. This tree structure prevents cycles—you can't reach the same triangulation via two different flip sequences.
+    
+    \item \textbf{Global chord set $S$:} As we explore triangulations across faces using DFS:
+    \begin{itemize}
+        \item Add chords to $S$ when entering a new face triangulation
+        \item Remove chords from $S$ when backtracking
+        \item Prune branches if a chord would create a multi-edge (already in $S$)
+    \end{itemize}
+    
+    \item \textbf{Why no duplicates:} Each global triangulation corresponds to a unique path in the DFS recursion tree. The path is determined by the choice of face triangulations, and within each face, the local tree ensures no repeated local configurations.
+\end{itemize}
+
+\textbf{Key insight:} We never need to store or compare full triangulations. The tree structure and backtracking automatically prevent duplicates.
+
+\subsubsection{Pruning Invalid Branches Preserves Completeness}
+
+When a chord from the current triangulation already exists in $S$ (a ``blocking chord''), we prune that entire branch:
+
+\begin{itemize}
+    \item \textbf{Why is pruning safe?} Lemma~\ref{lem:blocking_chord_persists} proves that blocking chords \emph{never get flipped} in descendant triangulations—they persist through the entire subtree.
+    
+    \item \textbf{Implication:} If triangulation $T$ contains a blocking chord, then \emph{all} children and descendants of $T$ also contain it. Since the blocking chord creates a multi-edge (duplicate), all descendants are invalid.
+    
+    \item \textbf{Conclusion:} Pruning the branch at $T$ eliminates no valid triangulations—only invalid ones.
+\end{itemize}
+
+\textbf{Completeness:} Every valid triangulation will be found along some branch that doesn't encounter blocking chords.
+
+\subsubsection{Summary: The Three Pillars}
+
+Our algorithm rests on three key mechanisms:
+
+\begin{enumerate}
+    \item \textbf{Safe roots (Theorem~\ref{thm:safe_root_exists}):} Guaranteed initialization for every face via outerplanar graph degree-2 vertices.
+    
+    \item \textbf{Local tree structure:} Unique parent-child relationships within each face prevent local duplicates.
+    
+    \item \textbf{Global pruning (Theorem~\ref{thm:completeness}):} Backtracking + blocking chord detection prevents global duplicates while preserving completeness.
+\end{enumerate}
+
+Together, these eliminate the need for isomorphism testing or explicit triangulation storage, achieving $O(1)$ amortized time per triangulation.
+
 
 \section{Correctness and Completeness}
 \label{sec:correctness}
@@ -760,187 +832,167 @@ We now prove that our algorithm correctly generates all triangulations without d
 In any face of a biconnected plane graph during the triangulation process, there exist at least two safe root vertices.
 \end{theorem}
 
-\textbf{Proof Strategy:} We prove by structural induction on face segments divided by existing chords. The key insight is that existing chords partition the face into smaller regions, and by analyzing the smallest regions (1 or 2 internal vertices), we can guarantee safe roots exist. The proof handles two cases: (1) no blocking chords exist (trivial—all vertices are safe), or (2) chords exist and partition the face into regions where boundary vertices of smallest regions are provably safe.
+\textbf{Proof Strategy:} We interpret the face and its existing chords as an outerplanar graph structure and apply a classical result from graph theory: every maximal outerplanar graph has at least two vertices of degree 2 on its outer cycle. These degree-2 vertices correspond precisely to safe root vertices in our setting.
 
 \begin{proof}
-Consider a face $F$ with $n$ vertices $v_1, v_2, \ldots, v_n$ listed in counterclockwise order. Let $S$ be the global chord set from previously processed faces.
+Consider a face $F_i$ with vertices $v_1, v_2, \ldots, v_n$ in counterclockwise order along the boundary. Let $S$ be the global chord set from previously processed faces.
 
-\textbf{Case 1:} If $S$ contains no chords with both endpoints in $F$, then all $n$ vertices are safe roots.
+\textbf{Case 1: No existing chords within the face.}
 
-\textbf{Case 2:} Assume $S$ contains at least one chord with both endpoints in $F$. Consider a chord $(v_a, v_b) \in S$. Due to planarity, no other chord can cross $(v_a, v_b)$.
+If $S$ contains no chords with both endpoints in $F_i$, then all $n$ vertices are safe roots, as there are no conflicting chords. This trivially satisfies the theorem.
 
-The chord $(v_a, v_b)$ divides the cycle $F$ into two segments:
+\textbf{Case 2: Existing chords form an outerplanar structure.}
+
+Suppose $S$ contains chords with both endpoints in $F_i$. View the face as an outerplanar graph $G$:
 \begin{itemize}
-    \item $S_1 = \langle v_a, v_{a+1}, \ldots, v_b \rangle$
-    \item $S_2 = \langle v_b, v_{b+1}, \ldots, v_a \rangle$
+    \item The \textbf{outer cycle} consists of the boundary edges of $F_i$: $(v_1, v_2), (v_2, v_3), \ldots, (v_n, v_1)$.
+    \item The \textbf{internal edges} are the chords from $S$ that lie entirely within $F_i$.
 \end{itemize}
 
-Each segment forms a substructure $T_m$ where $m$ is the number of internal vertices (vertices excluding the endpoints).
+By adding all possible non-crossing chords between vertices of $F_i$ that do not conflict with existing chords in $S$, we can extend $G$ to a \textbf{maximal outerplanar graph} (where no additional chords can be added without violating planarity or creating crossings).
 
-\textbf{Base Case: $T_1$}
+A fundamental result in graph theory (see \cite{diestel2017}) states:
+\begin{quote}
+\textit{In any maximal outerplanar graph with $n \geq 3$ vertices, the outer cycle has at least two vertices of degree 2.}
+\end{quote}
 
-If $S_1$ has one internal vertex $v_c$ between $v_a$ and $v_b$, then both $v_a$ and $v_b$ are neighbors of $v_c$ on the boundary. Any potential chord from $v_c$ would go to one of its neighbors, which is not allowed. Therefore, $v_c$ has no conflicting chords and is a safe root.
+A vertex $v$ with degree 2 on the outer cycle has exactly two neighbors: its two adjacent vertices on the boundary cycle. Crucially, \textbf{$v$ has no incident chords from $S$} (since all its connections are boundary edges).
 
-\textbf{Base Case: $T_2$}
-
-If $S_1$ has two internal vertices $v_c$ and $v_d$ (with $v_c$ between $v_a$ and $v_d$, and $v_d$ between $v_c$ and $v_b$), then:
+Therefore, for any vertex $v$ with degree 2 on the outer cycle:
 \begin{itemize}
-    \item The only non-neighbor of $v_c$ is $v_b$
-    \item The only non-neighbor of $v_d$ is $v_a$
+    \item All vertices at distance $\geq 2$ from $v$ along the boundary are non-neighbors.
+    \item No chord from $v$ to these non-neighbors exists in $S$ (since $v$ has no internal edges).
+    \item Hence, all such chords can be added without conflicts.
 \end{itemize}
 
-If $(v_c, v_b) \in S$, this creates a $T_1$ structure containing only $v_d$, making $v_d$ safe.
-If $(v_d, v_a) \in S$, this creates a $T_1$ structure containing only $v_c$, making $v_c$ safe.
-If neither chord exists, both $v_c$ and $v_d$ are safe.
+This precisely satisfies the definition of a \textbf{safe root vertex}.
 
-\textbf{Inductive Case: $T_m$ for $m > 2$}
+Since every maximal outerplanar graph has at least two vertices of degree 2 on the outer cycle, every face $F_i$ has at least two safe root vertices.
 
-We use an iterative reduction strategy. Consider the first internal vertex $v_{a+1}$:
-\begin{itemize}
-    \item Its neighbors on the boundary are $v_a$ and $v_{a+2}$
-    \item Possible conflicting chords: $(v_{a+1}, v_{a+3}), \ldots, (v_{a+1}, v_b)$
-\end{itemize}
-
-Check from $v_b$ downward:
-\begin{itemize}
-    \item If $(v_{a+1}, v_b) \in S$, the structure reduces to $T_{m-1}$ with vertices $v_{a+2}, \ldots, v_b$
-    \item If $(v_{a+1}, v_{b-k}) \in S$ for some $k > 0$, the structure reduces to $T_{m-k-1}$
-    \item If no such chord exists, $v_{a+1}$ is a safe root
-\end{itemize}
-
-This process either finds a safe root or reduces $m$, eventually reaching $T_1$ or $T_2$, both of which contain safe roots.
-
-\textbf{Finding Safe Vertices in $O(n)$ Time:}
-
-The above iterative process can be implemented efficiently:
-
-\begin{enumerate}
-    \item Consider vertex $v_{a+1}$ (first internal vertex)
-    \item $v_{a+1}$ cannot create chords with neighbors $v_a$ and $v_{a+2}$
-    \item Possible chord partners: $\{v_{a+3}, \ldots, v_b\}$
-    \item Check from $v_b$ downward using a hash set ($O(1)$ per check)
-    \item If a chord $(v_{a+1}, v_{b-k})$ is found, reduce to subproblem $T_{m-k-1}$
-    \item If no chord is found after checking all candidates, $v_{a+1}$ is safe
-\end{enumerate}
-
-Each iteration either:
-\begin{itemize}
-    \item Finds a safe root vertex (algorithm terminates successfully), or
-    \item Reduces the problem size by at least 1, eventually reaching $T_1$ or $T_2$
-\end{itemize}
-
-Since $T_1$ and $T_2$ are proven to contain safe vertices, and each reduction step decreases $m$, the algorithm is guaranteed to find a safe vertex in $O(n)$ time.
-
-\textbf{Two Complementary $T_m$ Structures:}
-
-The face $F$ is divided by chord $(v_a, v_b)$ into two segments:
-\begin{itemize}
-    \item Structure 1: $S_1 = \langle v_a, v_{a+1}, \ldots, v_b \rangle$ with $m_1$ internal vertices
-    \item Structure 2: $S_2 = \langle v_b, v_{b+1}, \ldots, v_a \rangle$ with $m_2$ internal vertices
-\end{itemize}
-
-Note that $m_1 + m_2 = n - 2$ (total vertices minus the two endpoints of the constraining chord).
-
-By the analysis above, each structure $S_1$ and $S_2$ contains at least one safe vertex. Therefore, every face has at least two safe root vertices—one from each complementary segment.
-
-Since both segments $S_1$ and $S_2$ contain safe roots by this argument, every face has at least two safe root vertices.
+\textbf{Edge Case:} If the face is already fully triangulated by chords in $S$, then no further triangulations are needed, and the algorithm trivially completes with $d_i = 1$ (the single existing triangulation).
 \end{proof}
 
 \begin{remark}
-The existence of at least two safe root vertices is crucial for the algorithm's flexibility. It ensures that even in highly constrained faces with many pre-existing chords from previous face triangulations, we can always find a valid starting point for the local genealogical tree.
+The outerplanar graph interpretation provides both elegance and rigor. The existence of safe roots is guaranteed by a classical structural theorem, eliminating the need for iterative reduction arguments. This result holds regardless of the complexity of the existing chord structure within the face.
 \end{remark}
 
 \begin{figure}[htbp]
 \centering
-\begin{subfigure}[b]{0.3\textwidth}
-    \centering
-    \begin{tikzpicture}[scale=1.2]
-        % T_1 structure
-        \node[circle,draw,fill=white,minimum size=6pt,inner sep=2pt] (a) at (0,0) {$a$};
-        \node[circle,draw,fill=white,minimum size=6pt,inner sep=2pt] (b) at (2.5,0) {$b$};
-        \node[circle,draw,fill=yellow!30,minimum size=6pt,inner sep=2pt] (c) at (1.25,1.2) {$c$};
-        
-        % Constraining chord (thick)
-        \draw[very thick,red] (a) -- (b) node[midway,below] {\tiny constraining};
-        
-        % Boundary edges
-        \draw[thick] (a) -- (c);
-        \draw[thick] (c) -- (b);
-        
-        % Labels
-        \node[below] at (1.25,-0.5) {\small $c$ is safe (neighbors: $a$, $b$)};
-    \end{tikzpicture}
-    \caption{$T_1$ structure: one internal vertex}
-    \label{fig:T1}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.3\textwidth}
-    \centering
-    \begin{tikzpicture}[scale=1.2]
-        % T_2 structure
-        \node[circle,draw,fill=white,minimum size=6pt,inner sep=2pt] (a) at (0,0) {$a$};
-        \node[circle,draw,fill=white,minimum size=6pt,inner sep=2pt] (b) at (3,0) {$b$};
-        \node[circle,draw,fill=green!30,minimum size=6pt,inner sep=2pt] (c) at (1,1) {$c$};
-        \node[circle,draw,fill=green!30,minimum size=6pt,inner sep=2pt] (d) at (2,1) {$d$};
-        
-        % Constraining chord
-        \draw[very thick,red] (a) -- (b) node[midway,below] {\tiny constraining};
-        
-        % Boundary edges
-        \draw[thick] (a) -- (c);
-        \draw[thick] (c) -- (d);
-        \draw[thick] (d) -- (b);
-        
-        % Optional internal chord (dashed)
-        \draw[dashed,blue] (c) -- (b);
-        
-        \node[below] at (1.5,-0.5) {\small At least one of $c$, $d$ is safe};
-    \end{tikzpicture}
-    \caption{$T_2$ structure: two internal vertices}
-    \label{fig:T2}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.35\textwidth}
-    \centering
-    \begin{tikzpicture}[scale=1.1]
-        % T_m reduction
-        \node[circle,draw,fill=white,minimum size=6pt,inner sep=2pt] (a) at (0,0) {$a$};
-        \node[circle,draw,fill=white,minimum size=6pt,inner sep=2pt] (b) at (4,0) {$b$};
-        \node[circle,draw,fill=orange!40,minimum size=6pt,inner sep=2pt] (a1) at (0.8,0.9) {\tiny $a$+1};
-        \node[circle,draw,fill=white,minimum size=6pt,inner sep=2pt] (a2) at (1.5,1.1) {\tiny $a$+2};
-        \node (dots) at (2.5,1.1) {$\cdots$};
-        \node[circle,draw,fill=white,minimum size=6pt,inner sep=2pt] (b1) at (3.2,0.9) {\tiny $b$-1};
-        
-        % Constraining chord
-        \draw[very thick,red] (a) -- (b) node[midway,below] {\tiny constraining};
-        
-        % Boundary edges
-        \draw[thick] (a) -- (a1);
-        \draw[thick] (a1) -- (a2);
-        \draw[thick] (b) -- (b1);
-        
-        % Checking process (dashed arrows)
-        \draw[->,dashed,thick,purple] (a1) to[bend left=20] node[midway,above] {\tiny check} (b);
-        \draw[->,dashed,thick,purple] (a1) to[bend left=10] (b1);
-        
-        \node[below] at (2,-0.6) {\small Check $a$+1 against $b$, $b$-1, ...};
-        \node[below] at (2,-1.0) {\small Reduce or find safe vertex};
-    \end{tikzpicture}
-    \caption{$T_m$ reduction: iterative search}
-    \label{fig:Tm}
-\end{subfigure}
-\caption{$T_m$ structures for safe root existence proof. (a) In $T_1$, vertex $c$ is safe as both endpoints are neighbors. (b) In $T_2$, at least one of $c$ or $d$ is safe. (c) For $T_m$ with $m > 2$, checking vertex $a$+1 either finds it safe or reduces to smaller $T_k$.}
-\label{fig:Tm_structures}
+\begin{tikzpicture}[scale=1.3]
+    % Face boundary (hexagon as example)
+    \node[circle,draw,fill=green!20,minimum size=8pt,inner sep=2pt,thick] (v1) at (90:2) {$v_1$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=2pt] (v2) at (30:2) {$v_2$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=2pt] (v3) at (-30:2) {$v_3$};
+    \node[circle,draw,fill=green!20,minimum size=8pt,inner sep=2pt,thick] (v4) at (-90:2) {$v_4$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=2pt] (v5) at (-150:2) {$v_5$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=2pt] (v6) at (150:2) {$v_6$};
+    
+    % Boundary edges (outer cycle)
+    \draw[thick,blue] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- cycle;
+    
+    % Existing chords from S (internal edges)
+    \draw[thick,red,dashed] (v2) -- (v5) node[midway,above left,font=\small] {$(v_2,v_5) \in S$};
+    \draw[thick,red,dashed] (v3) -- (v6) node[midway,above right,font=\small] {$(v_3,v_6) \in S$};
+    
+    % Highlight safe roots
+    \node[above,font=\small,green!50!black] at (v1.north) {Safe root};
+    \node[below,font=\small,green!50!black] at (v4.south) {Safe root};
+    
+    % Degree annotations
+    \node[right,font=\footnotesize,align=left] at (3,1.5) {$v_1$: degree 2 on outer cycle\\(neighbors: $v_6, v_2$)\\No internal chords\\$\Rightarrow$ \textbf{safe root}};
+    
+    \node[right,font=\footnotesize,align=left] at (3,-1.5) {$v_4$: degree 2 on outer cycle\\(neighbors: $v_3, v_5$)\\No internal chords\\$\Rightarrow$ \textbf{safe root}};
+    
+    % Annotation for non-safe vertices
+    \node[left,font=\footnotesize,align=right,gray] at (-3,0.5) {$v_2, v_3, v_5, v_6$:\\Have internal chords\\$\Rightarrow$ not safe roots};
+    
+    % Title
+    \node[above,font=\small\bfseries] at (0,2.7) {Outerplanar Graph View of Face with Existing Chords};
+\end{tikzpicture}
+\caption{Illustration of Theorem~\ref{thm:safe_root_exists}: A hexagonal face with two existing chords $(v_2, v_5)$ and $(v_3, v_6)$ from previously processed faces (shown in red dashed lines). Viewing this as an outerplanar graph, vertices $v_1$ and $v_4$ have degree 2 on the outer cycle (blue boundary) with no incident internal edges. By the classical theorem, at least two such vertices exist, guaranteeing safe roots for algorithm initialization.}
+\label{fig:outerplanar_safe_roots}
 \end{figure}
 
 \subsection{Completeness via Pruning}
+
+\begin{lemma}[Blocking Chords Persist]
+\label{lem:blocking_chord_persists}
+In a local genealogical tree, a blocking chord (one that already exists in the global set $S$) in triangulation $T$ is never the generating chord of $T$. Consequently, the blocking chord persists in all descendants of $T$ in the tree.
+\end{lemma}
+
+\textbf{Proof Strategy:} A generating chord must satisfy two conditions: (1) neither endpoint is the root vertex, and (2) it is the leftmost such chord. We show that a blocking chord violates at least one of these conditions in every case, making it impossible to flip.
+
+\begin{proof}
+Let $(v_a, v_b)$ be a blocking chord in triangulation $T$ (i.e., $(v_a, v_b) \in S$ from a previously processed face). Since $T$ is a complete triangulation of the current face, there exist two vertices $v_p$ and $v_q$ forming triangles on opposite sides of $(v_a, v_b)$: triangles $(v_a, v_b, v_p)$ and $(v_a, v_b, v_q)$.
+
+Recall from Definition~\ref{def:generating_chord} that the generating chord of a triangulation must:
+\begin{enumerate}
+    \item Have neither endpoint be the root vertex $r$
+    \item Be the leftmost chord satisfying condition 1
+\end{enumerate}
+
+We analyze all possible positions of $v_p$ relative to the root vertex $r$:
+
+\textbf{Case 1: $v_p$ is to the left of root $r$ in the vertex ordering.}
+
+For $(v_a, v_b)$ to be flippable, both $v_a$ and $v_b$ must not be the root. However, the chord $(v_b, v_p)$ also exists in $T$ (forming the triangle $(v_a, v_b, v_p)$), and by the vertex ordering, $(v_b, v_p)$ is positioned to the left of $(v_a, v_b)$.
+
+Since $(v_b, v_p)$ is to the left of $(v_a, v_b)$ and neither $v_b$ nor $v_p$ is the root, the chord $(v_b, v_p)$ would be the leftmost generating chord, not $(v_a, v_b)$.
+
+Therefore, $(v_a, v_b)$ cannot be the generating chord in this case (violates the ``leftmost'' condition).
+
+\textbf{Case 2: $v_p$ is to the right of root $r$ in the vertex ordering.}
+
+Similarly, the chord $(v_a, v_p)$ exists in $T$ (forming the triangle $(v_a, v_b, v_p)$), and $(v_a, v_p)$ is positioned to the left of the chord that would result from flipping $(v_a, v_b)$ (namely, $(v_p, v_q)$).
+
+Since $(v_a, v_p)$ is to the left of $(v_p, v_q)$, if $(v_a, v_b)$ were flipped, the resulting $(v_p, v_q)$ would not be the leftmost chord. This contradicts the algorithm's rule of always flipping the leftmost chord.
+
+Therefore, $(v_a, v_b)$ cannot be the generating chord in this case (flipping it would not produce a valid child).
+
+\textbf{Case 3: $v_p$ equals the root $r$.}
+
+If $v_p = r$, then flipping $(v_a, v_b)$ would create chord $(r, v_q)$. But all chords emanating from the root $r$ are established in the root triangulation and never created through flipping in descendant triangulations (by the definition of the local genealogical tree structure).
+
+Creating a new chord from $r$ in a descendant would violate the fundamental tree construction rule.
+
+Therefore, $(v_a, v_b)$ cannot be the generating chord in this case (violates the tree structure constraint).
+
+\textbf{Conclusion:}
+
+In all three cases, the blocking chord $(v_a, v_b)$ cannot be the generating chord of triangulation $T$. Since generating chords are the only chords flipped to produce children in the local genealogical tree, the blocking chord persists unchanged through all descendants of $T$.
+\end{proof}
+
+\begin{example}[Blocking Chord Persistence]
+Consider a hexagonal face $F$ with vertices $v_1, v_2, v_3, v_4, v_5, v_6$ where chord $(v_2, v_5) \in S$ from a previous face. Suppose we choose $v_1$ as the safe root.
+
+\textbf{Triangulation $T$ with blocking chord:}
+\begin{itemize}
+    \item Root chords from $v_1$: $(v_1, v_3), (v_1, v_4), (v_1, v_5)$
+    \item Suppose through flipping we reach triangulation $T$ containing: $(v_1, v_3), (v_2, v_5), (v_3, v_5)$
+    \item The chord $(v_2, v_5)$ is a \textbf{blocking chord} (already in $S$)
+\end{itemize}
+
+\textbf{Why $(v_2, v_5)$ cannot be the generating chord:}
+
+The blocking chord $(v_2, v_5)$ forms two triangles: $(v_1, v_2, v_5)$ and $(v_3, v_2, v_5)$ (assuming $v_p = v_1$ and $v_q = v_3$).
+
+\textbf{Case 1 applies:} Vertex $v_p = v_1$ is the root, so $(v_2, v_5)$ violates condition 1 of Definition~\ref{def:generating_chord} (neither endpoint can be the root). 
+
+Wait—neither $v_2$ nor $v_5$ is the root, but $v_p = v_1$ \emph{is} the root. Let's apply Case 3:
+
+If we tried to flip $(v_2, v_5)$ to $(v_1, v_3)$, we would create a chord from the root $v_1$. But $(v_1, v_3)$ should have been established in the root triangulation, not created through flipping.
+
+This violates the tree structure, so $(v_2, v_5)$ cannot be the generating chord.
+
+\textbf{Therefore:} The blocking chord $(v_2, v_5)$ persists in all descendants of $T$, making them all invalid. Pruning at $T$ is sound.
+\end{example}
 
 \begin{theorem}[Completeness]
 \label{thm:completeness}
 The algorithm generates all valid triangulations of the biconnected plane graph without duplications.
 \end{theorem}
 
-\textbf{Proof Strategy:} We prove completeness by showing: (1) every valid triangulation appears in some tree path from a safe root, and (2) the pruning of invalid branches (those creating multi-edges) is sound—all descendants of pruned branches would also be invalid. The no-duplication property follows from the uniqueness of the generating chord (leftmost chord) in each triangulation, ensuring each triangulation appears exactly once in the genealogical tree structure.
+\textbf{Proof Strategy:} We prove completeness by showing that pruning triangulations containing blocking chords is sound—all descendants would also be invalid. The no-duplication property follows from the uniqueness of the generating chord and the tree structure of the local genealogical trees.
 
 \begin{proof}
 We must show two properties:
@@ -949,43 +1001,40 @@ We must show two properties:
     \item No triangulation is generated twice (no duplicates)
 \end{enumerate}
 
-\textbf{Pruning Preserves Validity:}
+\textbf{Soundness of Pruning:}
 
-When the algorithm prunes a branch (because a chord would create a multi-edge), we must verify that all children of that branch would also be invalid.
+When the algorithm encounters a triangulation $T$ containing a blocking chord (a chord that already exists in the global set $S$ from a previously processed face), it prunes that branch of the search tree.
 
-Consider a triangulation $T$ with a blocking chord $(v_a, v_b)$ that already exists in the global set $S$. Since $T$ is a complete triangulation of the face, there exist two vertices $v_p$ and $v_q$ forming triangles $(v_a, v_b, v_p)$ and $(v_a, v_b, v_q)$ on opposite sides of the chord.
+By Lemma~\ref{lem:blocking_chord_persists}, this blocking chord persists in all descendants of $T$ in the local genealogical tree. Since the blocking chord creates a multi-edge (it would be added twice to the graph), $T$ and all its descendants are invalid.
 
-We now prove that a blocking chord is \emph{never flipped} in any child of the triangulation tree, by analyzing all possible positions of the vertices relative to the root vertex $r$.
+Therefore, pruning such branches eliminates no valid triangulations, preserving completeness.
 
-\textbf{Case 1: $v_p$ is on the left of the root vertex $r$}
+\textbf{Validity of Generated Triangulations:}
 
-Flipping the $(v_a, v_b)$ chord would result in a $(v_p, v_q)$ chord. However, before this flip, the $(v_b, v_p)$ chord was also a blocking chord positioned to the left of $(v_a, v_b)$ (by the ordering of vertices). This means $(v_a, v_b)$ could not be the leftmost blocking chord. 
+Every triangulation generated by the algorithm:
+\begin{itemize}
+    \item Is constructed by adding chords that do not exist in $S$ (blocking chords are detected and pruned)
+    \item Forms a complete triangulation of the current face (all internal faces become triangles)
+    \item Maintains planarity (chords are added within a face, no crossings occur)
+\end{itemize}
 
-Consequently, after flipping to create the new $(v_p, v_q)$ chord, this new chord cannot be the leftmost blocking chord either, because the $(v_p, v_b)$ chord still exists and remains to the left of the $(v_q, v_p)$ chord. 
-
-Therefore, flipping the $(v_a, v_b)$ blocking chord is not permitted by the algorithm in this case, as the algorithm only flips the leftmost generating chord.
-
-\textbf{Case 2: $v_p$ is on the right of the root vertex $r$}
-
-Flipping the $(v_a, v_b)$ chord would produce a $(v_p, v_q)$ chord. However, the $(v_a, v_p)$ chord exists and is positioned to the left of where the new $(v_p, v_q)$ chord would be. Since $(v_a, v_p)$ is more to the left than $(v_p, v_q)$, the flip is invalid according to the algorithm's leftmost-chord-first policy.
-
-\textbf{Case 3: $v_p$ is at the root vertex $r$}
-
-Flipping the $(v_a, v_b)$ chord would create a $(r, v_q)$ chord, where $r$ is the root vertex. This would give the child triangulation's root vertex better visibility than the parent—the root would be able to see $v_q$ through a chord, which contradicts the tree construction where chords from the root are only added in the root triangulation.
-
-This violates the algorithm's fundamental constraint that all chords emanating from the root vertex are established in the root triangulation and are never created through flipping operations in descendant triangulations.
-
-\textbf{Conclusion:}
-
-In all three cases, flipping a blocking chord in a triangulation tree is impossible according to the algorithm's rules. Therefore, if $(v_a, v_b)$ is a blocking chord (duplicate from previous faces), it will be present in all descendants of $T$ in the local tree, making all descendants invalid. 
-
-By pruning such branches, we eliminate no valid triangulations, preserving completeness.
+These triangulations correspond exactly to the valid triangulations of the face given the constraints from $S$.
 
 \textbf{No Duplicates:}
 
-The local genealogical tree structure for each face ensures unique parent-child relationships: each triangulation (except the root) has exactly one parent obtained by flipping its generating chord. This defines a tree (not a DAG), preventing cycles and duplicates within a single face's triangulation space.
+The local genealogical tree structure for each face ensures unique parent-child relationships:
+\begin{itemize}
+    \item Each triangulation (except the root) has exactly one parent, obtained by flipping its unique generating chord (the leftmost chord not involving the root)
+    \item This defines a tree structure (not a DAG), preventing cycles
+    \item Each triangulation appears exactly once in the tree
+\end{itemize}
 
-Across faces, the recursive DFS exploration with backtracking ensures that each combination of face triangulations is explored exactly once. The global chord set $S$ is updated and restored correctly during backtracking, maintaining consistency.
+Across faces, the recursive DFS exploration with backtracking ensures that each combination of face triangulations is explored exactly once:
+\begin{itemize}
+    \item The global chord set $S$ is updated when entering a face triangulation
+    \item $S$ is restored when backtracking (maintaining correct state)
+    \item Each path from root to leaf in the recursion tree represents a unique global triangulation
+\end{itemize}
 
 Therefore, the algorithm generates all valid triangulations exactly once.
 \end{proof}
@@ -1081,55 +1130,28 @@ For any face $F_i$ with $n_i \geq 5$ vertices, the number of valid triangulation
 \end{lemma}
 
 \begin{proof}
-Consider face $F_i$ with $n_i \geq 5$ vertices labeled $v_1, v_2, \ldots, v_{n_i}$ in counterclockwise order. Let $S$ be the global chord set containing all chords from previously triangulated faces.
+This is an immediate corollary of Lemma~\ref{lem:min_triangulations}, which establishes that $d_i \geq n_i - 3$ for all faces.
 
-\textbf{Case Analysis by Safe Root Selection:}
+For $n_i \geq 5$:
+\begin{align}
+d_i \geq n_i - 3 \geq 5 - 3 = 2
+\end{align}
 
-By Theorem~\ref{thm:safe_root_exists}, face $F_i$ has at least two safe root vertices. Let $r$ be one such safe root vertex. Without loss of generality, assume $r = v_1$ (we can relabel vertices accordingly).
+Therefore, $d_i \geq 2$ for all faces with at least 5 vertices. $\checkmark$
 
-Since $v_1$ is a safe root, the algorithm can construct the root triangulation $T_{ir}$ by adding chords from $v_1$ to all non-adjacent vertices: $(v_1, v_3), (v_1, v_4), \ldots, (v_1, v_{n_i-1})$. This gives us at least one triangulation.
+\textbf{Verification for Small Cases:}
 
-\textbf{Generating a Second Triangulation:}
-
-From the root triangulation $T_{ir}$, we can perform a flip operation to generate at least one child triangulation. Specifically:
-
-\begin{enumerate}
-    \item The root triangulation contains chord $(v_1, v_{n_i-1})$ which is the rightmost chord from $v_1$.
-    
-    \item This chord is part of a triangle with vertices $v_1, v_{n_i-1}, v_{n_i}$ (where $v_{n_i}$ is adjacent to both $v_1$ and $v_{n_i-1}$ on the face boundary).
-    
-    \item We can flip to create chord $(v_2, v_{n_i})$ instead. This is valid because:
-    \begin{itemize}
-        \item $(v_2, v_{n_i}) \notin S$: If $(v_2, v_{n_i})$ were in $S$, then $v_1$ would not be a safe root (contradiction).
-        \item The flip does not create multi-edges: The quadrilateral $v_1v_2v_{n_i}v_{n_i-1}$ allows the flip.
-    \end{itemize}
-    
-    \item For $n_i \geq 5$, vertices $v_2$ and $v_{n_i}$ are non-adjacent on the original face boundary (they are separated by at least 3 edges: $v_2 \to v_3 \to \cdots \to v_{n_i-1} \to v_{n_i}$). Therefore, $(v_2, v_{n_i})$ is a valid chord.
-\end{enumerate}
-
-This flip operation produces a distinct triangulation $T_{ir}' = T_{ir} \setminus \{(v_1, v_{n_i-1})\} \cup \{(v_2, v_{n_i})\}$.
-
-\textbf{Verification for $n_i = 5$:}
-
-For the smallest case $n_i = 5$:
 \begin{itemize}
-    \item Root triangulation from $v_1$: chords $(v_1, v_3), (v_1, v_4)$
-    \item Flip chord $(v_1, v_4)$ to create chord $(v_2, v_5)$
-    \item New triangulation: chords $(v_1, v_3), (v_2, v_5)$
+    \item For $n_i = 5$: $d_i \geq 5 - 3 = 2$ \\
+    Example: Pentagon has at least 2 triangulations
+    
+    \item For $n_i = 6$: $d_i \geq 6 - 3 = 3$ \\
+    Example: Hexagon has at least 3 triangulations (far more in practice; see Table~\ref{tab:triangulation_counts})
+    
+    \item For $n_i \geq 7$: $d_i \geq n_i - 3 \geq 4$
 \end{itemize}
 
-Both triangulations are valid and distinct, proving $d_i \geq 2$ for $n_i = 5$.
-
-For $n_i > 5$, additional flip operations provide even more triangulations, so $d_i \geq 2$ holds.
-
-\textbf{Worst-Case Scenario:}
-
-Even in the worst case where the global chord set $S$ contains many blocking chords:
-\begin{itemize}
-    \item At least one safe root exists (by Theorem~\ref{thm:safe_root_exists})
-    \item From that root, at least two triangulations can be constructed as shown above
-    \item Therefore, $d_i \geq 2$ for all $n_i \geq 5$
-\end{itemize}
+The empirical data in Table~\ref{tab:triangulation_counts} confirms that practical minimum values significantly exceed this lower bound—for instance, the minimum observed for $n = 6$ is 4, not just 3.
 \end{proof}
 
 \begin{remark}
@@ -1965,7 +1987,7 @@ Table~\ref{tab:complexity_summary} provides a comprehensive summary of all time 
 \hline
 \multicolumn{3}{|c|}{\textbf{Per-Face Operations}} \\
 \hline
-Find safe root vertex & $O(n_i)$ & Theorem~\ref{thm:safe_root_exists}, iterative reduction \\
+Find safe root vertex & $O(n_i)$ & Theorem~\ref{thm:safe_root_exists}, outerplanar degree-2 vertices \\
 \hline
 Construct root triangulation & $O(n_i)$ & Add $n_i-3$ chords from root \\
 \hline

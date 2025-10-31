@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{avis1996}
 David Avis and Komei Fukuda.
@@ -14,6 +14,13 @@ Bernard Chazelle.
 Mark de~Berg, Otfried Cheong, Marc van Kreveld, and Mark Overmars.
 \newblock {\em Computational Geometry: Algorithms and Applications}.
 \newblock Springer, 3rd edition, 2008.
+
+\bibitem{diestel2017}
+Reinhard Diestel.
+\newblock {\em Graph Theory}, volume 173 of {\em Graduate Texts in
+  Mathematics}.
+\newblock Springer, 5th edition, 2017.
+\newblock Chapter 2: Outerplanar Graphs.
 
 \bibitem{hurtado1999}
 Ferran Hurtado and Marc Noy.
