@@ -442,7 +442,7 @@ Given a triangulation $T$ with chord set $C$, and a potential new chord $e = (v_
     \item $T(v_1,v_4) = T \setminus \{(v_2,v_3)\} \cup \{(v_1,v_4)\}$
 \end{itemize}
 
-This notation appears throughout Algorithms~\ref{alg:find_all_cycle} and~\ref{alg:find_children_cycle}.
+This notation appears throughout Algorithms~\ref{alg:face_triangulation} and~\ref{alg:child_triangulations}.
 \end{definition}
 
 \subsection{Complete Algorithm Specification}
@@ -640,7 +640,7 @@ When a face has exactly 4 vertices, our algorithm handles it in $O(1)$ constant 
 
 \textbf{Why This Matters for Complexity Analysis:}
 
-Throughout our complexity proofs (Theorems~\ref{thm:time_complexity} and~\ref{thm:overall_complexity}), we state that for $n \geq 5$, the number of triangulations $d \geq n - 3 \geq 2$. For $n = 4$, there are exactly $d = 2$ triangulations (unless one diagonal conflicts with $S$, in which case $d = 1$).
+Throughout our complexity proofs (Theorem~\ref{thm:time_complexity}), we state that for $n \geq 5$, the number of triangulations $d \geq n - 3 \geq 2$. For $n = 4$, there are exactly $d = 2$ triangulations (unless one diagonal conflicts with $S$, in which case $d = 1$).
 
 By handling $n = 4$ as a base case with constant-time lookup, we ensure:
 
@@ -1944,7 +1944,7 @@ where $p$ is a prime slightly larger than $n$. This distributes chords uniformly
 
 \subsubsection{Safe Root Caching}
 
-For faces with many vertices, the safe root search (Algorithm~\ref{alg:find_safe_root}) can be expensive. We cache the result: once a safe root vertex is found for face $F_i$, it remains safe throughout the processing of $F_i$ (since $S$ only grows, constraints only increase). This eliminates redundant searches.
+For faces with many vertices, the safe root search (Algorithm~\ref{alg:safe_root_complete}) can be expensive. We cache the result: once a safe root vertex is found for face $F_i$, it remains safe throughout the processing of $F_i$ (since $S$ only grows, constraints only increase). This eliminates redundant searches.
 
 \textbf{Impact:} Reduces safe root finding overhead by up to 50\% on faces with $n > 10$ vertices.
 
@@ -1962,7 +1962,7 @@ Instead of individually adding/removing chords to/from $S$ during backtracking, 
 
 \subsubsection{Early Pruning}
 
-In Algorithm~\ref{alg:find_all_children}, before recursing on a child triangulation, we check if ANY of its chords create multi-edges. If so, prune immediately without constructing the full triangulation. This saves significant work on highly constrained faces.
+In Algorithm~\ref{alg:child_triangulations}, before recursing on a child triangulation, we check if ANY of its chords create multi-edges. If so, prune immediately without constructing the full triangulation. This saves significant work on highly constrained faces.
 
 \textbf{Implementation:}
 \begin{verbatim}
@@ -2232,7 +2232,7 @@ java -jar target/triangulation.jar input_graph.txt
 
 \subsection{Test Instances}
 
-All 41 test graphs used in Section~\ref{sec:implementation} (Table~\ref{tab:experimental_results}) are provided in multiple formats:
+All 41 test graphs used in Section~\ref{sec:implementation} (Tables~\ref{tab:experimental_results_part1} and~\ref{tab:experimental_results_part2}) are provided in multiple formats:
 \begin{itemize}
 \item \texttt{.txt}: Adjacency list format (human-readable)
 \item \texttt{.json}: Structured JSON with vertex coordinates and face boundaries
