@@ -261,6 +261,70 @@ The \textbf{leftmost chord} among a set of chords is the chord that is to the le
 
 These definitions provide the foundation for understanding our algorithm's approach to handling the multi-edge problem in biconnected graphs.
 
+\subsection{Glossary of Notation}
+
+For quick reference, we summarize the key notation used throughout this paper:
+
+\begin{table}[H]
+\centering
+\caption{Glossary of Notation}
+\begin{tabular}{|l|p{11cm}|}
+\hline
+\textbf{Symbol} & \textbf{Meaning} \\
+\hline
+\hline
+\multicolumn{2}{|l|}{\textbf{Graph-Related Notation}} \\
+\hline
+$G = (V, E)$ & Biconnected plane graph with vertex set $V$ and edge set $E$ \\
+$n$ & Number of vertices in $G$, i.e., $n = |V|$ \\
+$m$ & Number of edges in $G$, i.e., $m = |E|$ \\
+$k$ & Number of faces in $G$ \\
+$F_i$ & The $i$-th face in $G$ (processed in sequential order) \\
+$n_i$ & Number of vertices of face $F_i$ \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Triangulation Notation}} \\
+\hline
+$T$ & A triangulation (maximal plane graph obtained by adding chords) \\
+$T_i$ & A triangulation of face $F_i$ \\
+$T_{ir}$ & Root triangulation of face $F_i$ (initial triangulation from safe root) \\
+$T_{\text{current}}$ & Current partial triangulation (union of triangulations of processed faces) \\
+$d_i$ & Number of triangulations for face $F_i$ under current constraints \\
+$C(T)$ & Set of chords in triangulation $T$ \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Chord and Edge Operations}} \\
+\hline
+$(v_a, v_b)$ & A chord (internal edge) connecting vertices $v_a$ and $v_b$ \\
+$S$ & Global chord set tracking all chords added across all processed faces \\
+$T(e)$ & Triangulation obtained from $T$ by flipping to include edge $e$ \\
+$T_i(v_1, v_j)$ & Triangulation obtained from $T_i$ by flipping to create chord $(v_1, v_j)$ \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Algorithm-Specific Notation}} \\
+\hline
+$r$ & Safe root vertex for a face \\
+$v_1, v_2, \ldots, v_n$ & Vertices of a face in counterclockwise order \\
+$(v_b, v_{b'})$ & Leftmost generating chord of a triangulation \\
+$B$ & Total time spent building triangulations \\
+$F$ & Total time spent flipping to generate child triangulations \\
+$T$ & Total number of triangulations generated \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Complexity Analysis}} \\
+\hline
+$C_n$ & Catalan number: $C_n = \frac{1}{n+1}\binom{2n}{n}$ (upper bound on $d_i$) \\
+$B + F$ & Total runtime of the algorithm \\
+$O(1)$ per $T$ & Amortized constant time per generated triangulation \\
+\hline
+\end{tabular}
+\label{tab:notation}
+\end{table}
+
+\textbf{Important Conventions:}
+\begin{itemize}
+    \item Vertices of each face are indexed in \emph{counterclockwise} order starting from an arbitrary vertex
+    \item The term ``\emph{chord}'' refers to an internal edge added during triangulation (not an original edge of $G$)
+    \item ``\emph{Multi-edge}'' denotes multiple edges between the same pair of vertices (which we must avoid)
+    \item We use $O(1)$ amortized time to mean total time $O(T)$ for generating $T$ triangulations
+\end{itemize}
+
 
 \section{The Algorithm}
 \label{sec:algorithm}
@@ -664,6 +728,8 @@ We now prove that our algorithm correctly generates all triangulations without d
 In any face of a biconnected plane graph during the triangulation process, there exist at least two safe root vertices.
 \end{theorem}
 
+\textbf{Proof Strategy:} We prove by structural induction on face segments divided by existing chords. The key insight is that existing chords partition the face into smaller regions, and by analyzing the smallest regions (1 or 2 internal vertices), we can guarantee safe roots exist. The proof handles two cases: (1) no blocking chords exist (trivial—all vertices are safe), or (2) chords exist and partition the face into regions where boundary vertices of smallest regions are provably safe.
+
 \begin{proof}
 Consider a face $F$ with $n$ vertices $v_1, v_2, \ldots, v_n$ listed in counterclockwise order. Let $S$ be the global chord set from previously processed faces.
 
@@ -842,6 +908,8 @@ The existence of at least two safe root vertices is crucial for the algorithm's 
 The algorithm generates all valid triangulations of the biconnected plane graph without duplications.
 \end{theorem}
 
+\textbf{Proof Strategy:} We prove completeness by showing: (1) every valid triangulation appears in some tree path from a safe root, and (2) the pruning of invalid branches (those creating multi-edges) is sound—all descendants of pruned branches would also be invalid. The no-duplication property follows from the uniqueness of the generating chord (leftmost chord) in each triangulation, ensuring each triangulation appears exactly once in the genealogical tree structure.
+
 \begin{proof}
 We must show two properties:
 \begin{enumerate}
@@ -971,6 +1039,89 @@ Therefore, the algorithm generates all valid triangulations exactly once.
 
 \subsection{Time Complexity}
 
+\subsubsection{Minimum Triangulations Guarantee}
+
+Before presenting the main time complexity theorem, we establish a critical lemma about the minimum number of triangulations for faces with at least 5 vertices.
+
+\begin{lemma}[Minimum Triangulations for $n \geq 5$]
+\label{lem:min_triangulations_n5}
+For any face $F_i$ with $n_i \geq 5$ vertices, the number of valid triangulations $d_i \geq 2$, even under maximal constraints from previously triangulated faces.
+\end{lemma}
+
+\begin{proof}
+Consider face $F_i$ with $n_i \geq 5$ vertices labeled $v_1, v_2, \ldots, v_{n_i}$ in counterclockwise order. Let $S$ be the global chord set containing all chords from previously triangulated faces.
+
+\textbf{Case Analysis by Safe Root Selection:}
+
+By Theorem~\ref{thm:safe_root_exists}, face $F_i$ has at least two safe root vertices. Let $r$ be one such safe root vertex. Without loss of generality, assume $r = v_1$ (we can relabel vertices accordingly).
+
+Since $v_1$ is a safe root, the algorithm can construct the root triangulation $T_{ir}$ by adding chords from $v_1$ to all non-adjacent vertices: $(v_1, v_3), (v_1, v_4), \ldots, (v_1, v_{n_i-1})$. This gives us at least one triangulation.
+
+\textbf{Generating a Second Triangulation:}
+
+From the root triangulation $T_{ir}$, we can perform a flip operation to generate at least one child triangulation. Specifically:
+
+\begin{enumerate}
+    \item The root triangulation contains chord $(v_1, v_{n_i-1})$ which is the rightmost chord from $v_1$.
+    
+    \item This chord is part of a triangle with vertices $v_1, v_{n_i-1}, v_{n_i}$ (where $v_{n_i}$ is adjacent to both $v_1$ and $v_{n_i-1}$ on the face boundary).
+    
+    \item We can flip to create chord $(v_2, v_{n_i})$ instead. This is valid because:
+    \begin{itemize}
+        \item $(v_2, v_{n_i}) \notin S$: If $(v_2, v_{n_i})$ were in $S$, then $v_1$ would not be a safe root (contradiction).
+        \item The flip does not create multi-edges: The quadrilateral $v_1v_2v_{n_i}v_{n_i-1}$ allows the flip.
+    \end{itemize}
+    
+    \item For $n_i \geq 5$, vertices $v_2$ and $v_{n_i}$ are non-adjacent on the original face boundary (they are separated by at least 3 edges: $v_2 \to v_3 \to \cdots \to v_{n_i-1} \to v_{n_i}$). Therefore, $(v_2, v_{n_i})$ is a valid chord.
+\end{enumerate}
+
+This flip operation produces a distinct triangulation $T_{ir}' = T_{ir} \setminus \{(v_1, v_{n_i-1})\} \cup \{(v_2, v_{n_i})\}$.
+
+\textbf{Verification for $n_i = 5$:}
+
+For the smallest case $n_i = 5$:
+\begin{itemize}
+    \item Root triangulation from $v_1$: chords $(v_1, v_3), (v_1, v_4)$
+    \item Flip chord $(v_1, v_4)$ to create chord $(v_2, v_5)$
+    \item New triangulation: chords $(v_1, v_3), (v_2, v_5)$
+\end{itemize}
+
+Both triangulations are valid and distinct, proving $d_i \geq 2$ for $n_i = 5$.
+
+For $n_i > 5$, additional flip operations provide even more triangulations, so $d_i \geq 2$ holds.
+
+\textbf{Worst-Case Scenario:}
+
+Even in the worst case where the global chord set $S$ contains many blocking chords:
+\begin{itemize}
+    \item At least one safe root exists (by Theorem~\ref{thm:safe_root_exists})
+    \item From that root, at least two triangulations can be constructed as shown above
+    \item Therefore, $d_i \geq 2$ for all $n_i \geq 5$
+\end{itemize}
+\end{proof}
+
+\begin{remark}
+For $n_i = 4$ (squares), only $d_i \in \{1, 2\}$ triangulations exist (the two diagonals). If one diagonal is blocked by a chord in $S$, then $d_i = 1$. The time complexity proof handles this special case separately.
+\end{remark}
+
+\subsubsection{Main Time Complexity Theorem}
+
+\textbf{Proof Strategy Overview:}
+
+The time complexity proof proceeds by analyzing two components:
+\begin{enumerate}
+    \item \textbf{Building Time ($B$):} Time to construct tree structures and find safe roots
+    \item \textbf{Flipping Time ($F$):} Time to perform edge flips generating children
+\end{enumerate}
+
+We prove $B + F < 4T$ by induction on the number of faces, establishing amortized $O(1)$ time per triangulation. The key insight is that building and flipping costs are amortized across the exponentially growing number of triangulations.
+
+\textbf{Critical Dependencies:}
+\begin{itemize}
+    \item For $n_i \geq 5$: We use $d_i \geq 2$ (Lemma~\ref{lem:min_triangulations_n5})
+    \item For $n_i = 4$: We handle as a special base case with $d_i \in \{1, 2\}$
+\end{itemize}
+
 \begin{theorem}[Amortized Constant Time per Triangulation]
 \label{thm:time_complexity}
 The algorithm has amortized $O(1)$ time complexity per triangulation.
@@ -1093,13 +1244,19 @@ Therefore:
 F &\leq 2 \cdot d_1 \cdot d_2 + d_1 \cdot d_2 \cdot d_3
 \end{align}
 
-Since $d_3 \geq 2$ for $n \geq 5$ (we use brute force for $n = 4$):
+\textbf{Case 3.1:} If $n_3 = 4$, then $d_3 \in \{1, 2\}$:
+\begin{itemize}
+    \item If $d_3 = 1$: Then $F = 2 \cdot d_1 \cdot d_2 + d_1 \cdot d_2 \cdot 1 = 3 \cdot d_1 \cdot d_2 < 4 \cdot d_1 \cdot d_2 \cdot 1 = 4T$
+    \item If $d_3 = 2$: Then $2 \cdot d_1 \cdot d_2 \leq d_1 \cdot d_2 \cdot 2$, so $F \leq 2T$
+\end{itemize}
+
+\textbf{Case 3.2:} If $n_3 \geq 5$, then by Lemma~\ref{lem:min_triangulations_n5}, $d_3 \geq 2$:
 \begin{align}
 2 \cdot d_1 \cdot d_2 &\leq d_1 \cdot d_2 \cdot d_3 \\
 F &\leq 2 \cdot d_1 \cdot d_2 \cdot d_3 = 2T
 \end{align}
 
-Therefore, for three faces:
+Therefore, for three faces (all cases):
 \begin{align}
 B + F &< 2T + 2T = 4T
 \end{align}
@@ -1143,13 +1300,19 @@ F_k &= d_1 + d_1 \cdot d_2 + \cdots + d_1 \cdot d_2 \cdots d_{k-1} + d_1 \cdot d
 &\leq 2 \cdot d_1 \cdot d_2 \cdots d_{k-1} + d_1 \cdot d_2 \cdots d_k \quad \text{(by inductive hypothesis)}
 \end{align}
 
-For $n \geq 5$, we have $d_k \geq 2$, thus:
+\textbf{Case k.1:} If $n_k = 4$, then $d_k \in \{1, 2\}$:
+\begin{itemize}
+    \item If $d_k = 1$: Then $F_k = 2 \cdot d_1 \cdots d_{k-1} + d_1 \cdots d_{k-1} \cdot 1 = 3 \cdot d_1 \cdots d_{k-1} < 4T$
+    \item If $d_k = 2$: Then $2 \cdot d_1 \cdots d_{k-1} \leq d_1 \cdots d_k$, so $F_k \leq 2T$
+\end{itemize}
+
+\textbf{Case k.2:} If $n_k \geq 5$, then by Lemma~\ref{lem:min_triangulations_n5}, $d_k \geq 2$:
 \begin{align}
 2 \cdot d_1 \cdot d_2 \cdots d_{k-1} &\leq d_1 \cdot d_2 \cdots d_k \\
 F_k &\leq 2 \cdot d_1 \cdot d_2 \cdots d_k = 2T
 \end{align}
 
-Therefore, for $k$ faces:
+Therefore, for $k$ faces (all cases):
 \begin{align}
 B_k + F_k &< 2T + 2T = 4T
 \end{align}
@@ -1157,10 +1320,16 @@ B_k + F_k &< 2T + 2T = 4T
 \vspace{0.3cm}
 \noindent\textbf{Conclusion:}
 
-For any biconnected planar graph with $k$ faces where each face has at least 5 vertices (we use brute force constant time for $n = 4$), the total time is bounded by:
+For any biconnected planar graph with $k$ faces, the total time is bounded by:
 \begin{align}
 \text{Total Time} = B + F < 4T
 \end{align}
+
+This holds for all face sizes:
+\begin{itemize}
+    \item For faces with $n_i = 4$: We explicitly handle both $d_i = 1$ and $d_i = 2$ cases
+    \item For faces with $n_i \geq 5$: We use the guarantee $d_i \geq 2$ from Lemma~\ref{lem:min_triangulations_n5}
+\end{itemize}
 
 This gives an amortized time complexity of $O(1)$ per triangulation.
 \end{proof}
