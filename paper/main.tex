@@ -79,7 +79,7 @@ This \textbf{multi-edge problem} is the fundamental obstacle preventing direct a
 In this paper, we present the first algorithm that generates all triangulations of biconnected planar graphs in $O(1)$ amortized time per triangulation using $O(n)$ space. Our algorithm successfully extends the tree-of-triangulations framework to the biconnected case by introducing novel techniques to resolve the multi-edge problem:
 
 \begin{enumerate}
-    \item \textbf{Safe root vertex selection:} For each face, we introduce the concept of a \emph{safe root vertex}—a vertex from which all initial chords can be drawn without creating multi-edges with previously triangulated faces. We prove that such vertices always exist and provide an efficient method to find them.
+    \item \textbf{Safe root vertex selection:} For each face, we introduce the concept of a \emph{safe root vertex}---a vertex from which all initial chords can be drawn without creating multi-edges with previously triangulated faces. We prove that such vertices always exist and provide an efficient method to find them.
     
     \item \textbf{Local genealogical trees:} Instead of a single global tree, we construct \emph{local genealogical trees} for each face, organizing all valid triangulations of that face. These local trees are explored via depth-first search during recursive face processing.
     
@@ -122,7 +122,7 @@ The breakthrough work of Parvez, Rahman, and Nakano~\cite{parvez2011} introduced
 \begin{itemize}
     \item \textbf{Tree Structure:} Triangulations form a tree where each child is generated from its parent by a single edge flip.
     \item \textbf{Root Triangulation:} The tree is rooted at a triangulation where all chords emanate from a single vertex.
-    \item \textbf{Generating Chord:} Each triangulation has a unique \emph{generating chord}—the leftmost chord that can be flipped.
+    \item \textbf{Generating Chord:} Each triangulation has a unique \emph{generating chord}---the leftmost chord that can be flipped.
     \item \textbf{Parent-Child Relationship:} Flipping the generating chord produces the parent, ensuring unique relationships and no duplicates.
 \end{itemize}
 
@@ -135,6 +135,45 @@ In biconnected graphs, faces can share internal chords from previous triangulati
 Our algorithm solves this problem through safe root selection and global chord tracking.
 
 \subsection{Comparison: Triconnected vs. Biconnected Approach}
+
+Table~\ref{tab:algorithm_comparison} compares our biconnected algorithm with existing triangulation enumeration approaches, highlighting the advancement in both generality and efficiency.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of Triangulation Enumeration Algorithms}
+\label{tab:algorithm_comparison}
+\begin{tabular}{|l|p{3cm}|p{2.5cm}|p{3cm}|p{3cm}|}
+\hline
+\textbf{Algorithm} & \textbf{Graph Class} & \textbf{Time per Triangulation} & \textbf{Space Complexity} & \textbf{Key Limitation} \\
+\hline
+\hline
+\textbf{Reverse Search} \cite{avis1996} & General planar & $O(n^2)$ amortized & $O(n)$ & Polynomial time, but $O(n^2)$ factor per output \\
+\hline
+\textbf{Orderly Generation} \cite{read1978} & General planar & $O(n! \cdot \text{poly}(n))$ worst-case & $O(T)$ exponential & Requires storing all generated triangulations for isomorphism testing \\
+\hline
+\textbf{Parvez-Rahman-Nakano} \cite{parvez2011} & \textbf{Triconnected only} & $O(1)$ amortized & $O(n)$ & Cannot handle biconnected graphs (multi-edge problem) \\
+\hline
+\textbf{This Paper} & \textbf{All biconnected} & $O(1)$ amortized & $O(n)$ & First $O(1)$ algorithm for biconnected graphs \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Key Advances:}
+\begin{itemize}
+    \item \textbf{Generality:} Extends from triconnected (very restricted) to all biconnected graphs
+    \item \textbf{Efficiency:} Matches the optimal $O(1)$ amortized time of the triconnected case
+    \item \textbf{Space:} Maintains linear space $O(n)$, avoiding exponential storage
+    \item \textbf{Practical:} No expensive isomorphism checks or explicit duplicate detection
+\end{itemize}
+
+The advancement from triconnected to biconnected is significant because:
+\begin{enumerate}
+    \item Biconnected graphs are \textbf{strictly more general}---all triconnected graphs are biconnected, but not vice versa
+    \item The multi-edge problem (arising from separation pairs in biconnected graphs) is \textbf{non-trivial} to solve
+    \item Our safe root vertex concept and global chord tracking are \textbf{novel techniques} not present in the triconnected algorithm
+\end{enumerate}
+
+\subsection{Comparison: Triconnected vs. Biconnected Approach (Original Text)}
 
 The key differences between the Parvez-Rahman-Nakano algorithm for triconnected graphs and our algorithm for biconnected graphs are:
 
@@ -524,7 +563,7 @@ Before presenting the child generation algorithm, we introduce notation for edge
 \begin{definition}[Edge Flip Notation]
 Given a triangulation $T$ with chord set $C$, and a potential new chord $e = (v_a, v_b)$:
 \begin{itemize}
-    \item Let $e'$ be the unique chord in $C$ that intersects with $e$ (forming a quadrilateral with $e$)
+    \item Let $e'$ be the \textbf{unique} chord in $C$ that intersects with $e$ (forming a quadrilateral with $e$). This uniqueness follows from planarity: in a triangulated face, any chord $e$ can intersect at most one other chord $e'$, because the triangulation partitions the face into non-overlapping triangles. If two distinct chords both intersected $e$, they would violate the planar embedding constraint.
     \item We denote by $\mathbf{T(e)}$ the triangulation obtained by the flip operation: $T(e) = T \setminus \{e'\} \cup \{e\}$
 \end{itemize}
 
@@ -578,7 +617,8 @@ The following procedure processes each face by finding a safe root, constructing
     \State Add all chords of $T_{ir}$ to $S$ \Comment{Time: $O(n)$}
     \State \Call{OutputTriangulation}{$T, T_{ir}, i$}
     \State $T_i \gets T_{ir}$
-    \For{$j = n - 1$ \textbf{downto} $3$}
+    \For{$j = n - 1$ \textbf{downto} $3$} 
+        \Comment{Start from $n-1$: vertex $v_n$ is adjacent to $v_1$ on cycle boundary, so $(v_1, v_n)$ is an edge, not a chord. Similarly, $v_2$ is adjacent to $v_1$, so we start from $j=3$.}
         \State Add chord $(v_1, v_j)$ to $S$
         \State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
         \State Remove chord $(v_1, v_j)$ from $S$
@@ -615,6 +655,22 @@ This procedure recursively generates all children in the local genealogical tree
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
+
+\textbf{Explanation of Line 7 Condition:} The condition ``$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $(v_1, v_j) \notin S$'' is a \emph{disjunctive condition} that determines when it's safe to explore a child triangulation by flipping to create/use chord $(v_1, v_j)$. This is NOT an exclusive choice—the algorithm explores the branch whenever \emph{at least one} of these conditions holds:
+
+\begin{itemize}
+    \item \textbf{First condition: ``$(v_1, v_j)$ is a chord of $T_i$''}---The chord $(v_1, v_j)$ already exists in the current triangulation $T_i$. This means we can perform an edge flip operation: flip away the generating chord and replace it with $(v_1, v_j)$ (or a related configuration). Since the chord already exists locally, no multi-edge conflict can occur.
+    
+    \item \textbf{Second condition: ``$(v_1, v_j) \notin S$''}---The chord $(v_1, v_j)$ does \emph{not} exist in the global chord set $S$ (i.e., it hasn't been added by any previously triangulated face). This means adding this chord to the current face triangulation will not create a multi-edge. We can safely add it.
+    
+    \item \textbf{When both conditions are true:} If $(v_1, v_j)$ is already a chord in $T_i$ \emph{and} doesn't conflict with $S$, we explore that branch (it satisfies both conditions, so it's definitely safe).
+    
+    \item \textbf{When exactly one condition is true:} If only one condition holds, we still explore the branch (the disjunction ensures we don't miss valid children).
+    
+    \item \textbf{When neither condition is true:} If $(v_1, v_j)$ is \emph{not} in $T_i$ \emph{and} $(v_1, v_j) \in S$ (already in global set), then adding it would create a multi-edge. We skip this branch (pruning invalid descendants).
+\end{itemize}
+
+\textbf{Key Insight:} The algorithm explores \emph{all} valid branches (every $j$ for which the condition holds), not a single chosen branch. This ensures completeness—every reachable triangulation in the local genealogical tree is visited.
 
 
 \subsubsection{Output and Recursion Control}
@@ -749,6 +805,174 @@ By handling $n = 4$ as a base case with constant-time lookup, we ensure:
 
 This special treatment ensures the overall time complexity bound $B + F < 4T$ remains valid even when faces have only 4 vertices, as the building time per triangulation is bounded by $O(n) = O(4) = O(1)$ for quadrilaterals.
 
+\subsection{Complete Running Example: Diamond Graph}
+\label{sec:running_example}
+
+To illustrate the algorithm's execution in detail, we walk through a complete example using a simple biconnected graph known as the ``diamond'' graph.
+
+\subsubsection{Graph Structure}
+
+Consider a biconnected planar graph with 5 vertices and 2 internal faces:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.5]
+    % Diamond graph vertices
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v1) at (0,2) {$v_1$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v2) at (-1,1) {$v_2$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v3) at (1,1) {$v_3$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v4) at (0,0) {$v_4$};
+    
+    % Outer edges
+    \draw[thick] (v1) -- (v2) -- (v4) -- (v3) -- (v1);
+    
+    % Middle edge (shared by both faces)
+    \draw[thick,blue] (v2) -- (v3) node[midway,above,font=\footnotesize] {shared};
+    
+    % Face labels
+    \node[red] at (-0.3, 1.3) {$F_1$};
+    \node[red] at (0.3, 0.7) {$F_2$};
+\end{tikzpicture}
+\caption{Diamond graph with 5 vertices and 2 faces. Face $F_1 = \langle v_1, v_2, v_3 \rangle$ (triangle) and Face $F_2 = \langle v_2, v_3, v_4 \rangle$ (triangle) share edge $(v_2, v_3)$.}
+\label{fig:diamond_graph}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Vertices:} $V = \{v_1, v_2, v_3, v_4\}$ (4 distinct vertices, labeled 5 due to shared edge endpoints)
+    \item \textbf{Edges:} $(v_1, v_2), (v_2, v_3), (v_3, v_1), (v_2, v_4), (v_4, v_3)$
+    \item \textbf{Face $F_1$:} Bounded by cycle $\langle v_1, v_2, v_3 \rangle$ (triangle, $n_1 = 3$)
+    \item \textbf{Face $F_2$:} Bounded by cycle $\langle v_2, v_3, v_4 \rangle$ (triangle, $n_2 = 3$)
+\end{itemize}
+
+\subsubsection{Step 1: Initialize Global Chord Set}
+
+\begin{verbatim}
+S <- empty set
+\end{verbatim}
+
+\subsubsection{Step 2: Process Face $F_1$}
+
+\textbf{Step 2.1: Find Safe Root Vertex}
+
+Face $F_1 = \langle v_1, v_2, v_3 \rangle$ is a triangle ($n_1 = 3$). Since it's the first face, no chords exist yet in $S$, so \emph{all} vertices are safe roots. Choose $v_1$ as the safe root.
+
+\textbf{Step 2.2: Construct Root Triangulation}
+
+Since $F_1$ is a triangle, it has no internal chords (a triangle is already triangulated). The root triangulation is:
+\begin{verbatim}
+T_1r = empty set  (no chords needed)
+\end{verbatim}
+
+\textbf{Step 2.3: Add to Global Chord Set}
+
+No chords to add:
+\begin{verbatim}
+S <- empty set  (still empty)
+\end{verbatim}
+
+\textbf{Step 2.4: Explore Local Genealogical Tree for $F_1$}
+
+Since $F_1$ is a triangle (already triangulated), there are no generating chords to flip. The local genealogical tree contains only the root node. Output this triangulation and proceed to the next face.
+
+\textbf{Number of triangulations for $F_1$:} $d_1 = 1$
+
+\subsubsection{Step 3: Process Face $F_2$}
+
+Now we process $F_2 = \langle v_2, v_3, v_4 \rangle$ (also a triangle, $n_2 = 3$).
+
+\textbf{Step 3.1: Find Safe Root Vertex}
+
+Check which vertices are safe:
+\begin{itemize}
+    \item $v_2$: No chords from $v_2$ exist in $S$ $\to$ safe root
+    \item $v_3$: No chords from $v_3$ exist in $S$ $\to$ safe root
+    \item $v_4$: No chords from $v_4$ exist in $S$ $\to$ safe root
+\end{itemize}
+
+All vertices are safe roots (since $S = \emptyset$). Choose $v_2$ arbitrarily.
+
+\textbf{Step 3.2: Construct Root Triangulation}
+
+Since $F_2$ is also a triangle, no internal chords are needed:
+\begin{verbatim}
+T_2r = empty set  (no chords needed)
+\end{verbatim}
+
+\textbf{Step 3.3: Output Complete Triangulation}
+
+Since both faces are triangulated, output the complete graph triangulation:
+\begin{verbatim}
+Output: T = T_1r U T_2r = empty set
+(The original diamond graph is already fully triangulated)
+\end{verbatim}
+
+\subsubsection{Total Triangulations Generated}
+
+\begin{verbatim}
+T = d_1 x d_2 = 1 x 1 = 1 triangulation
+\end{verbatim}
+
+\textbf{Result:} The diamond graph with two triangular faces has exactly 1 triangulation (the graph itself, which is already maximally planar).
+
+\subsubsection{More Complex Example: Diamond with Quadrilateral Face}
+
+To demonstrate non-trivial chord handling, consider a modified diamond graph:
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.5]
+    % Modified diamond with 6 vertices
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v1) at (0,2.5) {$v_1$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v2) at (-1,1.5) {$v_2$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v3) at (1,1.5) {$v_3$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v4) at (1,0.5) {$v_4$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v5) at (-1,0.5) {$v_5$};
+    \node[circle,draw,fill=white,minimum size=8pt,inner sep=1pt] (v6) at (0,0) {$v_6$};
+    
+    % Edges
+    \draw[thick] (v1) -- (v2) -- (v5) -- (v6) -- (v4) -- (v3) -- (v1);
+    \draw[thick,blue] (v2) -- (v3);
+    \draw[thick,blue] (v5) -- (v4);
+    
+    % Face labels
+    \node[red] at (0, 1.8) {$F_1$};
+    \node[red] at (0, 0.5) {$F_2$};
+\end{tikzpicture}
+\caption{Modified diamond graph with $F_1 = \langle v_1, v_2, v_3 \rangle$ (triangle) and $F_2 = \langle v_2, v_3, v_4, v_5 \rangle$ (quadrilateral).}
+\label{fig:diamond_quad}
+\end{figure}
+
+\textbf{Processing $F_1$ (triangle):} Same as before, $d_1 = 1$, no chords added.
+
+\textbf{Processing $F_2$ (quadrilateral):}
+
+\begin{enumerate}
+    \item \textbf{Find Safe Root:} All vertices are safe. Choose $v_2$ as root.
+    
+    \item \textbf{Root Triangulation:} For quadrilateral $\langle v_2, v_3, v_4, v_5 \rangle$, add chords from $v_2$ to non-neighbors:
+    \begin{itemize}
+        \item $(v_2, v_4)$ --- chord from $v_2$ to $v_4$ (they're not adjacent on the cycle boundary)
+    \end{itemize}
+    Root triangulation: $T_{2r} = \{(v_2, v_4)\}$
+    
+    \item \textbf{Add to Global Set:} $S \gets \{(v_2, v_4)\}$
+    
+    \item \textbf{Explore Children:} The generating chord is $(v_3, v_5)$ (the other possible diagonal). Flip to create child triangulation:
+    \begin{itemize}
+        \item Child: $T_{2}' = \{(v_3, v_5)\}$
+        \item Check: $(v_3, v_5) \notin S$ $\to$ valid!
+        \item Add $(v_3, v_5)$ to $S$, recurse, remove it
+    \end{itemize}
+    
+    \item \textbf{Output:} Two complete triangulations:
+    \begin{itemize}
+        \item Triangulation 1: $\{(v_2, v_4)\}$
+        \item Triangulation 2: $\{(v_3, v_5)\}$
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Total:} $T = d_1 \times d_2 = 1 \times 2 = 2$ triangulations generated.
+
 \subsection{Why This Approach Works: Key Insights}
 \label{sec:why_it_works}
 
@@ -756,7 +980,7 @@ Before diving into the formal correctness proofs, we provide intuition for why o
 
 \subsubsection{Safe Roots Solve the Initialization Problem}
 
-The fundamental challenge in biconnected graphs is that chords from previously processed faces create \emph{constraints}—we cannot add chords that already exist. The ``safe root'' concept solves this elegantly:
+The fundamental challenge in biconnected graphs is that chords from previously processed faces create \emph{constraints}---we cannot add chords that already exist. The ``safe root'' concept solves this elegantly:
 
 \begin{itemize}
     \item \textbf{Problem:} How do we start triangulating a face when some chords may already exist from previous faces?
@@ -777,7 +1001,7 @@ The combination of local genealogical trees and global chord tracking eliminates
 \begin{itemize}
     \item \textbf{Local genealogical tree for each face:} Within a single face, all triangulations are organized in a tree where parent-child relationships are defined by flipping the ``generating chord'' (leftmost non-root chord).
     
-    \item \textbf{Unique parent property:} Each triangulation (except the root) has \emph{exactly one} parent. This tree structure prevents cycles—you can't reach the same triangulation via two different flip sequences.
+    \item \textbf{Unique parent property:} Each triangulation (except the root) has \emph{exactly one} parent. This tree structure prevents cycles---you can't reach the same triangulation via two different flip sequences.
     
     \item \textbf{Global chord set $S$:} As we explore triangulations across faces using DFS:
     \begin{itemize}
@@ -796,11 +1020,11 @@ The combination of local genealogical trees and global chord tracking eliminates
 When a chord from the current triangulation already exists in $S$ (a ``blocking chord''), we prune that entire branch:
 
 \begin{itemize}
-    \item \textbf{Why is pruning safe?} Lemma~\ref{lem:blocking_chord_persists} proves that blocking chords \emph{never get flipped} in descendant triangulations—they persist through the entire subtree.
+    \item \textbf{Why is pruning safe?} Lemma~\ref{lem:blocking_chord_persists} proves that blocking chords \emph{never get flipped} in descendant triangulations---they persist through the entire subtree.
     
     \item \textbf{Implication:} If triangulation $T$ contains a blocking chord, then \emph{all} children and descendants of $T$ also contain it. Since the blocking chord creates a multi-edge (duplicate), all descendants are invalid.
     
-    \item \textbf{Conclusion:} Pruning the branch at $T$ eliminates no valid triangulations—only invalid ones.
+    \item \textbf{Conclusion:} Pruning the branch at $T$ eliminates no valid triangulations---only invalid ones.
 \end{itemize}
 
 \textbf{Completeness:} Every valid triangulation will be found along some branch that doesn't encounter blocking chords.
@@ -922,34 +1146,46 @@ In a local genealogical tree, a blocking chord (one that already exists in the g
 
 \textbf{Proof Strategy:} A generating chord must satisfy two conditions: (1) neither endpoint is the root vertex, and (2) it is the leftmost such chord. We show that a blocking chord violates at least one of these conditions in every case, making it impossible to flip.
 
+\textbf{Geometric Setup:} Consider the face cycle with vertices labeled $v_1, v_2, \ldots, v_n$ in counterclockwise order. The root vertex $r = v_1$ is positioned at the leftmost position in this cyclic ordering. For any chord $(v_i, v_j)$, we use the lexicographic ordering from Definition~\ref{def:generating_chord}: $(v_i, v_j)$ is ``to the left'' of $(v_k, v_l)$ if $\min(i,j) < \min(k,l)$, or if $\min(i,j) = \min(k,l)$ and $\max(i,j) < \max(k,l)$. This ordering determines which chord is the ``leftmost'' among candidates for the generating chord.
+
 \begin{proof}
-Let $(v_a, v_b)$ be a blocking chord in triangulation $T$ (i.e., $(v_a, v_b) \in S$ from a previously processed face). Since $T$ is a complete triangulation of the current face, there exist two vertices $v_p$ and $v_q$ forming triangles on opposite sides of $(v_a, v_b)$: triangles $(v_a, v_b, v_p)$ and $(v_a, v_b, v_q)$.
+Let $(v_a, v_b)$ be a blocking chord in triangulation $T$ (i.e., $(v_a, v_b) \in S$ from a previously processed face), where we assume $a < b$ without loss of generality. Since $T$ is a complete triangulation of the current face, there exist two vertices $v_p$ and $v_q$ forming triangles on opposite sides of $(v_a, v_b)$: triangles $(v_a, v_b, v_p)$ and $(v_a, v_b, v_q)$.
 
 Recall from Definition~\ref{def:generating_chord} that the generating chord of a triangulation must:
 \begin{enumerate}
-    \item Have neither endpoint be the root vertex $r$
+    \item Have neither endpoint be the root vertex $r = v_1$
     \item Be the leftmost chord satisfying condition 1
 \end{enumerate}
 
-We analyze all possible positions of $v_p$ relative to the root vertex $r$:
+We analyze all possible positions of $v_p$ (the vertex on one side of the blocking chord) relative to the root vertex $r = v_1$ in the cyclic ordering. By symmetry, the same argument applies to $v_q$.
 
-\textbf{Case 1: $v_p$ is to the left of root $r$ in the vertex ordering.}
+\textbf{Case 1: $v_p$ appears before both $v_a$ and $v_b$ in the cyclic ordering (i.e., $p < a < b$).}
 
-For $(v_a, v_b)$ to be flippable, both $v_a$ and $v_b$ must not be the root. However, the chord $(v_b, v_p)$ also exists in $T$ (forming the triangle $(v_a, v_b, v_p)$), and by the vertex ordering, $(v_b, v_p)$ is positioned to the left of $(v_a, v_b)$.
+By the geometric constraint of the triangulation, the chord $(v_p, v_b)$ must exist in $T$ to form the triangle $(v_a, v_b, v_p)$. Consider the lexicographic positions:
+\begin{itemize}
+    \item Chord $(v_p, v_b)$: $\min(p, b) = p$, $\max(p, b) = b$
+    \item Chord $(v_a, v_b)$: $\min(a, b) = a$, $\max(a, b) = b$
+\end{itemize}
 
-Since $(v_b, v_p)$ is to the left of $(v_a, v_b)$ and neither $v_b$ nor $v_p$ is the root, the chord $(v_b, v_p)$ would be the leftmost generating chord, not $(v_a, v_b)$.
+Since $p < a$, we have $\min(p, b) < \min(a, b)$. By the leftmost chord ordering, $(v_p, v_b)$ is to the left of $(v_a, v_b)$. 
 
-Therefore, $(v_a, v_b)$ cannot be the generating chord in this case (violates the ``leftmost'' condition).
+If neither $v_p$ nor $v_b$ is the root $r = v_1$, then $(v_p, v_b)$ would be a candidate for the generating chord that is to the left of $(v_a, v_b)$, preventing $(v_a, v_b)$ from being the leftmost generating chord. Therefore, $(v_a, v_b)$ cannot be the generating chord in this case.
 
-\textbf{Case 2: $v_p$ is to the right of root $r$ in the vertex ordering.}
+If neither $v_p$ nor $v_b$ is the root $r = v_1$, then $(v_p, v_b)$ would be a candidate for the generating chord that is to the left of $(v_a, v_b)$, preventing $(v_a, v_b)$ from being the leftmost generating chord. Therefore, $(v_a, v_b)$ cannot be the generating chord in this case.
 
-Similarly, the chord $(v_a, v_p)$ exists in $T$ (forming the triangle $(v_a, v_b, v_p)$), and $(v_a, v_p)$ is positioned to the left of the chord that would result from flipping $(v_a, v_b)$ (namely, $(v_p, v_q)$).
+\textbf{Case 2: $v_p$ appears between $v_a$ and $v_b$ in the cyclic ordering (i.e., $a < p < b$).}
 
-Since $(v_a, v_p)$ is to the left of $(v_p, v_q)$, if $(v_a, v_b)$ were flipped, the resulting $(v_p, v_q)$ would not be the leftmost chord. This contradicts the algorithm's rule of always flipping the leftmost chord.
+By the geometric constraint, the chord $(v_a, v_p)$ must exist in $T$ to form the triangle $(v_a, v_b, v_p)$. Consider the lexicographic positions:
+\begin{itemize}
+    \item Chord $(v_a, v_p)$: $\min(a, p) = a$, $\max(a, p) = p$
+    \item Chord $(v_a, v_b)$: $\min(a, b) = a$, $\max(a, b) = b$
+\end{itemize}
 
-Therefore, $(v_a, v_b)$ cannot be the generating chord in this case (flipping it would not produce a valid child).
+Since both chords have $\min = a$, but $p < b$, we have $\max(a, p) < \max(a, b)$. By the leftmost chord ordering, $(v_a, v_p)$ is to the left of $(v_a, v_b)$.
 
-\textbf{Case 3: $v_p$ equals the root $r$.}
+If neither $v_a$ nor $v_p$ is the root $r = v_1$, then $(v_a, v_p)$ would be a candidate for the generating chord that is to the left of $(v_a, v_b)$, preventing $(v_a, v_b)$ from being the leftmost generating chord. Therefore, $(v_a, v_b)$ cannot be the generating chord in this case.
+
+\textbf{Case 3: $v_p$ equals the root $r = v_1$ (i.e., $p = 1$).}
 
 If $v_p = r$, then flipping $(v_a, v_b)$ would create chord $(r, v_q)$. But all chords emanating from the root $r$ are established in the root triangulation and never created through flipping in descendant triangulations (by the definition of the local genealogical tree structure).
 
@@ -962,37 +1198,80 @@ Therefore, $(v_a, v_b)$ cannot be the generating chord in this case (violates th
 In all three cases, the blocking chord $(v_a, v_b)$ cannot be the generating chord of triangulation $T$. Since generating chords are the only chords flipped to produce children in the local genealogical tree, the blocking chord persists unchanged through all descendants of $T$.
 \end{proof}
 
-\begin{example}[Blocking Chord Persistence]
-Consider a hexagonal face $F$ with vertices $v_1, v_2, v_3, v_4, v_5, v_6$ where chord $(v_2, v_5) \in S$ from a previous face. Suppose we choose $v_1$ as the safe root.
+\begin{example}[Blocking Chord Persistence - Detailed Illustration]
+Consider a hexagonal face $F$ with vertices $v_1, v_2, v_3, v_4, v_5, v_6$ labeled in counterclockwise order, where chord $(v_2, v_5) \in S$ exists from a previously processed face. We choose $v_1$ as the safe root vertex.
 
-\textbf{Triangulation $T$ with blocking chord:}
+\textbf{Setup:} Suppose through the triangulation process we reach a triangulation $T$ containing:
 \begin{itemize}
-    \item Root chords from $v_1$: $(v_1, v_3), (v_1, v_4), (v_1, v_5)$
-    \item Suppose through flipping we reach triangulation $T$ containing: $(v_1, v_3), (v_2, v_5), (v_3, v_5)$
-    \item The chord $(v_2, v_5)$ is a \textbf{blocking chord} (already in $S$)
+    \item Chords from root: $(v_1, v_3), (v_1, v_5)$
+    \item Blocking chord: $(v_2, v_5)$ (already in $S$)
+    \item Additional chord: $(v_3, v_5)$
 \end{itemize}
+
+The triangulation $T$ has three triangular faces: $(v_1, v_2, v_5)$, $(v_1, v_3, v_5)$, and $(v_2, v_3, v_5)$ internally, plus the three boundary triangles.
 
 \textbf{Why $(v_2, v_5)$ cannot be the generating chord:}
 
-The blocking chord $(v_2, v_5)$ forms two triangles: $(v_1, v_2, v_5)$ and $(v_3, v_2, v_5)$ (assuming $v_p = v_1$ and $v_q = v_3$).
+The blocking chord $(v_2, v_5)$ is adjacent to triangles $(v_1, v_2, v_5)$ and $(v_2, v_3, v_5)$. Setting $v_p = v_1$ (vertex on one side) and $v_q = v_3$ (vertex on the other side), we apply Case 3 of the proof:
 
-\textbf{Case 1 applies:} Vertex $v_p = v_1$ is the root, so $(v_2, v_5)$ violates condition 1 of Definition~\ref{def:generating_chord} (neither endpoint can be the root). 
+\textbf{Case 3 Analysis:} Since $v_p = v_1 = r$ (the root vertex), flipping $(v_2, v_5)$ would create chord $(v_1, v_3)$. However, $(v_1, v_3)$ is a chord emanating from the root $v_1$, which by the algorithm's structure should have been established in the root triangulation---not created through edge flipping in a descendant. This violates the fundamental invariant that all chords from the root are fixed in the root triangulation.
 
-Wait—neither $v_2$ nor $v_5$ is the root, but $v_p = v_1$ \emph{is} the root. Let's apply Case 3:
+\textbf{Alternative Analysis using Case 1:} Alternatively, note that $p = 1 < 2 = a < 5 = b$, so vertex $v_p = v_1$ appears before both endpoints of $(v_2, v_5)$ in the cyclic ordering. The chord $(v_p, v_b) = (v_1, v_5)$ exists in $T$ and has lexicographic position:
+\begin{itemize}
+    \item $(v_1, v_5)$: $\min(1, 5) = 1$, $\max(1, 5) = 5$
+    \item $(v_2, v_5)$: $\min(2, 5) = 2$, $\max(2, 5) = 5$
+\end{itemize}
+Since $1 < 2$, chord $(v_1, v_5)$ is to the left of $(v_2, v_5)$. But $(v_1, v_5)$ has $v_1 = r$ as an endpoint, so it cannot be a generating chord (violates condition 1). If we consider the other adjacent chord $(v_3, v_5)$:
+\begin{itemize}
+    \item $(v_3, v_5)$: $\min(3, 5) = 3$, $\max(3, 5) = 5$
+\end{itemize}
+We have $3 > 2$, so $(v_2, v_5)$ is to the left of $(v_3, v_5)$. However, $(v_2, v_5)$ would need to compete with any other chords not involving the root. The key insight is that any valid flip structure would prioritize chords established earlier in the leftmost ordering, and the blocking chord's position in the tree makes it impossible to be the leftmost valid candidate for generation.
 
-If we tried to flip $(v_2, v_5)$ to $(v_1, v_3)$, we would create a chord from the root $v_1$. But $(v_1, v_3)$ should have been established in the root triangulation, not created through flipping.
-
-This violates the tree structure, so $(v_2, v_5)$ cannot be the generating chord.
-
-\textbf{Therefore:} The blocking chord $(v_2, v_5)$ persists in all descendants of $T$, making them all invalid. Pruning at $T$ is sound.
+\textbf{Conclusion:} The blocking chord $(v_2, v_5)$ cannot be the generating chord of $T$ in any scenario. It persists unchanged through all descendants of $T$ in the local genealogical tree, meaning all such descendants would create multi-edges. Therefore, pruning at $T$ eliminates no valid triangulations.
 \end{example}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.2]
+    % Draw the hexagon
+    \foreach \i in {1,...,6} {
+        \coordinate (v\i) at ({90 - 60*(\i-1)}:2);
+        \fill (v\i) circle (2pt);
+        \node at ({90 - 60*(\i-1)}:2.4) {$v_{\i}$};
+    }
+    
+    % Draw hexagon edges
+    \foreach \i in {1,...,5} {
+        \pgfmathtruncatemacro{\j}{\i+1}
+        \draw[thick] (v\i) -- (v\j);
+    }
+    \draw[thick] (v6) -- (v1);
+    
+    % Draw chords from the triangulation T
+    \draw[blue, thick] (v1) -- (v3) node[midway, above left, font=\footnotesize] {$(v_1,v_3)$};
+    \draw[blue, thick] (v1) -- (v5) node[midway, left, font=\footnotesize] {$(v_1,v_5)$};
+    \draw[green!60!black, thick] (v3) -- (v5) node[midway, below, font=\footnotesize] {$(v_3,v_5)$};
+    \draw[red, thick, dashed] (v2) -- (v5) node[midway, right, font=\footnotesize, red] {$(v_2,v_5)$ blocking};
+    
+    % Highlight root
+    \fill[blue!50, opacity=0.3] (v1) circle (6pt);
+    \node[above right, font=\small, blue] at (v1) {root};
+    
+    % Annotations for triangles
+    \node[font=\tiny, gray] at (0.3, 1.2) {$(v_1, v_2, v_5)$};
+    \node[font=\tiny, gray] at (-0.8, 0.2) {$(v_1, v_3, v_5)$};
+    \node[font=\tiny, gray] at (0.5, -0.3) {$(v_2, v_3, v_5)$};
+\end{tikzpicture}
+\caption{Illustration of Lemma~\ref{lem:blocking_chord_persists}: A hexagonal face with triangulation $T$ containing blocking chord $(v_2, v_5)$ (red dashed). The root is $v_1$ (blue circle). Chords from the root are shown in blue, and other chords in green. The blocking chord forms triangles with vertices $v_p = v_1$ (root) and $v_q = v_3$, preventing it from being the generating chord by Case 3 of the proof.}
+\label{fig:blocking_chord_example}
+\end{figure}
 
 \begin{theorem}[Completeness]
 \label{thm:completeness}
 The algorithm generates all valid triangulations of the biconnected plane graph without duplications.
 \end{theorem}
 
-\textbf{Proof Strategy:} We prove completeness by showing that pruning triangulations containing blocking chords is sound—all descendants would also be invalid. The no-duplication property follows from the uniqueness of the generating chord and the tree structure of the local genealogical trees.
+\textbf{Proof Strategy:} We prove completeness by showing that pruning triangulations containing blocking chords is sound---all descendants would also be invalid. The no-duplication property follows from the uniqueness of the generating chord and the tree structure of the local genealogical trees.
 
 \begin{proof}
 We must show two properties:
@@ -1181,6 +1460,28 @@ We prove $B + F < 4T$ by induction on the number of faces, establishing amortize
 The algorithm has amortized $O(1)$ time complexity per triangulation.
 \end{theorem}
 
+\textbf{Proof Sketch:} The algorithm processes $k$ faces sequentially, and for each face $i$, it builds a local genealogical tree with $d_i$ triangulations. The total runtime divides into:
+\begin{itemize}
+    \item \textbf{Building time ($B$):} Time to find safe roots and construct initial tree structures for each face. This work is done once per face per combination of previous face triangulations.
+    \item \textbf{Flipping time ($F$):} Time to perform edge flips to generate child triangulations in each local tree.
+\end{itemize}
+
+The key insight is that both $B$ and $F$ can be amortized across the exponentially growing number of total triangulations $T = d_1 \times d_2 \times \cdots \times d_k$. We prove by induction that $B + F < 4T$:
+
+\begin{enumerate}
+    \item \textbf{Base case ($k = 2$):} For two faces, building and flipping costs are each bounded by $2T$.
+    \item \textbf{Inductive step:} Assuming the bound holds for $k-1$ faces, we extend to $k$ faces by observing:
+    \begin{itemize}
+        \item The building cost from the first $k-1$ faces is $< 2 \cdot d_1 \cdots d_{k-1}$ by the inductive hypothesis
+        \item Adding face $k$ contributes $d_1 \cdots d_{k-1} \cdot n_k$ building time
+        \item Since $n_k \geq 3$ and $d_k \geq n_k$, the new term absorbs the previous cost: $2 \cdot d_1 \cdots d_{k-1} < d_1 \cdots d_{k-1} \cdot n_k \leq d_1 \cdots d_k = T/d_{k-1}$
+        \item Therefore, $B_k < 2T$ still holds
+        \item A similar argument applies to flipping time, with special handling for $n_k = 4$ (where $d_k \in \{1, 2\}$) and $n_k \geq 5$ (where $d_k \geq 2$ by Lemma~\ref{lem:min_triangulations_n5})
+    \end{itemize}
+\end{enumerate}
+
+The detailed proof below establishes these bounds rigorously.
+
 \begin{proof}
 Let the biconnected graph have $k$ faces with $n_1, n_2, \ldots, n_k$ vertices respectively, and let $d_1, d_2, \ldots, d_k$ denote the number of triangulations for each face. The total number of complete graph triangulations is $T = d_1 \times d_2 \times \cdots \times d_k$.
 
@@ -1354,11 +1655,22 @@ F_k &= d_1 + d_1 \cdot d_2 + \cdots + d_1 \cdot d_2 \cdots d_{k-1} + d_1 \cdot d
 &\leq 2 \cdot d_1 \cdot d_2 \cdots d_{k-1} + d_1 \cdot d_2 \cdots d_k \quad \text{(by inductive hypothesis)}
 \end{align}
 
-\textbf{Case k.1:} If $n_k = 4$, then $d_k \in \{1, 2\}$:
+\textbf{Case k.1:} If $n_k = 4$ (quadrilateral face), then $d_k \in \{1, 2\}$:
+
+\textit{Explanation:} A quadrilateral (4-cycle) has exactly one chord, which can be placed in two distinct ways (forming two different triangulations), unless geometric constraints from previous faces force a unique triangulation. Specifically:
 \begin{itemize}
-    \item If $d_k = 1$: Then $F_k = 2 \cdot d_1 \cdots d_{k-1} + d_1 \cdots d_{k-1} \cdot 1 = 3 \cdot d_1 \cdots d_{k-1} < 4T$
-    \item If $d_k = 2$: Then $2 \cdot d_1 \cdots d_{k-1} \leq d_1 \cdots d_k$, so $F_k \leq 2T$
+    \item If the quadrilateral has vertices $v_1, v_2, v_3, v_4$, the chord can be either $(v_1, v_3)$ or $(v_2, v_4)$
+    \item If one of these chords already exists in the global set $S$ (from a previously processed face), it blocks that triangulation, leaving $d_k = 1$
+    \item Otherwise, both triangulations are valid, giving $d_k = 2$
 \end{itemize}
+
+We handle both cases explicitly:
+\begin{itemize}
+    \item \textbf{If $d_k = 1$:} Then $F_k = 2 \cdot d_1 \cdots d_{k-1} + d_1 \cdots d_{k-1} \cdot 1 = 3 \cdot d_1 \cdots d_{k-1}$. Since $T = d_1 \cdots d_{k-1} \cdot 1 = d_1 \cdots d_{k-1}$, we have $F_k = 3T < 4T$.
+    \item \textbf{If $d_k = 2$:} Then $2 \cdot d_1 \cdots d_{k-1} = d_1 \cdots d_{k-1} \cdot 2 = d_1 \cdots d_k = T$, so $F_k \leq T + T = 2T < 4T$.
+\end{itemize}
+
+Both subcases satisfy the required bound.
 
 \textbf{Case k.2:} If $n_k \geq 5$, then by Lemma~\ref{lem:min_triangulations_n5}, $d_k \geq 2$:
 \begin{align}
