@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  31 OCT 2025 23:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  31 OCT 2025 23:55
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -850,27 +850,27 @@ Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on inp
 [20]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 853.
+(hyperref)                removing `math shift' on input line 849.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 853.
+(hyperref)                removing `subscript' on input line 849.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 853.
+(hyperref)                removing `math shift' on input line 849.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 879.
+(hyperref)                removing `math shift' on input line 875.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 879.
+(hyperref)                removing `subscript' on input line 875.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 879.
+(hyperref)                removing `math shift' on input line 875.
 
 
 
@@ -891,7 +891,7 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 [28]
 
 [29]
-Overfull \hbox (9.09004pt too wide) in paragraph at lines 1402--1403
+Overfull \hbox (9.09004pt too wide) in paragraph at lines 1398--1399
  [][] 
  []
 
@@ -912,28 +912,28 @@ Overfull \hbox (9.09004pt too wide) in paragraph at lines 1402--1403
 [36]
 
 [37]
-Overfull \hbox (75.79474pt too wide) in paragraph at lines 1879--1894
+Overfull \hbox (75.79474pt too wide) in paragraph at lines 1875--1890
  [][] 
  []
 
 
 
 [38]
-Overfull \hbox (39.65594pt too wide) in paragraph at lines 1927--1942
+Overfull \hbox (39.65594pt too wide) in paragraph at lines 1923--1938
  [][] 
  []
 
 
 
 [39]
-Overfull \hbox (6.38705pt too wide) in paragraph at lines 1985--1986
+Overfull \hbox (6.38705pt too wide) in paragraph at lines 1981--1982
 []\OT1/cmr/m/n/12 These em-pir-i-cal re-sults strongly sup-port our the-o-ret-i-cal com-plex-ity anal-y-sis and demon-
  []
 
 
 
 [40]
-Overfull \hbox (1.94043pt too wide) in paragraph at lines 2003--2004
+Overfull \hbox (1.94043pt too wide) in paragraph at lines 1999--2000
 []\OT1/cmr/m/n/12 The growth rate is ex-po-nen-tial: tri-an-gu-la-tion counts fol-low Cata-lan num-bers $\OML/cmm/m/it/12 C[] \OMS/cmsy/m/n/12 ^^X
  []
 
@@ -950,7 +950,7 @@ Overfull \hbox (1.94043pt too wide) in paragraph at lines 2003--2004
 [45]
 
 [46]
-Overfull \hbox (2.11247pt too wide) in paragraph at lines 2307--2350
+Overfull \hbox (2.11247pt too wide) in paragraph at lines 2303--2346
  [][] 
  []
 
@@ -959,12 +959,12 @@ Overfull \hbox (2.11247pt too wide) in paragraph at lines 2307--2350
 [47]
 
 [48]
-Overfull \hbox (10.7422pt too wide) in paragraph at lines 2422--2423
+Overfull \hbox (10.7422pt too wide) in paragraph at lines 2418--2419
 []\OT1/cmr/bx/n/12 Simple poly-gons: \OT1/cmr/m/n/12 Tri-an-gle, square, pen-tagon, hexagon, hep-tagon, oc-tagon, nonagon 
  []
 
 
-Overfull \hbox (18.0779pt too wide) in paragraph at lines 2425--2426
+Overfull \hbox (18.0779pt too wide) in paragraph at lines 2421--2422
 []\OT1/cmr/bx/n/12 Graphs with vary-ing con-nec-tiv-ity: \OT1/cmr/m/n/12 From min-i-mal bi-con-nected to near-triconnected
  []
 
@@ -979,22 +979,18 @@ Overfull \hbox (18.0779pt too wide) in paragraph at lines 2425--2426
 [52]
 
 [53]
-Overfull \hbox (3.66563pt too wide) in paragraph at lines 2613--2614
+Overfull \hbox (3.66563pt too wide) in paragraph at lines 2609--2610
 []\OT1/cmr/bx/n/12 Robustness: \OT1/cmr/m/n/12 The al-go-rithm han-dles di-verse graph struc-tures (sim-ple cy-cles, wheels,
  []
 
 
-Overfull \hbox (6.87862pt too wide) in paragraph at lines 2615--2616
+Overfull \hbox (6.87862pt too wide) in paragraph at lines 2611--2612
 []\OT1/cmr/bx/n/12 Correctness Ver-i-fied: \OT1/cmr/m/n/12 All 41 test in-stances passed val-i-da-tion|output files matched
  []
 
 
 
 [54]
-
-LaTeX Warning: Reference `sec:hash_analysis' on page 55 undefined on input line 2663.
-
-
 
 [55]
 
@@ -1011,40 +1007,36 @@ LaTeX Warning: Reference `sec:hash_analysis' on page 55 undefined on input line 
 [61]
 
 [62]
-Overfull \hbox (119.88608pt too wide) in paragraph at lines 3015--3016
+
+[63]
+Overfull \hbox (119.88608pt too wide) in paragraph at lines 3047--3048
 []\OT1/cmr/m/n/12 Accessible at: \OT1/cmtt/m/n/12 https://tar2003.github.io/ThesisGraph/viz \OT1/cmr/m/n/12 or run lo-cally (\OT1/cmtt/m/n/12 visualization/index.html\OT1/cmr/m/n/12 ) 
  []
 
 
 
-[63] (main.bbl
-
-[64])
+[64] (main.bbl)
 
 [65] (main.aux)
  ***********
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-08-13>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
 Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 77D4936107688E05E1B8D6B36B1C52FB;19983.
  ) 
 Here is how much of TeX's memory you used:
- 36688 strings out of 468133
- 862304 string characters out of 5430229
- 1411179 words of memory out of 5000000
+ 36689 strings out of 468133
+ 862325 string characters out of 5430229
+ 1410244 words of memory out of 5000000
  64363 multiletter control sequences out of 15000+600000
  642342 words of font info for 99 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,19n,91p,1203b,2297s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\TAWKIR\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (65 pages, 634859 bytes).
+Output written on main.pdf (65 pages, 636224 bytes).
 PDF statistics:
- 1197 PDF objects out of 1200 (max. 8388607)
- 386 named destinations out of 1000 (max. 500000)
+ 1199 PDF objects out of 1200 (max. 8388607)
+ 387 named destinations out of 1000 (max. 500000)
  829 words of extra memory for PDF output out of 10000 (max. 10000000)
 
