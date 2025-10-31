@@ -20,7 +20,8 @@ Reinhard Diestel.
 \newblock {\em Graph Theory}, volume 173 of {\em Graduate Texts in
   Mathematics}.
 \newblock Springer, 5th edition, 2017.
-\newblock Chapter 2: Outerplanar Graphs.
+\newblock See Theorem 2.3.1 (Maximal Outerplanar Graphs) for degree-2 vertex
+  existence.
 
 \bibitem{hurtado1999}
 Ferran Hurtado and Marc Noy.
