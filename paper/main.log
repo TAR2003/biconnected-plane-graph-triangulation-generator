@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  31 OCT 2025 23:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  5 NOV 2025 00:30
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -655,15 +655,15 @@ Package pgfplots notification 'compat/show suggested version=true': document has
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(72.26999pt, 452.9679pt, 72.26999pt)
-* v-part:(T,H,B)=(72.26999pt, 700.50687pt, 72.26999pt)
+* h-part:(L,W,R)=(57.81621pt, 481.87546pt, 57.81621pt)
+* v-part:(T,H,B)=(57.81621pt, 729.41443pt, 57.81621pt)
 * \paperwidth=597.50787pt
 * \paperheight=845.04684pt
-* \textwidth=452.9679pt
-* \textheight=700.50687pt
-* \oddsidemargin=0.0pt
-* \evensidemargin=0.0pt
-* \topmargin=-37.0pt
+* \textwidth=481.87546pt
+* \textheight=729.41443pt
+* \oddsidemargin=-14.45378pt
+* \evensidemargin=-14.45378pt
+* \topmargin=-51.45378pt
 * \headheight=12.0pt
 * \headsep=25.0pt
 * \topskip=12.0pt
@@ -698,146 +698,56 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 [1
 
 {C:/Users/TAWKIR/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
+Overfull \hbox (2.00966pt too wide) in paragraph at lines 67--68
+[]\OT1/cmr/m/n/12 The break-through for \OT1/cmr/m/it/12 tri-con-nected \OT1/cmr/m/n/12 plane graphs came from Parvez, Rah-man, and Nakano [[]9[]],
+ []
+
+
 
 [2]
 
 [3]
-Underfull \hbox (badness 10000) in paragraph at lines 143--143
-[]\OT1/cmr/bx/n/12 Time per
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 143--143
-\OT1/cmr/bx/n/12 Tri-an-gu-la-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 143--143
-[]\OT1/cmr/bx/n/12 Space Com-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 143--144
-[]\OT1/cmr/bx/n/12 Key Lim-i-ta-
- []
-
-
-Underfull \hbox (badness 4518) in paragraph at lines 146--146
-[]$\OML/cmm/m/it/12 O\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 n[]\OT1/cmr/m/n/12 )$ amor-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 146--147
-[]\OT1/cmr/m/n/12 Polynomial
- []
-
-
-Underfull \hbox (badness 1810) in paragraph at lines 146--147
-\OT1/cmr/m/n/12 fac-tor per out-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 148--148
-[]$\OML/cmm/m/it/12 O\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 T\OT1/cmr/m/n/12 )$ ex-po-nen-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 148--149
-\OT1/cmr/m/n/12 all gen-er-ated
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 148--149
-\OT1/cmr/m/n/12 tri-an-gu-la-tions
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 150--150
-[]\OT1/cmr/bx/n/12 Triconnected
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 150--150
-[]$\OML/cmm/m/it/12 O\OT1/cmr/m/n/12 (1)$ amor-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 150--151
-[]\OT1/cmr/m/n/12 Cannot han-dle
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 150--151
-\OT1/cmr/m/n/12 bi-con-nected
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 150--151
-\OT1/cmr/m/n/12 graphs (multi-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 152--152
-[]\OT1/cmr/bx/n/12 All bi-con-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 152--152
-[]$\OML/cmm/m/it/12 O\OT1/cmr/m/n/12 (1)$ amor-
- []
-
-
-Overfull \hbox (93.14143pt too wide) in paragraph at lines 141--155
- [][] 
- []
-
-
 
 [4]
 
 [5]
+Overfull \hbox (20.91652pt too wide) in paragraph at lines 202--203
+\OT1/cmr/m/n/12 Our al-go-rithm gen-er-ates all tri-an-gu-la-tions of a bi-con-nected plane graph $\OML/cmm/m/it/12 G$ \OT1/cmr/m/n/12 with $\OML/cmm/m/it/12 k$ \OT1/cmr/m/n/12 faces $\OML/cmm/m/it/12 F[]; F[]; [] ; F[]$
+ []
+
+
 
 [6]
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 263.
+
 
 [7]
 
 [8]
 
 [9]
-Underfull \hbox (badness 1783) in paragraph at lines 382--383
-\OT1/cmr/m/n/12 drawn with-out cre-at-ing multi-
- []
-
-
-Underfull \hbox (badness 1681) in paragraph at lines 384--385
-[]\OT1/cmr/m/n/12 Main en-try point. Ini-tial-izes
- []
-
-
-Underfull \hbox (badness 1005) in paragraph at lines 390--391
-\OT1/cmr/m/n/12 gen-er-at-ing chord. Im-ple-ments
- []
-
-
 
 [10]
-Overfull \hbox (54.19548pt too wide) in paragraph at lines 436--437
- [][] 
- []
-
-
 
 [11]
 
 [12]
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 493.
-
 
 [13]
 
 [14]
 
 [15]
+
+LaTeX Warning: Reference `lem:min_triangulations' on page 16 undefined on input line 718.
+
+
+LaTeX Warning: Reference `tab:triangulation_counts' on page 16 undefined on input line 734.
+
+
+LaTeX Warning: Reference `tab:triangulation_counts' on page 16 undefined on input line 739.
+
+
 
 [16]
 
@@ -849,194 +759,49 @@ Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on inp
 
 [20]
 
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 849.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 849.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 849.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 875.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `subscript' on input line 875.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `math shift' on input line 875.
+LaTeX Warning: Reference `lem:min_triangulations' on page 21 undefined on input line 1062.
 
 
 
 [21]
+Overfull \hbox (24.56915pt too wide) in paragraph at lines 1103--1104
+[]\OT1/cmr/bx/n/12 Complex struc-tures: \OT1/cmr/m/n/12 Oc-ta-he-dron dual, gen-eral pla-nar graphs with vary-ing ver-tex/edge/face
+ []
+
+
 
 [22]
 
-[23]
+[23] (main.bbl
 
-[24]
+[24])
 
 [25]
 
-[26]
-
-[27]
-
-[28]
-
-[29]
-Overfull \hbox (9.09004pt too wide) in paragraph at lines 1398--1399
- [][] 
- []
-
-
-
-[30]
-
-[31]
-
-[32]
-
-[33]
-
-[34]
-
-[35]
-
-[36]
-
-[37]
-Overfull \hbox (75.79474pt too wide) in paragraph at lines 1875--1890
- [][] 
- []
-
-
-
-[38]
-Overfull \hbox (39.65594pt too wide) in paragraph at lines 1923--1938
- [][] 
- []
-
-
-
-[39]
-Overfull \hbox (6.38705pt too wide) in paragraph at lines 1981--1982
-[]\OT1/cmr/m/n/12 These em-pir-i-cal re-sults strongly sup-port our the-o-ret-i-cal com-plex-ity anal-y-sis and demon-
- []
-
-
-
-[40]
-Overfull \hbox (1.94043pt too wide) in paragraph at lines 1999--2000
-[]\OT1/cmr/m/n/12 The growth rate is ex-po-nen-tial: tri-an-gu-la-tion counts fol-low Cata-lan num-bers $\OML/cmm/m/it/12 C[] \OMS/cmsy/m/n/12 ^^X
- []
-
-
-
-[41]
-
-[42]
-
-[43]
-
-[44]
-
-[45]
-
-[46]
-Overfull \hbox (2.11247pt too wide) in paragraph at lines 2303--2346
- [][] 
- []
-
-
-
-[47]
-
-[48]
-Overfull \hbox (10.7422pt too wide) in paragraph at lines 2418--2419
-[]\OT1/cmr/bx/n/12 Simple poly-gons: \OT1/cmr/m/n/12 Tri-an-gle, square, pen-tagon, hexagon, hep-tagon, oc-tagon, nonagon 
- []
-
-
-Overfull \hbox (18.0779pt too wide) in paragraph at lines 2421--2422
-[]\OT1/cmr/bx/n/12 Graphs with vary-ing con-nec-tiv-ity: \OT1/cmr/m/n/12 From min-i-mal bi-con-nected to near-triconnected
- []
-
-
-
-[49]
-
-[50]
-
-[51]
-
-[52]
-
-[53]
-Overfull \hbox (3.66563pt too wide) in paragraph at lines 2609--2610
-[]\OT1/cmr/bx/n/12 Robustness: \OT1/cmr/m/n/12 The al-go-rithm han-dles di-verse graph struc-tures (sim-ple cy-cles, wheels,
- []
-
-
-Overfull \hbox (6.87862pt too wide) in paragraph at lines 2611--2612
-[]\OT1/cmr/bx/n/12 Correctness Ver-i-fied: \OT1/cmr/m/n/12 All 41 test in-stances passed val-i-da-tion|output files matched
- []
-
-
-
-[54]
-
-[55]
-
-[56]
-
-[57]
-
-[58]
-
-[59]
-
-[60]
-
-[61]
-
-[62]
-
-[63]
-Overfull \hbox (119.88608pt too wide) in paragraph at lines 3047--3048
-[]\OT1/cmr/m/n/12 Accessible at: \OT1/cmtt/m/n/12 https://tar2003.github.io/ThesisGraph/viz \OT1/cmr/m/n/12 or run lo-cally (\OT1/cmtt/m/n/12 visualization/index.html\OT1/cmr/m/n/12 ) 
- []
-
-
-
-[64] (main.bbl)
-
-[65] (main.aux)
+[26] (main.aux)
  ***********
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-08-13>
  ***********
+
+
+LaTeX Warning: There were undefined references.
+
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 77D4936107688E05E1B8D6B36B1C52FB;19983.
+(rerunfilecheck)             Checksum: 05336C3E53C8164A01C7B378616260D5;9738.
  ) 
 Here is how much of TeX's memory you used:
- 36689 strings out of 468133
- 862325 string characters out of 5430229
- 1410244 words of memory out of 5000000
- 64363 multiletter control sequences out of 15000+600000
- 642342 words of font info for 99 fonts, out of 8000000 for 9000
+ 35723 strings out of 468133
+ 842174 string characters out of 5430229
+ 1362972 words of memory out of 5000000
+ 63603 multiletter control sequences out of 15000+600000
+ 641473 words of font info for 96 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,19n,91p,1203b,2297s stack positions out of 10000i,1000n,20000p,200000b,200000s
- <C:\Users\TAWKIR\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (65 pages, 636224 bytes).
+ 84i,13n,91p,1203b,794s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\TAWKIR\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
+Output written on main.pdf (26 pages, 410616 bytes).
 PDF statistics:
- 1199 PDF objects out of 1200 (max. 8388607)
- 387 named destinations out of 1000 (max. 500000)
- 829 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 617 PDF objects out of 1000 (max. 8388607)
+ 184 named destinations out of 1000 (max. 500000)
+ 413 words of extra memory for PDF output out of 10000 (max. 10000000)
 
