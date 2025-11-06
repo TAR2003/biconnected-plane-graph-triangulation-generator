@@ -1,279 +1,350 @@
-#include <iostream>
-#include <vector>
-#include <set>
-#include <map>
-#include <algorithm>
-
+// prn_cycle_exact_pass_block.cpp
+// C++17
+#include <bits/stdc++.h>
 using namespace std;
+
+/*
+  Exact Section 4 (cycle) implementation of:
+  Parvez, Rahman, Nakano (2011) — "Generating All Triangulations of Plane Graphs"
+
+  - Vertices labeled 1..n
+  - Root is vertex 1
+  - In-place chord objects; flip/unflip in O(1) by local updates + flip-record stack
+  - Incremental leftmost-blocking tracking (no global scan)
+  - Passing newly generated blocking chord index into recursion
+*/
 
 struct Chord
 {
-    int u, v;
-
-    Chord(int a, int b) : u(min(a, b)), v(max(a, b)) {}
-
-    bool operator<(const Chord &other) const
-    {
-        if (u != other.u)
-            return u < other.u;
-        return v < other.v;
-    }
-
-    bool operator==(const Chord &other) const
-    {
-        return u == other.u && v == other.v;
-    }
+    int v1, vj;         // endpoints
+    int opp_o, opp_o_p; // opposite pair (vo, vo')
+    Chord(int a = 0, int b = 0, int c = 0, int d = 0) : v1(a), vj(b), opp_o(c), opp_o_p(d) {}
 };
 
-class Triangulation
+struct FlipRecord
 {
-private:
-    int n;                              // number of vertices
-    set<Chord> chords;                  // current chords in triangulation
-    // set<set<Chord>> seenTriangulations; // track visited triangulations
-    int count;
+    int chord_idx;
+    int original_vj;
 
-    // Check if edge is a boundary edge
-    bool isBoundaryEdge(int u, int v)
+    // saved neighbor data for (1,vo)
+    int vo_idx;
+    int vo_opp_o;
+    int vo_opp_o_p;
+
+    // saved neighbor data for (1,vop)
+    int vop_idx;
+    int vop_opp_o;
+    int vop_opp_o_p;
+
+    // saved leftmost-blocking state
+    int prev_leftmost_idx;
+    int prev_leftmost_b;
+};
+
+class PRN_Cycle
+{
+public:
+    int n;
+    vector<Chord> chords;      // in-place chord objects
+    vector<int> chord_index;   // chord_index[j] = index into chords for chord (1,j) or -1
+    int leftmost_blocking_idx; // index into chords of leftmost blocking chord (or -1)
+    int leftmost_blocking_b;   // b value (left endpoint) or -1
+    vector<FlipRecord> flipStack;
+
+    vector<vector<pair<int, int>>> allTriangulations;
+    long long generated = 0;
+
+    PRN_Cycle(int n_ = 0) { init(n_); }
+
+    void init(int n_)
     {
-        return (abs(u - v) == 1) || (u == 1 && v == n) || (v == 1 && u == n);
+        n = n_;
+        chord_index.assign(n + 1, -1);
+        chords.clear();
+        leftmost_blocking_idx = -1;
+        leftmost_blocking_b = -1;
+        flipStack.clear();
+        allTriangulations.clear();
+        generated = 0;
     }
 
-    // Create initial fan triangulation from v1
-    void createRootTriangulation()
+    inline int nxt(int v) const { return (v == n ? 1 : v + 1); }
+    inline int prv(int v) const { return (v == 1 ? n : v - 1); }
+
+    void generateRoot()
     {
         chords.clear();
-        for (int j = 3; j <= n - 1; j++)
+        fill(chord_index.begin(), chord_index.end(), -1);
+        leftmost_blocking_idx = -1;
+        leftmost_blocking_b = -1;
+        flipStack.clear();
+        allTriangulations.clear();
+        generated = 0;
+
+        // Create chords (1, j) for j = n-1 downto 3
+        for (int j = n - 1; j >= 3; --j)
         {
-            chords.insert(Chord(1, j));
+            int vo = j - 1;
+            int vop = (j == n - 1) ? 2 : (j + 1); // proper wrap: for (1,n-1) use (n-2,2)
+            chords.emplace_back(1, j, vo, vop);
+            chord_index[j] = (int)chords.size() - 1;
         }
     }
 
-    // Find the quadrilateral containing chord (u,v) and return the other diagonal
-    Chord findFlipChord(const Chord &chord)
+    // Flip chord at index idx (must currently be (1, original_vj))
+    // Mutates chord into blocking chord (vo, vop). Saves minimal state for unflip.
+    void flip_inplace(int idx)
     {
-        int u = chord.u;
-        int v = chord.v;
+        Chord &ch = chords[idx];
+        int original_vj = ch.vj;
+        int vo = ch.opp_o;
+        int vop = ch.opp_o_p;
 
-        // Find the two triangles sharing this chord
-        // We need to find two other vertices that form the quadrilateral
-        int a = -1, b = -1;
+        FlipRecord rec;
+        rec.chord_idx = idx;
+        rec.original_vj = original_vj;
 
-        // For each potential vertex
-        for (int i = 1; i <= n; i++)
+        // save neighbor (1,vo)
+        rec.vo_idx = (vo >= 1 && vo <= n) ? chord_index[vo] : -1;
+        if (rec.vo_idx != -1)
         {
-            if (i == u || i == v)
-                continue;
+            rec.vo_opp_o = chords[rec.vo_idx].opp_o;
+            rec.vo_opp_o_p = chords[rec.vo_idx].opp_o_p;
+        }
+        else
+            rec.vo_opp_o = rec.vo_opp_o_p = -1;
 
-            // Check if vertex i forms a triangle with edge (u,v)
-            bool hasUI = chords.count(Chord(u, i)) || isBoundaryEdge(u, i);
-            bool hasIV = chords.count(Chord(i, v)) || isBoundaryEdge(i, v);
+        // save neighbor (1,vop)
+        rec.vop_idx = (vop >= 1 && vop <= n) ? chord_index[vop] : -1;
+        if (rec.vop_idx != -1)
+        {
+            rec.vop_opp_o = chords[rec.vop_idx].opp_o;
+            rec.vop_opp_o_p = chords[rec.vop_idx].opp_o_p;
+        }
+        else
+            rec.vop_opp_o = rec.vop_opp_o_p = -1;
 
-            if (hasUI && hasIV)
+        // save leftmost state
+        rec.prev_leftmost_idx = leftmost_blocking_idx;
+        rec.prev_leftmost_b = leftmost_blocking_b;
+
+        flipStack.push_back(rec);
+
+        // remove (1, original_vj)
+        chord_index[original_vj] = -1;
+
+        // mutate into blocking chord (vo, vop)
+        ch.v1 = vo;
+        ch.vj = vop;
+
+        // new opposite is old diagonal
+        ch.opp_o = 1;
+        ch.opp_o_p = original_vj;
+
+        // update (1,vo) replace original_vj -> vop
+        if (rec.vo_idx != -1)
+        {
+            Chord &cvo = chords[rec.vo_idx];
+            if (cvo.opp_o == original_vj)
+                cvo.opp_o = vop;
+            else if (cvo.opp_o_p == original_vj)
+                cvo.opp_o_p = vop;
+        }
+        // update (1,vop) replace original_vj -> vo
+        if (rec.vop_idx != -1)
+        {
+            Chord &cvop = chords[rec.vop_idx];
+            if (cvop.opp_o == original_vj)
+                cvop.opp_o = vo;
+            else if (cvop.opp_o_p == original_vj)
+                cvop.opp_o_p = vo;
+        }
+
+        // update leftmost blocking incrementally with tie-break (choose leftmost vo if vj equal)
+        if (leftmost_blocking_idx == -1)
+        {
+            leftmost_blocking_idx = idx;
+            leftmost_blocking_b = vo;
+        }
+        else
+        {
+            Chord &curL = chords[leftmost_blocking_idx];
+            if ((ch.vj > curL.vj) || (ch.vj == curL.vj && vo < curL.v1))
             {
-                if (a == -1)
-                    a = i;
-                else if (b == -1)
-                    b = i;
+                leftmost_blocking_idx = idx;
+                leftmost_blocking_b = vo;
             }
         }
-
-        if (a != -1 && b != -1)
-        {
-            return Chord(a, b);
-        }
-
-        return Chord(-1, -1); // Invalid flip
     }
 
-    // Check if a chord can be flipped (is a generating chord)
-    bool canFlipChord(const Chord &chord)
+    // Unflip last flip (restore the in-place chord and neighbors, and leftmost state)
+    void unflip_inplace()
     {
-        // Boundary edges cannot be flipped
-        if (isBoundaryEdge(chord.u, chord.v))
-            return false;
-
-        // Check if the flip would create a valid triangulation
-        Chord newChord = findFlipChord(chord);
-        if (newChord.u == -1)
-            return false;
-
-        // Check if newChord already exists (would be invalid)
-        if (chords.count(newChord))
-            return false;
-
-        // Check if it's a boundary edge
-        if (isBoundaryEdge(newChord.u, newChord.v))
-            return false;
-
-        return true;
-    }
-
-    // Check if triangulation has any generating chords
-    bool hasGeneratingChords()
-    {
-        for (const auto &chord : chords)
-        {
-            if (canFlipChord(chord))
-                return true;
-        }
-        return false;
-    }
-
-    // Find leftmost blocking chord (chord from v1 with smallest second vertex)
-    Chord findLeftmostBlockingChord()
-    {
-        Chord leftmost(1, n + 1);
-
-        for (const auto &chord : chords)
-        {
-            if (chord.u == 1)
-            { // Chords from v1
-                if (chord.v < leftmost.v)
-                {
-                    leftmost = chord;
-                }
-            }
-        }
-
-        return leftmost;
-    }
-
-    // Output current triangulation
-    void outputTriangulation()
-    {
-        // Check for duplicates
-        // if (seenTriangulations.count(chords))
-        // {
-        //     return; // Skip duplicate
-        // }
-
-        // seenTriangulations.insert(chords);
-        count++;
-
-        cout << "Triangulation #" << count << ": ";
-        for (const auto &chord : chords)
-        {
-            cout << "(" << chord.u << "," << chord.v << ") ";
-        }
-        cout << endl;
-    }
-
-    // Main recursive function
-    void findAllChildTriangulationsCycle()
-    {
-        outputTriangulation();
-
-        // Base case: no generating chords
-        if (!hasGeneratingChords())
-        {
+        if (flipStack.empty())
             return;
-        }
+        FlipRecord rec = flipStack.back();
+        flipStack.pop_back();
 
-        // Find leftmost blocking chord
-        Chord blockingChord = findLeftmostBlockingChord();
-        int b = blockingChord.v;
+        Chord &ch = chords[rec.chord_idx];
+        int original_vj = rec.original_vj;
 
-        // Try flipping all chords (v1, vj) where j >= b
-        for (int j = b; j <= n; j++)
+        // current ch is (vo, vop) with opp (1, original_vj)
+        int vo = ch.v1;
+        int vop = ch.vj;
+
+        // restore chord to (1, original_vj)
+        ch.v1 = 1;
+        ch.vj = original_vj;
+
+        // restore its opposite pair to (vo, vop)
+        ch.opp_o = vo;
+        ch.opp_o_p = vop;
+
+        // restore chord_index
+        chord_index[original_vj] = rec.chord_idx;
+
+        // restore (1,vo) opps if existed
+        if (rec.vo_idx != -1)
         {
-            Chord currentChord(1, j);
-
-            // Check if this chord exists in current triangulation
-            if (chords.count(currentChord) && canFlipChord(currentChord))
-            {
-                // Find the new chord after flipping
-                Chord newChord = findFlipChord(currentChord);
-
-                if (newChord.u != -1)
-                {
-                    // Flip the chord
-                    chords.erase(currentChord);
-                    chords.insert(newChord);
-
-                    // Recurse
-                    findAllChildTriangulationsCycle();
-
-                    // Backtrack: undo the flip
-                    chords.erase(newChord);
-                    chords.insert(currentChord);
-                }
-            }
+            chords[rec.vo_idx].opp_o = rec.vo_opp_o;
+            chords[rec.vo_idx].opp_o_p = rec.vo_opp_o_p;
         }
-    }
-
-public:
-    Triangulation(int vertices) : n(vertices), count(0) {}
-
-    // Main algorithm entry point
-    void findAllTriangulationsCycle()
-    {
-        // seenTriangulations.clear();
-        count = 0;
-
-        // Create root triangulation
-        createRootTriangulation();
-
-        // Output root
-        outputTriangulation();
-
-        // Store initial state
-        set<Chord> rootChords = chords;
-
-        // Try flipping each chord from v1 in reverse order
-        for (int j = n - 1; j >= 3; j--)
+        // restore (1,vop) opps if existed
+        if (rec.vop_idx != -1)
         {
-            Chord chord(1, j);
-
-            // Start from root each time
-            chords = rootChords;
-
-            if (chords.count(chord) && canFlipChord(chord))
-            {
-                Chord newChord = findFlipChord(chord);
-
-                if (newChord.u != -1)
-                {
-                    // Flip the chord
-                    chords.erase(chord);
-                    chords.insert(newChord);
-
-                    // Recurse
-                    findAllChildTriangulationsCycle();
-                }
-            }
+            chords[rec.vop_idx].opp_o = rec.vop_opp_o;
+            chords[rec.vop_idx].opp_o_p = rec.vop_opp_o_p;
         }
 
-        cout << "\nTotal triangulations found: " << count << endl;
+        // restore leftmost-blocking
+        leftmost_blocking_idx = rec.prev_leftmost_idx;
+        leftmost_blocking_b = rec.prev_leftmost_b;
     }
 
-    int getCount() const
+    // Record current triangulation (store chords as pairs)
+    void record_current()
     {
-        return count;
+        vector<pair<int, int>> cur;
+        cur.reserve(chords.size());
+        for (auto &c : chords)
+            cur.emplace_back(c.v1, c.vj);
+        allTriangulations.push_back(move(cur));
+        ++generated;
     }
+
+    // Recursive generator: pass the index of the blocking chord created by the caller (or -1 for root)
+    void findAllChildren_passedBlocking(int blocking_idx)
+    {
+        // record current triangulation
+        record_current();
+
+        // threshold b: if blocking_idx == -1 => b = 2 else b = chords[blocking_idx].v1
+        int b = (blocking_idx == -1 ? 2 : chords[blocking_idx].v1);
+
+        // iterate j from b..n-1 (paper's generating chords are (1,j) with j >= b)
+        for (int j = b; j <= n - 1; ++j)
+        {
+            int idx = chord_index[j];
+            if (idx == -1)
+                continue;
+            // flip chord at idx -> creates blocking chord at same idx
+            flip_inplace(idx);
+            // pass the newly created blocking chord idx down
+            findAllChildren_passedBlocking(idx);
+            // unflip
+            unflip_inplace();
+        }
+    }
+
+    // top-level: build root and start recursion
+    void generateAll()
+    {
+        generateRoot();
+        // start recursion passing -1 (no blocking chord at root)
+        findAllChildren_passedBlocking(-1);
+    }
+
+    // void generateRoot()
+    // {
+    //     chords.clear();
+    //     fill(chord_index.begin(), chord_index.end(), -1);
+    //     leftmost_blocking_idx = -1;
+    //     leftmost_blocking_b = -1;
+    //     flipStack.clear();
+    //     allTriangulations.clear();
+    //     generated = 0;
+
+    //     for (int j = n - 1; j >= 3; --j)
+    //     {
+    //         int vo = j - 1;
+    //         int vop = (j == n - 1) ? 2 : (j + 1);
+    //         chords.emplace_back(1, j, vo, vop);
+    //         chord_index[j] = (int)chords.size() - 1;
+    //     }
+    // }
+
+    const vector<vector<pair<int, int>>> &getAll() const { return allTriangulations; }
+    long long count() const { return generated; }
 };
+
+long long catalan(int m)
+{
+    if (m <= 1)
+        return 1;
+    vector<long long> C(m + 1, 0);
+    C[0] = 1;
+    for (int i = 1; i <= m; i++)
+    {
+        long long s = 0;
+        for (int k = 0; k < i; k++)
+            s += C[k] * C[i - 1 - k];
+        C[i] = s;
+    }
+    return C[m];
+}
 
 int main()
 {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << "PRN cycle exact generator (Section 4) — O(1) flips\n";
     int n;
-    cout << "Enter number of vertices in convex polygon: ";
-    cin >> n;
-
+    cout << "Enter n (>=3): ";
+    if (!(cin >> n))
+        return 0;
     if (n < 3)
     {
-        cout << "Need at least 3 vertices!" << endl;
-        return 1;
+        cout << "need n>=3\n";
+        return 0;
     }
 
-    Triangulation tri(n);
-    tri.findAllTriangulationsCycle();
+    PRN_Cycle gen(n);
+    auto t1 = chrono::high_resolution_clock::now();
+    gen.generateAll();
+    auto t2 = chrono::high_resolution_clock::now();
 
-    // Verify with Catalan number
-    if (n <= 10)
+    long long actual = gen.count();
+    long long expected = catalan(n - 2);
+
+    cout << "Generated: " << actual << " triangulations\n";
+    cout << "Expected (Catalan C(" << (n - 2) << ")) = " << expected << "\n";
+    cout << (actual == expected ? "MATCH\n" : "MISMATCH\n");
+
+    auto dur = chrono::duration_cast<chrono::microseconds>(t2 - t1).count();
+    cout << "Time: " << dur << " microseconds\n";
+    if (actual > 0)
+        cout << "avg per triangulation: " << (double)dur / actual << " us\n";
+
+    if (n <= 7)
     {
-        int catalan[] = {1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862};
-        cout << "Expected (Catalan number C_" << (n - 2) << "): " << catalan[n - 2] << endl;
+        auto &all = gen.getAll();
+        for (size_t i = 0; i < all.size(); ++i)
+        {
+            cout << "T" << setw(2) << i + 1 << ": ";
+            for (auto &p : all[i])
+                cout << "(" << p.first << "," << p.second << ") ";
+            cout << "\n";
+        }
     }
-
     return 0;
 }

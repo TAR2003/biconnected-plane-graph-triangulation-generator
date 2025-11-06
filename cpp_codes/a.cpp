@@ -1,6 +1,3 @@
-
-//-----------------Tawkir Aziz Rahman---------------------//
-
 #include <bits/stdc++.h>
 #define input(arr, n)          \
     for (ll i = 0; i < n; i++) \
@@ -123,44 +120,42 @@ public:
         opp1 = c;
         opp2 = d;
         active = true;
-        edges = vector<chord *>(4);
+        edges = vector<chord *>();
     }
-    void setRectangle() 
+    void setRectangle()
     {
-        
     }
     void calculateOppositeChords()
     {
-
     }
 };
 
 class PRN
 {
 public:
-    list<chord> chords;
-    list<chord> blockingChords;
+    list<chord *> chords;
+    // list<chord *> blockingChords;
     ll n;
-    vector<list<chord>> allTriangulations;
+    vector<vector<pair<ll, ll>>> allTriangulations;
     PRN(ll n)
     {
         this->n = n;
         findAllTriangulationsCycle(n);
     }
-    void findAllChildTriangulationsCycle()
+    void findAllChildTriangulationsCycle(chord *blockingChord)
     {
         answer();
-        chord leftmostBlockingChord = blockingChords.front();
-        ll b = leftmostBlockingChord.p1;
+        chord *leftmostBlockingChord = blockingChord;
+        ll b = leftmostBlockingChord->p1;
         for (auto itr = chords.begin(); itr != chords.end(); itr++)
         {
-            if (itr->p2 < b)
+            if ((*itr)->p2 < b)
             {
                 continue;
             }
             flip(*itr);
-            findAllChildTriangulationsCycle();
-            unflip();
+            findAllChildTriangulationsCycle(*itr);
+            unflip(*itr);
         }
     }
 
@@ -171,43 +166,44 @@ public:
         for (auto itr = chords.begin(); itr != chords.end(); itr++)
         {
             flip(*itr);
-            findAllChildTriangulationsCycle();
-            unflip();
+            findAllChildTriangulationsCycle(*itr);
+            unflip(*itr);
         }
     }
 
-    void flip(chord &ch)
+    void flip(chord *ch)
     {
-        ch.active = false;
+        ch->active = false;
     }
-    void unflip()
+    void unflip(chord *ch)
     {
+        ch->active = true;
     }
     void generateRoot(ll n)
     {
         for (ll i = 2; i < n - 1; i++)
         {
-            chord ch(1, i, i + 1, n);
+            chord *ch = new chord(1, i, i + 1, n);
             chords.push_back(ch);
         }
-        for(auto itr=chords.begin(); itr!=chords.end(); itr++)
+        for (auto itr = chords.begin(); itr != chords.end(); itr++)
         {
-            if(itr != chords.begin())
+            if (itr != chords.begin())
             {
-                itr->oppositeChords.push_back(&(*prev(itr)));
+                (*itr)->edges.push_back(*prev(itr));
             }
-            if(next(itr) != chords.end())
+            if (next(itr) != chords.end())
             {
-                itr->oppositeChords.push_back(&(*next(itr)));
+                (*itr)->edges.push_back(*next(itr));
             }
         }
     }
     void answer()
     {
-        list<chord> currentChords;
+        vector<pair<ll,ll>> currentChords;
         for (auto a : chords)
         {
-            currentChords.push_back(a);
+            currentChords.push_back(make_pair(a->p1, a->p2));
         };
         allTriangulations.push_back(currentChords);
         // printChords(chords);
@@ -217,7 +213,7 @@ public:
         cout << "total triangulations:" << allTriangulations.size() << endl;
         for (auto triangulation : allTriangulations)
         {
-            printChords(triangulation);
+            printVectorPair(triangulation);
             cout << "-----" << endl;
         }
     }
