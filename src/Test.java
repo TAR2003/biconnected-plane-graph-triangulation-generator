@@ -15,18 +15,19 @@ public class Test {
         System.out.println("Total input files: " + files.length);
         int match = 0;
         // Loop through all the files
-        for (File file : files) {
-            String filename = file.getPath(); // full path (or file.getName() if only name needed)
-
-            filename = "./input/C6_hexagon_cycle_1.txt";
-            System.out.println("Processing file: " + filename);
-            BiconnectedGraph.solve(filename);
-            CrossResult.solve(filename);
-            boolean b = FileCompare.solve();
-            if (b) {
-                match++;
-            }
+        // for (File file : files) {
+        // String filename = file.getPath(); // full path (or file.getName() if only
+        // name needed)
+        String filename;
+        filename = "./input/complex.txt";
+        System.out.println("Processing file: " + filename);
+        BiconnectedGraph.solve(filename);
+        CrossResult.solve(filename);
+        boolean b = FileCompare.solve();
+        if (b) {
+            match++;
         }
+        // }
         if (match == files.length) {
             System.out.println("All " + match + " files matched!");
         } else {
