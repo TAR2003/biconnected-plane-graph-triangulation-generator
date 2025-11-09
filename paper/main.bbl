@@ -1,14 +1,9 @@
-\begin{thebibliography}{10}
+\begin{thebibliography}{1}
 
 \bibitem{avis1996}
 David Avis and Komei Fukuda.
 \newblock Reverse search for enumeration.
 \newblock {\em Discrete Applied Mathematics}, 65(1-3):21--46, 1996.
-
-\bibitem{chazelle1991}
-Bernard Chazelle.
-\newblock Triangulating a simple polygon in linear time.
-\newblock {\em Discrete \& Computational Geometry}, 6(1):485--524, 1991.
 
 \bibitem{berg2008}
 Mark de~Berg, Otfried Cheong, Marc van Kreveld, and Mark Overmars.
