@@ -15,6 +15,8 @@
 \usepackage{hyperref}
 \usepackage{cite}
 \usepackage{float}
+\usetikzlibrary{arrows.meta}
+
 
 
 \geometry{margin=0.8in}
@@ -79,6 +81,9 @@ The Parvez-Rahman-Nakano algorithm critically relies on the graph being \emph{tr
 In contrast, general \emph{biconnected} graphs, which have vertex connectivity exactly 2, do not satisfy this guarantee. Such graphs may contain \emph{separation pairs}—pairs of vertices whose removal disconnects the graph. Faces separated by these pairs can share internal structure beyond their boundary edges. Consequently, independently triangulating faces can introduce \textbf{multi-edges}—multiple edges connecting the same pair of vertices—violating the simple graph property.
 
 This \textbf{multi-edge problem} is the fundamental obstacle in extending the triconnected graph algorithm to biconnected graphs. Naively applying the face-by-face approach of Parvez et al. to biconnected graphs can produce invalid triangulations with parallel edges, making a direct extension non-trivial.
+
+
+
 \subsection{Our Contribution}
 
 In this paper, we present the first algorithm that generates all triangulations of biconnected plane graphs in $O(1)$ amortized time per triangulation using $O(n)$ space. Our algorithm successfully extends the tree-of-triangulations framework to the biconnected case by introducing novel techniques to resolve the multi-edge problem:
