@@ -1,4 +1,4 @@
-\documentclass[12pt,a4paper]{article}
+﻿\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{positioning,shapes,arrows}
+\usetikzlibrary{arrows.meta, shapes.geometric, calc}
 \usepackage{subcaption}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
@@ -48,7 +49,7 @@ In this paper, we address the problem of generating all triangulations of a bico
 
 \section{Introduction}
 
-Triangulation of plane graphs is a fundamental problem in computational geometry with numerous applications, including VLSI floorplanning~\cite{kozminski1985}, general computational geometry~\cite{berg2008}, and graph drawing~\cite{nishizeki2004}. While computing a single triangulation of a plane graph can be performed efficiently, the exhaustive generation of \emph{all} triangulations poses substantial computational challenges due to the combinatorial explosion of possible embeddings. In this paper, we focus on the problem of generating all triangulations of biconnected plane graphs—a problem that remains open despite significant advances on special subclasses of planar graphs.
+Triangulation of plane graphs is a fundamental problem in computational geometry with numerous applications, including VLSI floorplanning~\cite{kozminski1985}, general computational geometry~\cite{berg2008}, and graph drawing~\cite{nishizeki2004}. While computing a single triangulation of a plane graph can be performed efficiently, the exhaustive generation of \emph{all} triangulations poses substantial computational challenges due to the combinatorial explosion of possible embeddings. In this paper, we focus on the problem of generating all triangulations of biconnected plane graphs---a problem that remains open despite significant advances on special subclasses of planar graphs.
 
 \subsection{Motivation and Challenges}
 
@@ -65,22 +66,156 @@ The enumeration of all triangulations is critical for applications necessitating
 Classical enumeration algorithms address the challenges of generating all triangulations through several strategies. The generate-and-filter method produces candidate objects and removes duplicates via filtering but is memory-intensive. Orderly generation~\cite{read1978} ensures canonical representations using sophisticated techniques, though it often involves expensive isomorphism testing. The reverse search paradigm~\cite{avis1996} reduces memory requirements by implicitly defining a spanning tree over the solution space, enabling polynomial-space enumeration; however, its time complexity is typically 
 $O(n^2)$ per triangulation in triangulation problems.
 
-Early work by Hurtado and Noy~\cite{hurtado1999} studied the triangulation graph for \emph{convex polygons}, constructing a graph representing all triangulations and exploring its structural properties. Their approach requires generating all triangulations of smaller polygons as part of the process, potentially increasing complexity. For more general graphs, Li and Nakano~\cite{li2001} proposed an algorithm to enumerate all biconnected ‘based’ plane triangulations up to size $n$. Since their method incrementally builds from smaller graphs, it is inefficient when enumerating triangulations of a fixed-size graph.
+Early work by Hurtado and Noy~\cite{hurtado1999} studied the triangulation graph for \emph{convex polygons}, constructing a graph representing all triangulations and exploring its structural properties. Their approach requires generating all triangulations of smaller polygons as part of the process, potentially increasing complexity. For more general graphs, Li and Nakano~\cite{li2001} proposed an algorithm to enumerate all biconnected `based' plane triangulations up to size $n$. Since their method incrementally builds from smaller graphs, it is inefficient when enumerating triangulations of a fixed-size graph.
 
 The significant breakthrough for \emph{triconnected} plane graphs came from Parvez, Rahman, and Nakano~\cite{parvez2011}, who developed an elegant algorithm that achieves $O(1)$ time per triangulation using $O(n)$ space. Their key insight is to organize all triangulations into a tree structure, where parent-child relationships correspond to single edge flip operations. By carefully defining a unique \emph{generating chord} for each triangulation, they ensure that flipping this chord produces a unique parent, thereby avoiding duplicates without explicit storage or isomorphism testing. This algorithm decomposes the graph into faces, triangulates each face independently, and efficiently combines the results.
 
 However, this approach fundamentally relies on the graph being triconnected: in triconnected graphs, any two faces share edges only along their boundaries, preventing \textbf{multi-edge} conflicts. In general \emph{biconnected} graphs, which may contain \emph{separation pairs}, faces can share internal edges, leading to the multi-edge problem (see Section~\ref{subsec:multiedge}). This challenge obstructs the direct extension of the triconnected algorithm to all biconnected graphs.
 
-Our work extends this framework to all biconnected graphs—a strictly more general class—while maintaining $O(1)$ amortized time and $O(n)$ space complexity. This is achieved by introducing novel techniques including safe root vertex selection, local genealogical trees, and dynamic global chord tracking to efficiently resolve multi-edge conflicts.
+Our work extends this framework to all biconnected graphs---a strictly more general class---while maintaining $O(1)$ amortized time and $O(n)$ space complexity. This is achieved by introducing novel techniques including safe root vertex selection, local genealogical trees, and dynamic global chord tracking to efficiently resolve multi-edge conflicts.
+
+%% ============================================================
+%% FIGURE 10: Comparison - Triconnected vs Biconnected
+%% Section 1.2 - Related Work
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.4]
+    
+    % Triconnected example
+    \begin{scope}[xshift=-5cm]
+        \node[draw=none, font=\bfseries, align=center] at (0, 3) 
+            {Triconnected Graph\\(Previous Work [8])};
+        
+        % Create a simple triconnected structure
+        \node[circle, draw, fill=white, minimum size=6pt] (t1) at (0, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (t2) at (2, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (t3) at (2, 2) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (t4) at (0, 2) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (t5) at (1, 1) {};
+        
+        \draw[thick] (t1) -- (t2) -- (t3) -- (t4) -- cycle;
+        \draw[thick] (t1) -- (t5) -- (t2);
+        \draw[thick] (t3) -- (t5) -- (t4);
+        
+        % Annotations
+        \node[draw=none, font=\small, align=center, green!60!black] at (1, -1.2) 
+            {\checkmark\ No separation pairs\\
+            \checkmark\ Faces share only boundaries\\
+            \checkmark\ No multi-edge conflicts};
+        
+    \end{scope}
+    
+    % Biconnected example
+    \begin{scope}[xshift=5cm]
+        \node[draw=none, font=\bfseries, align=center] at (0, 3) 
+            {Biconnected Graph\\(This Work)};
+        
+        % Create biconnected with separation pair
+        \node[circle, draw, fill=red!30, minimum size=8pt, label=left:$u$] (b1) at (0, 1) {};
+        \node[circle, draw, fill=red!30, minimum size=8pt, label=right:$v$] (b2) at (2, 1) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (b3) at (1, 2.5) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (b4) at (1, -0.5) {};
+        
+        \draw[thick] (b1) -- (b3) -- (b2) -- (b4) -- cycle;
+        \draw[thick, blue] (b1) -- (b2);
+        
+        % Highlight separation pair
+        \draw[red, dashed, very thick, rounded corners] 
+            (-0.3, 0.7) rectangle (2.3, 1.3);
+        \node[draw=none, font=\scriptsize, red] at (1, 0.3) {Separation pair $\{u,v\}$};
+        
+        % Annotations
+        \node[draw=none, font=\small, align=center, orange!70!black] at (1, -1.8) 
+            {$\triangledown$ Has separation pairs\\
+            $\triangledown$ Faces can share internals\\
+            $\triangledown$ Multi-edge risk\\
+            \checkmark\ \textbf{Solved by our algorithm}};
+        
+    \end{scope}
+    
+    % Arrow and text between them
+    \draw[-latex, ultra thick, blue!50] (-2.5, 1) -- (-1, 1);
+    \node[draw=none, font=\small, align=center] at (-1.75, 2) 
+        {Extension\\to more\\general class};
+    
+\end{tikzpicture}
+\caption{Comparison of graph classes. \textbf{Left:} Triconnected graphs (addressed by Parvez et al. [8]) have no separation pairs, so faces share only boundary edges. \textbf{Right:} Biconnected graphs (this work) may contain separation pairs (highlighted in red), allowing faces to share internal structure and creating multi-edge conflicts. Our algorithm extends the framework to this more general class through safe root selection and global chord tracking.}
+\label{fig:graph_comparison}
+\end{figure}
 
 \subsection{The Multi-Edge Problem in Biconnected Graphs}
 \label{subsec:multiedge}
 
-The Parvez-Rahman-Nakano algorithm critically relies on the graph being \emph{triconnected}. Triconnectivity guarantees that any two faces share edges only along their boundaries—they cannot share internal chords. This property allows independent triangulation of faces without conflicts.
+The Parvez-Rahman-Nakano algorithm critically relies on the graph being \emph{triconnected}. Triconnectivity guarantees that any two faces share edges only along their boundaries---they cannot share internal chords. This property allows independent triangulation of faces without conflicts.
 
-In contrast, general \emph{biconnected} graphs, which have vertex connectivity exactly 2, do not satisfy this guarantee. Such graphs may contain \emph{separation pairs}—pairs of vertices whose removal disconnects the graph. Faces separated by these pairs can share internal structure beyond their boundary edges. Consequently, independently triangulating faces can introduce \textbf{multi-edges}—multiple edges connecting the same pair of vertices—violating the simple graph property.
+In contrast, general \emph{biconnected} graphs, which have vertex connectivity exactly 2, do not satisfy this guarantee. Such graphs may contain \emph{separation pairs}---pairs of vertices whose removal disconnects the graph. Faces separated by these pairs can share internal structure beyond their boundary edges. Consequently, independently triangulating faces can introduce \textbf{multi-edges}---multiple edges connecting the same pair of vertices---violating the simple graph property.
 
 This \textbf{multi-edge problem} is the fundamental obstacle in extending the triconnected graph algorithm to biconnected graphs. Naively applying the face-by-face approach of Parvez et al. to biconnected graphs can produce invalid triangulations with parallel edges, making a direct extension non-trivial.
+
+%% ============================================================
+%% FIGURE 2: Multi-Edge Problem in Biconnected Graphs
+%% Section 1.3 - The Multi-Edge Problem
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+    
+    % Left subfigure: Triconnected (no multi-edges)
+    \begin{scope}[xshift=-4cm]
+        \node[draw=none, font=\bfseries] at (0, 2.5) {Triconnected Graph};
+        
+        % Face 1
+        \node[circle, draw, fill=white, minimum size=6pt] (a1) at (0, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (b1) at (1.5, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (c1) at (0.75, 1.3) {};
+        
+        \draw[thick] (a1) -- (b1) -- (c1) -- cycle;
+        \draw[blue, thick] (a1) -- (c1);
+        
+        \node[draw=none, font=\small, blue] at (0.75, 1.7) {Face 1 triangulated};
+        
+        % Face 2 (adjacent)
+        \node[circle, draw, fill=white, minimum size=6pt] (d1) at (1.5, 1.3) {};
+        
+        \draw[thick] (b1) -- (d1) -- (c1);
+        \draw[red, thick, dashed] (b1) -- (c1);
+        
+        \node[draw=none, font=\small, red] at (2.3, 0.65) {Face 2};
+        
+        \node[draw=none, font=\small, align=center, green!50!black] at (0.75, -0.8) 
+            {\checkmark\ No conflict:\\Faces share only\\boundary edges};
+    \end{scope}
+    
+    % Right subfigure: Biconnected (multi-edge conflict)
+    \begin{scope}[xshift=4cm]
+        \node[draw=none, font=\bfseries] at (0, 2.5) {Biconnected Graph};
+        
+        % Vertices
+        \node[circle, draw, fill=white, minimum size=6pt, label=below:$u$] (a2) at (-0.5, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below:$v$] (b2) at (1.5, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (c2) at (0.5, 1.3) {};
+        \node[circle, draw, fill=white, minimum size=6pt] (d2) at (0.5, -1.3) {};
+        
+        % Separation pair u, v
+        \draw[thick] (a2) -- (c2) -- (b2) -- (d2) -- cycle;
+        
+        % Chord from Face 1 (blue)
+        \draw[blue, very thick] (a2) -- (b2);
+        \node[draw=none, font=\small, blue] at (0.5, 0.3) {$(u,v)$ from Face 1};
+        
+        % Chord from Face 2 (red, parallel - MULTI-EDGE!)
+        \draw[red, very thick, dashed] (a2) to[bend right=30] (b2);
+        \node[draw=none, font=\small, red] at (0.5, -0.5) {$(u,v)$ from Face 2};
+        
+        \node[draw=none, font=\small, align=center, red!70!black] at (0.5, -2.2) 
+            {\textbf{$\times$ Multi-edge conflict!}\\Separation pair $\{u,v\}$\\allows faces to share\\internal chords};
+    \end{scope}
+    
+\end{tikzpicture}
+\caption{The multi-edge problem in biconnected graphs. \textbf{Left:} In triconnected graphs, any two faces share only boundary edges, enabling independent triangulation. \textbf{Right:} In biconnected graphs with separation pairs, faces can share internal structure. Naive independent triangulation creates multi-edges (parallel edges between the same vertex pair), violating the simple graph property.}
+\label{fig:multiedge_problem}
+\end{figure}
 
 
 
@@ -210,6 +345,83 @@ Our algorithm generates all triangulations of a biconnected plane graph $G$ with
 
 \noindent\rule{\textwidth}{0.4pt}
 
+%% ============================================================
+%% FIGURE 11: Complete Algorithm Workflow
+%% Section 3 - The Algorithm
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    startstop/.style={rectangle, rounded corners, minimum width=3cm, minimum height=1cm, 
+                      text centered, align=center, draw=black, fill=red!20, font=\small},
+    process/.style={rectangle, minimum width=3cm, minimum height=1cm, 
+                    text centered, align=center, draw=black, fill=blue!20, font=\small},
+    decision/.style={diamond, aspect=2, minimum width=2.5cm, minimum height=1cm, 
+                     text centered, align=center, draw=black, fill=green!20, font=\small},
+    arrow/.style={thick,-latex}
+]
+
+% Start
+\node (start) [startstop] {Start: $S = \emptyset$};
+
+% Step 1
+\node (step1) [process, below=of start] {Initialize faces\\$F_1, \ldots, F_k$};
+
+% Step 2
+\node (step2) [process, below=of step1] {Select face $F_i$};
+
+% Step 3
+\node (step3) [process, below=of step2] {Find safe root $r$\\(Algorithm 2)};
+
+% Step 4
+\node (step4) [process, below=of step3] {Build root\\triangulation $T_r$};
+
+% Step 5
+\node (step5) [process, below=of step4] {Add $T_r$ chords to $S$};
+
+% Step 6
+\node (step6) [process, below=of step5] {Explore local tree\\via DFS};
+
+% Decision 1
+\node (dec1) [decision, below=of step6, yshift=-0.5cm] {More\\faces?};
+
+% Step 7
+\node (step7) [process, right=2.5cm of dec1] {Output\\triangulation};
+
+% Step 8
+\node (step8) [process, below=of dec1, yshift=-0.5cm] {Remove $T_r$\\from $S$};
+
+% Decision 2
+\node (dec2) [decision, below=of step8, yshift=-0.5cm] {More\\triangulations\\in tree?};
+
+% End
+\node (end) [startstop, below=of dec2, yshift=-0.5cm] {End};
+
+% Arrows
+\draw [arrow] (start) -- (step1);
+\draw [arrow] (step1) -- (step2);
+\draw [arrow] (step2) -- (step3);
+\draw [arrow] (step3) -- (step4);
+\draw [arrow] (step4) -- (step5);
+\draw [arrow] (step5) -- (step6);
+\draw [arrow] (step6) -- (dec1);
+\draw [arrow] (dec1) -- node[above, font=\scriptsize] {Yes} (step7);
+\draw [arrow] (dec1) -- node[left, font=\scriptsize] {No} (step8);
+\draw [arrow] (step8) -- (dec2);
+\draw [arrow] (dec2) -- node[left, font=\scriptsize] {No} (end);
+
+% Backtrack arrow
+\draw [arrow, dashed, red] (dec2.east) -- ++(1.5,0) |- node[near start, right, font=\scriptsize] {Yes} (step6.east);
+
+% Next face arrow
+\draw [arrow] (step7.north) |- (step2.east);
+
+\end{tikzpicture}
+\caption{Complete algorithm workflow. The algorithm processes faces sequentially, constructing a local genealogical tree for each face from a safe root vertex. The global chord set $S$ is maintained through push/pop operations during DFS exploration. When all faces are triangulated, a complete graph triangulation is output. Backtracking explores all valid combinations.}
+\label{fig:algorithm_workflow}
+\end{figure}
+
 \subsection{Key Innovations}
 
 Our algorithm extends the Parvez-Rahman-Nakano framework from triconnected to biconnected graphs through three essential innovations:
@@ -226,6 +438,116 @@ Rather than constructing a single global genealogical tree (which fails for bico
 \end{itemize}
 
 This decomposition enables independent triangulation of each face while maintaining global consistency through the chord set.
+
+%% ============================================================
+%% FIGURE 8: Algorithm Recursion Structure (DFS with Backtracking)
+%% Section 3.1 - Algorithm Overview
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    level 1/.style={sibling distance=5cm, level distance=2cm},
+    level 2/.style={sibling distance=2.5cm, level distance=1.8cm},
+    level 3/.style={sibling distance=1.5cm, level distance=1.5cm},
+    every node/.style={rectangle, rounded corners, minimum width=1.8cm, minimum height=0.7cm, align=center, font=\scriptsize},
+    edge from parent/.style={draw, -latex}
+]
+
+\node[draw, fill=blue!30, font=\small] {Start\\$S = \emptyset$}
+    child {
+        node[draw, fill=blue!20] {Face $F_1$\\$T_{1,1}$}
+        child {
+            node[draw, fill=green!20] {Face $F_2$\\$T_{2,1}$}
+            child {
+                node[draw, fill=yellow!20] {$F_3$: Output}
+                edge from parent node[left, draw=none, font=\tiny] {$S$ updated}
+            }
+            edge from parent node[left, draw=none, font=\tiny] {Add $T_{2,1}$ to $S$}
+        }
+        child {
+            node[draw, fill=green!20] {Face $F_2$\\$T_{2,2}$}
+            child {
+                node[draw, fill=yellow!20] {$F_3$: Output}
+            }
+            edge from parent node[right, draw=none, font=\tiny] {Backtrack,\\try $T_{2,2}$}
+        }
+        edge from parent node[left, draw=none, font=\tiny] {Add $T_{1,1}$ to $S$}
+    }
+    child {
+        node[draw, fill=blue!20] {Face $F_1$\\$T_{1,2}$}
+        child {
+            node[draw, fill=green!20] {Face $F_2$\\$T_{2,1}$}
+            child {
+                node[draw, fill=yellow!20] {$F_3$: Output}
+            }
+        }
+        edge from parent node[right, draw=none, font=\tiny] {Backtrack,\\try $T_{1,2}$}
+    };
+
+% Annotations with spacing
+\node[draw=none, font=\small, align=left, blue!70!black] at (-6, 0) 
+    {Process faces\\$F_1, F_2, \ldots, F_k$\\sequentially};
+
+\node[draw=none, font=\small, align=left, green!60!black] at (6.5, -2) 
+    {For each face,\\explore all\\local tree\\triangulations};
+
+\node[draw=none, font=\small, align=left, orange!70!black] at (6.5, -5) 
+    {Backtrack:\\Remove chords\\from $S$};
+
+\end{tikzpicture}
+\caption{DFS recursion structure with backtracking. The algorithm processes faces sequentially, exploring all triangulations in each face's local genealogical tree. The global chord set $S$ is updated when entering a branch (add chords) and restored when backtracking (remove chords). Each path from root to leaf represents a unique complete triangulation of the graph.}
+\label{fig:recursion_structure}
+\end{figure}
+
+%% ============================================================
+%% FIGURE 3: Local Genealogical Tree Structure
+%% Section 3.2.1 - Innovation 1: Local Genealogical Trees
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    level distance=1.5cm,
+    sibling distance=2.5cm,
+    every node/.style={rectangle, draw, rounded corners, minimum width=1.5cm, minimum height=0.8cm, align=center, font=\small},
+    edge from parent/.style={draw, -latex, thick}
+]
+
+% Root triangulation
+\node[fill=blue!20] {Root $T_r$\\(safe fan)}
+    child {
+        node[fill=green!15] {Child\\flip 1}
+        child {node[fill=yellow!15] {Leaf 1}}
+        child {node[fill=yellow!15] {Leaf 2}}
+    }
+    child {
+        node[fill=green!15] {Child\\flip 2}
+        child {node[fill=yellow!15] {Leaf 3}}
+    }
+    child {
+        node[fill=green!15] {Child\\flip 3}
+        child {
+            node[fill=orange!15] {Child\\flip 4}
+            child {node[fill=yellow!15] {Leaf 4}}
+        }
+    };
+
+% Annotations with proper spacing
+\node[draw=none, font=\small, align=left, blue!70!black] at (-5, 0.5) 
+    {Root from\\safe vertex $r$};
+
+\node[draw=none, font=\small, align=left, green!60!black] at (5.5, -1.5) 
+    {Each edge flip\\creates child};
+
+\node[draw=none, font=\small, align=left, orange!70!black] at (5.5, -4) 
+    {Recursive\\descent};
+
+\node[draw=none, font=\small, align=center] at (0, -5.5) 
+    {Local Genealogical Tree for Face $F_i$};
+
+\end{tikzpicture}
+\caption{Structure of a local genealogical tree for a single face. The root is constructed from a safe root vertex using a fan triangulation. Each child is obtained by flipping the generating chord (leftmost non-root chord). The tree structure ensures each triangulation appears exactly once, with unique parent-child relationships defined by edge flips.}
+\label{fig:local_tree}
+\end{figure}
 
 \subsubsection{Innovation 2: Safe Root Vertex Selection}
 
@@ -253,6 +575,76 @@ The set is managed dynamically during DFS traversal:
 
 This ensures $S$ always reflects exactly the chords in the current exploration path.
 
+%% ============================================================
+%% FIGURE 9: Global Chord Set Management (Push/Pop)
+%% Section 3.2.3 - Dynamic Global Chord Management
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.3]
+    
+    % Timeline representation
+    \foreach \x/\label in {0/Start, 3/Face 1, 6/Face 2, 9/Backtrack, 12/Face 1'} {
+        \node[font=\small] at (\x, 3.5) {\label};
+        \draw[dashed, gray] (\x, 3.2) -- (\x, -0.5);
+    }
+    
+    % S contents over time
+    \node[draw=none, font=\small, align=left] at (-1.5, 2.5) {Global\\Set $S$:};
+    
+    % Empty at start
+    \node[draw, minimum width=2cm, minimum height=0.8cm] at (1.5, 2.5) {$\emptyset$};
+    
+    % After Face 1
+    \draw[-latex, thick, blue] (2.5, 2.5) -- (3.5, 2.5);
+    \node[draw=none, font=\scriptsize, blue, above] at (3, 2.7) {Push};
+    \node[draw, minimum width=2cm, minimum height=0.8cm, fill=blue!10] at (4.5, 2.5) 
+        {$\{e_1, e_2\}$};
+    
+    % After Face 2
+    \draw[-latex, thick, green!60!black] (5.5, 2.5) -- (6.5, 2.5);
+    \node[draw=none, font=\scriptsize, green!60!black, above] at (6, 2.7) {Push};
+    \node[draw, minimum width=2.5cm, minimum height=0.8cm, fill=green!10] at (7.5, 2.5) 
+        {$\{e_1, e_2, e_3, e_4\}$};
+    
+    % Backtrack from Face 2
+    \draw[-latex, thick, red] (8.5, 2.5) -- (9.5, 2.5);
+    \node[draw=none, font=\scriptsize, red, above] at (9, 2.7) {Pop};
+    \node[draw, minimum width=2cm, minimum height=0.8cm, fill=blue!10] at (10.5, 2.5) 
+        {$\{e_1, e_2\}$};
+    
+    % Try different Face 1 triangulation
+    \draw[-latex, thick, orange] (11.5, 2.5) -- (12.5, 2.5);
+    \node[draw=none, font=\scriptsize, orange, above] at (12, 2.7) {Pop+Push};
+    \node[draw, minimum width=2.5cm, minimum height=0.8cm, fill=orange!10] at (13.8, 2.5) 
+        {$\{e_1', e_2', e_3'\}$};
+    
+    % Action annotations below
+    \node[draw=none, font=\scriptsize, align=center] at (1.5, 0.8) 
+        {Initialize};
+    
+    \node[draw=none, font=\scriptsize, align=center, blue!70!black] at (4.5, 0.8) 
+        {Add chords\\from $F_1$\\triangulation};
+    
+    \node[draw=none, font=\scriptsize, align=center, green!60!black] at (7.5, 0.8) 
+        {Add chords\\from $F_2$\\triangulation};
+    
+    \node[draw=none, font=\scriptsize, align=center, red!70!black] at (10.5, 0.8) 
+        {Remove $F_2$\\chords\\(backtrack)};
+    
+    \node[draw=none, font=\scriptsize, align=center, orange!70!black] at (13.8, 0.8) 
+        {Try different\\$F_1$ triangulation};
+    
+    % Bottom explanation
+    \node[draw=none, font=\small, align=center] at (7, -1.5) 
+        {Dynamic management: Push chords when exploring, Pop when backtracking\\
+        $S$ always reflects current path in recursion tree};
+    
+\end{tikzpicture}
+\caption{Dynamic global chord set management. As the algorithm explores the recursion tree via DFS, chords are added to $S$ when entering a branch (push) and removed when backtracking (pop). This ensures $S$ always contains exactly the chords from the current partial triangulation on the exploration path, enabling efficient multi-edge detection.}
+\label{fig:global_chord_management}
+\end{figure}
+
 \noindent\rule{\textwidth}{0.4pt}
 
 \subsection{Core Concepts}
@@ -262,6 +654,53 @@ This ensures $S$ always reflects exactly the chords in the current exploration p
 Once a safe root vertex $r$ is identified, we construct the \textbf{root triangulation} by adding chords from $r$ to all non-neighboring vertices:
 
 \textbf{Definition (Root Triangulation)}: The \textit{root triangulation} $T_r$ of face $F$ with safe root $r$ is formed by adding all chords $(r, v)$ for every vertex $v \in F$ that is not adjacent to $r$ on the cycle boundary.
+
+%% ============================================================
+%% FIGURE 4: Root Triangulation Construction (Fan Structure)
+%% Section 3.3.1 - Root Triangulation
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.8]
+    
+    % Pentagon example
+    \begin{scope}
+        \node[draw=none, font=\small, align=center] at (0, 2) {\textbf{Root Triangulation from Safe Root $r = v_1$}};
+        
+        % Vertices
+        \node[circle, draw, fill=red!30, minimum size=8pt, label=left:$v_1$ (root)] (v1) at (0, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=above:$v_2$] (v2) at (0.8, 1.2) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=right:$v_3$] (v3) at (1.5, 0.3) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below:$v_4$] (v4) at (1, -1) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below:$v_5$] (v5) at (-0.5, -1) {};
+        
+        % Boundary edges
+        \draw[thick, blue] (v1) -- (v2);
+        \draw[thick] (v2) -- (v3);
+        \draw[thick] (v3) -- (v4);
+        \draw[thick] (v4) -- (v5);
+        \draw[thick, blue] (v5) -- (v1);
+        
+        % Fan chords from root
+        \draw[thick, red, ->] (v1) -- (v3) node[midway, above right, draw=none, font=\scriptsize] {$(v_1, v_3)$};
+        \draw[thick, red, ->] (v1) -- (v4) node[midway, below right, draw=none, font=\scriptsize] {$(v_1, v_4)$};
+        
+        % Adjacent vertices annotation
+        \node[draw=none, font=\scriptsize, align=center, blue!70!black] at (-0.5, 0.6) {Adjacent\\to $r$};
+        \node[draw=none, font=\scriptsize, align=center, blue!70!black] at (-0.7, -0.5) {Adjacent\\to $r$};
+        
+        % Non-adjacent vertices annotation
+        \node[draw=none, font=\scriptsize, align=center, red!70!black] at (2.2, 0.3) {Non-adjacent\\$\Rightarrow$ add chord};
+        \node[draw=none, font=\scriptsize, align=center, red!70!black] at (1.5, -1.3) {Non-adjacent\\$\Rightarrow$ add chord};
+        
+        \node[draw=none, font=\small, align=center] at (0.5, -2.2) 
+            {Fan triangulation: Add all chords from $r$ to non-neighbors};
+    \end{scope}
+    
+\end{tikzpicture}
+\caption{Construction of root triangulation from safe root vertex $r = v_1$ in a pentagon. The algorithm adds chords from $r$ to all non-adjacent vertices ($v_3$ and $v_4$), creating a fan structure. Vertices $v_2$ and $v_5$ are already adjacent to $r$ on the cycle boundary (blue edges), so no chords are needed. This construction guarantees no multi-edges if $r$ is a safe root.}
+\label{fig:root_triangulation}
+\end{figure}
 
 \subsubsection{Local Genealogical Tree Structure}
 
@@ -280,6 +719,86 @@ In a triangulation $T$ of a face with root vertex $r$, a chord $(v_i, v_j)$ is a
 \label{def:parent_child}
 Let $T$ be a triangulation with generating chord $(v_i, v_j)$ forming triangles $(v_i, v_j, v_p)$ and $(v_i, v_j, v_q)$ on opposite sides. The \textit{parent} of $T$ is the triangulation obtained by flipping $(v_i, v_j)$ to $(v_p, v_q)$, provided this flip does not create a multi-edge.
 \end{definition}
+
+%% ============================================================
+%% FIGURE 6: Generating Chord and Parent-Child Relationship
+%% Section 3.3.2 - Local Genealogical Tree Structure
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+    
+    % Current triangulation
+    \begin{scope}[xshift=-4cm]
+        \node[draw=none, font=\small] at (0, 2.3) {\textbf{Current Triangulation $T$}};
+        
+        % Vertices (hexagon with root v1)
+        \node[circle, draw, fill=red!30, minimum size=8pt, label=left:$v_1$ (root)] (v1) at (0, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=above left:$v_2$] (v2) at (0.7, 1) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=above right:$v_3$] (v3) at (1.8, 0.8) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=right:$v_4$] (v4) at (2.2, -0.3) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below:$v_5$] (v5) at (1.2, -1.2) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below left:$v_6$] (v6) at (0, -0.8) {};
+        
+        % Boundary
+        \draw[thick, gray] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- cycle;
+        
+        % Root chords (thin, blue)
+        \draw[blue, thin] (v1) -- (v3);
+        \draw[blue, thin] (v1) -- (v4);
+        \draw[blue, thin] (v1) -- (v5);
+        
+        % Generating chord (LEFTMOST non-root, red thick)
+        \draw[red, ultra thick] (v3) -- (v5);
+        \node[draw=none, font=\small, red, align=center] at (2.5, 0.2) 
+            {Generating\\chord\\$(v_3, v_5)$};
+        
+        % Other non-root chord
+        \draw[thin] (v3) -- (v6);
+        
+    \end{scope}
+    
+    % Arrow
+    \draw[-latex, ultra thick, blue!50] (-0.8, 0) -- (0.5, 0) node[midway, above, draw=none, font=\scriptsize] {Flip $(v_3, v_5)$};
+    
+    % Parent triangulation
+    \begin{scope}[xshift=4cm]
+        \node[draw=none, font=\small] at (0, 2.3) {\textbf{Parent Triangulation}};
+        
+        % Same vertices
+        \node[circle, draw, fill=red!30, minimum size=8pt, label=left:$v_1$] (w1) at (0, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=above left:$v_2$] (w2) at (0.7, 1) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=above right:$v_3$] (w3) at (1.8, 0.8) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=right:$v_4$] (w4) at (2.2, -0.3) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below:$v_5$] (w5) at (1.2, -1.2) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below left:$v_6$] (w6) at (0, -0.8) {};
+        
+        % Boundary
+        \draw[thick, gray] (w1) -- (w2) -- (w3) -- (w4) -- (w5) -- (w6) -- cycle;
+        
+        % Root chords (unchanged)
+        \draw[blue, thin] (w1) -- (w3);
+        \draw[blue, thin] (w1) -- (w4);
+        \draw[blue, thin] (w1) -- (w5);
+        
+        % Flipped chord (green thick)
+        \draw[green!60!black, ultra thick] (w4) -- (w6);
+        \node[draw=none, font=\small, green!60!black, align=center] at (2.5, -0.7) 
+            {New chord\\$(v_4, v_6)$};
+        
+        % Other chord
+        \draw[thin] (w3) -- (w6);
+    \end{scope}
+    
+    % Explanation with spacing
+    \node[draw=none, font=\small, align=center] at (0, -2.5) 
+        {The parent of $T$ is obtained by flipping the \textbf{generating chord}\\
+        (leftmost chord not incident to root $v_1$)};
+    
+\end{tikzpicture}
+\caption{Parent-child relationship via generating chord. The generating chord is the leftmost chord in the triangulation that does not involve the root vertex. Flipping this chord produces the unique parent triangulation. This defines a tree structure where each non-root triangulation has exactly one parent.}
+\label{fig:generating_chord}
+\end{figure}
 
 \noindent\rule{\textwidth}{0.4pt}
 
@@ -399,6 +918,71 @@ An edge flip transforms one triangulation into another by replacing a chord:
     \item \textbf{Perform the flip}: Remove $(v_a, v_b)$ and add $(v_p, v_q)$ to create $T'$
     \item \textbf{Validate}: Verify $(v_p, v_q) \notin S$ to avoid multi-edges
 \end{enumerate}
+
+%% ============================================================
+%% FIGURE 5: Edge Flip Operation
+%% Section 3.5.1 - How Edge Flipping Works
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.6]
+    
+    % Before flip
+    \begin{scope}[xshift=-3.5cm]
+        \node[draw=none, font=\small] at (0, 2) {\textbf{Before Flip}};
+        
+        % Quadrilateral
+        \node[circle, draw, fill=white, minimum size=6pt, label=left:$v_a$] (a) at (0, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=right:$v_b$] (b) at (2, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=above:$v_p$] (p) at (0.5, 1.5) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below:$v_q$] (q) at (1.5, -1.5) {};
+        
+        % Boundary
+        \draw[thick] (a) -- (p) -- (b) -- (q) -- cycle;
+        
+        % Chord to be flipped (red)
+        \draw[red, very thick] (a) -- (b);
+        \node[draw=none, font=\small, red] at (1, -0.3) {$(v_a, v_b)$};
+        
+        % Triangles annotation
+        \node[draw=none, font=\scriptsize, blue!70!black] at (0.5, 0.7) {Triangle 1};
+        \node[draw=none, font=\scriptsize, blue!70!black] at (1.2, -0.7) {Triangle 2};
+    \end{scope}
+    
+    % Arrow
+    \draw[-latex, ultra thick, blue!50] (-1, 0) -- (0.5, 0) node[midway, above, draw=none, font=\small] {Flip};
+    
+    % After flip
+    \begin{scope}[xshift=3.5cm]
+        \node[draw=none, font=\small] at (0, 2) {\textbf{After Flip}};
+        
+        % Same vertices
+        \node[circle, draw, fill=white, minimum size=6pt, label=left:$v_a$] (a2) at (0, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=right:$v_b$] (b2) at (2, 0) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=above:$v_p$] (p2) at (0.5, 1.5) {};
+        \node[circle, draw, fill=white, minimum size=6pt, label=below:$v_q$] (q2) at (1.5, -1.5) {};
+        
+        % Boundary
+        \draw[thick] (a2) -- (p2) -- (b2) -- (q2) -- cycle;
+        
+        % New chord (green)
+        \draw[green!60!black, very thick] (p2) -- (q2);
+        \node[draw=none, font=\small, green!60!black] at (1.3, 0.3) {$(v_p, v_q)$};
+        
+        % New triangles annotation
+        \node[draw=none, font=\scriptsize, blue!70!black] at (0.3, 0.5) {Triangle 1'};
+        \node[draw=none, font=\scriptsize, blue!70!black] at (1.5, 0.2) {Triangle 2'};
+    \end{scope}
+    
+    % Bottom explanation with spacing
+    \node[draw=none, font=\small, align=center] at (0, -3) 
+        {Edge flip: Remove chord $(v_a, v_b)$ and add chord $(v_p, v_q)$\\
+        Transforms one valid triangulation into another};
+    
+\end{tikzpicture}
+\caption{Edge flip operation. A chord $(v_a, v_b)$ forming two adjacent triangles is removed and replaced with the opposite diagonal $(v_p, v_q)$. This operation transforms one triangulation into another while preserving validity. Each child in the genealogical tree is obtained from its parent by a single edge flip.}
+\label{fig:edge_flip}
+\end{figure}
 
 \textbf{Notation}: We write $T(e)$ for the triangulation obtained by flipping to create chord $e$. For example, $T_i(v_1, v_j)$ denotes the triangulation created by flipping to form chord $(v_1, v_j)$.
 
@@ -571,7 +1155,7 @@ The outerplane graph interpretation provides both elegance and rigor. The existe
     };
 \end{tikzpicture}
 \caption{Illustration of Theorem~\ref{thm:safe_root_exists}: A hexagonal face with two existing chords $(v_2, v_5)$ and $(v_3, v_6)$ from previously processed faces (red dashed lines). Viewing this as an outerplane graph, vertices $v_1$ and $v_4$ have degree 2 on the outer cycle (blue boundary) with no incident internal edges. By the classical theorem, at least two such vertices exist, guaranteeing safe roots for algorithm initialization.}
-\label{fig:outerplane_safe_roots}
+\label{fig:safe_roots}
 \end{figure}
 
 % ----------------------------------------------------------------
@@ -671,6 +1255,56 @@ This lemma ensures that the fan structure emanating from the safe root remains s
 In a local genealogical tree, a blocking chord (one that already exists in the global set $S$) in triangulation $T$ is never the generating chord of $T$. Consequently, the blocking chord persists in all descendants of $T$ in the tree.
 \end{lemma}
 
+%% ============================================================
+%% FIGURE 7: Blocking Chord Persistence (Lemma 4)
+%% Section 4.3 - Completeness via Strategic Pruning
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    level distance=2cm,
+    sibling distance=3cm,
+    every node/.style={rectangle, rounded corners, minimum width=2cm, minimum height=1cm, align=center, font=\small},
+    edge from parent/.style={draw, -latex, thick}
+]
+
+% Root
+\node[draw, fill=blue!20] {$T_{root}$\\No blocking\\chords}
+    child {
+        node[draw, fill=yellow!20] {$T_1$\\Contains\\$(u,v) \in S$}
+        child {
+            node[draw=red, very thick, fill=red!10] {$T_2$\\$(u,v)$ persists\\PRUNED}
+            edge from parent[draw=red, very thick, dashed]
+        }
+        child {
+            node[draw=red, very thick, fill=red!10] {$T_3$\\$(u,v)$ persists\\PRUNED}
+            edge from parent[draw=red, very thick, dashed]
+        }
+        edge from parent node[left, draw=none, font=\scriptsize] {Flip adds\\$(u,v)$}
+    }
+    child {
+        node[draw, fill=green!20] {$T_4$\\Valid\\(no conflicts)}
+        child {
+            node[draw, fill=green!15] {$T_5$\\Valid}
+        }
+        edge from parent node[right, draw=none, font=\scriptsize] {Safe flip}
+    };
+
+% Annotations with spacing
+\node[draw=none, font=\small, align=left, red!70!black] at (5.5, -3) 
+    {Blocking chord $(u,v) \in S$\\persists in all descendants\\$\Rightarrow$ Safe to prune};
+
+\node[draw=none, font=\small, align=left, green!60!black] at (-5.5, -2) 
+    {No conflicts\\$\Rightarrow$ Continue\\exploration};
+
+\node[draw=none, font=\small, align=center] at (0, -5.5) 
+    {Blocking chords never get flipped (Lemma 4),\\so pruning eliminates only invalid triangulations};
+
+\end{tikzpicture}
+\caption{Illustration of Lemma 4: Blocking chord persistence. When a triangulation $T_1$ contains a chord $(u,v)$ that already exists in the global set $S$ (a blocking chord), this chord cannot be the generating chord and thus persists in all descendants $T_2, T_3, \ldots$ Creating multi-edges in all descendants. Therefore, pruning this entire subtree (red dashed edges) is safe and eliminates only invalid triangulations.}
+\label{fig:blocking_chord}
+\end{figure}
+
 \begin{proof}
 Let $(v_a, v_b)$ be a blocking chord in triangulation $T$ where $(v_a, v_b) \in S$. Since $T$ triangulates the face, vertices $v_p$ and $v_q$ form triangles on opposite sides of $(v_a, v_b)$. The generating chord must: \textbf{(1)} not involve the root $r = v_1$, and \textbf{(2)} be leftmost among such chords.
 
@@ -750,7 +1384,7 @@ Therefore, the algorithm generates all valid triangulations exactly once.
 
 \subsection{Order-Independence of Face Processing}
 
-Our algorithm processes faces in an arbitrary order as specified in Algorithm~1, line~2. We now prove that this choice does not affect completeness—all valid triangulations are generated regardless of the processing order.
+Our algorithm processes faces in an arbitrary order as specified in Algorithm~1, line~2. We now prove that this choice does not affect completeness---all valid triangulations are generated regardless of the processing order.
 
 \begin{theorem}[Order-Independence]
 \label{thm:order_independence}
@@ -915,7 +1549,7 @@ Therefore, $d_i \geq 2$ for all faces with at least 5 vertices. $\checkmark$
     \item For $n_i \geq 7$: $d_i \geq n_i - 3 \geq 4$
 \end{itemize}
 
-The empirical data in Table~\ref{tab:triangulation_counts} confirms that practical minimum values significantly exceed this lower bound—for instance, the minimum observed for $n = 6$ is 4, not just 3.
+The empirical data in Table~\ref{tab:triangulation_counts} confirms that practical minimum values significantly exceed this lower bound---for instance, the minimum observed for $n = 6$ is 4, not just 3.
 \end{proof}
 
 \begin{remark}
@@ -1222,6 +1856,56 @@ The constant factor of 4 in our bound $B + F < 4T$ is tight for certain graph fa
 
 The lower bound $d_i \geq n_i - 3$ (Lemma~\ref{lem:min_triangulations}) has been validated experimentally; see \url{https://github.com/TAR2003/ThesisGraph}.
 
+%% ============================================================
+%% FIGURE 12: Time Complexity Amortization Visualization
+%% Section 5.1 - Time Complexity
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+    
+    % Axes
+    \draw[-latex, thick] (0, 0) -- (10, 0) node[right, font=\small] {Triangulations $(T)$};
+    \draw[-latex, thick] (0, 0) -- (0, 5) node[above, font=\small] {Operations};
+    
+    % Building cost line (B < 2T)
+    \draw[thick, blue] (0, 0) -- (9, 4.5) node[right, font=\small] {$B < 2T$};
+    
+    % Flipping cost line (F < 2T)
+    \draw[thick, green!60!black] (0, 0) -- (9, 4.5);
+    \node[green!60!black, font=\small] at (8, 4.8) {$F < 2T$};
+    
+    % Total cost line (B+F < 4T)
+    \draw[thick, red, dashed] (0, 0) -- (9, 9);
+    \node[red, font=\small, align=center] at (6, 7) {$B + F < 4T$\\(Theorem 8)};
+    
+    % Slope = 1 reference line
+    \draw[thick, orange, dotted] (0, 0) -- (9, 4.5);
+    \node[orange, font=\small, align=center] at (7, 3.2) {Slope = $1$\\(ideal)};
+    
+    % Grid for reference
+    \foreach \x in {0, 2, 4, 6, 8} {
+        \draw[gray, thin, dashed] (\x, 0) -- (\x, 5);
+    }
+    \foreach \y in {0, 1, 2, 3, 4} {
+        \draw[gray, thin, dashed] (0, \y) -- (10, \y);
+    }
+    
+    % Annotations with proper spacing
+    \node[draw=none, font=\small, align=left, blue!70!black] at (3, 1.5) 
+        {Building:\\Root construction\\for each face};
+    
+    \node[draw=none, font=\small, align=left, green!60!black] at (3, 3.5) 
+        {Flipping:\\Edge flips in\\genealogical trees};
+    
+    \node[draw=none, font=\small, align=center] at (5, -1.2) 
+        {Linear growth in operations $\Rightarrow$ O(1) amortized per triangulation};
+    
+\end{tikzpicture}
+\caption{Time complexity amortization. Building operations $B$ and flipping operations $F$ both grow linearly with the number of triangulations $T$. The total operations $B + F < 4T$ (Theorem 8) confirms constant amortized cost per triangulation. The slope represents operations per triangulation; slopes $<4$ guarantee O(1) amortized complexity.}
+\label{fig:time_complexity}
+\end{figure}
+
 \subsection{Space Complexity}
 
 \begin{theorem}[Linear Space Complexity]
@@ -1269,6 +1953,56 @@ Combining all components:
 
 The space complexity is \textbf{linear} in the number of vertices, independent of the number of triangulations generated (which can be exponential in $n$).
 \end{proof}
+
+%% ============================================================
+%% FIGURE 14: Space Complexity Illustration
+%% Section 5.2 - Space Complexity
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.1]
+    
+    % Memory layout visualization
+    \node[draw=none, font=\small, align=left] at (-2, 5) {\textbf{Memory Usage:}};
+    
+    % Component 1: Vertex/Face data
+    \node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=blue!15, font=\small] 
+        (comp1) at (3, 4) {Vertex \& Face Information: $O(n)$};
+    
+    % Component 2: Global chord set
+    \node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=green!15, font=\small] 
+        (comp2) at (3, 2.5) {Global Chord Set $S$: $O(n)$ (at most $3n-6$ chords)};
+    
+    % Component 3: Recursion stack
+    \node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=orange!15, font=\small] 
+        (comp3) at (3, 1) {Recursion Stack: $O(k) = O(n)$ ($k \leq 2n-4$ faces)};
+    
+    % Component 4: Current triangulation
+    \node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=yellow!15, font=\small] 
+        (comp4) at (3, -0.5) {Current Triangulation: $O(n)$};
+    
+    % Total
+    \node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=red!20, font=\bfseries] 
+        (total) at (3, -2.5) {Total Space: $O(n)$};
+    
+    % Arrow annotations
+    \draw[-latex, thick] (comp1.south) -- (comp2.north);
+    \draw[-latex, thick] (comp2.south) -- (comp3.north);
+    \draw[-latex, thick] (comp3.south) -- (comp4.north);
+    \draw[-latex, thick, red] (comp4.south) -- (total.north);
+    
+    % Side annotation
+    \node[draw=none, font=\small, align=left] at (9, 1.5) 
+        {All components\\linear in $n$\\
+        \\
+        Space independent\\of output size $T$\\
+        \\
+        No explicit storage\\of triangulations};
+    
+\end{tikzpicture}
+\caption{Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them.}
+\label{fig:space_complexity}
+\end{figure}
 
 \subsection{Complexity Summary}
 
@@ -1339,11 +2073,11 @@ Total triangulations & $\Omega\left(\prod_{i=1}^{k} n_i\right)$ & $T = \prod_{i=
 
 \item The amortized analysis is tight: experimental results (Section~\ref{sec:experiments}) show that the ratio $(B+F)/T$ varies from near 1.0 (for graphs with minimal constraints) to approaching 4.0 (for highly constrained graphs), confirming both the practical effectiveness and theoretical tightness of our bounds.
 
-\item For graphs with $k$ faces where each face has $\Omega(n/k)$ vertices, the total number of triangulations grows exponentially: $T = \prod_{i=1}^{k} d_i \geq \prod_{i=1}^{k} (n_i - 3) = \exp(\Omega(k \log(n/k)))$. The building cost $B = O(T)$ shows perfect amortization—preprocessing work grows linearly with the exponential output size.
+\item For graphs with $k$ faces where each face has $\Omega(n/k)$ vertices, the total number of triangulations grows exponentially: $T = \prod_{i=1}^{k} d_i \geq \prod_{i=1}^{k} (n_i - 3) = \exp(\Omega(k \log(n/k)))$. The building cost $B = O(T)$ shows perfect amortization---preprocessing work grows linearly with the exponential output size.
 \end{itemize}
 
 \begin{remark}[Comparison with Related Work]
-Our result improves upon the reverse search approach~\cite{avis1996}, which typically requires $O(n^2)$ time per solution for triangulation enumeration problems. While the Parvez-Rahman-Nakano algorithm~\cite{parvez2011} achieves $O(1)$ amortized time for triconnected plane graphs, our extension to biconnected plane graphs—a strictly more general class—maintains the same optimal complexity through the novel techniques of safe root selection, local genealogical trees, and dynamic global chord tracking.
+Our result improves upon the reverse search approach~\cite{avis1996}, which typically requires $O(n^2)$ time per solution for triangulation enumeration problems. While the Parvez-Rahman-Nakano algorithm~\cite{parvez2011} achieves $O(1)$ amortized time for triconnected plane graphs, our extension to biconnected plane graphs---a strictly more general class---maintains the same optimal complexity through the novel techniques of safe root selection, local genealogical trees, and dynamic global chord tracking.
 \end{remark}
 
 \begin{remark}[Practical Considerations]
@@ -1360,6 +2094,94 @@ Our experimental implementation (Section~\ref{sec:experiments}) uses Java's buil
 \label{sec:implementation}
 
 We implemented the algorithm in Java and tested it on 41 diverse biconnected plane graphs. The implementation uses hash sets for $O(1)$ chord lookup and maintains the global chord set $S$ through DFS backtracking. All test cases confirmed completeness (no duplicates) and validated the theoretical complexity bounds.
+
+%% ============================================================
+%% FIGURE 13: Example - Pentagon Triangulation Generation
+%% Section 6 - Implementation and Experimental Results
+%% ============================================================
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.3]
+    
+    % Pentagon vertices (reused for all subfigures)
+    \def\pent{
+        (0:1) node[circle, draw, fill=white, minimum size=5pt] {}
+        (72:1) node[circle, draw, fill=white, minimum size=5pt] {}
+        (144:1) node[circle, draw, fill=white, minimum size=5pt] {}
+        (216:1) node[circle, draw, fill=white, minimum size=5pt] {}
+        (288:1) node[circle, draw, fill=white, minimum size=5pt] {}
+    }
+    
+    % Root triangulation
+    \begin{scope}[xshift=-4cm, yshift=2cm]
+        \node[draw=none, font=\small] at (0, 1.7) {\textbf{Root $T_1$}};
+        \foreach \a in {0, 72, 144, 216, 288} {
+            \node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
+        }
+        \draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
+        \draw[red, thick] (0:1) -- (144:1);
+        \draw[red, thick] (0:1) -- (216:1);
+    \end{scope}
+    
+    % Child 1
+    \begin{scope}[xshift=0cm, yshift=2cm]
+        \node[draw=none, font=\small] at (0, 1.7) {\textbf{Child $T_2$}};
+        \foreach \a in {0, 72, 144, 216, 288} {
+            \node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
+        }
+        \draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
+        \draw[blue, thick] (72:1) -- (216:1);
+        \draw[blue, thick] (0:1) -- (216:1);
+    \end{scope}
+    
+    % Child 2
+    \begin{scope}[xshift=4cm, yshift=2cm]
+        \node[draw=none, font=\small] at (0, 1.7) {\textbf{Child $T_3$}};
+        \foreach \a in {0, 72, 144, 216, 288} {
+            \node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
+        }
+        \draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
+        \draw[green!60!black, thick] (0:1) -- (144:1);
+        \draw[green!60!black, thick] (72:1) -- (288:1);
+    \end{scope}
+    
+    % Child 3
+    \begin{scope}[xshift=-2cm, yshift=-2cm]
+        \node[draw=none, font=\small] at (0, 1.7) {\textbf{Child $T_4$}};
+        \foreach \a in {0, 72, 144, 216, 288} {
+            \node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
+        }
+        \draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
+        \draw[orange, thick] (144:1) -- (288:1);
+        \draw[orange, thick] (0:1) -- (144:1);
+    \end{scope}
+    
+    % Child 4
+    \begin{scope}[xshift=2cm, yshift=-2cm]
+        \node[draw=none, font=\small] at (0, 1.7) {\textbf{Child $T_5$}};
+        \foreach \a in {0, 72, 144, 216, 288} {
+            \node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
+        }
+        \draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
+        \draw[purple, thick] (72:1) -- (216:1);
+        \draw[purple, thick] (72:1) -- (288:1);
+    \end{scope}
+    
+    % Tree structure lines (showing parent-child)
+    \draw[-latex, gray, thick] (-4, 1) -- (-3, 0.5);
+    \draw[-latex, gray, thick] (-4, 1) -- (0, 1);
+    \draw[-latex, gray, thick] (-4, 1) -- (4, 1);
+    \draw[-latex, gray, thick] (-4, 0.5) -- (-2, -1);
+    \draw[-latex, gray, thick] (0, 0.5) -- (2, -1);
+    
+    % Caption below
+    \node[draw=none, font=\small, align=center] at (0, -4) 
+        {All 5 triangulations of a pentagon generated from local genealogical tree};
+    
+\end{tikzpicture}
+\caption{Example: All triangulations of a pentagon. The root triangulation $T_1$ is constructed from a safe root vertex (bottom vertex) using a fan structure. Four children $T_2, T_3, T_4, T_5$ are generated via edge flips. This demonstrates the local genealogical tree structure for a single face. The algorithm generates all 5 triangulations (matching the Catalan number $C_3 = 5$) without duplicates.}
+\label{fig:pentagon_example}
+\end{figure}
 
 \subsection{Performance Results}
 
