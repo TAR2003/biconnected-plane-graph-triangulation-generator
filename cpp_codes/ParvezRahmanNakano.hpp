@@ -41,8 +41,11 @@ public:
     {
         if (next(itr) == GS.end())
             return;
+        cout << "Before changing" << endl;
+
         Edge *e = *itr;
-        Edge *next_e = *next(itr);
+        Edge *next_e = *itr_next;
+        cout << next_e->u << " " << next_e->v << endl;
         pair<int, int> newChord = make_pair(e->opposite_u, e->opposite_v);
         pair<int, int> oldChord = make_pair(e->u, e->v);
         int oldPoint = oldChord.first;
@@ -63,6 +66,8 @@ public:
         {
             next_e->opposite_v = newPoint;
         }
+        cout << "After chaginig" << endl;
+        cout << next_e->u << " " << next_e->v << endl;
     }
 
     void flip(list<Edge *>::iterator itr)
@@ -77,6 +82,8 @@ public:
             flipit(itr, prev(itr));
 
         e->flip();
+        cout << "newchord:" << newChord.first << " " << newChord.second << endl;
+        cout << "oldchord:" << oldChord.first << " " << oldChord.second << endl;
     }
 
     void addTriangulation()
@@ -87,7 +94,8 @@ public:
         {
             currentTriangulation.push_back({chord->u, chord->v});
         }
-        for(int i = 0 ; i < currentTriangulation.size() ; i++) {
+        for (int i = 0; i < currentTriangulation.size(); i++)
+        {
             cout << "( " << currentTriangulation[i].first << " " << currentTriangulation[i].second << " ),";
         }
         cout << endl;
@@ -96,12 +104,18 @@ public:
 
     void generateChildTriangulations(int leftmost_blocking_b)
     {
+        cout << "leftmost:" << leftmost_blocking_b << endl;
+        for (auto a : GS)
+        {
+            cout << "( " << a->u << " , " << a->v << " ) ";
+        }
+        cout << endl;
         addTriangulation();
 
         for (auto itr = GS.begin(); itr != GS.end(); itr++)
         {
             Edge *chord = *itr;
-            if (chord->u >= leftmost_blocking_b)
+            if (chord->v >= leftmost_blocking_b)
             {
                 flip(itr);
                 bool lastChord = false;
@@ -112,23 +126,25 @@ public:
                 }
                 else
                 {
-                    Edge *next_chord = *next(itr);
+                    next_chord = *next(itr);
                 }
 
                 GS.erase(itr);
+
                 generateChildTriangulations(min(chord->u, chord->v));
+                cout << "came back from child function" << endl;
                 if (lastChord)
                 {
                     GS.push_back(chord);
-                    auto tempitr = prev(GS.end());
-                    chord->chordItr = tempitr;
+                    itr = prev(GS.end());
+                    chord->chordItr = itr;
                 }
                 else
                 {
-                    auto tempitr = GS.insert(next_chord->chordItr, chord);
-                    chord->chordItr = tempitr;
+                    itr = GS.insert(next_chord->chordItr, chord);
+                    chord->chordItr = itr;
                 }
-
+                cout << "added in the GS itr" << endl;
                 flip(itr);
             }
         }
