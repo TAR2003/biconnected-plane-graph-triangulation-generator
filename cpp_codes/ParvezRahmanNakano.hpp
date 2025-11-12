@@ -85,7 +85,6 @@ public:
         e->flip();
     }
 
-
     void addTriangulation()
     {
         vector<pair<int, int>> currentTriangulation;
@@ -93,48 +92,56 @@ public:
         {
             currentTriangulation.push_back({chord->u, chord->v});
         }
-        
+
         allTriangulations.push_back(currentTriangulation);
     }
 
-    void generateChildTriangulations(int leftmost_blocking_b)
+    void generateChildTriangulations(list<Edge *>::iterator &itr)
     {
+
+        flip(itr);
+        bool lastChord = false;
+        Edge *next_chord;
+        if (next(itr) == GS.end())
+        {
+            lastChord = true;
+        }
+        else
+        {
+            next_chord = *next(itr);
+        }
+        Edge *c = *itr;
+        list<Edge *>::iterator itrloop;
+        if (itr == GS.begin())
+        {
+            itrloop = next(itr);
+        }
+        else
+        {
+            itrloop = prev(itr);
+        }
+        GS.erase(itr);
+
+        int leftmost_blocking_b = min(c->u, c->v);
+
         addTriangulation();
 
-        for (auto itr = GS.begin(); itr != GS.end(); itr++)
+        for (; itrloop != GS.end(); itrloop++)
         {
-            Edge *chord = *itr;
-            if (chord->v >= leftmost_blocking_b)
-            {
-                flip(itr);
-                bool lastChord = false;
-                Edge *next_chord;
-                if (next(itr) == GS.end())
-                {
-                    lastChord = true;
-                }
-                else
-                {
-                    next_chord = *next(itr);
-                }
-
-                GS.erase(itr);
-
-                generateChildTriangulations(min(chord->u, chord->v));
-                if (lastChord)
-                {
-                    GS.push_back(chord);
-                    itr = prev(GS.end());
-                    chord->chordItr = itr;
-                }
-                else
-                {
-                    itr = GS.insert(next_chord->chordItr, chord);
-                    chord->chordItr = itr;
-                }
-                flip(itr);
-            }
+            generateChildTriangulations(itrloop);
         }
+        if (lastChord)
+        {
+            GS.push_back(c);
+            itr = prev(GS.end());
+            c->chordItr = itr;
+        }
+        else
+        {
+            itr = GS.insert(next_chord->chordItr, c);
+            c->chordItr = itr;
+        }
+        flip(itr);
     }
 
     void generateAllTriangulations()
@@ -145,6 +152,10 @@ public:
             GS.push_back(e);
             chords.push_back(e);
         }
-        generateChildTriangulations(0);
+        addTriangulation();
+        for (auto itr = GS.begin(); itr != GS.end(); itr++)
+        {
+            generateChildTriangulations(itr);
+        }
     }
 };
