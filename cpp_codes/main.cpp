@@ -33,7 +33,7 @@ vector<vector<int>> solve(string filename)
 
 int main()
 {
-    string filename = "input/simple3.txt";
+    string filename = "input/pentagon.txt";
     vector<vector<int>> faces = solve(filename);
     biconnected *bc = new biconnected(faces);
     bc->getAllTriangulations();

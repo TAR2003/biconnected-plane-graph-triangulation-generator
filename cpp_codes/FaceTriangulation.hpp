@@ -16,8 +16,8 @@ public:
     list<Edge *> GS;
     /// @brief the vertex number of the cycle
     int n;
-    /// @brief set of all present chords in the original graph
-    unordered_set<pair<int, int>, PairHash> present;
+    /// @brief set of all present chords in the original graph (reference to shared set)
+    unordered_set<pair<int, int>, PairHash>& present;
     /// @brief all the triangulations generated
     vector<vector<pair<int, int>>> allTriangulations;
     vector<int> positions;
@@ -32,16 +32,12 @@ public:
     /// @param serial the serial number of the face
     /// @param bc pointer to the biconnected class
     FaceTriangulation(int n, vector<int> &elements, unordered_set<pair<int, int>, PairHash> &present, int serial, biconnected *bc)
+        : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1)
     {
-        this->n = n;
-        this->present = present;
-        this->elements = elements;
-        this->serial = serial;
-        this->bc = bc;
-        positions = vector<int>(n, -1);
         findSafeRoot();
         cout << "size:" << present.size() << ", serial:" << serial << endl;
     }
+
 
     // FaceTriangulation(const FaceTriangulation &other)
     // {
