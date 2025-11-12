@@ -17,7 +17,7 @@ public:
     /// @brief the vertex number of the cycle
     int n;
     /// @brief set of all present chords in the original graph (reference to shared set)
-    unordered_set<pair<int, int>, PairHash>& present;
+    unordered_set<pair<int, int>, PairHash> &present;
     /// @brief all the triangulations generated
     vector<vector<pair<int, int>>> allTriangulations;
     vector<int> positions;
@@ -37,12 +37,12 @@ public:
         findSafeRoot();
         cout << "size:" << present.size() << ", serial:" << serial << endl;
 
-        for(auto a: present) {
+        for (auto a : present)
+        {
             cout << "(" << a.first << ", " << a.second << ") , ";
         }
-        cout << "______________" <<  endl;
+        cout << "______________" << endl;
     }
-
 
     // FaceTriangulation(const FaceTriangulation &other)
     // {
@@ -55,13 +55,13 @@ public:
     // }
 
     /// @brief the destructor of the class
-    ~FaceTriangulation()
-    {
-        for (auto &chord : chords)
-        {
-            delete chord; // free the memory allocated for each chord
-        }
-    }
+    // ~FaceTriangulation()
+    // {
+    //     for (auto &chord : chords)
+    //     {
+    //         delete chord; // free the memory allocated for each chord
+    //     }
+    // }
 
     pair<int, int> getPair(Edge *e)
     {
@@ -214,26 +214,46 @@ public:
 
         // addTriangulation(); // Add the current triangulation to the list of all triangulations
         output();
-
+        cout << "back to child trian" << endl;
         for (; itrloop != GS.end(); itrloop++)
         {
+            cout << "Anotehr branch: " << getOppositePair(*itrloop).first << " " << getOppositePair(*itrloop).second << endl;
             // Recursively generate child triangulations for edges that can block the current edge
             if (present.find(getOppositePair(*itrloop)) == present.end())
             {
+
                 generateChildTriangulations(itrloop);
             }
+            else {
+                cout << "Blocked at: " << getOppositePair(*itrloop).first << " " << getOppositePair(*itrloop).second << endl;
+            }
         }
+        cout << "After iteration" << endl;
         if (lastChord) // If the current edge was the last in the generating set
         {
+            // cout << "last chord" << endl;
             GS.push_back(c);
             itr = prev(GS.end());
             c->chordItr = itr; // Update the iterator of the chord
         }
         else
         { // If there are more edges in the generating set
+            cout << "Threre is something" << endl;
+            cout << "next chord info: " << next_chord->first << " " << next_chord->second << endl;
+            // cout << *(next_chord->chordItr) << endl;
+            for(auto a:GS) {
+                cout << "GS has: " << a->first << ", " << a->second << endl;
+            }
+            if(GS.begin() == next_chord->chordItr) {
+                cout << "They are equal" << endl;
+            } else {
+                cout << "They are not equal" << endl;
+            }
             itr = GS.insert(next_chord->chordItr, c);
+            cout << "insertion done" << endl;
             c->chordItr = itr; // Update the iterator of the chord
         }
+        cout << "before flip back" << endl;
         flip(itr); // Flip back the edge to restore the original state
     }
 
@@ -253,12 +273,18 @@ public:
         {
             if (present.find(getOppositePair(*itr)) == present.end())
             {
+                cout << "this time " << getPair((*itr)).first << ", " << getPair((*itr)).second
+                     << endl;
                 generateChildTriangulations(itr); // generating child triangulations recursively
+                cout << "After : " << getOppositePair(*itr).first << ", " << getOppositePair(*itr).second << endl;
             }
         }
+
         for (auto &chord : chords)
         {
+            // cout << "erasing the chords" << endl;
             present.erase(getPair(chord)); // unmarking the edges after finishing
+            // cout << "we are done erasing the chords" << endl;
         }
     }
 };
@@ -270,5 +296,5 @@ public:
 inline void FaceTriangulation::output()
 {
     bc->output(serial);
+    cout << "Back to serial : " << serial << endl;
 }
-
