@@ -3,7 +3,9 @@ using namespace std;
 #pragma once
 #include "Edge.hpp"
 #include "pairHash.hpp"
-#include "biconnected.hpp"
+
+// Forward declaration to avoid circular dependency
+class biconnected;
 
 class FaceTriangulation
 {
@@ -38,17 +40,18 @@ public:
         this->bc = bc;
         positions = vector<int>(n, -1);
         findSafeRoot();
+        cout << "size:" << present.size() << ", serial:" << serial << endl;
     }
 
-    FaceTriangulation(const FaceTriangulation &other)
-    {
-        this->n = other.n;
-        this->elements = other.elements; // deep copy of vector
-        this->present = other.present;   // deep copy of unordered_set
-        this->serial = other.serial;
-        this->bc = other.bc;               // pointer copy (not deep copy)
-        this->positions = other.positions; // deep copy of vector
-    }
+    // FaceTriangulation(const FaceTriangulation &other)
+    // {
+    //     this->n = other.n;
+    //     this->elements = other.elements; // deep copy of vector
+    //     this->present = other.present;   // deep copy of unordered_set
+    //     this->serial = other.serial;
+    //     this->bc = other.bc;               // pointer copy (not deep copy)
+    //     this->positions = other.positions; // deep copy of vector
+    // }
 
     /// @brief the destructor of the class
     ~FaceTriangulation()
@@ -176,10 +179,7 @@ public:
         allTriangulations.push_back(currentTriangulation);
     }
 
-    void output()
-    {
-        bc->output(serial);
-    }
+    void output();
 
     /// @brief Generates child triangulations by flipping the edge pointed to by the iterator
     /// @param itr Iterator pointing to the edge to be flipped
@@ -261,3 +261,13 @@ public:
         }
     }
 };
+
+// Include biconnected.hpp after class declaration to resolve circular dependency
+#include "biconnected.hpp"
+
+// Define output() method after including biconnected.hpp
+inline void FaceTriangulation::output()
+{
+    bc->output(serial);
+}
+

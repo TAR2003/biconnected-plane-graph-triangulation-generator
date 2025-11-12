@@ -1,9 +1,9 @@
 #include <bits/stdc++.h>
 using namespace std;
 #include "Edge.hpp"
-#include "FaceTriangulation.hpp"
 #include "pairHash.hpp"
 #include "biconnected.hpp"
+#include "FaceTriangulation.hpp"
 #include "triconnected.hpp"
 
 vector<vector<int>> solve(string filename)
