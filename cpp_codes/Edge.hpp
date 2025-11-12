@@ -4,17 +4,17 @@ class Edge
 {
 public:
     /// @brief the two endpoints of the edge
-    int u, v;
+    int first, second;
     /// @brief the two endpoints of the opposite edge
-    int opposite_u, opposite_v;
+    int opposite_first, opposite_second;
     /// @brief iterator to the position of the edge in the list of chords
     list<Edge*>::iterator chordItr;
     /// @brief  the constructor of the class
-    Edge(int a = 0, int b = 0, int c = 0, int d = 0) : u(a), v(b), opposite_u(c), opposite_v(d) {}
+    Edge(int a = 0, int b = 0, int c = 0, int d = 0) : first(a), second(b), opposite_first(c), opposite_second(d) {}
     void flip()
     {
-        swap(u, opposite_u);
-        swap(v, opposite_v);
+        swap(first, opposite_first);
+        swap(second, opposite_second);
     }
 
 };

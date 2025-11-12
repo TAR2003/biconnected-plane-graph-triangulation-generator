@@ -2,7 +2,7 @@
 using namespace std;
 #include "Edge.hpp"
 
-class ParvezRahmanNakano
+class FaceTriangulation
 {
 public:
     /// @brief all the chords in the current cycle
@@ -16,7 +16,7 @@ public:
 
     /// @brief the constructor of the class
     /// @param n the number of vertices in the cycle
-    ParvezRahmanNakano(int n)
+    FaceTriangulation(int n)
     {
         this->n = n;
     }
@@ -37,31 +37,33 @@ public:
 
     /// @brief the flip operation on a given edge
     /// @param e the edge to be flipped
-    void flipit(list<Edge *>::iterator itr, list<Edge *>::iterator itr_other,
+    void flipit(list<Edge *>::iterator itr, list<Edge *>::iterator itr_next,
                 pair<int, int> newChord, pair<int, int> oldChord)
     {
+        if (itr_next == GS.end())
+            return;
 
-        Edge *other_e = *itr_other; // 
+        Edge *next_e = *itr_next;
 
         int oldPoint = oldChord.first;
-        if (oldPoint == other_e->first || oldPoint == other_e->second)
+        if (oldPoint == next_e->first || oldPoint == next_e->second)
         {
             oldPoint = oldChord.second;
         }
 
         int newPoint = newChord.first;
-        if (newPoint == other_e->first || newPoint == other_e->second)
+        if (newPoint == next_e->first || newPoint == next_e->second)
         {
             newPoint = newChord.second;
         }
 
-        if (other_e->opposite_first == oldPoint)
+        if (next_e->opposite_first == oldPoint)
         {
-            other_e->opposite_first = newPoint;
+            next_e->opposite_first = newPoint;
         }
-        else if (other_e->opposite_second == oldPoint)
+        else if (next_e->opposite_second == oldPoint)
         {
-            other_e->opposite_second = newPoint;
+            next_e->opposite_second = newPoint;
         }
     }
 
