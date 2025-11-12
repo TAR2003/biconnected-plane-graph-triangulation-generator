@@ -20,6 +20,13 @@ public:
     {
         this->n = n;
     }
+    ~ParvezRahmanNakano()
+    {
+        for (auto &chord : chords)
+        {
+            delete chord;
+        }
+    }
 
     /// @brief printing all the triangulations after finishing the complete task
     void printAllTriangulations()

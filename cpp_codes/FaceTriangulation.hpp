@@ -1,6 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
+#pragma once
 #include "Edge.hpp"
+#include "pairHash.hpp"
 
 class FaceTriangulation
 {
@@ -11,15 +13,56 @@ public:
     list<Edge *> GS;
     /// @brief the vertex number of the cycle
     int n;
+    /// @brief set of all present chords in the original graph
+    unordered_set<pair<int, int>, PairHash> present;
     /// @brief all the triangulations generated
     vector<vector<pair<int, int>>> allTriangulations;
+    vector<int> positions;
+    vector<int> elements;
 
     /// @brief the constructor of the class
     /// @param n the number of vertices in the cycle
-    FaceTriangulation(int n)
+    FaceTriangulation(int n, vector<int> &elements, unordered_set<pair<int, int>, PairHash> &present)
     {
         this->n = n;
+        this->present = present;
+        this->elements = elements;
+        positions = vector<int>(n, -1);
+        findSafeRoot();
     }
+    /// @brief the destructor of the class
+    ~FaceTriangulation()
+    {
+        for (auto &chord : chords)
+        {
+            delete chord; // free the memory allocated for each chord
+        }
+    }
+
+    /// @brief finds a safe root for the cycle and updates the positions vector accordingly
+    void findSafeRoot()
+    {
+        int startIndex = n - 1;
+        int endIndex = 1;
+        while (startIndex > endIndex + 1)
+        {
+            if (present.find({elements[startIndex], elements[endIndex]}) != present.end())
+            {
+                startIndex--;
+            }
+            else
+            {
+                endIndex++;
+            }
+        }
+        // start Index is the safe root
+        
+        for (int i = 0; i < n; i++)
+        {
+            positions[i] = elements[(startIndex + i) % n];
+        }
+    }
+
     /// @brief printing all the triangulations after finishing the complete task
     void printAllTriangulations()
     {
@@ -95,7 +138,7 @@ public:
         vector<pair<int, int>> currentTriangulation;
         for (auto &chord : chords)
         {
-            currentTriangulation.push_back({chord->first, chord->second});
+            currentTriangulation.push_back({positions[chord->first], positions[chord->second]});
         }
 
         allTriangulations.push_back(currentTriangulation);
@@ -136,7 +179,7 @@ public:
         for (; itrloop != GS.end(); itrloop++)
         {
             // Recursively generate child triangulations for edges that can block the current edge
-            if ((*itrloop)->second >= leftmost_blocking_b)
+            if (present.find({positions[(*itrloop)->opposite_first], positions[(*itrloop)->opposite_second]}) == present.end())
             {
                 generateChildTriangulations(itrloop);
             }
@@ -163,11 +206,17 @@ public:
             Edge *e = new Edge(0, i, i - 1, (i + 1) % n); // creating a new edge object
             GS.push_back(e);                              // adding the edge to the generating set
             chords.push_back(e);                          // adding the edge to the list of all chords
+            present.insert({positions[0], positions[i]}); // marking the edge as present in the original graph
         }
         addTriangulation(); // adding the initial root triangulation
         for (auto itr = GS.begin(); itr != GS.end(); itr++)
         {
-            generateChildTriangulations(itr); // generating child triangulations recursively
+            if (present.find({positions[(*itr)->opposite_first], positions[(*itr)->opposite_second]}) == present.end())
+                generateChildTriangulations(itr); // generating child triangulations recursively
+        }
+        for (auto &chord : chords)
+        {
+            present.erase({positions[chord->first], positions[chord->second]}); // unmarking the edges after finishing
         }
     }
 };
