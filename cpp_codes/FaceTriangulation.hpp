@@ -39,6 +39,16 @@ public:
         }
     }
 
+    pair<int, int> getPair(Edge *e)
+    {
+        return {min(positions[e->first], positions[e->second]), max(positions[e->first], positions[e->second])};
+    }
+
+    pair<int, int> getOppositePair(Edge *e)
+    {
+        return {min(positions[e->opposite_first], positions[e->opposite_second]), max(positions[e->opposite_first], positions[e->opposite_second])};
+    }
+
     /// @brief finds a safe root for the cycle and updates the positions vector accordingly
     void findSafeRoot()
     {
@@ -56,7 +66,7 @@ public:
             }
         }
         // start Index is the safe root
-        
+
         for (int i = 0; i < n; i++)
         {
             positions[i] = elements[(startIndex + i) % n];
@@ -129,7 +139,9 @@ public:
             flipit(itr, prev(itr), newChord, oldChord); // if it is not the first edge, update the previous edge
 
         // Now flip the edge
+        present.erase(getPair(e));
         e->flip();
+        present.insert(getPair(e));
     }
 
     /// @brief adds the current triangulation to the list of all triangulations
@@ -138,7 +150,7 @@ public:
         vector<pair<int, int>> currentTriangulation;
         for (auto &chord : chords)
         {
-            currentTriangulation.push_back({positions[chord->first], positions[chord->second]});
+            currentTriangulation.push_back(getPair(chord));
         }
 
         allTriangulations.push_back(currentTriangulation);
@@ -179,7 +191,7 @@ public:
         for (; itrloop != GS.end(); itrloop++)
         {
             // Recursively generate child triangulations for edges that can block the current edge
-            if (present.find({positions[(*itrloop)->opposite_first], positions[(*itrloop)->opposite_second]}) == present.end())
+            if (present.find(getOppositePair(*itrloop)) == present.end())
             {
                 generateChildTriangulations(itrloop);
             }
@@ -206,17 +218,19 @@ public:
             Edge *e = new Edge(0, i, i - 1, (i + 1) % n); // creating a new edge object
             GS.push_back(e);                              // adding the edge to the generating set
             chords.push_back(e);                          // adding the edge to the list of all chords
-            present.insert({positions[0], positions[i]}); // marking the edge as present in the original graph
+            present.insert(getPair(e));                   // marking the edge as present in the original graph
         }
         addTriangulation(); // adding the initial root triangulation
         for (auto itr = GS.begin(); itr != GS.end(); itr++)
         {
-            if (present.find({positions[(*itr)->opposite_first], positions[(*itr)->opposite_second]}) == present.end())
+            if (present.find(getOppositePair(*itr)) == present.end())
+            {
                 generateChildTriangulations(itr); // generating child triangulations recursively
+            }
         }
         for (auto &chord : chords)
         {
-            present.erase({positions[chord->first], positions[chord->second]}); // unmarking the edges after finishing
+            present.erase(getPair(chord)); // unmarking the edges after finishing
         }
     }
 };

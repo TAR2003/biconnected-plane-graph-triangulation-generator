@@ -83,7 +83,7 @@ void printStructure(T &t)
 int main()
 {
 
-    ParvezRahmanNakano *parvezRahmanNakano = new ParvezRahmanNakano(7);
+    ParvezRahmanNakano *parvezRahmanNakano = new ParvezRahmanNakano(4);
     parvezRahmanNakano->generateAllTriangulations();
     parvezRahmanNakano->printAllTriangulations();
 
