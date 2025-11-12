@@ -36,6 +36,11 @@ public:
     {
         findSafeRoot();
         cout << "size:" << present.size() << ", serial:" << serial << endl;
+
+        for(auto a: present) {
+            cout << "(" << a.first << ", " << a.second << ") , ";
+        }
+        cout << "______________" <<  endl;
     }
 
 
@@ -75,7 +80,7 @@ public:
         int endIndex = 1;
         while (startIndex > endIndex + 1)
         {
-            if (present.find({elements[startIndex], elements[endIndex]}) != present.end())
+            if (present.find({elements[startIndex], elements[endIndex]}) != present.end() || present.find({elements[endIndex], elements[startIndex]}) != present.end())
             {
                 startIndex--;
             }
@@ -85,7 +90,7 @@ public:
             }
         }
         // start Index is the safe root
-
+        cout << "Safe root: " << elements[startIndex] << endl;
         for (int i = 0; i < n; i++)
         {
             positions[i] = elements[(startIndex + i) % n];
