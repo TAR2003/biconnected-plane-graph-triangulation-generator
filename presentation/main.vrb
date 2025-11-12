@@ -1,0 +1,14 @@
+\frametitle{Main Algorithm - Start Triangulation}
+\normalsize
+	\textbf{Input:} $G$ = biconnected plane graph, $k$ = number of faces
+	
+	\begin{algorithmic}[1]
+		\Procedure{StartTriangulation}{$G, k$}
+		\State Label the faces as $F_1, F_2, \ldots, F_k$ arbitrarily
+		\State Initialize \textit{GlobalChordSet} $\gets \emptyset$
+		\State \Call{FindAllTriangulations}{$F, \emptyset, 1$}
+		\EndProcedure
+	\end{algorithmic}
+	
+	\vspace{0.5cm}
+	\textbf{Note:} This is the entry point of the algorithm. It processes faces sequentially, building up complete triangulations through recursive exploration.

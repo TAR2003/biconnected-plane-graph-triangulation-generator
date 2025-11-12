@@ -806,64 +806,87 @@ Let $T$ be a triangulation with generating chord $(v_i, v_j)$ forming triangles 
 
 \subsubsection*{Algorithm 1: Main Entry Point}
 
-\begin{verbatim}
-Procedure StartTriangulation(G, k)
-    Label faces as F_1, F_2, ..., F_k arbitrarily
-    Initialize global chord set S <- \emptyset
-    T <- \emptyset  // Empty partial triangulation
-    FindAllTriangulationsCycle(F, T, 0)
-\end{verbatim}
+\begin{algorithm}[H]
+\caption{StartTriangulation}
+\begin{algorithmic}[1]
+\Procedure{StartTriangulation}{$G, k$}
+    \State Label faces as $F_1, F_2, \ldots, F_k$ arbitrarily
+    \State Initialize global chord set $S \gets \emptyset$
+    \State $T \gets \emptyset$ \Comment{Empty partial triangulation}
+    \State \Call{FindAllTriangulationsCycle}{$F, T, 0$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection*{Algorithm 2: Safe Root Construction}
 
-\begin{verbatim}
-Procedure ConstructRootTriangulation(F, index)
-    r <- FindSafeRootVertex(F, index)
-    T_r <- \emptyset
-    Let F = <v_1, v_2, ..., v_n> with v_r = safe root vertex
-    
-    for each vertex v_j in F do
-        if v_j is not adjacent to v_r on cycle boundary then
-            Add chord (v_r, v_j) to T_r
-    
-    return T_r
+\begin{algorithm}[H]
+\caption{ConstructRootTriangulation}
+\begin{algorithmic}[1]
+\Procedure{ConstructRootTriangulation}{$F, \text{index}$}
+    \State $r \gets$ \Call{FindSafeRootVertex}{$F, \text{index}$}
+    \State $T_r \gets \emptyset$
+    \State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$ with $v_r =$ safe root vertex
+    \State
+    \For{each vertex $v_j$ in $F$}
+        \If{$v_j$ is not adjacent to $v_r$ on cycle boundary}
+            \State Add chord $(v_r, v_j)$ to $T_r$
+        \EndIf
+    \EndFor
+    \State
+    \State \Return $T_r$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
-Procedure FindSafeRootVertex(F, index)
-    Let F = <v_1, v_2, ..., v_n>
-    startIndex <- n - 1
-    endIndex <- 0
-    
-    while startIndex > endIndex + 1 do
-        if chord (v_startIndex, v_endIndex) exists in S then
-            startIndex <- startIndex - 1
-        else
-            endIndex <- endIndex + 1
-    
-    return v_endIndex  // Safe root vertex found
-\end{verbatim}
+\begin{algorithm}[H]
+\caption{FindSafeRootVertex}
+\begin{algorithmic}[1]
+\Procedure{FindSafeRootVertex}{$F, \text{index}$}
+    \State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$
+    \State $\text{startIndex} \gets n - 1$
+    \State $\text{endIndex} \gets 0$
+    \State
+    \While{$\text{startIndex} > \text{endIndex} + 1$}
+        \If{chord $(v_{\text{startIndex}}, v_{\text{endIndex}})$ exists in $S$}
+            \State $\text{startIndex} \gets \text{startIndex} - 1$
+        \Else
+            \State $\text{endIndex} \gets \text{endIndex} + 1$
+        \EndIf
+    \EndWhile
+    \State
+    \State \Return $v_{\text{endIndex}}$ \Comment{Safe root vertex found}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \textbf{Time Complexity}: $\mathcal{O}(n)$ where $n$ is the number of vertices in the face.
 
 \subsubsection*{Algorithm 3: Face-Level Triangulation}
 
-\begin{verbatim}
-Procedure FindAllTriangulationsCycle(F, T, i)
-    n <- number of vertices of face F_i
-    T_{ir} <- ConstructRootTriangulation(F, i)  // O(n)
-    
-    Add all chords of T_{ir} to S  // O(n)
-    OutputTriangulation(T, T_{ir}, i)
-    T_i <- T_{ir}
-    
-    // Start from n-1: vertex v_n is adjacent to v_1, so (v_1, v_n) is an edge
-    // Similarly v_2 is adjacent to v_1, so we start from j=3
-    for j = n-1 downto 3 do
-        Add chord (v_1, v_j) to S
-        FindAllChildTriangulationsCycle(T_i(v_1, v_j), T, i)
-        Remove chord (v_1, v_j) from S
-    
-    Remove all chords of T_{ir} from S  // O(n)
-\end{verbatim}
+\begin{algorithm}[H]
+\caption{FindAllTriangulationsCycle}
+\begin{algorithmic}[1]
+\Procedure{FindAllTriangulationsCycle}{$F, T, i$}
+    \State $n \gets$ number of vertices of face $F_i$
+    \State $T_{ir} \gets$ \Call{ConstructRootTriangulation}{$F, i$} \Comment{$\mathcal{O}(n)$}
+    \State
+    \State Add all chords of $T_{ir}$ to $S$ \Comment{$\mathcal{O}(n)$}
+    \State \Call{OutputTriangulation}{$T, T_{ir}, i$}
+    \State $T_i \gets T_{ir}$
+    \State
+    \State \Comment{Start from $n-1$: vertex $v_n$ is adjacent to $v_1$, so $(v_1, v_n)$ is an edge}
+    \State \Comment{Similarly $v_2$ is adjacent to $v_1$, so we start from $j=3$}
+    \For{$j = n-1$ \textbf{down to} $3$}
+        \State Add chord $(v_1, v_j)$ to $S$
+        \State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
+        \State Remove chord $(v_1, v_j)$ from $S$
+    \EndFor
+    \State
+    \State Remove all chords of $T_{ir}$ from $S$ \Comment{$\mathcal{O}(n)$}
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection*{Algorithm 4: Recursive Child Generation}
 
@@ -875,34 +898,46 @@ Procedure FindAllTriangulationsCycle(F, T, i)
     \item \textbf{Pruning case}: If neither holds (chord not in $T_i$ \textbf{and} chord in $S$), we skip this branch to avoid multi-edges
 \end{itemize}
 
-\begin{verbatim}
-Procedure FindAllChildTriangulationsCycle(T_i, T, i)
-    OutputTriangulation(T, T_i, i)
-    
-    if T_i has no generating chord then
-        return  // Leaf node reached
-    
-    Let (v_b, v_b') be the leftmost generating chord of T_i
-    
-    for all j >= b do
-        // Safe to explore: existing chord OR no conflict
-        if (v_1, v_j) is a chord of T_i OR (v_1, v_j) \notin S then
-            Add chord (v_1, v_j) to S
-            FindAllChildTriangulationsCycle(T_i(v_1, v_j), T, i)
-            Remove chord (v_1, v_j) from S
-\end{verbatim}
+\begin{algorithm}[H]
+\caption{FindAllChildTriangulationsCycle}
+\begin{algorithmic}[1]
+\Procedure{FindAllChildTriangulationsCycle}{$T_i, T, i$}
+    \State \Call{OutputTriangulation}{$T, T_i, i$}
+    \State
+    \If{$T_i$ has no generating chord}
+        \State \Return \Comment{Leaf node reached}
+    \EndIf
+    \State
+    \State Let $(v_b, v_{b'})$ be the leftmost generating chord of $T_i$
+    \State
+    \For{all $j \geq b$}
+        \State \Comment{Safe to explore: existing chord OR no conflict}
+        \If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $(v_1, v_j) \notin S$}
+            \State Add chord $(v_1, v_j)$ to $S$
+            \State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
+            \State Remove chord $(v_1, v_j)$ from $S$
+        \EndIf
+    \EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \textbf{Key Property}: The algorithm explores \textit{all} valid branches (every $j$ satisfying the condition), ensuring completeness.
 
 \subsubsection*{Algorithm 5: Output Control}
 
-\begin{verbatim}
-Procedure OutputTriangulation(T, T_i, i)
-    if i = k then  // All faces triangulated
-        output (T \cup T_i)
-    else
-        FindAllTriangulationsCycle(F, T \cup T_i, i + 1)
-\end{verbatim}
+\begin{algorithm}[H]
+\caption{OutputTriangulation}
+\begin{algorithmic}[1]
+\Procedure{OutputTriangulation}{$T, T_i, i$}
+    \If{$i = k$} \Comment{All faces triangulated}
+        \State \textbf{output} $(T \cup T_i)$
+    \Else
+        \State \Call{FindAllTriangulationsCycle}{$F, T \cup T_i, i + 1$}
+    \EndIf
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
 
 \noindent\rule{\textwidth}{0.4pt}
 

@@ -11,6 +11,7 @@ public:
     list<Edge*>::iterator chordItr;
     /// @brief  the constructor of the class
     Edge(int a = 0, int b = 0, int c = 0, int d = 0) : first(a), second(b), opposite_first(c), opposite_second(d) {}
+    /// @brief flips the edge by swapping its endpoints with the opposite endpoints
     void flip()
     {
         swap(first, opposite_first);

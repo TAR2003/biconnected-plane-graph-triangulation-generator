@@ -41,62 +41,64 @@
 \headcommand {\beamer@framepages {16}{16}}
 \headcommand {\slideentry {3}{0}{5}{17/17}{}{0}}
 \headcommand {\beamer@framepages {17}{17}}
-\headcommand {\beamer@sectionpages {13}{17}}
-\headcommand {\beamer@subsectionpages {13}{17}}
-\headcommand {\sectionentry {4}{Proofs}{18}{Proofs}{0}}
-\headcommand {\beamer@subsectionpages {18}{17}}
-\headcommand {\beamer@subsectionentry {0}{4}{1}{18}{Proof of Completeness}}
-\headcommand {\slideentry {4}{1}{1}{18/18}{Proof of Completeness}{0}}
+\headcommand {\slideentry {3}{0}{6}{18/18}{}{0}}
 \headcommand {\beamer@framepages {18}{18}}
-\headcommand {\slideentry {4}{1}{2}{19/19}{Proof of Completeness}{0}}
+\headcommand {\beamer@sectionpages {13}{18}}
+\headcommand {\beamer@subsectionpages {13}{18}}
+\headcommand {\sectionentry {4}{Proofs}{19}{Proofs}{0}}
+\headcommand {\beamer@subsectionpages {19}{18}}
+\headcommand {\beamer@subsectionentry {0}{4}{1}{19}{Proof of Completeness}}
+\headcommand {\slideentry {4}{1}{1}{19/19}{Proof of Completeness}{0}}
 \headcommand {\beamer@framepages {19}{19}}
-\headcommand {\slideentry {4}{1}{3}{20/20}{Proof of Completeness}{0}}
+\headcommand {\slideentry {4}{1}{2}{20/20}{Proof of Completeness}{0}}
 \headcommand {\beamer@framepages {20}{20}}
-\headcommand {\slideentry {4}{1}{4}{21/21}{Proof of Completeness}{0}}
+\headcommand {\slideentry {4}{1}{3}{21/21}{Proof of Completeness}{0}}
 \headcommand {\beamer@framepages {21}{21}}
-\headcommand {\beamer@subsectionpages {18}{21}}
-\headcommand {\beamer@subsectionentry {0}{4}{2}{22}{Existence of Valid Root Triangulation}}
-\headcommand {\slideentry {4}{2}{1}{22/22}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\slideentry {4}{1}{4}{22/22}{Proof of Completeness}{0}}
 \headcommand {\beamer@framepages {22}{22}}
-\headcommand {\slideentry {4}{2}{2}{23/23}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\beamer@subsectionpages {19}{22}}
+\headcommand {\beamer@subsectionentry {0}{4}{2}{23}{Existence of Valid Root Triangulation}}
+\headcommand {\slideentry {4}{2}{1}{23/23}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {23}{23}}
-\headcommand {\slideentry {4}{2}{3}{24/24}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\slideentry {4}{2}{2}{24/24}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {24}{24}}
-\headcommand {\slideentry {4}{2}{4}{25/25}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\slideentry {4}{2}{3}{25/25}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {25}{25}}
-\headcommand {\slideentry {4}{2}{5}{26/26}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\slideentry {4}{2}{4}{26/26}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {26}{26}}
-\headcommand {\slideentry {4}{2}{6}{27/27}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\slideentry {4}{2}{5}{27/27}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {27}{27}}
-\headcommand {\slideentry {4}{2}{7}{28/28}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\slideentry {4}{2}{6}{28/28}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {28}{28}}
-\headcommand {\slideentry {4}{2}{8}{29/29}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\slideentry {4}{2}{7}{29/29}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {29}{29}}
-\headcommand {\slideentry {4}{2}{9}{30/30}{Existence of Valid Root Triangulation}{0}}
+\headcommand {\slideentry {4}{2}{8}{30/30}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {30}{30}}
-\headcommand {\beamer@subsectionpages {22}{30}}
-\headcommand {\beamer@subsectionentry {0}{4}{3}{31}{Time Complexity Analysis}}
-\headcommand {\slideentry {4}{3}{1}{31/31}{Time Complexity Analysis}{0}}
+\headcommand {\slideentry {4}{2}{9}{31/31}{Existence of Valid Root Triangulation}{0}}
 \headcommand {\beamer@framepages {31}{31}}
-\headcommand {\slideentry {4}{3}{2}{32/32}{Time Complexity Analysis}{0}}
+\headcommand {\beamer@subsectionpages {23}{31}}
+\headcommand {\beamer@subsectionentry {0}{4}{3}{32}{Time Complexity Analysis}}
+\headcommand {\slideentry {4}{3}{1}{32/32}{Time Complexity Analysis}{0}}
 \headcommand {\beamer@framepages {32}{32}}
-\headcommand {\slideentry {4}{3}{3}{33/33}{Time Complexity Analysis}{0}}
+\headcommand {\slideentry {4}{3}{2}{33/33}{Time Complexity Analysis}{0}}
 \headcommand {\beamer@framepages {33}{33}}
-\headcommand {\slideentry {4}{3}{4}{34/34}{Time Complexity Analysis}{0}}
+\headcommand {\slideentry {4}{3}{3}{34/34}{Time Complexity Analysis}{0}}
 \headcommand {\beamer@framepages {34}{34}}
-\headcommand {\slideentry {4}{3}{5}{35/35}{Time Complexity Analysis}{0}}
+\headcommand {\slideentry {4}{3}{4}{35/35}{Time Complexity Analysis}{0}}
 \headcommand {\beamer@framepages {35}{35}}
-\headcommand {\beamer@subsectionpages {31}{35}}
-\headcommand {\beamer@subsectionentry {0}{4}{4}{36}{Space Complexity Analysis}}
-\headcommand {\slideentry {4}{4}{1}{36/36}{Space Complexity Analysis}{0}}
+\headcommand {\slideentry {4}{3}{5}{36/36}{Time Complexity Analysis}{0}}
 \headcommand {\beamer@framepages {36}{36}}
-\headcommand {\beamer@sectionpages {18}{36}}
-\headcommand {\beamer@subsectionpages {36}{36}}
-\headcommand {\sectionentry {5}{Conclusion}{37}{Conclusion}{0}}
-\headcommand {\slideentry {5}{0}{1}{37/37}{}{0}}
+\headcommand {\beamer@subsectionpages {32}{36}}
+\headcommand {\beamer@subsectionentry {0}{4}{4}{37}{Space Complexity Analysis}}
+\headcommand {\slideentry {4}{4}{1}{37/37}{Space Complexity Analysis}{0}}
 \headcommand {\beamer@framepages {37}{37}}
-\headcommand {\beamer@partpages {1}{37}}
+\headcommand {\beamer@sectionpages {19}{37}}
 \headcommand {\beamer@subsectionpages {37}{37}}
-\headcommand {\beamer@sectionpages {37}{37}}
-\headcommand {\beamer@documentpages {37}}
-\headcommand {\gdef \inserttotalframenumber {37}}
+\headcommand {\sectionentry {5}{Conclusion}{38}{Conclusion}{0}}
+\headcommand {\slideentry {5}{0}{1}{38/38}{}{0}}
+\headcommand {\beamer@framepages {38}{38}}
+\headcommand {\beamer@partpages {1}{38}}
+\headcommand {\beamer@subsectionpages {38}{38}}
+\headcommand {\beamer@sectionpages {38}{38}}
+\headcommand {\beamer@documentpages {38}}
+\headcommand {\gdef \inserttotalframenumber {38}}

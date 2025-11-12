@@ -338,96 +338,150 @@
 
 
 \section{Algorithm}
-\begin{frame}{Find All Triangulations Cycle}
-	\small
+
+\begin{frame}{Algorithm Structure Overview}
+	\textbf{Our algorithm consists of 5 main procedures:}
+	
+	\begin{enumerate}
+		\item \textbf{StartTriangulation}$(G, k)$
+		\begin{itemize}
+			\item Entry point - initializes the process
+		\end{itemize}
+		
+		\vspace{0.2cm}
+		\item \textbf{FindAllTriangulations}$(F, T, i)$
+		\begin{itemize}
+			\item Generates all triangulations for face $F_i$
+			\item Uses safe root as starting point
+		\end{itemize}
+		
+		\vspace{0.2cm}
+		\item \textbf{FindAllChildTriangulations}$(T_i, T, i)$
+		\begin{itemize}
+			\item Explores genealogical tree via chord flipping
+		\end{itemize}
+		
+		\vspace{0.2cm}
+		\item \textbf{FindSafeRoot}$(F, i)$
+		\begin{itemize}
+			\item Finds safe root vertex and creates initial triangulation
+		\end{itemize}
+		
+		\vspace{0.2cm}
+		\item \textbf{OutputTriangulation}$(T, T_i, i)$
+		\begin{itemize}
+			\item Outputs complete triangulation or continues to next face
+		\end{itemize}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{Find All Child Triangulations}
+	\scriptsize
+	\textbf{Input:} $T_i$ = current triangulation, $T$ = partial solution, $i$ = face index
+	
 	\begin{algorithmic}[1]
-		\Procedure{find-all-child-triangulations-cycle}{$T_i, T, i$}
-		\State \Call{output-triangulation}{$T, T_{ir}, i$}
+		\Procedure{FindAllChildTriangulations}{$T_i, T, i$}
+		\State \Call{OutputTriangulation}{$T, T_i, i$}
 		\If{$T_i$ has no generating chords}
 		\State \Return
 		\EndIf
-		\State Let $(v_{b},v_{b^{\prime}})$ be the leftmost blocking chord of $T_i$
-		\ForAll{$j\geq b$}
-		\If{$(v_1, v_j)$ is a chord of $T_i$ $\lor$ $(v_1, v_j) \notin \textit{GlobalChordSet}$}
-		\State add chord $(v_{1},v_{j})$ to GlobalChordSet
-		\State \Call{find-all-child-triangulations-cycle}{$T(v_{1},v_{j})$}
-		\State remove chord $(v_{1},v_{j})$ from GlobalChordSet
+		\State Let $(v_{b},v_{b'})$ be the \textbf{leftmost blocking chord} of $T_i$
+		\ForAll{vertices $v_j$ where $j \geq b$}
+		\If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $(v_1, v_j) \notin$ \textit{GlobalChordSet}}
+		\State Add chord $(v_1, v_j)$ to \textit{GlobalChordSet}
+		\State \Call{FindAllChildTriangulations}{$T_i(v_1, v_j), T, i$}
+		\State Remove chord $(v_1, v_j)$ from \textit{GlobalChordSet}
 		\EndIf
 		\EndFor
 		\EndProcedure
 	\end{algorithmic}
 \end{frame}
 
-\begin{frame}{Find All Triangulations}
-	\small
+\begin{frame}[fragile]{Find All Triangulations for a Face}
+	\scriptsize
+	\textbf{Input:} $F$ = faces array, $T$ = partial solution, $i$ = current face index
+	
 	\begin{algorithmic}[1]
-		\Procedure{find-all-triangulations-cycle}{$F, T, i$}
-		\State n $\gets$ number of vertices for $F_i$
-		\State $T_{ir}$ $\gets$ \Call{find-safe-root}{$F, i$} \Comment{Time O(1)}
-		\State Add All Chords of the root to GlobalChordSet \Comment{Time O(n)}
-		\State \Call{output-triangulation}{$T, T_{ir}, i$}
-		\State $T_i = T_{ir}$
-		\For{$j=n-1$ \textbf{to} $3$}
-		\State add chord $(v_{1},v_{j})$ to GlobalChordSet
-		\State \Call{find-all-child-triangulations-cycle}{$T_i(v_{1},v_{j}), T, i$}
-		\State Remove chord $(v_{1},v_{j})$ from GlobalChordSet
+		\Procedure{FindAllTriangulations}{$F, T, i$}
+		\State $n \gets$ number of vertices in face $F_i$
+		\State $T_{ir} \gets$ \Call{FindSafeRoot}{$F, i$} \Comment{Time: $O(1)$ per triangulation}
+		\State Add all chords of $T_{ir}$ to \textit{GlobalChordSet} \Comment{Time: $O(n)$}
+		\State \Call{OutputTriangulation}{$T, T_{ir}, i$}
+		\State $T_i \gets T_{ir}$
+		\For{$j = n-1$ \textbf{down to} $3$}
+		\If{$(v_1, v_j) \notin$ \textit{GlobalChordSet}}
+		\State Add chord $(v_1, v_j)$ to \textit{GlobalChordSet}
+		\State \Call{FindAllChildTriangulations}{$T_i(v_1, v_j), T, i$}
+		\State Remove chord $(v_1, v_j)$ from \textit{GlobalChordSet}
+		\EndIf
 		\EndFor
-		\State Remove All Chords of the root From GlobalChordSet \Comment{Time O(n)}
+		\State Remove all chords of $T_{ir}$ from \textit{GlobalChordSet} \Comment{Time: $O(n)$}
 		\EndProcedure
 	\end{algorithmic}
 \end{frame}
 
-\begin{frame}{Output}
-	\small
+\begin{frame}[fragile]{Output Triangulation}
+	\normalsize
+	\textbf{Input:} $T$ = partial solution, $T_i$ = current face triangulation, $i$ = face index
+	
 	\begin{algorithmic}[1]
-		\Procedure{output-triangulation}{$T, T_i, i$}
-		\If{$i == \text{face.length}$}
-		\State \textbf{output}($T + T_i$)
+		\Procedure{OutputTriangulation}{$T, T_i, i$}
+		\If{$i = $ \textit{totalFaces}}
+		\State \textbf{Output} complete triangulation $(T + T_i)$
 		\Else
-		\State \Call{find-all-triangulation-cycle}{$F, T + T_i, i + 1$}
+		\State \Call{FindAllTriangulations}{$F, T + T_i, i + 1$}
 		\EndIf
 		\EndProcedure
 	\end{algorithmic}
+	
+	\vspace{0.5cm}
+	\textbf{Note:} This recursive structure combines triangulations from individual faces to generate complete graph triangulations.
 \end{frame}
 
 
-\begin{frame}{Find Safe Root}
-	\small
+\begin{frame}[fragile]{Find Safe Root}
+	\scriptsize
+	\textbf{Input:} $F$ = faces array, $i$ = face index
+	
 	\begin{algorithmic}[1]
-		\Procedure{find-safe-root}{$F, index$}
-		\State \Call{find-safe-root-vertex}{$F, index$}
-		\State add chords from the safe root vertex
-		\State \Return
+		\Procedure{FindSafeRoot}{$F, i$}
+		\State $v_{root} \gets$ \Call{FindSafeRootVertex}{$F, i$}
+		\State Create triangulation by adding chords from $v_{root}$ to all non-neighbors
+		\State \Return root triangulation $T_{ir}$
 		\EndProcedure
 	\end{algorithmic}
 
-	\vspace{0.1cm}
+	\vspace{0.3cm}
 	\begin{algorithmic}[1]
-		\Procedure{find-safe-root-vertex}{$F, index$}
-		\State startindex $\gets n - 1$
-		\State endIndex $\gets 0$
-		\While{startindex $>$ endIndex + 1}
-		\If{chord exists between $V_{startindex}$ and $V_{endIndex}$}
-		\State startindex $\gets$ startindex $- 1$
+		\Procedure{FindSafeRootVertex}{$F, i$}
+		\State $n \gets$ number of vertices in face $F_i$
+		\State $startIndex \gets n - 1$
+		\State $endIndex \gets 0$
+		\While{$startIndex > endIndex + 1$}
+		\If{chord exists between $v_{startIndex}$ and $v_{endIndex}$ in \textit{GlobalChordSet}}
+		\State $startIndex \gets startIndex - 1$
 		\Else
-		\State endIndex $\gets$ endIndex $+ 1$
+		\State $endIndex \gets endIndex + 1$
 		\EndIf
 		\EndWhile
+		\State \Return $v_{endIndex}$ as safe root vertex
 		\EndProcedure
 	\end{algorithmic}
-
 \end{frame}
-
-
-
-\begin{frame}{Start Triangulation Process}
-	\small
+\begin{frame}[fragile]{Main Algorithm - Start Triangulation}
+	\normalsize
+	\textbf{Input:} $G$ = biconnected plane graph, $k$ = number of faces
+	
 	\begin{algorithmic}[1]
-		\Procedure{start-triangulation}{$G, k$}
-		\State Label the faces $F_1, F_2, \cdots, F_k$ arbitrarily
-		\State \Call{find-all-triangulations}{$F, 0$}
+		\Procedure{StartTriangulation}{$G, k$}
+		\State Label the faces as $F_1, F_2, \ldots, F_k$ arbitrarily
+		\State Initialize \textit{GlobalChordSet} $\gets \emptyset$
+		\State \Call{FindAllTriangulations}{$F, \emptyset, 1$}
 		\EndProcedure
 	\end{algorithmic}
+	
+	\vspace{0.5cm}
+	\textbf{Note:} This is the entry point of the algorithm. It processes faces sequentially, building up complete triangulations through recursive exploration.
 \end{frame}
 
 \section{Proofs}
