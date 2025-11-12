@@ -3,6 +3,7 @@ using namespace std;
 #pragma once
 #include "Edge.hpp"
 #include "pairHash.hpp"
+#include "biconnected.hpp"
 
 class FaceTriangulation
 {
@@ -19,17 +20,36 @@ public:
     vector<vector<pair<int, int>>> allTriangulations;
     vector<int> positions;
     vector<int> elements;
+    biconnected *bc;
+    int serial;
 
     /// @brief the constructor of the class
     /// @param n the number of vertices in the cycle
-    FaceTriangulation(int n, vector<int> &elements, unordered_set<pair<int, int>, PairHash> &present)
+    /// @param elements the elements of the cycle
+    /// @param present the set of present chords
+    /// @param serial the serial number of the face
+    /// @param bc pointer to the biconnected class
+    FaceTriangulation(int n, vector<int> &elements, unordered_set<pair<int, int>, PairHash> &present, int serial, biconnected *bc)
     {
         this->n = n;
         this->present = present;
         this->elements = elements;
+        this->serial = serial;
+        this->bc = bc;
         positions = vector<int>(n, -1);
         findSafeRoot();
     }
+
+    FaceTriangulation(const FaceTriangulation &other)
+    {
+        this->n = other.n;
+        this->elements = other.elements; // deep copy of vector
+        this->present = other.present;   // deep copy of unordered_set
+        this->serial = other.serial;
+        this->bc = other.bc;               // pointer copy (not deep copy)
+        this->positions = other.positions; // deep copy of vector
+    }
+
     /// @brief the destructor of the class
     ~FaceTriangulation()
     {
@@ -156,6 +176,11 @@ public:
         allTriangulations.push_back(currentTriangulation);
     }
 
+    void output()
+    {
+        bc->output(serial);
+    }
+
     /// @brief Generates child triangulations by flipping the edge pointed to by the iterator
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &itr)
@@ -186,7 +211,8 @@ public:
         // Determine the leftmost blocking endpoint
         int leftmost_blocking_b = min(c->first, c->second);
 
-        addTriangulation(); // Add the current triangulation to the list of all triangulations
+        // addTriangulation(); // Add the current triangulation to the list of all triangulations
+        output();
 
         for (; itrloop != GS.end(); itrloop++)
         {
@@ -220,7 +246,8 @@ public:
             chords.push_back(e);                          // adding the edge to the list of all chords
             present.insert(getPair(e));                   // marking the edge as present in the original graph
         }
-        addTriangulation(); // adding the initial root triangulation
+        // addTriangulation(); // adding the initial root triangulation
+        output();
         for (auto itr = GS.begin(); itr != GS.end(); itr++)
         {
             if (present.find(getOppositePair(*itr)) == present.end())

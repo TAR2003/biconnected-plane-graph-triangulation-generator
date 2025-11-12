@@ -4,6 +4,7 @@ using namespace std;
 #include "FaceTriangulation.hpp"
 #include "pairHash.hpp"
 #include "biconnected.hpp"
+#include "triconnected.hpp"
 
 vector<vector<int>> solve(string filename)
 {
@@ -34,12 +35,8 @@ int main()
 {
     string filename = "input/simple3.txt";
     vector<vector<int>> faces = solve(filename);
-    biconnected bc(faces);
-    bc.getAllTriangulations();
-    unordered_set<pair<int, int>, PairHash> present;
-    vector<int> elements = {1,2,3,4};
-    FaceTriangulation *f = new FaceTriangulation(4, elements, present);
-    f->generateAllTriangulations();
-    f->printAllTriangulations();
+    biconnected *bc = new biconnected(faces);
+    bc->getAllTriangulations();
+    bc->printAllTriangulations();
     return 0;
 }
