@@ -57,6 +57,7 @@ public class BiconnectedGraph {
         tweakedAlgo.generateAllTriangulations(0);
 //        System.out.println("total: " + tweakedAlgo.allTriangulations.size());
         // Get the final answer string
+        System.out.println("Total Triangulation Number: " + tweakedAlgo.allTriangulations.size());
         String answer = tweakedAlgo.getResult();
 
         // Write answer to output.txt

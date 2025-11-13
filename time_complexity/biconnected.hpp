@@ -13,13 +13,25 @@ public:
     vector<vector<int>> faces;
     unordered_set<pair<int, int>, PairHash> present;
     vector<vector<pair<int, int>>> allTriangulations;
-    vector<FaceTriangulation*> faceTriangulations;
+    vector<FaceTriangulation *> faceTriangulations;
     int totalTriangulations = 0;
     biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
         present = unordered_set<pair<int, int>, PairHash>();
-        faceTriangulations = vector<FaceTriangulation*>(faces.size());
+        initiatePresent();
+        faceTriangulations = vector<FaceTriangulation *>(faces.size());
+    }
+    void initiatePresent()
+    {
+        for (auto face : faces)
+        {
+            for (int i = 0; i < face.size() - 1; i++)
+            {
+                present.insert(make_pair(min(face[i], face[i + 1]), max(face[i], face[i + 1])));
+            }
+            present.insert(make_pair(min(face[0], face[face.size() - 1]), max(face[0], face[face.size() - 1])));
+        }
     }
     void getAllTriangulations();
     void output(int serial);
@@ -30,7 +42,7 @@ public:
     }
     void printAllTriangulations()
     {
-        
+
         cout << "Total triangulations in biconnected component: " << allTriangulations.size() << endl;
         for (auto &triangulation : allTriangulations)
         {
@@ -58,17 +70,16 @@ inline void biconnected::output(int serial)
 {
     if (serial == faces.size() - 1)
     {
-        // We will uncomment it when we want to output all triangulations
         // addTriangulation();
         totalTriangulations++;
     }
-    else {
+    else
+    {
         faceTriangulations[serial + 1] = new FaceTriangulation(faces[serial + 1].size(), faces[serial + 1], present, serial + 1, this);
         faceTriangulations[serial + 1]->generateAllTriangulations();
     }
 }
 
-/// @brief Adds the current triangulation (combination of triangulations from all faces) to the list of all triangulations in the biconnected component.
 // inline void biconnected::addTriangulation()
 // {
 //     vector<pair<int, int>> currentTriangulations;

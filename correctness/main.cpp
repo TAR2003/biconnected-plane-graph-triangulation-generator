@@ -6,7 +6,7 @@ using namespace std;
 #include "FaceTriangulation.hpp"
 #include "triconnected.hpp"
 
-vector<vector<int>> input(string filename)
+vector<vector<int>> solve(string filename)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -52,7 +52,7 @@ bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int
 
 bool matchTwoAlgorithms(string filename)
 {
-    vector<vector<int>> faces = input(filename);
+    vector<vector<int>> faces = solve(filename);
     biconnected *bc = new biconnected(faces);
     bc->getAllTriangulations();
     bc->sortTriangulations();
@@ -69,6 +69,7 @@ bool matchTwoAlgorithms(string filename)
     }
     else
     {
+        cout << "Matched in number: " << newalgo.size() << endl;
         bool allMatch = true;
         for (size_t i = 0; i < newalgo.size(); i++)
         {

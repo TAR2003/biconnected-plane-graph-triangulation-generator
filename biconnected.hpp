@@ -19,7 +19,19 @@ public:
     {
         this->faces = faces;
         present = unordered_set<pair<int, int>, PairHash>();
+        initiatePresent();
         faceTriangulations = vector<FaceTriangulation*>(faces.size());
+    }
+    void initiatePresent()
+    {
+        for (auto face : faces)
+        {
+            for (int i = 0; i < face.size() - 1; i++)
+            {
+                present.insert(make_pair(min(face[i], face[i + 1]), max(face[i], face[i + 1])));
+            }
+            present.insert(make_pair(min(face[0], face[face.size() - 1]), max(face[0], face[face.size() - 1])));
+        }
     }
     void getAllTriangulations();
     void output(int serial);

@@ -12,10 +12,25 @@ public:
     vector<vector<int>> faces;
     vector<vector<pair<int, int>>> allTriangulations;
     vector<vector<vector<pair<int, int>>>> triangulation_per_face;
+    unordered_set<pair<int, int>, PairHash> present;
     triconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
+
+        present = unordered_set<pair<int, int>, PairHash>();
+        initiatePresent();
         triangulation_per_face = vector<vector<vector<pair<int, int>>>>(faces.size());
+    }
+    void initiatePresent()
+    {
+        for (auto face : faces)
+        {
+            for (int i = 0; i < face.size() - 1; i++)
+            {
+                present.insert(make_pair(min(face[i], face[i + 1]), max(face[i], face[i + 1])));
+            }
+            present.insert(make_pair(min(face[0], face[face.size() - 1]), max(face[0], face[face.size() - 1])));
+        }
     }
     void getAllTriangulations()
     {
@@ -44,20 +59,30 @@ public:
     void combineTriangulations(
         const vector<vector<vector<pair<int, int>>>> &triangulation_per_face,
         int index,
-        vector<pair<int, int>> current,
+        vector<pair<int, int>> &current,
         vector<vector<pair<int, int>>> &allTriangulations)
     {
+        // Skip faces with 0 triangulations
+        while (index < (int)triangulation_per_face.size() &&
+               triangulation_per_face[index].empty())
+        {
+            index++;
+        }
+
+        // Base case: all faces processed
         if (index == (int)triangulation_per_face.size())
         {
             allTriangulations.push_back(current);
             return;
         }
 
+        // Recursive case: combine current triangulation with next face's triangulations
         for (const auto &tri : triangulation_per_face[index])
         {
-            vector<pair<int, int>> next = current;
-            next.insert(next.end(), tri.begin(), tri.end());
-            combineTriangulations(triangulation_per_face, index + 1, next, allTriangulations);
+            size_t oldSize = current.size();
+            current.insert(current.end(), tri.begin(), tri.end());
+            combineTriangulations(triangulation_per_face, index + 1, current, allTriangulations);
+            current.resize(oldSize); // backtrack efficiently
         }
     }
 
@@ -76,13 +101,21 @@ public:
         for (auto &triangulation : allTriangulations)
         {
             set<pair<int,int>> allPairsInsideThisTriangulation;
+            bool arm = false;
             for(auto &p:triangulation) {
                 int a = min(p.first, p.second);
                 int b = max(p.first, p.second);
                 allPairsInsideThisTriangulation.insert({a,b});
+                if(present.find({a,b}) != present.end()) {
+                    arm = true;
+                    break;
+                }
             }
             if(allPairsInsideThisTriangulation.size() != totalLength) {
                 continue; // skip invalid triangulations
+            }
+            if(arm) {
+                continue; // skip triangulations having edges not in present
             }
             else {
                 uniqueTriangulations.push_back(triangulation);
@@ -98,7 +131,8 @@ public:
     void refineTriangulations()
     {
         sortTriangulations();
-        combineTriangulations(triangulation_per_face, 0, {}, allTriangulations);
+        vector<pair<int, int>> current;
+        combineTriangulations(triangulation_per_face, 0, current, allTriangulations);
 
         removeDuplicated();
     }
