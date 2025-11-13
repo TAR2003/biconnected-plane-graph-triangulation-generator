@@ -35,33 +35,17 @@ public:
         : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1)
     {
         findSafeRoot();
-        cout << "size:" << present.size() << ", serial:" << serial << endl;
-
-        for (auto a : present)
-        {
-            cout << "(" << a.first << ", " << a.second << ") , ";
-        }
-        cout << "______________" << endl;
     }
 
-    // FaceTriangulation(const FaceTriangulation &other)
-    // {
-    //     this->n = other.n;
-    //     this->elements = other.elements; // deep copy of vector
-    //     this->present = other.present;   // deep copy of unordered_set
-    //     this->serial = other.serial;
-    //     this->bc = other.bc;               // pointer copy (not deep copy)
-    //     this->positions = other.positions; // deep copy of vector
-    // }
 
     /// @brief the destructor of the class
-    // ~FaceTriangulation()
-    // {
-    //     for (auto &chord : chords)
-    //     {
-    //         delete chord; // free the memory allocated for each chord
-    //     }
-    // }
+    ~FaceTriangulation()
+    {
+        for (auto &chord : chords)
+        {
+            delete chord; // free the memory allocated for each chord
+        }
+    }
 
     pair<int, int> getPair(Edge *e)
     {
@@ -90,7 +74,6 @@ public:
             }
         }
         // start Index is the safe root
-        cout << "Safe root: " << elements[startIndex] << endl;
         for (int i = 0; i < n; i++)
         {
             positions[i] = elements[(startIndex + i) % n];
@@ -207,28 +190,25 @@ public:
         {
             itrloop = prev(itr); // else start from the previous edge
         }
+
         GS.erase(itr); // Remove the current edge from the generating set
+        auto itr_begin = GS.begin();
 
         // Determine the leftmost blocking endpoint
         int leftmost_blocking_b = min(c->first, c->second);
 
-        // addTriangulation(); // Add the current triangulation to the list of all triangulations
+        // addTriangulation(); 
         output();
-        cout << "back to child trian" << endl;
+
         for (; itrloop != GS.end(); itrloop++)
         {
-            cout << "Anotehr branch: " << getOppositePair(*itrloop).first << " " << getOppositePair(*itrloop).second << endl;
             // Recursively generate child triangulations for edges that can block the current edge
             if (present.find(getOppositePair(*itrloop)) == present.end())
             {
 
                 generateChildTriangulations(itrloop);
             }
-            else {
-                cout << "Blocked at: " << getOppositePair(*itrloop).first << " " << getOppositePair(*itrloop).second << endl;
-            }
         }
-        cout << "After iteration" << endl;
         if (lastChord) // If the current edge was the last in the generating set
         {
             // cout << "last chord" << endl;
@@ -237,23 +217,11 @@ public:
             c->chordItr = itr; // Update the iterator of the chord
         }
         else
-        { // If there are more edges in the generating set
-            cout << "Threre is something" << endl;
-            cout << "next chord info: " << next_chord->first << " " << next_chord->second << endl;
-            // cout << *(next_chord->chordItr) << endl;
-            for(auto a:GS) {
-                cout << "GS has: " << a->first << ", " << a->second << endl;
-            }
-            if(GS.begin() == next_chord->chordItr) {
-                cout << "They are equal" << endl;
-            } else {
-                cout << "They are not equal" << endl;
-            }
+        { 
+            // If there are more edges in the generating set
             itr = GS.insert(next_chord->chordItr, c);
-            cout << "insertion done" << endl;
             c->chordItr = itr; // Update the iterator of the chord
         }
-        cout << "before flip back" << endl;
         flip(itr); // Flip back the edge to restore the original state
     }
 
@@ -266,6 +234,8 @@ public:
             GS.push_back(e);                              // adding the edge to the generating set
             chords.push_back(e);                          // adding the edge to the list of all chords
             present.insert(getPair(e));                   // marking the edge as present in the original graph
+            auto itr = prev(GS.end());
+            e->chordItr = itr;                            // setting the iterator of the chord
         }
         // addTriangulation(); // adding the initial root triangulation
         output();
@@ -273,10 +243,7 @@ public:
         {
             if (present.find(getOppositePair(*itr)) == present.end())
             {
-                cout << "this time " << getPair((*itr)).first << ", " << getPair((*itr)).second
-                     << endl;
                 generateChildTriangulations(itr); // generating child triangulations recursively
-                cout << "After : " << getOppositePair(*itr).first << ", " << getOppositePair(*itr).second << endl;
             }
         }
 
@@ -296,5 +263,4 @@ public:
 inline void FaceTriangulation::output()
 {
     bc->output(serial);
-    cout << "Back to serial : " << serial << endl;
 }

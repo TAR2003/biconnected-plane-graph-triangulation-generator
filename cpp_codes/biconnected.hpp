@@ -71,9 +71,6 @@ inline void biconnected::addTriangulation()
             currentTriangulation.push_back(a->getPair(chord));
         }
     }
-    for(auto c:currentTriangulation) {
-        cout << "(" << c.first << ", " << c.second << ") , ";
-    }
-    cout << endl;
+    
     allTriangulations.push_back(currentTriangulation);
 }
