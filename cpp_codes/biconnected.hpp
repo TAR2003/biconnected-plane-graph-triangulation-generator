@@ -23,9 +23,13 @@ public:
     void getAllTriangulations();
     void output(int serial);
     void addTriangulation();
-
+    void sortTriangulations()
+    {
+        sort(allTriangulations.begin(), allTriangulations.end());
+    }
     void printAllTriangulations()
     {
+        
         cout << "Total triangulations in biconnected component: " << allTriangulations.size() << endl;
         for (auto &triangulation : allTriangulations)
         {
@@ -63,14 +67,16 @@ inline void biconnected::output(int serial)
 
 inline void biconnected::addTriangulation()
 {
-    vector<pair<int, int>> currentTriangulation;
+    vector<pair<int, int>> currentTriangulations;
     for (auto a : faceTriangulations)
     {
+        vector<pair<int, int>> currentTriangulation;
         for (auto &chord : a->chords)
         {
             currentTriangulation.push_back(a->getPair(chord));
         }
+        sort(currentTriangulation.begin(), currentTriangulation.end());
+        currentTriangulations.insert(currentTriangulations.end(), currentTriangulation.begin(), currentTriangulation.end());
     }
-    
-    allTriangulations.push_back(currentTriangulation);
+    allTriangulations.push_back(currentTriangulations);
 }

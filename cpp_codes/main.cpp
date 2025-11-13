@@ -31,12 +31,75 @@ vector<vector<int>> solve(string filename)
     return faces;
 }
 
-int main()
+bool matchPairs(const pair<int, int> &p1, const pair<int, int> &p2)
 {
-    string filename = "input/hexagon_cycle.txt";
+    return (p1.first == p2.first && p1.second == p2.second);
+}
+
+bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int, int>> &t2)
+{
+    if (t1.size() != t2.size())
+        return false;
+    for (size_t i = 0; i < t1.size(); i++)
+    {
+        if (!matchPairs(t1[i], t2[i]))
+            return false;
+    }
+    return true;
+}
+
+void matchTwoAlgorithms(string filename)
+{
     vector<vector<int>> faces = solve(filename);
     biconnected *bc = new biconnected(faces);
     bc->getAllTriangulations();
-    bc->printAllTriangulations();
+    bc->sortTriangulations();
+    triconnected *tc = new triconnected(faces);
+    tc->getAllTriangulations();
+    tc->refineTriangulations();
+    auto newalgo = bc->allTriangulations;
+    auto oldalgo = tc->allTriangulations;
+    cout << "Comparing results from both algorithms..." << endl;
+    if (newalgo.size() != oldalgo.size())
+    {
+        cout << "Mismatch in number of triangulations: New Algo = " << newalgo.size() << ", Old Algo = " << oldalgo.size() << endl;
+    }
+    else
+    {
+        bool allMatch = true;
+        for (size_t i = 0; i < newalgo.size(); i++)
+        {
+            if (!matchTriangulations(newalgo[i], oldalgo[i]))
+            {
+                cout << " Mismatch found in triangulation " << i + 1 << endl;
+                allMatch = false;
+                break;
+            }
+        }
+        if (allMatch)
+        {
+            cout << " All triangulations match between both algorithms." << endl;
+        }
+    }
+}
+
+#include <filesystem>
+namespace fs = std::filesystem;
+
+int main()
+{
+    string folder = "input";
+
+    // Loop through all files in the folder
+    for (const auto &entry : fs::directory_iterator(folder))
+    {
+        if (entry.is_regular_file())
+        {
+            string filename = entry.path().string();
+            cout << "Processing: " << filename << endl;
+            matchTwoAlgorithms(filename);
+        }
+    }
+
     return 0;
 }
