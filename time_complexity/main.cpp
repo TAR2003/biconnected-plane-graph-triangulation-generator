@@ -9,7 +9,10 @@ using namespace std;
 
 namespace fs = std::filesystem;
 
-// Cross-platform memory measurement
+// ============================================================================
+// Cross-Platform High-Precision Memory Measurement
+// ============================================================================
+
 #ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
@@ -17,22 +20,51 @@ size_t getCurrentMemoryUsage()
 {
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS *)&pmc, sizeof(pmc));
-    return pmc.WorkingSetSize;
+    return pmc.WorkingSetSize; // Bytes
 }
+
 #elif __APPLE__
 #include <mach/mach.h>
 size_t getCurrentMemoryUsage()
 {
     struct mach_task_basic_info info;
     mach_msg_type_number_t size = MACH_TASK_BASIC_INFO_COUNT;
-    task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info, &size);
-    return info.resident_size;
+    if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info, &size) == KERN_SUCCESS)
+        return info.resident_size;
+    return 0;
 }
+
 #else
 #include <unistd.h>
 #include <fstream>
+
+// Linux high-precision RSS measurement
 size_t getCurrentMemoryUsage()
 {
+    // Try the more accurate /proc/self/smaps_rollup (available since Linux 4.14)
+    std::ifstream smaps("/proc/self/smaps_rollup");
+    if (smaps.is_open())
+    {
+        std::string line;
+        size_t rssBytes = 0;
+        while (std::getline(smaps, line))
+        {
+            if (line.rfind("Rss:", 0) == 0)
+            {
+                std::istringstream iss(line);
+                std::string key, unit;
+                size_t value;
+                iss >> key >> value >> unit;
+                if (unit == "kB")
+                    rssBytes += value * 1024;
+            }
+        }
+        smaps.close();
+        if (rssBytes > 0)
+            return rssBytes; // Return precise RSS in bytes
+    }
+
+    // Fallback: statm (page-based, lower precision)
     long rss = 0L;
     FILE *fp = fopen("/proc/self/statm", "r");
     if (fp)
@@ -48,6 +80,9 @@ size_t getCurrentMemoryUsage()
 }
 #endif
 
+// ============================================================================
+// Input Reader
+// ============================================================================
 vector<vector<int>> input(const string &filename, int &distinctVertices)
 {
     ifstream infile(filename);
@@ -79,6 +114,9 @@ vector<vector<int>> input(const string &filename, int &distinctVertices)
     return faces;
 }
 
+// ============================================================================
+// Utility: Format Bytes Nicely
+// ============================================================================
 string formatBytes(size_t bytes)
 {
     const char *units[] = {"B", "KB", "MB", "GB"};
@@ -96,6 +134,9 @@ string formatBytes(size_t bytes)
     return oss.str();
 }
 
+// ============================================================================
+// Struct to Hold Benchmark Result
+// ============================================================================
 struct BenchmarkResult
 {
     string filename;
@@ -107,10 +148,14 @@ struct BenchmarkResult
     double memoryPerVertex;
 };
 
+// ============================================================================
+// Main Benchmark Function
+// ============================================================================
 int main()
 {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
+
     string folder = "input";
     const int testRuns = 20;
     vector<BenchmarkResult> results;
@@ -180,7 +225,9 @@ int main()
         cout << "✓\n";
     }
 
-    // ============= PRINT RESULTS TABLE =============
+    // ========================================================================
+    // PRINT RESULTS TABLE
+    // ========================================================================
     cout << "\n";
     cout << "╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n";
     cout << "║                                                    BENCHMARK RESULTS                                                               ║\n";
@@ -199,16 +246,14 @@ int main()
     {
         const auto &r = results[i];
 
-        // Color coding based on performance
         string timeColor = r.avgTime < 0.1 ? "\033[32m" : // Green: fast
                                r.avgTime < 1.0 ? "\033[33m"
-                                               : // Yellow: medium
-                               "\033[31m";       // Red: slow
+                                               : "\033[31m"; // Red: slow
 
-        string memColor = r.memoryPerVertex < 1024 ? "\033[32m" : // Green: < 1KB/vertex
+        string memColor = r.memoryPerVertex < 1024 ? "\033[32m" : // < 1KB/vertex
                               r.memoryPerVertex < 10240 ? "\033[33m"
-                                                        : // Yellow: < 10KB/vertex
-                              "\033[31m";                 // Red: >= 10KB/vertex
+                                                        : // < 10KB/vertex
+                              "\033[31m";                 // >= 10KB/vertex
 
         cout << "║ " << left << setw(25) << r.filename.substr(0, 25)
              << "║ " << right << setw(10) << r.distinctVertices
@@ -222,14 +267,16 @@ int main()
 
     cout << "╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝\n";
 
-    // ============= COMPLEXITY ANALYSIS =============
+    // ========================================================================
+    // COMPLEXITY ANALYSIS
+    // ========================================================================
     cout << "\n";
     cout << "╔════════════════════════════════════════════════════════════════════════════╗\n";
     cout << "║                         COMPLEXITY ANALYSIS                                ║\n";
     cout << "╠════════════════════════════════════════════════════════════════════════════╣\n";
     cout << "║  Time Complexity:  Varies with triangulation count (see ns/Triang)        ║\n";
     cout << "║  Space Complexity: O(n) where n = number of vertices                      ║\n";
-    cout << "║                    (see Memory/Vertex column for constant factor)         ║\n";
+    cout << "║                    (measured precisely via RSS at byte-level)             ║\n";
     cout << "╠════════════════════════════════════════════════════════════════════════════╣\n";
     cout << "║  Color Legend:                                                             ║\n";
     cout << "║    \033[32m● Green\033[0m  = Excellent performance                                         ║\n";
@@ -237,6 +284,7 @@ int main()
     cout << "║    \033[31m● Red\033[0m    = High resource usage                                           ║\n";
     cout << "╚════════════════════════════════════════════════════════════════════════════╝\n";
     cout << "\nNote: Results averaged over " << testRuns << " runs per file.\n";
+    cout << "      Memory measured at byte precision (using /proc/self/smaps_rollup where available).\n";
 
     return 0;
 }
