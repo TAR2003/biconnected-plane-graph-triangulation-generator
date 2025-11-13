@@ -2234,9 +2234,7 @@ The implementation uses C++ STL containers including \texttt{unordered\_set} for
 
 \subsection{Performance Results}
 
-We conducted comprehensive experiments on 41 different graph instances representing various graph structures. Tables~\ref{tab:experimental_results_part1} and~\ref{tab:experimental_results_part2} present detailed performance metrics for each test case.
-
-The graph instances include:
+We conducted comprehensive experiments on 48 different graph instances representing various graph structures. The graph instances include:
 \begin{itemize}
     \item \textbf{Simple cycles:} $C_3$ (triangle), $C_4$ (square), $C_5$ (pentagon), $C_6$ (hexagon), $C_7$ (heptagon), $C_8$ (octagon), $C_9$ (nonagon)
     \item \textbf{Wheels:} $W_4$, $W_5$ (hub vertex connected to outer cycle)
@@ -2248,109 +2246,7 @@ The graph instances include:
     \item \textbf{Complex structures:} Octahedron dual, general plane graphs with varying vertex/edge/face counts
 \end{itemize}
 
-\textbf{Time Complexity Metrics:}
-\begin{itemize}
-    \item \textbf{Iterations:} Total number of recursive calls in the DFS exploration tree
-    \item \textbf{Triangulations ($T$):} Total number of valid triangulations generated
-    \item \textbf{Building Time (B):} Time to construct initial triangulations. For $n = 3$, $B = 0$ (triangle is already triangulated). For $n = 4$, $B = 1$ (linear construction). For $n \geq 5$, we add $n$ to the building time for each triangulation built.
-    \item \textbf{Flipping Time (F):} Each edge flip operation adds 1 to the flipping time
-    \item \textbf{$(B+F)/T$ Ratio:} The ratio of total operations (building + flipping) to total triangulations, measuring amortized complexity. Our theoretical bound is $(B+F)/T < 4$.
-\end{itemize}
-
-\begin{table}[h]
-\centering
-\small
-\caption{Experimental Results on 41 Graph Instances (Part 1: Simple and Regular Structures)}
-\label{tab:experimental_results_part1}
-\begin{tabular}{|l|r|r|r|r|r|r|}
-\hline
-\textbf{Graph} & \textbf{Iter.} & \textbf{$T$} & \textbf{$B$} & \textbf{$F$} & \textbf{$B+F$} & \textbf{$(B+F)/T$} \\
-\hline
-\multicolumn{7}{|c|}{\textit{Simple Cycles}} \\
-\hline
-$C_3$ (triangle) & 0 & 1 & 0 & 0 & 0 & 0.00 \\
-$C_4$ (square) & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-$C_5$ (pentagon) & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-$C_6$ (hexagon\_1) & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-$C_6$ (hexagon\_2) & 1 & 1 & 0 & 1 & 1 & 1.00 \\
-$C_6$ (hexagon\_3) & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-$C_7$ (heptagon) & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-$C_8$ (octagon) & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-$C_9$ (nonagon) & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-\hline
-\multicolumn{7}{|c|}{\textit{Diamond Structures}} \\
-\hline
-diamond\_1 & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-diamond\_2 & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-diamond\_3 & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-\hline
-\multicolumn{7}{|c|}{\textit{Complete Graphs and Tetrahedra}} \\
-\hline
-$K_3$ (triangle) & 0 & 1 & 0 & 0 & 0 & 0.00 \\
-$K_4$ (tetrahedron\_1) & 0 & 1 & 0 & 0 & 0 & 0.00 \\
-$K_4$ (tetrahedron\_2) & 0 & 1 & 0 & 0 & 0 & 0.00 \\
-Octahedron dual & 0 & 1 & 0 & 0 & 0 & 0.00 \\
-\hline
-\multicolumn{7}{|c|}{\textit{Pre-triangulated Graphs}} \\
-\hline
-triangulated\_4tri\_1 & 0 & 1 & 0 & 0 & 0 & 0.00 \\
-triangulated\_4tri\_2 & 0 & 1 & 0 & 0 & 0 & 0.00 \\
-triangulated\_9tri & 0 & 1 & 0 & 0 & 0 & 0.00 \\
-\hline
-\multicolumn{7}{|c|}{\textit{Wheel Graphs}} \\
-\hline
-$W_4$ wheel & 2 & 2 & 1 & 1 & 2 & 1.00 \\
-$W_5$ wheel\_1 & 9 & 5 & 5 & 4 & 9 & 1.80 \\
-$W_5$ wheel\_2 & 9 & 5 & 5 & 4 & 9 & 1.80 \\
-\hline
-\multicolumn{7}{|c|}{\textit{Bipartite Graphs}} \\
-\hline
-$K_{2,3}$ bipartite & 9 & 4 & 6 & 3 & 9 & 2.25 \\
-\hline
-\end{tabular}
-\end{table}
-
-\begin{table}[h]
-\centering
-\small
-\caption{Experimental Results on 41 Graph Instances (Part 2: Complex and Large-Scale Structures)}
-\label{tab:experimental_results_part2}
-\begin{tabular}{|l|r|r|r|r|r|r|}
-\hline
-\textbf{Graph} & \textbf{Iter.} & \textbf{$T$} & \textbf{$B$} & \textbf{$F$} & \textbf{$B+F$} & \textbf{$(B+F)/T$} \\
-\hline
-\multicolumn{7}{|c|}{\textit{General plane Graphs (Small to Medium)}} \\
-\hline
-graph\_V5E6F3 & 14 & 4 & 11 & 3 & 14 & 3.50 \\
-graph\_V5E7F3 & 6 & 2 & 5 & 1 & 6 & 3.00 \\
-graph\_V5E7F4\_1 & 6 & 2 & 5 & 1 & 6 & 3.00 \\
-graph\_V5E7F4\_2 & 1 & 1 & 1 & 0 & 1 & 1.00 \\
-graph\_V5E7F4\_3 & 6 & 2 & 5 & 1 & 6 & 3.00 \\
-graph\_V6E7F3\_1 & 46 & 20 & 27 & 19 & 46 & 2.30 \\
-graph\_V6E7F3\_2 & 58 & 24 & 35 & 23 & 58 & 2.42 \\
-graph\_V6E7F3\_3 & 46 & 20 & 27 & 19 & 46 & 2.30 \\
-graph\_V6E7F3\_4 & 46 & 20 & 27 & 19 & 46 & 2.30 \\
-graph\_V7E9F3 & 14 & 9 & 6 & 8 & 14 & 1.56 \\
-graph\_V7E11F5 & 12 & 7 & 6 & 6 & 12 & 1.71 \\
-graph\_V7E14F9 & 2 & 2 & 1 & 1 & 2 & 1.00 \\
-graph\_V8E10F4 & 94 & 40 & 55 & 39 & 94 & 2.35 \\
-graph\_V8E15F8 & 10 & 5 & 6 & 4 & 10 & 2.00 \\
-\hline
-\multicolumn{7}{|c|}{\textit{Large-Scale Instances}} \\
-\hline
-graph\_V9E10F3 & 15,075 & 13,880 & 1,196 & 13,879 & 15,075 & \textbf{1.09} \\
-graph\_V12E25F12 & 69 & 62 & 8 & 61 & 69 & \textbf{1.11} \\
-\hline
-\multicolumn{7}{|c|}{\textit{Quadrilateral-based Graphs}} \\
-\hline
-quadrilateral\_4quad & 30 & 16 & 15 & 15 & 30 & 1.88 \\
-quadrilateral\_7quad & 162 & 72 & 91 & 71 & 162 & 2.25 \\
-quadrilateral\_14quad & 32,766 & 16,384 & 16,383 & 16,383 & 32,766 & \textbf{2.00} \\
-\hline
-\end{tabular}
-\end{table}
-
-Experimental results confirm Theorem~\ref{thm:time_complexity}: all 41 test cases satisfy $(B+F)/T < 4.0$, with an overall average of 1.62. Large instances (graph\_V9E10F3 with 13,880 triangulations, quadrilateral\_14quad with 16,384 triangulations) achieve exceptional ratios of 1.09 and 2.00 respectively, demonstrating excellent scalability and amortization. All outputs were verified for completeness and correctness.
+All outputs were verified for completeness and correctness, with no duplicate triangulations generated across all test cases.
 
 \subsection{Runtime Performance Analysis}
 
