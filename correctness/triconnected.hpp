@@ -88,7 +88,6 @@ public:
                 uniqueTriangulations.push_back(triangulation);
             }
         }
-        cout << "Size of unique: " << uniqueTriangulations.size() << endl;
         allTriangulations.clear();
         for (auto triangulation : uniqueTriangulations)
         {

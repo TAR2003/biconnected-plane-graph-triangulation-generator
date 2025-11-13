@@ -1,1 +1,0 @@
-{"name":"Local: biconnected","url":"c:\\Users\\TAWKIR\\Documents\\GitHub\\ThesisGraph\\cpp_codes\\biconnected.cpp","tests":[{"id":1762966815964,"input":"3\n4\n1 2 3 4\n4\n1 2 3 5\n4\n1 5 3 4","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\TAWKIR\\Documents\\GitHub\\ThesisGraph\\cpp_codes\\biconnected.cpp","group":"local","local":true}

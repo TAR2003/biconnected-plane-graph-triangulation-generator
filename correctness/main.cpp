@@ -6,10 +6,10 @@ using namespace std;
 #include "FaceTriangulation.hpp"
 #include "triconnected.hpp"
 
-vector<vector<int>> solve(string filename)
+vector<vector<int>> input(string filename)
 {
     ifstream infile(filename);
-    if(!infile.is_open())
+    if (!infile.is_open())
     {
         cerr << "Error opening file: " << filename << endl;
         return {};
@@ -17,11 +17,13 @@ vector<vector<int>> solve(string filename)
     vector<vector<int>> faces;
     int faceno;
     infile >> faceno;
-    for(int i = 0 ; i < faceno ; i++) {
+    for (int i = 0; i < faceno; i++)
+    {
         int vertices;
         infile >> vertices;
         vector<int> face;
-        for(int j = 0 ; j < vertices ; j++) {
+        for (int j = 0; j < vertices; j++)
+        {
             int vertex;
             infile >> vertex;
             face.push_back(vertex);
@@ -48,9 +50,9 @@ bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int
     return true;
 }
 
-void matchTwoAlgorithms(string filename)
+bool matchTwoAlgorithms(string filename)
 {
-    vector<vector<int>> faces = solve(filename);
+    vector<vector<int>> faces = input(filename);
     biconnected *bc = new biconnected(faces);
     bc->getAllTriangulations();
     bc->sortTriangulations();
@@ -63,6 +65,7 @@ void matchTwoAlgorithms(string filename)
     if (newalgo.size() != oldalgo.size())
     {
         cout << "Mismatch in number of triangulations: New Algo = " << newalgo.size() << ", Old Algo = " << oldalgo.size() << endl;
+        return false;
     }
     else
     {
@@ -71,15 +74,16 @@ void matchTwoAlgorithms(string filename)
         {
             if (!matchTriangulations(newalgo[i], oldalgo[i]))
             {
-                cout << " Mismatch found in triangulation " << i + 1 << endl;
+                cout << "\033[1;31m Mismatch found in triangulation " << i + 1 << "\033[0m" << endl;
                 allMatch = false;
                 break;
             }
         }
         if (allMatch)
         {
-            cout << " All triangulations match between both algorithms." << endl;
+            cout << "\033[1;32m All triangulations match between both algorithms.\033[0m" << endl;
         }
+        return allMatch;
     }
 }
 
@@ -89,7 +93,7 @@ namespace fs = std::filesystem;
 int main()
 {
     string folder = "input";
-
+    vector<pair<string, bool>> files;
     // Loop through all files in the folder
     for (const auto &entry : fs::directory_iterator(folder))
     {
@@ -97,7 +101,19 @@ int main()
         {
             string filename = entry.path().string();
             cout << "Processing: " << filename << endl;
-            matchTwoAlgorithms(filename);
+            bool result = matchTwoAlgorithms(filename);
+            files.push_back({filename, result});
+        }
+    }
+    for (int i = 0; i < files.size(); i++)
+    {
+        if (files[i].second)
+        {
+            cout << "File: " << " => \033[1;32mMatched: " << files[i].first << " \033[0m" << endl;
+        }
+        else
+        {
+            cout << "File: " << " => \033[1;31mMismatched: " << files[i].first << " \033[0m" << endl;
         }
     }
 
