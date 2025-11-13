@@ -1,28 +1,66 @@
 #include <bits/stdc++.h>
 using namespace std;
-
 #include "Edge.hpp"
 #include "pairHash.hpp"
 #include "biconnected.hpp"
 #include "FaceTriangulation.hpp"
-
 #include <filesystem>
 #include <chrono>
+
 namespace fs = std::filesystem;
 
-vector<vector<int>> input(const string &filename)
+// Cross-platform memory measurement
+#ifdef _WIN32
+#include <windows.h>
+#include <psapi.h>
+size_t getCurrentMemoryUsage()
+{
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS *)&pmc, sizeof(pmc));
+    return pmc.WorkingSetSize;
+}
+#elif __APPLE__
+#include <mach/mach.h>
+size_t getCurrentMemoryUsage()
+{
+    struct mach_task_basic_info info;
+    mach_msg_type_number_t size = MACH_TASK_BASIC_INFO_COUNT;
+    task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info, &size);
+    return info.resident_size;
+}
+#else
+#include <unistd.h>
+#include <fstream>
+size_t getCurrentMemoryUsage()
+{
+    long rss = 0L;
+    FILE *fp = fopen("/proc/self/statm", "r");
+    if (fp)
+    {
+        if (fscanf(fp, "%*s%ld", &rss) == 1)
+        {
+            fclose(fp);
+            return rss * sysconf(_SC_PAGESIZE);
+        }
+        fclose(fp);
+    }
+    return 0;
+}
+#endif
+
+vector<vector<int>> input(const string &filename, int &distinctVertices)
 {
     ifstream infile(filename);
     if (!infile.is_open())
     {
         cerr << "Error opening file: " << filename << endl;
+        distinctVertices = 0;
         return {};
     }
-
     vector<vector<int>> faces;
+    unordered_set<int> uniqueVertices;
     int faceno;
     infile >> faceno;
-
     for (int i = 0; i < faceno; i++)
     {
         int vertices;
@@ -33,21 +71,49 @@ vector<vector<int>> input(const string &filename)
             int vertex;
             infile >> vertex;
             face.push_back(vertex);
+            uniqueVertices.insert(vertex);
         }
         faces.push_back(face);
     }
+    distinctVertices = uniqueVertices.size();
     return faces;
 }
+
+string formatBytes(size_t bytes)
+{
+    const char *units[] = {"B", "KB", "MB", "GB"};
+    int unitIndex = 0;
+    double size = bytes;
+
+    while (size >= 1024.0 && unitIndex < 3)
+    {
+        size /= 1024.0;
+        unitIndex++;
+    }
+
+    ostringstream oss;
+    oss << fixed << setprecision(2) << size << " " << units[unitIndex];
+    return oss.str();
+}
+
+struct BenchmarkResult
+{
+    string filename;
+    int distinctVertices;
+    uint64_t totalTriang;
+    double avgTime;
+    double perTriangNs;
+    size_t peakMemory;
+    double memoryPerVertex;
+};
 
 int main()
 {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
-
     string folder = "input";
-    const int testRuns = 20; // repeat each test for averaging
-
-    vector<tuple<string, uint64_t, double, double>> results;
+    const int testRuns = 20;
+    vector<BenchmarkResult> results;
 
     if (!fs::exists(folder) || !fs::is_directory(folder))
     {
@@ -55,34 +121,48 @@ int main()
         return 1;
     }
 
-    cout << "Scanning folder: " << folder << "\n\n";
-    cout << "Each test will run " << testRuns << " times, and results will be averaged.\n\n";
+    cout << "\n";
+    cout << "╔════════════════════════════════════════════════════════════════════════════╗\n";
+    cout << "║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║\n";
+    cout << "╚════════════════════════════════════════════════════════════════════════════╝\n";
+    cout << "\nScanning folder: " << folder << "\n";
+    cout << "Test runs per file: " << testRuns << "\n\n";
 
     for (const auto &entry : fs::directory_iterator(folder))
     {
         if (!entry.is_regular_file())
             continue;
 
-        string filename = entry.path().string();
-        cout << "Processing: " << filename << endl;
+        string filename = entry.path().filename().string();
+        cout << "⏳ Processing: " << filename << " ... " << flush;
 
-        vector<vector<int>> faces = input(filename);
+        int distinctVertices = 0;
+        vector<vector<int>> faces = input(entry.path().string(), distinctVertices);
+
         if (faces.empty())
         {
-            cerr << "Warning: Skipping empty or invalid file: " << filename << endl;
+            cerr << "\n⚠️  Warning: Skipping empty or invalid file: " << filename << endl;
             continue;
         }
 
         uint64_t totalTriang = 0;
         long double totalTimeSum = 0.0L;
+        size_t peakMemory = 0;
 
         for (int run = 1; run <= testRuns; run++)
         {
+            size_t memBefore = getCurrentMemoryUsage();
+
             biconnected *bc = new biconnected(faces);
+
             using clock = std::chrono::steady_clock;
             auto start = clock::now();
             bc->getAllTriangulations();
             auto end = clock::now();
+
+            size_t memAfter = getCurrentMemoryUsage();
+            size_t memUsed = (memAfter > memBefore) ? (memAfter - memBefore) : 0;
+            peakMemory = max(peakMemory, memUsed);
 
             auto dur_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
             totalTimeSum += (long double)dur_ns / 1'000'000'000.0L;
@@ -94,39 +174,69 @@ int main()
         double avgTime = (double)(totalTimeSum / testRuns);
         double avgTimeNs = avgTime * 1'000'000'000.0;
         double perTriangNs = (totalTriang > 0) ? avgTimeNs / totalTriang : 0.0;
+        double memoryPerVertex = (distinctVertices > 0) ? (double)peakMemory / distinctVertices : 0.0;
 
-        results.push_back({filename, totalTriang, avgTime, perTriangNs});
+        results.push_back({filename, distinctVertices, totalTriang, avgTime, perTriangNs, peakMemory, memoryPerVertex});
+        cout << "✓\n";
     }
 
-    // ============= PRINT TABLE =============
-    cout << "\n============================================================\n";
-    cout << "\033[1m" // Bold header
-         << left << setw(35) << "File"
-         << right << setw(18) << "Total Triang"
-         << setw(18) << "Avg Time (s)"
-         << setw(22) << "Time/Trig (ns)"
-         << "\033[0m\n";
-    cout << "------------------------------------------------------------\n";
+    // ============= PRINT RESULTS TABLE =============
+    cout << "\n";
+    cout << "╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n";
+    cout << "║                                                    BENCHMARK RESULTS                                                               ║\n";
+    cout << "╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣\n";
+    cout << "║ " << "\033[1m" << left << setw(25) << "File"
+         << "\033[0m║ " << "\033[1m" << right << setw(10) << "Vertices"
+         << "\033[0m║ " << "\033[1m" << right << setw(15) << "Triangulations"
+         << "\033[0m║ " << "\033[1m" << right << setw(12) << "Time (s)"
+         << "\033[0m║ " << "\033[1m" << right << setw(13) << "ns/Triang"
+         << "\033[0m║ " << "\033[1m" << right << setw(15) << "Peak Memory"
+         << "\033[0m║ " << "\033[1m" << right << setw(22) << "Memory/Vertex"
+         << "\033[0m║\n";
+    cout << "╠═══════════════════════════╬════════════╬═════════════════╬══════════════╬═══════════════╬═════════════════╬════════════════════════╣\n";
 
-    int row = 0;
-    for (const auto &[fname, total, avgSec, perNs] : results)
+    for (size_t i = 0; i < results.size(); i++)
     {
-        // Alternate row background color
-        string bg = (row % 2 == 0) ? "\033[48;5;236m" : "\033[48;5;233m";
-        string reset = "\033[0m";
+        const auto &r = results[i];
 
-        cout << bg
-             << left << setw(35) << fname
-             << right << setw(18) << total
-             << setw(18) << fixed << setprecision(6) << avgSec
-             << setw(22) << fixed << setprecision(3) << perNs
-             << reset << "\n";
+        // Color coding based on performance
+        string timeColor = r.avgTime < 0.1 ? "\033[32m" : // Green: fast
+                               r.avgTime < 1.0 ? "\033[33m"
+                                               : // Yellow: medium
+                               "\033[31m";       // Red: slow
 
-        row++;
+        string memColor = r.memoryPerVertex < 1024 ? "\033[32m" : // Green: < 1KB/vertex
+                              r.memoryPerVertex < 10240 ? "\033[33m"
+                                                        : // Yellow: < 10KB/vertex
+                              "\033[31m";                 // Red: >= 10KB/vertex
+
+        cout << "║ " << left << setw(25) << r.filename.substr(0, 25)
+             << "║ " << right << setw(10) << r.distinctVertices
+             << "║ " << right << setw(15) << r.totalTriang
+             << "║ " << timeColor << right << setw(12) << fixed << setprecision(6) << r.avgTime << "\033[0m"
+             << "║ " << right << setw(13) << fixed << setprecision(2) << r.perTriangNs
+             << "║ " << memColor << right << setw(15) << formatBytes(r.peakMemory) << "\033[0m"
+             << "║ " << memColor << right << setw(22) << formatBytes((size_t)r.memoryPerVertex) << "\033[0m"
+             << "║\n";
     }
 
-    cout << "============================================================\n";
-    cout << "Note: Results averaged over " << testRuns << " runs per file.\n";
+    cout << "╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝\n";
+
+    // ============= COMPLEXITY ANALYSIS =============
+    cout << "\n";
+    cout << "╔════════════════════════════════════════════════════════════════════════════╗\n";
+    cout << "║                         COMPLEXITY ANALYSIS                                ║\n";
+    cout << "╠════════════════════════════════════════════════════════════════════════════╣\n";
+    cout << "║  Time Complexity:  Varies with triangulation count (see ns/Triang)        ║\n";
+    cout << "║  Space Complexity: O(n) where n = number of vertices                      ║\n";
+    cout << "║                    (see Memory/Vertex column for constant factor)         ║\n";
+    cout << "╠════════════════════════════════════════════════════════════════════════════╣\n";
+    cout << "║  Color Legend:                                                             ║\n";
+    cout << "║    \033[32m● Green\033[0m  = Excellent performance                                         ║\n";
+    cout << "║    \033[33m● Yellow\033[0m = Moderate performance                                          ║\n";
+    cout << "║    \033[31m● Red\033[0m    = High resource usage                                           ║\n";
+    cout << "╚════════════════════════════════════════════════════════════════════════════╝\n";
+    cout << "\nNote: Results averaged over " << testRuns << " runs per file.\n";
 
     return 0;
 }

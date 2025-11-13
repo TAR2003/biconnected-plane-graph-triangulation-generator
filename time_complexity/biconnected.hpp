@@ -75,6 +75,7 @@ inline void biconnected::output(int serial)
     }
     else
     {
+        delete faceTriangulations[serial + 1];
         faceTriangulations[serial + 1] = new FaceTriangulation(faces[serial + 1].size(), faces[serial + 1], present, serial + 1, this);
         faceTriangulations[serial + 1]->generateAllTriangulations();
     }
