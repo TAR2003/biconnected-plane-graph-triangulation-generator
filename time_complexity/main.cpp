@@ -45,7 +45,7 @@ int main()
     cin.tie(nullptr);
 
     string folder = "input";
-    const int testRuns = 1; // repeat each test for averaging
+    const int testRuns = 20; // repeat each test for averaging
 
     vector<tuple<string, uint64_t, double, double>> results;
 
