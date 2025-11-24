@@ -18,11 +18,22 @@ Reinhard Diestel.
 \newblock See Theorem 2.3.1 (Maximal Outerplanar Graphs) for degree-2 vertex
   existence.
 
+\bibitem{hurtado1999}
+Ferran Hurtado and Marc Noy.
+\newblock Graph of triangulations of a convex polygon and tree of
+  triangulations.
+\newblock {\em Computational Geometry}, 13(3):179--188, 1999.
+
 \bibitem{kozminski1985}
 Krzysztof Kozminski and Edwin Kinnen.
 \newblock Rectangular dualization and rectangular dissections.
 \newblock {\em IEEE Transactions on Circuits and Systems}, 32(8):771--781,
   1985.
+
+\bibitem{li2001}
+Zheng Li and Shin-ichi Nakano.
+\newblock Generating all triangulations of plane graphs.
+\newblock {\em Theoretical Computer Science}, 270(1-2):771--784, 2002.
 
 \bibitem{nishizeki2004}
 Takao Nishizeki and Md~Saidur Rahman.
