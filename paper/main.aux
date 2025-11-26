@@ -2,155 +2,136 @@
 \providecommand\hyper@newdestlabel[2]{}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
-\citation{kozminski1985}
-\citation{berg2008}
-\citation{nishizeki2004}
-\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Motivation and Challenges}{1}{subsection.1.1}\protected@file@percent }
-\citation{read1978}
-\citation{avis1996}
-\citation{hurtado1999}
 \citation{li2001}
 \citation{parvez2011}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Related Work}{2}{subsection.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}The Multi-Edge Problem in Biconnected Graphs}{2}{subsection.1.3}\protected@file@percent }
-\newlabel{subsec:multiedge}{{1.3}{2}{The Multi-Edge Problem in Biconnected Graphs}{subsection.1.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Comparison of graph classes. \textbf  {Left:} Triconnected graphs (addressed by Parvez et al. [8]) have no separation pairs, so faces share only boundary edges. \textbf  {Right:} Biconnected graphs (this work) may contain separation pairs (highlighted in red), allowing faces to share internal structure and creating multi-edge conflicts. Our algorithm extends the framework to this more general class through safe root selection and global chord tracking.}}{3}{figure.caption.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:introduction}{{1}{1}{Introduction}{section.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}.}}{2}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:graph_comparison}{{1}{3}{Comparison of graph classes. \textbf {Left:} Triconnected graphs (addressed by Parvez et al. [8]) have no separation pairs, so faces share only boundary edges. \textbf {Right:} Biconnected graphs (this work) may contain separation pairs (highlighted in red), allowing faces to share internal structure and creating multi-edge conflicts. Our algorithm extends the framework to this more general class through safe root selection and global chord tracking}{figure.caption.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Our Contribution}{3}{subsection.1.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The multi-edge problem in biconnected graphs. \textbf  {Left:} In triconnected graphs, any two faces share only boundary edges, enabling independent triangulation. \textbf  {Right:} In biconnected graphs with separation pairs, faces can share internal structure. Naive independent triangulation creates multi-edges (parallel edges between the same vertex pair), violating the simple graph property.}}{4}{figure.caption.2}\protected@file@percent }
-\newlabel{fig:multiedge_problem}{{2}{4}{The multi-edge problem in biconnected graphs. \textbf {Left:} In triconnected graphs, any two faces share only boundary edges, enabling independent triangulation. \textbf {Right:} In biconnected graphs with separation pairs, faces can share internal structure. Naive independent triangulation creates multi-edges (parallel edges between the same vertex pair), violating the simple graph property}{figure.caption.2}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {2}Preliminaries}{4}{section.2}\protected@file@percent }
-\newlabel{sec:preliminaries}{{2}{4}{Preliminaries}{section.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Basic Graph Theory}{4}{subsection.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Plane Graphs and Plane Embeddings}{5}{subsection.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Cycles and Chords}{5}{subsection.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Triangulations}{5}{subsection.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Visibility in Triangulations}{5}{subsection.2.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Key Definitions for Our Algorithm}{6}{subsection.2.6}\protected@file@percent }
-\newlabel{def:edgeflip}{{8}{6}{Edge Flip Notation}{definition.8}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}The Algorithm}{7}{section.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Algorithm Overview}{7}{subsection.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Key Innovations}{7}{subsection.3.2}\protected@file@percent }
+\newlabel{separationpair}{{1}{2}{Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}}{figure.caption.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces (3,7) separation pair can have a chord between them in more than one way. }}{2}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:multiedgeinseparationpair}{{2}{2}{(3,7) separation pair can have a chord between them in more than one way}{figure.caption.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The left one is a biconnected graph, where (3,7) has a possiblity of being multi edge, but on the right one, (3,7) cannot be multi edge because is it a triconnected graph}}{2}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:occurranceofmultiedge}{{3}{2}{The left one is a biconnected graph, where (3,7) has a possiblity of being multi edge, but on the right one, (3,7) cannot be multi edge because is it a triconnected graph}{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Preliminaries}{3}{section.2}\protected@file@percent }
+\newlabel{sec:preliminaries}{{2}{3}{Preliminaries}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Basic Graph Theory}{3}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Plane Graphs and Plane Embeddings}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Cycles and Chords}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Triangulations}{4}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Visibility in Triangulations}{4}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Key Definitions for Our Algorithm}{4}{subsection.2.6}\protected@file@percent }
+\newlabel{def:edgeflip}{{8}{5}{Edge Flip Notation}{definition.8}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}The Algorithm}{5}{section.3}\protected@file@percent }
+\newlabel{sec:algorithm}{{3}{5}{The Algorithm}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Algorithm Overview}{5}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Key Innovations}{5}{subsection.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Complete algorithm workflow. The algorithm processes faces sequentially, constructing a local genealogical tree for each face from a safe root vertex. The global chord set $S$ is maintained through push/pop operations during DFS exploration. When all faces are triangulated, a complete graph triangulation is output. Backtracking explores all valid combinations.}}{6}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:algorithm_workflow}{{4}{6}{Complete algorithm workflow. The algorithm processes faces sequentially, constructing a local genealogical tree for each face from a safe root vertex. The global chord set $S$ is maintained through push/pop operations during DFS exploration. When all faces are triangulated, a complete graph triangulation is output. Backtracking explores all valid combinations}{figure.caption.4}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Innovation 1: Local Genealogical Trees}{7}{subsubsection.3.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces DFS recursion structure with backtracking. The algorithm processes faces sequentially, exploring all triangulations in each face's local genealogical tree. The global chord set $S$ is updated when entering a branch (add chords) and restored when backtracking (remove chords). Each path from root to leaf represents a unique complete triangulation of the graph.}}{7}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:recursion_structure}{{5}{7}{DFS recursion structure with backtracking. The algorithm processes faces sequentially, exploring all triangulations in each face's local genealogical tree. The global chord set $S$ is updated when entering a branch (add chords) and restored when backtracking (remove chords). Each path from root to leaf represents a unique complete triangulation of the graph}{figure.caption.5}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Innovation 2: Safe Root Vertex Selection}{7}{subsubsection.3.2.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Complete algorithm workflow. The algorithm processes faces sequentially, constructing a local genealogical tree for each face from a safe root vertex. The global chord set $S$ is maintained through push/pop operations during DFS exploration. When all faces are triangulated, a complete graph triangulation is output. Backtracking explores all valid combinations.}}{8}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:algorithm_workflow}{{3}{8}{Complete algorithm workflow. The algorithm processes faces sequentially, constructing a local genealogical tree for each face from a safe root vertex. The global chord set $S$ is maintained through push/pop operations during DFS exploration. When all faces are triangulated, a complete graph triangulation is output. Backtracking explores all valid combinations}{figure.caption.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces DFS recursion structure with backtracking. The algorithm processes faces sequentially, exploring all triangulations in each face's local genealogical tree. The global chord set $S$ is updated when entering a branch (add chords) and restored when backtracking (remove chords). Each path from root to leaf represents a unique complete triangulation of the graph.}}{9}{figure.caption.4}\protected@file@percent }
-\newlabel{fig:recursion_structure}{{4}{9}{DFS recursion structure with backtracking. The algorithm processes faces sequentially, exploring all triangulations in each face's local genealogical tree. The global chord set $S$ is updated when entering a branch (add chords) and restored when backtracking (remove chords). Each path from root to leaf represents a unique complete triangulation of the graph}{figure.caption.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Structure of a local genealogical tree for a single face. The root is constructed from a safe root vertex using a fan triangulation. Each child is obtained by flipping the generating chord (leftmost non-root chord). The tree structure ensures each triangulation appears exactly once, with unique parent-child relationships defined by edge flips.}}{9}{figure.caption.5}\protected@file@percent }
-\newlabel{fig:local_tree}{{5}{9}{Structure of a local genealogical tree for a single face. The root is constructed from a safe root vertex using a fan triangulation. Each child is obtained by flipping the generating chord (leftmost non-root chord). The tree structure ensures each triangulation appears exactly once, with unique parent-child relationships defined by edge flips}{figure.caption.5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Innovation 3: Dynamic Global Chord Management}{10}{subsubsection.3.2.3}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Dynamic global chord set management. As the algorithm explores the recursion tree via DFS, chords are added to $S$ when entering a branch (push) and removed when backtracking (pop). This ensures $S$ always contains exactly the chords from the current partial triangulation on the exploration path, enabling efficient multi-edge detection.}}{10}{figure.caption.6}\protected@file@percent }
-\newlabel{fig:global_chord_management}{{6}{10}{Dynamic global chord set management. As the algorithm explores the recursion tree via DFS, chords are added to $S$ when entering a branch (push) and removed when backtracking (pop). This ensures $S$ always contains exactly the chords from the current partial triangulation on the exploration path, enabling efficient multi-edge detection}{figure.caption.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Core Concepts}{10}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Root Triangulation}{10}{subsubsection.3.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Construction of root triangulation from safe root vertex $r = v_1$ in a pentagon. The algorithm adds chords from $r$ to all non-adjacent vertices ($v_3$ and $v_4$), creating a fan structure. Vertices $v_2$ and $v_5$ are already adjacent to $r$ on the cycle boundary (blue edges), so no chords are needed. This construction guarantees no multi-edges if $r$ is a safe root.}}{11}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:root_triangulation}{{7}{11}{Construction of root triangulation from safe root vertex $r = v_1$ in a pentagon. The algorithm adds chords from $r$ to all non-adjacent vertices ($v_3$ and $v_4$), creating a fan structure. Vertices $v_2$ and $v_5$ are already adjacent to $r$ on the cycle boundary (blue edges), so no chords are needed. This construction guarantees no multi-edges if $r$ is a safe root}{figure.caption.7}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Local Genealogical Tree Structure}{11}{subsubsection.3.3.2}\protected@file@percent }
-\newlabel{def:generating_chord}{{9}{11}{Generating Chord}{definition.9}{}}
-\newlabel{def:parent_child}{{10}{11}{Parent-Child Relationship}{definition.10}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Algorithm Specification}{11}{subsection.3.4}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces StartTriangulation}}{11}{algorithm.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Parent-child relationship via generating chord. The generating chord is the leftmost chord in the triangulation that does not involve the root vertex. Flipping this chord produces the unique parent triangulation. This defines a tree structure where each non-root triangulation has exactly one parent.}}{12}{figure.caption.8}\protected@file@percent }
-\newlabel{fig:generating_chord}{{8}{12}{Parent-child relationship via generating chord. The generating chord is the leftmost chord in the triangulation that does not involve the root vertex. Flipping this chord produces the unique parent triangulation. This defines a tree structure where each non-root triangulation has exactly one parent}{figure.caption.8}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces ConstructRootTriangulation}}{12}{algorithm.2}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces FindSafeRootVertex}}{13}{algorithm.3}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces FindAllTriangulationsCycle}}{13}{algorithm.4}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces FindAllChildTriangulationsCycle}}{14}{algorithm.5}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {6}{\ignorespaces OutputTriangulation}}{14}{algorithm.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}The Edge Flip Mechanism}{14}{subsection.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.1}How Edge Flipping Works}{14}{subsubsection.3.5.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Edge flip operation. A chord $(v_a, v_b)$ forming two adjacent triangles is removed and replaced with the opposite diagonal $(v_p, v_q)$. This operation transforms one triangulation into another while preserving validity. Each child in the genealogical tree is obtained from its parent by a single edge flip.}}{15}{figure.caption.14}\protected@file@percent }
-\newlabel{fig:edge_flip}{{9}{15}{Edge flip operation. A chord $(v_a, v_b)$ forming two adjacent triangles is removed and replaced with the opposite diagonal $(v_p, v_q)$. This operation transforms one triangulation into another while preserving validity. Each child in the genealogical tree is obtained from its parent by a single edge flip}{figure.caption.14}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.2}Tree Structure Properties}{15}{subsubsection.3.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.3}Completeness Through Tree Exploration}{15}{subsubsection.3.5.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Why This Approach Works}{16}{subsection.3.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.1}Safe Roots Solve Initialization}{16}{subsubsection.3.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.2}Local Trees + Global Tracking Prevent Duplicates}{16}{subsubsection.3.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.3}Pruning Preserves Completeness}{16}{subsubsection.3.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.4}The Three Pillars}{16}{subsubsection.3.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Innovation 3: Dynamic Global Chord Management}{7}{subsubsection.3.2.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Structure of a local genealogical tree for a single face. The root is constructed from a safe root vertex using a fan triangulation. Each child is obtained by flipping the generating chord (leftmost non-root chord). The tree structure ensures each triangulation appears exactly once, with unique parent-child relationships defined by edge flips.}}{8}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:local_tree}{{6}{8}{Structure of a local genealogical tree for a single face. The root is constructed from a safe root vertex using a fan triangulation. Each child is obtained by flipping the generating chord (leftmost non-root chord). The tree structure ensures each triangulation appears exactly once, with unique parent-child relationships defined by edge flips}{figure.caption.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Dynamic global chord set management. As the algorithm explores the recursion tree via DFS, chords are added to $S$ when entering a branch (push) and removed when backtracking (pop). This ensures $S$ always contains exactly the chords from the current partial triangulation on the exploration path, enabling efficient multi-edge detection.}}{8}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:global_chord_management}{{7}{8}{Dynamic global chord set management. As the algorithm explores the recursion tree via DFS, chords are added to $S$ when entering a branch (push) and removed when backtracking (pop). This ensures $S$ always contains exactly the chords from the current partial triangulation on the exploration path, enabling efficient multi-edge detection}{figure.caption.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Core Concepts}{9}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Root Triangulation}{9}{subsubsection.3.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Construction of root triangulation from safe root vertex $r = v_1$ in a pentagon. The algorithm adds chords from $r$ to all non-adjacent vertices ($v_3$ and $v_4$), creating a fan structure. Vertices $v_2$ and $v_5$ are already adjacent to $r$ on the cycle boundary (blue edges), so no chords are needed. This construction guarantees no multi-edges if $r$ is a safe root.}}{9}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:root_triangulation}{{8}{9}{Construction of root triangulation from safe root vertex $r = v_1$ in a pentagon. The algorithm adds chords from $r$ to all non-adjacent vertices ($v_3$ and $v_4$), creating a fan structure. Vertices $v_2$ and $v_5$ are already adjacent to $r$ on the cycle boundary (blue edges), so no chords are needed. This construction guarantees no multi-edges if $r$ is a safe root}{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Local Genealogical Tree Structure}{9}{subsubsection.3.3.2}\protected@file@percent }
+\newlabel{def:generating_chord}{{9}{9}{Generating Chord}{definition.9}{}}
+\newlabel{def:parent_child}{{10}{9}{Parent-Child Relationship}{definition.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Parent-child relationship via generating chord. The generating chord is the leftmost chord in the triangulation that does not involve the root vertex. Flipping this chord produces the unique parent triangulation. This defines a tree structure where each non-root triangulation has exactly one parent.}}{10}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:generating_chord}{{9}{10}{Parent-child relationship via generating chord. The generating chord is the leftmost chord in the triangulation that does not involve the root vertex. Flipping this chord produces the unique parent triangulation. This defines a tree structure where each non-root triangulation has exactly one parent}{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Algorithm Specification}{10}{subsection.3.4}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces StartTriangulation}}{10}{algorithm.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces ConstructRootTriangulation}}{11}{algorithm.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces FindSafeRootVertex}}{11}{algorithm.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces FindAllTriangulationsCycle}}{12}{algorithm.4}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces FindAllChildTriangulationsCycle}}{13}{algorithm.5}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {6}{\ignorespaces OutputTriangulation}}{13}{algorithm.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}The Edge Flip Mechanism}{13}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.1}How Edge Flipping Works}{13}{subsubsection.3.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Edge flip operation. A chord $(v_a, v_b)$ forming two adjacent triangles is removed and replaced with the opposite diagonal $(v_p, v_q)$. This operation transforms one triangulation into another while preserving validity. Each child in the genealogical tree is obtained from its parent by a single edge flip.}}{14}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:edge_flip}{{10}{14}{Edge flip operation. A chord $(v_a, v_b)$ forming two adjacent triangles is removed and replaced with the opposite diagonal $(v_p, v_q)$. This operation transforms one triangulation into another while preserving validity. Each child in the genealogical tree is obtained from its parent by a single edge flip}{figure.caption.15}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.2}Tree Structure Properties}{14}{subsubsection.3.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.3}Completeness Through Tree Exploration}{14}{subsubsection.3.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Why This Approach Works}{15}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.1}Safe Roots Solve Initialization}{15}{subsubsection.3.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.2}Local Trees + Global Tracking Prevent Duplicates}{15}{subsubsection.3.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.3}Pruning Preserves Completeness}{15}{subsubsection.3.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.4}The Three Pillars}{15}{subsubsection.3.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Correctness and Completeness}{15}{section.4}\protected@file@percent }
+\newlabel{sec:correctness}{{4}{15}{Correctness and Completeness}{section.4}{}}
 \citation{diestel2017}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Correctness and Completeness}{17}{section.4}\protected@file@percent }
-\newlabel{sec:correctness}{{4}{17}{Correctness and Completeness}{section.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Existence of Safe Root Vertices}{17}{subsection.4.1}\protected@file@percent }
-\newlabel{thm:safe_root_exists}{{1}{17}{Existence of Safe Roots}{theorem.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Illustration of Theorem~\ref {thm:safe_root_exists}: A hexagonal face with two existing chords $(v_2, v_5)$ and $(v_3, v_6)$ from previously processed faces (red dashed lines). Viewing this as an outerplane graph, vertices $v_1$ and $v_4$ have degree 2 on the outer cycle (blue boundary) with no incident internal edges. By the classical theorem, at least two such vertices exist, guaranteeing safe roots for algorithm initialization.}}{18}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:safe_roots}{{10}{18}{Illustration of Theorem~\ref {thm:safe_root_exists}: A hexagonal face with two existing chords $(v_2, v_5)$ and $(v_3, v_6)$ from previously processed faces (red dashed lines). Viewing this as an outerplane graph, vertices $v_1$ and $v_4$ have degree 2 on the outer cycle (blue boundary) with no incident internal edges. By the classical theorem, at least two such vertices exist, guaranteeing safe roots for algorithm initialization}{figure.caption.15}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Lower Bound on the Number of Triangulations}{18}{subsection.4.2}\protected@file@percent }
-\newlabel{lem:min_triangulations}{{2}{18}{Minimum Triangulations per Face}{theorem.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Completeness via Strategic Pruning}{20}{subsection.4.3}\protected@file@percent }
-\newlabel{lem:root_chord_invariant}{{3}{20}{Root Chord Invariant}{theorem.3}{}}
-\newlabel{lem:blocking_chord_persists}{{4}{20}{Blocking Chords Persist}{theorem.4}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Illustration of Lemma 4: Blocking chord persistence. When a triangulation $T_1$ contains a chord $(u,v)$ that already exists in the global set $S$ (a blocking chord), this chord cannot be the generating chord and thus persists in all descendants $T_2, T_3, \ldots  $ Creating multi-edges in all descendants. Therefore, pruning this entire subtree (red dashed edges) is safe and eliminates only invalid triangulations.}}{20}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:blocking_chord}{{11}{20}{Illustration of Lemma 4: Blocking chord persistence. When a triangulation $T_1$ contains a chord $(u,v)$ that already exists in the global set $S$ (a blocking chord), this chord cannot be the generating chord and thus persists in all descendants $T_2, T_3, \ldots $ Creating multi-edges in all descendants. Therefore, pruning this entire subtree (red dashed edges) is safe and eliminates only invalid triangulations}{figure.caption.16}{}}
-\newlabel{thm:completeness}{{5}{21}{Completeness}{theorem.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Order-Independence of Face Processing}{22}{subsection.4.4}\protected@file@percent }
-\newlabel{thm:order_independence}{{6}{22}{Order-Independence}{theorem.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Complexity Analysis}{24}{section.5}\protected@file@percent }
-\newlabel{sec:complexity}{{5}{24}{Complexity Analysis}{section.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Time Complexity}{24}{subsection.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Cost Model}{24}{subsubsection.5.1.1}\protected@file@percent }
-\newlabel{def:elementary_ops}{{11}{24}{Elementary Operations}{definition.11}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.2}Minimum Triangulations Guarantee}{24}{subsubsection.5.1.2}\protected@file@percent }
-\newlabel{lem:min_triangulations_n5}{{7}{24}{Minimum Triangulations for $n \geq 5$}{theorem.7}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Empirical Triangulation Counts for Simple Polygons}}{25}{table.caption.17}\protected@file@percent }
-\newlabel{tab:triangulation_counts}{{1}{25}{Empirical Triangulation Counts for Simple Polygons}{table.caption.17}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.3}Main Time Complexity Theorem}{26}{subsubsection.5.1.3}\protected@file@percent }
-\newlabel{thm:time_complexity}{{8}{26}{Amortized Constant Time per Triangulation}{theorem.8}{}}
-\newlabel{eq:build_hyp}{{29}{29}{Main Time Complexity Theorem}{equation.29}{}}
-\newlabel{eq:flip_hyp}{{30}{29}{Main Time Complexity Theorem}{equation.30}{}}
-\newlabel{eq:build_k}{{32}{29}{Main Time Complexity Theorem}{equation.32}{}}
-\newlabel{eq:build_k_bound}{{33}{29}{Main Time Complexity Theorem}{equation.33}{}}
-\newlabel{eq:build_k_final}{{34}{29}{Main Time Complexity Theorem}{equation.34}{}}
-\newlabel{eq:flip_k}{{36}{29}{Main Time Complexity Theorem}{equation.36}{}}
-\newlabel{eq:flip_k_final}{{38}{29}{Main Time Complexity Theorem}{equation.38}{}}
-\newlabel{cor:linear_time}{{9}{30}{Amortized Linear Time}{theorem.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Space Complexity}{30}{subsection.5.2}\protected@file@percent }
-\newlabel{thm:space_complexity}{{10}{30}{Linear Space Complexity}{theorem.10}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Time complexity amortization. Building operations $B$ and flipping operations $F$ both grow linearly with the number of triangulations $T$. The total operations $B + F < 4T$ (Theorem 8) confirms constant amortized cost per triangulation. The slope represents operations per triangulation; slopes $<4$ guarantee O(1) amortized complexity.}}{31}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:time_complexity}{{12}{31}{Time complexity amortization. Building operations $B$ and flipping operations $F$ both grow linearly with the number of triangulations $T$. The total operations $B + F < 4T$ (Theorem 8) confirms constant amortized cost per triangulation. The slope represents operations per triangulation; slopes $<4$ guarantee O(1) amortized complexity}{figure.caption.18}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them.}}{32}{figure.caption.19}\protected@file@percent }
-\newlabel{fig:space_complexity}{{13}{32}{Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them}{figure.caption.19}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Complexity Summary}{32}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Existence of Safe Root Vertices}{16}{subsection.4.1}\protected@file@percent }
+\newlabel{thm:safe_root_exists}{{1}{16}{Existence of Safe Roots}{theorem.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Illustration of Theorem~\ref {thm:safe_root_exists}: A hexagonal face with two existing chords $(v_2, v_5)$ and $(v_3, v_6)$ from previously processed faces (red dashed lines). Viewing this as an outerplane graph, vertices $v_1$ and $v_4$ have degree 2 on the outer cycle (blue boundary) with no incident internal edges. By the classical theorem, at least two such vertices exist, guaranteeing safe roots for algorithm initialization.}}{17}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:safe_roots}{{11}{17}{Illustration of Theorem~\ref {thm:safe_root_exists}: A hexagonal face with two existing chords $(v_2, v_5)$ and $(v_3, v_6)$ from previously processed faces (red dashed lines). Viewing this as an outerplane graph, vertices $v_1$ and $v_4$ have degree 2 on the outer cycle (blue boundary) with no incident internal edges. By the classical theorem, at least two such vertices exist, guaranteeing safe roots for algorithm initialization}{figure.caption.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Lower Bound on the Number of Triangulations}{17}{subsection.4.2}\protected@file@percent }
+\newlabel{lem:min_triangulations}{{2}{17}{Minimum Triangulations per Face}{theorem.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Completeness via Strategic Pruning}{18}{subsection.4.3}\protected@file@percent }
+\newlabel{lem:root_chord_invariant}{{3}{18}{Root Chord Invariant}{theorem.3}{}}
+\newlabel{lem:blocking_chord_persists}{{4}{19}{Blocking Chords Persist}{theorem.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Illustration of Lemma 4: Blocking chord persistence. When a triangulation $T_1$ contains a chord $(u,v)$ that already exists in the global set $S$ (a blocking chord), this chord cannot be the generating chord and thus persists in all descendants $T_2, T_3, \ldots  $ Creating multi-edges in all descendants. Therefore, pruning this entire subtree (red dashed edges) is safe and eliminates only invalid triangulations.}}{19}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:blocking_chord}{{12}{19}{Illustration of Lemma 4: Blocking chord persistence. When a triangulation $T_1$ contains a chord $(u,v)$ that already exists in the global set $S$ (a blocking chord), this chord cannot be the generating chord and thus persists in all descendants $T_2, T_3, \ldots $ Creating multi-edges in all descendants. Therefore, pruning this entire subtree (red dashed edges) is safe and eliminates only invalid triangulations}{figure.caption.17}{}}
+\newlabel{thm:completeness}{{5}{20}{Completeness}{theorem.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Order-Independence of Face Processing}{21}{subsection.4.4}\protected@file@percent }
+\newlabel{thm:order_independence}{{6}{21}{Order-Independence}{theorem.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Complexity Analysis}{22}{section.5}\protected@file@percent }
+\newlabel{sec:complexity}{{5}{22}{Complexity Analysis}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Time Complexity}{22}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Cost Model}{22}{subsubsection.5.1.1}\protected@file@percent }
+\newlabel{def:elementary_ops}{{11}{22}{Elementary Operations}{definition.11}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.2}Minimum Triangulations Guarantee}{23}{subsubsection.5.1.2}\protected@file@percent }
+\newlabel{lem:min_triangulations_simplified}{{7}{23}{Minimum Triangulations}{theorem.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Empirical Triangulation Counts for Simple Polygons}}{24}{table.caption.18}\protected@file@percent }
+\newlabel{tab:triangulation_counts}{{1}{24}{Empirical Triangulation Counts for Simple Polygons}{table.caption.18}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.3}Main Time Complexity Theorem}{24}{subsubsection.5.1.3}\protected@file@percent }
+\newlabel{thm:time_complexity}{{8}{24}{Amortized Constant Time}{theorem.8}{}}
+\newlabel{cor:linear_time}{{9}{25}{Amortized Linear Time}{theorem.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Space Complexity}{25}{subsection.5.2}\protected@file@percent }
+\newlabel{thm:space_complexity}{{10}{25}{Linear Space Complexity}{theorem.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Time complexity amortization. Building operations $B$ and flipping operations $F$ both grow linearly with the number of triangulations $T$. The total operations $B + F = O(T)$ (Theorem 8) confirms constant amortized cost per triangulation.}}{26}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:time_complexity}{{13}{26}{Time complexity amortization. Building operations $B$ and flipping operations $F$ both grow linearly with the number of triangulations $T$. The total operations $B + F = O(T)$ (Theorem 8) confirms constant amortized cost per triangulation}{figure.caption.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them.}}{27}{figure.caption.20}\protected@file@percent }
+\newlabel{fig:space_complexity}{{14}{27}{Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them}{figure.caption.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Complexity Summary}{27}{subsection.5.3}\protected@file@percent }
 \citation{avis1996}
 \citation{parvez2011}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Complexity Summary}}{33}{table.caption.20}\protected@file@percent }
-\newlabel{tab:complexity_summary}{{2}{33}{Complexity Summary}{table.caption.20}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Implementation and Experimental Results}{34}{section.6}\protected@file@percent }
-\newlabel{sec:experiments}{{6}{34}{Implementation and Experimental Results}{section.6}{}}
-\newlabel{sec:implementation}{{6}{34}{Implementation and Experimental Results}{section.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Experimental Setup}{34}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.1}Input Processing}{34}{subsubsection.6.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.2}Time Measurement}{35}{subsubsection.6.1.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.3}Space Measurement}{35}{subsubsection.6.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.4}System Specifications}{35}{subsubsection.6.1.4}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Example: All triangulations of a pentagon. The root triangulation $T_1$ is constructed from a safe root vertex (bottom vertex) using a fan structure. Four children $T_2, T_3, T_4, T_5$ are generated via edge flips. This demonstrates the local genealogical tree structure for a single face. The algorithm generates all 5 triangulations (matching the Catalan number $C_3 = 5$) without duplicates.}}{36}{figure.caption.21}\protected@file@percent }
-\newlabel{fig:pentagon_example}{{14}{36}{Example: All triangulations of a pentagon. The root triangulation $T_1$ is constructed from a safe root vertex (bottom vertex) using a fan structure. Four children $T_2, T_3, T_4, T_5$ are generated via edge flips. This demonstrates the local genealogical tree structure for a single face. The algorithm generates all 5 triangulations (matching the Catalan number $C_3 = 5$) without duplicates}{figure.caption.21}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Performance Results}{36}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Experimental Results}{37}{subsection.6.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Experimental Results (Part 1 of 2): Time and Space Complexity Analysis}}{37}{table.caption.22}\protected@file@percent }
-\newlabel{tab:timing_results_part1}{{3}{37}{Experimental Results (Part 1 of 2): Time and Space Complexity Analysis}{table.caption.22}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Performance Analysis and Discussion}{37}{subsection.6.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Experimental Results (Part 2 of 2): Time and Space Complexity Analysis}}{38}{table.caption.23}\protected@file@percent }
-\newlabel{tab:timing_results_part2}{{4}{38}{Experimental Results (Part 2 of 2): Time and Space Complexity Analysis}{table.caption.23}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Complexity Summary}}{28}{table.caption.21}\protected@file@percent }
+\newlabel{tab:complexity_summary}{{2}{28}{Complexity Summary}{table.caption.21}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Implementation and Experimental Results}{29}{section.6}\protected@file@percent }
+\newlabel{sec:experiments}{{6}{29}{Implementation and Experimental Results}{section.6}{}}
+\newlabel{sec:implementation}{{6}{29}{Implementation and Experimental Results}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Experimental Setup}{29}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.1}Input Processing}{29}{subsubsection.6.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.2}Time Measurement}{30}{subsubsection.6.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.3}Space Measurement}{30}{subsubsection.6.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {6.1.4}System Specifications}{30}{subsubsection.6.1.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Example: All triangulations of a pentagon. The root triangulation $T_1$ is constructed from a safe root vertex (bottom vertex) using a fan structure. Four children $T_2, T_3, T_4, T_5$ are generated via edge flips. This demonstrates the local genealogical tree structure for a single face. The algorithm generates all 5 triangulations (matching the Catalan number $C_3 = 5$) without duplicates.}}{31}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:pentagon_example}{{15}{31}{Example: All triangulations of a pentagon. The root triangulation $T_1$ is constructed from a safe root vertex (bottom vertex) using a fan structure. Four children $T_2, T_3, T_4, T_5$ are generated via edge flips. This demonstrates the local genealogical tree structure for a single face. The algorithm generates all 5 triangulations (matching the Catalan number $C_3 = 5$) without duplicates}{figure.caption.22}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Performance Results}{31}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Experimental Results}{32}{subsection.6.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Experimental Results (Part 1 of 2): Time and Space Complexity Analysis}}{32}{table.caption.23}\protected@file@percent }
+\newlabel{tab:timing_results_part1}{{3}{32}{Experimental Results (Part 1 of 2): Time and Space Complexity Analysis}{table.caption.23}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Performance Analysis and Discussion}{32}{subsection.6.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Experimental Results (Part 2 of 2): Time and Space Complexity Analysis}}{33}{table.caption.24}\protected@file@percent }
+\newlabel{tab:timing_results_part2}{{4}{33}{Experimental Results (Part 2 of 2): Time and Space Complexity Analysis}{table.caption.24}{}}
 \citation{parvez2011}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion and Future Work}{39}{section.7}\protected@file@percent }
-\newlabel{sec:conclusion}{{7}{39}{Conclusion and Future Work}{section.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion and Future Work}{34}{section.7}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{34}{Conclusion and Future Work}{section.7}{}}
 \citation{parvez2011}
 \bibstyle{plain}
 \bibdata{references}
 \bibcite{avis1996}{1}
-\bibcite{berg2008}{2}
-\bibcite{diestel2017}{3}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Key Achievements}{40}{subsection.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Theoretical Significance}{40}{subsection.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Future Directions}{40}{subsection.7.3}\protected@file@percent }
-\bibcite{hurtado1999}{4}
-\bibcite{kozminski1985}{5}
-\bibcite{li2001}{6}
-\bibcite{nishizeki2004}{7}
-\bibcite{parvez2011}{8}
-\bibcite{read1978}{9}
-\gdef \@abspage@last{41}
+\bibcite{diestel2017}{2}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Key Achievements}{35}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Theoretical Significance}{35}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Future Directions}{35}{subsection.7.3}\protected@file@percent }
+\bibcite{li2001}{3}
+\bibcite{parvez2011}{4}
+\gdef \@abspage@last{36}

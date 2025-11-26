@@ -5,11 +5,6 @@ David Avis and Komei Fukuda.
 \newblock Reverse search for enumeration.
 \newblock {\em Discrete Applied Mathematics}, 65(1-3):21--46, 1996.
 
-\bibitem{berg2008}
-Mark de~Berg, Otfried Cheong, Marc van Kreveld, and Mark Overmars.
-\newblock {\em Computational Geometry: Algorithms and Applications}.
-\newblock Springer, 3rd edition, 2008.
-
 \bibitem{diestel2017}
 Reinhard Diestel.
 \newblock {\em Graph Theory}, volume 173 of {\em Graduate Texts in
@@ -18,27 +13,10 @@ Reinhard Diestel.
 \newblock See Theorem 2.3.1 (Maximal Outerplanar Graphs) for degree-2 vertex
   existence.
 
-\bibitem{hurtado1999}
-Ferran Hurtado and Marc Noy.
-\newblock Graph of triangulations of a convex polygon and tree of
-  triangulations.
-\newblock {\em Computational Geometry}, 13(3):179--188, 1999.
-
-\bibitem{kozminski1985}
-Krzysztof Kozminski and Edwin Kinnen.
-\newblock Rectangular dualization and rectangular dissections.
-\newblock {\em IEEE Transactions on Circuits and Systems}, 32(8):771--781,
-  1985.
-
 \bibitem{li2001}
 Zheng Li and Shin-ichi Nakano.
 \newblock Generating all triangulations of plane graphs.
 \newblock {\em Theoretical Computer Science}, 270(1-2):771--784, 2002.
-
-\bibitem{nishizeki2004}
-Takao Nishizeki and Md~Saidur Rahman.
-\newblock {\em Planar Graph Drawing}.
-\newblock World Scientific, 2004.
 
 \bibitem{parvez2011}
 Mohammad~Tanvir Parvez, Md.~Saidur Rahman, and Shin-ichi Nakano.
@@ -47,11 +25,5 @@ Mohammad~Tanvir Parvez, Md.~Saidur Rahman, and Shin-ichi Nakano.
   2011.
 \newblock See Section 4 for the generating chord concept used in local
   genealogical trees.
-
-\bibitem{read1978}
-Ronald~C Read.
-\newblock Every one a winner or how to avoid isomorphism search when
-  cataloguing combinatorial configurations.
-\newblock {\em Annals of Discrete Mathematics}, 2:107--120, 1978.
 
 \end{thebibliography}

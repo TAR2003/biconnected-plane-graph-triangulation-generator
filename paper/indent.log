@@ -1,10 +1,10 @@
 INFO:  latexindent.pl version 3.24.7, 2025-08-15, a script to indent .tex files
-       latexindent.pl lives here: C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/scripts/latexindent/
-       Sun Nov  9 20:23:57 2025
-       Filename: c:\Users\TAWKIR\Documents\GitHub\ThesisGraph\paper\main.tex
+       latexindent.pl lives here: C:/Users/TAR/AppData/Local/Programs/MiKTeX/scripts/latexindent/
+       Thu Nov 27 00:04:13 2025
+       Filename: c:\Users\TAR\Documents\GitHub\Thesis\paper\main.tex
 INFO:  Processing switches:
 INFO:  Directory for backup files and log file indent.log:
-       c:\Users\TAWKIR\Documents\GitHub\ThesisGraph\paper
+       c:\Users\TAR\Documents\GitHub\Thesis\paper
 INFO:  Perl modules are being loaded from the following directories:
        C:/Strawberry/perl/lib/FindBin.pm
        C:/Strawberry/perl/vendor/lib/YAML/Tiny.pm
@@ -13,11 +13,11 @@ INFO:  Perl modules are being loaded from the following directories:
        C:/Strawberry/perl/lib/Getopt/Long.pm
        C:/Strawberry/perl/vendor/lib/File/HomeDir.pm
 INFO:  LatexIndent perl modules are being loaded from, for example:
-       C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/scripts/latexindent/LatexIndent/Document.pm
+       C:/Users/TAR/AppData/Local/Programs/MiKTeX/scripts/latexindent/LatexIndent/Document.pm
 INFO:  YAML settings read: defaultSettings.yaml
-       Reading defaultSettings.yaml from C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/scripts/latexindent/defaultSettings.yaml
+       Reading defaultSettings.yaml from C:/Users/TAR/AppData/Local/Programs/MiKTeX/scripts/latexindent/defaultSettings.yaml
 INFO:  YAML reading settings
-       Home directory is C:\Users\TAWKIR
+       Home directory is C:\Users\TAR
        latexindent.pl didn't find indentconfig.yaml or .indentconfig.yaml
        see all possible locations: https://latexindentpl.readthedocs.io/en/latest/sec-appendices.html#indentconfig-options)
 INFO:  Phase 1: searching for objects
