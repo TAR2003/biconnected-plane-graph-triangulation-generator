@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿\documentclass[12pt,a4paper]{article}
+﻿﻿﻿﻿﻿﻿﻿\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -1163,103 +1163,103 @@ Now notice that in the figure \ref{fig:hexagon_outer_edge}, the chord $(v_i, v_j
 	\label{fig:path4_both}
 \end{figure}
 
-In both of them in figure \ref{fig:path4_both} any type of multi edges can occur where both of the endpoints belong to the same structure. as there can be no chords between the two structures.  We can call them $T_n$ structures where n is the number of vertices trapped inside them. In the figure \ref{fig:path4_both} we can see two $T_2$ structures. Now as chords must happen between two non neighboring vertices, any any T structures will always be at least $T_1$, as there must be at least one vertex between two endpoints of a chord. Also, there should be at least two T structures, as the chord $(v_i, v_j)$ separates them. 
-The lowest number of n in $T_n$ structures is 1, and the highest is k - 3, where k is the total number of vertices in the current face. 
+In both of them in figure \ref{fig:path4_both} any type of multi edges can occur where both of the endpoints belong to the same structure. as there can be no chords between the two structures.  We can call them $T_n$ structures where n is the number of vertices trapped inside them. In the figure \ref{fig:path4_both} we can see two $T_2$ structures. Now as chords must happen between two non neighboring vertices, any any T structures will always be at least $T_1$, as there must be at least one vertex between two endpoints of a chord. Also, there should be at least two T structures, as the chord $(v_i, v_j)$ separates them.
+The lowest number of n in $T_n$ structures is 1, and the highest is k - 3, where k is the total number of vertices in the current face.
 Now, we have to prove that in any $T_n$ structure, there is always at least one safe root vertex, which do not have a chord with any of the non neightbouring vertices of the $T_n$ structures.
 We will prove it by induction on n.
 Here is $T_1$ structure:
 
 \begin{figure}[h]
-    \centering
-    \begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
-        % Vertices
-        \node (v1) at (0,0) {1};
-        \node (v2) at (2,0) {2};
-        \node (v3) at (4,0) {3};
-        
-        % Path edges
-        \draw (v1) -- (v2) -- (v3);
-        
-        % Curved edge from v1 to v4 (above the path)
-        \draw[thick, bend left=45] (v1) to (v3);
-    \end{tikzpicture}
-	 
-    \caption{$T_1$ structure}
-    \label{fig:T1_structure}
+	\centering
+	\begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
+		% Vertices
+		\node (v1) at (0,0) {1};
+		\node (v2) at (2,0) {2};
+		\node (v3) at (4,0) {3};
+
+		% Path edges
+		\draw (v1) -- (v2) -- (v3);
+
+		% Curved edge from v1 to v4 (above the path)
+		\draw[thick, bend left=45] (v1) to (v3);
+	\end{tikzpicture}
+
+	\caption{$T_1$ structure}
+	\label{fig:T1_structure}
 \end{figure}
 
 Here both 1 and 3 are neighbours of vertex 2, which means that vertex 2 cannot have any chords with any of them. Thus, vertex 2 will be a safe vertex.
 
 Now for $T_2$ structures.
 \begin{figure}[h]
-    \centering
-    \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-        % Vertices
-        \node (v1) at (1,0) {1};
-        \node (v2) at (2,0) {2};
-        \node (v3) at (3,0) {3};
+	\centering
+	\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+		% Vertices
+		\node (v1) at (1,0) {1};
+		\node (v2) at (2,0) {2};
+		\node (v3) at (3,0) {3};
 		\node (v4) at (4,0) {4};
-        
-        % Path edges
-        \draw (v1) -- (v2) -- (v3) -- (v4);
-        
-        % Curved edge from v1 to v4 (above the path)
-        \draw[thick, bend left=45] (v1) to (v4);
-    \end{tikzpicture}
-	 
-    \caption{$T_2$ structure}
-    \label{fig:T2_structure}
+
+		% Path edges
+		\draw (v1) -- (v2) -- (v3) -- (v4);
+
+		% Curved edge from v1 to v4 (above the path)
+		\draw[thick, bend left=45] (v1) to (v4);
+	\end{tikzpicture}
+
+	\caption{$T_2$ structure}
+	\label{fig:T2_structure}
 \end{figure}
 
 In this case, vertex 2 can only have a chord with vertex 4, as vertex 1 is its neighbour. Similarly, vertex 3 can only have a chord with vertex 1. Therefore, if vertex 2 have a chord with vertex 4, then it will create a new $T_1$ structure with vertex 3, making vertex 3 a safe root vertex. On the other hand, if vertex 3 have a chord with vertex 1, then it will create a new $T_1$ structure with vertex 2, making vertex 2 a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_2$ structure.
 
 \begin{figure}[h]
-    \centering
-    
-    % First subfigure - Original with 2-4 chord
-    \begin{subfigure}[b]{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-            % Vertices
-            \node (v1) at (1,0) {1};
-            \node (v2) at (2,0) {2};
-            \node (v3) at (3,0) {3};
-            \node (v4) at (4,0) {4};
-            
-            % Path edges
-            \draw (v1) -- (v2) -- (v3) -- (v4);
-            
-            % Curved edges
-            \draw[thick, bend left=45] (v1) to (v4);
-            \draw[red, thick, bend left=45] (v2) to (v4);
-        \end{tikzpicture}
-        \caption{$T_1$ with chord 2--4}
-        \label{fig:T1_24}
-    \end{subfigure}
-    \hfill
-    % Second subfigure - Modified with 1-3 chord
-    \begin{subfigure}[b]{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-            % Vertices
-            \node (v1) at (1,0) {1};
-            \node (v2) at (2,0) {2};
-            \node (v3) at (3,0) {3};
-            \node (v4) at (4,0) {4};
-            
-            % Path edges
-            \draw (v1) -- (v2) -- (v3) -- (v4);
-            
-            % Curved edges
-            \draw[thick, bend left=45] (v1) to (v4);
-            \draw[red, thick, bend left=45] (v1) to (v3);
-        \end{tikzpicture}
-        \caption{$T_1$ with chord 1--3}
-        \label{fig:T1_13}
-    \end{subfigure}
-    
-    \caption{$T_1$ structures with different chords}
-    \label{fig:T1_structures}
+	\centering
+
+	% First subfigure - Original with 2-4 chord
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Vertices
+			\node (v1) at (1,0) {1};
+			\node (v2) at (2,0) {2};
+			\node (v3) at (3,0) {3};
+			\node (v4) at (4,0) {4};
+
+			% Path edges
+			\draw (v1) -- (v2) -- (v3) -- (v4);
+
+			% Curved edges
+			\draw[thick, bend left=45] (v1) to (v4);
+			\draw[red, thick, bend left=45] (v2) to (v4);
+		\end{tikzpicture}
+		\caption{$T_1$ with chord 2--4}
+		\label{fig:T1_24}
+	\end{subfigure}
+	\hfill
+	% Second subfigure - Modified with 1-3 chord
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Vertices
+			\node (v1) at (1,0) {1};
+			\node (v2) at (2,0) {2};
+			\node (v3) at (3,0) {3};
+			\node (v4) at (4,0) {4};
+
+			% Path edges
+			\draw (v1) -- (v2) -- (v3) -- (v4);
+
+			% Curved edges
+			\draw[thick, bend left=45] (v1) to (v4);
+			\draw[red, thick, bend left=45] (v1) to (v3);
+		\end{tikzpicture}
+		\caption{$T_1$ with chord 1--3}
+		\label{fig:T1_13}
+	\end{subfigure}
+
+	\caption{$T_1$ structures with different chords}
+	\label{fig:T1_structures}
 \end{figure}
 
 Now in the case for $T_1$ with figure \ref{fig:T1_24}, vertex 3 becomes a safe root vertex. In the case for $T_1$ with figure \ref{fig:T1_13}, vertex 2 becomes a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_1$ structure.
@@ -1267,25 +1267,25 @@ Now in the case for $T_1$ with figure \ref{fig:T1_24}, vertex 3 becomes a safe r
 now we will go with induction. we assume that for all $T_i$ structures where i < k, there is at least one safe root vertex. Now we will prove it for $T_k$ structure.
 
 \begin{figure}[h]
-    \centering
-    \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-        % Vertices
-        \node (v1) at (0,0) {$v_i$};
-        \node (v2) at (2,0) {$v_{i+1}$};
-        \node (v3) at (4,0) {$v_{i+2}$};
+	\centering
+	\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+		% Vertices
+		\node (v1) at (0,0) {$v_i$};
+		\node (v2) at (2,0) {$v_{i+1}$};
+		\node (v3) at (4,0) {$v_{i+2}$};
 		\node (vall) at (6,0) {...};
 		\node (v4) at (8,0) {$v_{j-1}$};
 		\node (v5) at (10,0) {$v_j$};
-        
-        % Path edges
-        \draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
-        
-        % Curved edge from v1 to v4 (above the path)
-        \draw[thick, bend left=60] (v1) to (v5);
-    \end{tikzpicture}
-	 
-    \caption{$T_k$ structure}
-    \label{fig:Tk_structure}
+
+		% Path edges
+		\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
+
+		% Curved edge from v1 to v4 (above the path)
+		\draw[thick, bend left=60] (v1) to (v5);
+	\end{tikzpicture}
+
+	\caption{$T_k$ structure}
+	\label{fig:Tk_structure}
 \end{figure}
 
 Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chord with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, $v_j$, as all other vertices are its neighbours. There can be two possibilites
@@ -1294,30 +1294,30 @@ Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chor
 	\item vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$.
 \end{enumerate}
 \begin{figure}[h]
-    \centering
-    \begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-        % Vertices
-        \node (v1) at (0,0) {$v_i$};
-        \node (v2) at (2,0) {$v_{i+1}$};
-        \node (v3) at (4,0) {$v_{i+2}$};
+	\centering
+	\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+		% Vertices
+		\node (v1) at (0,0) {$v_i$};
+		\node (v2) at (2,0) {$v_{i+1}$};
+		\node (v3) at (4,0) {$v_{i+2}$};
 		\node (vall) at (6,0) {...};
 		\node (v4) at (8,0) {$v_{j-1}$};
 		\node (v5) at (10,0) {$v_j$};
-        
-        % Path edges
-        \draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
-        
-        % Curved edge from v1 to v4 (above the path)
-        \draw[thick, bend left=60] (v1) to (v5);
+
+		% Path edges
+		\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
+
+		% Curved edge from v1 to v4 (above the path)
+		\draw[thick, bend left=60] (v1) to (v5);
 		\draw[red, thick, dotted, bend left=60] (v2) to (vall);
 		\draw[red, thick, dotted, bend left=60] (v2) to (v3);
 		\draw[red, thick, dotted, bend left=60] (v2) to (v4);
 		\draw[red, thick, dotted, bend left=60] (v2) to (v5);
 
-    \end{tikzpicture}
-	 
-    \caption{new $T_m$ structure, where m < k}
-    \label{fig:firstcase}
+	\end{tikzpicture}
+
+	\caption{new $T_m$ structure, where $m < k$}
+	\label{fig:firstcase}
 \end{figure}
 In the first case in figure \ref{fig:firstcase}, if vertex $v_{i+1}$ have a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, $v_j$, then it will create a new $T_m$ structure where m < k, as at least one vertex is removed from the original $T_k$ structure. By our induction hypothesis, this new $T_m$ structure will have at least one safe root vertex.
 
@@ -1474,6 +1474,58 @@ Before proceeding to the complexity analysis, we establish a fundamental lower b
 	\noindent\textbf{Key observation:} Different safe roots produce different root triangulations because the fan from vertex $v_i$ contains chords $(v_i, v_{i+2}), (v_i, v_{i+3}), \ldots, (v_i, v_{i+n_i-2})$, while the fan from vertex $v_j \neq v_i$ contains a distinct set of chords. These chord sets share no common chords except possibly boundary edges.
 
 	Therefore, with at least 2 safe roots, we obtain at least 2 distinct root triangulations. Each root triangulation serves as the root of a local genealogical tree containing at least 1 triangulation (itself). Furthermore, from each root triangulation, we can generate additional triangulations via edge flips that do not violate the constraints in $S$.
+	\begin{figure}[h]
+		\centering
+		% ----- Subfigure (a) -----
+		\begin{subfigure}[b]{0.45\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+				% Vertices (counterclockwise)
+				\node (a1) at ( 1.0,  0.0) {1};
+				\node (a2) at ( 0.5,  0.866) {2};
+				\node[fill=red] (a3) at (-0.5,  0.866) {3};
+				\node (a4) at (-1.0,  0.0) {4};
+				\node (a5) at (-0.5, -0.866) {5};
+				\node (a6) at ( 0.5, -0.866) {6};
+
+				% Edges
+				\draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
+				\draw[draw=red, line width=2pt] (a1) -- (a3);
+				\draw[draw=red, line width=2pt] (a3) -- (a5);
+				\draw[draw=red, line width=2pt] (a6) -- (a3);
+			\end{tikzpicture}
+			\caption{Child Triangulation }
+			\label{fig:hex1}
+		\end{subfigure}
+		\hfill
+		% ----- Subfigure (b) -----
+		\begin{subfigure}[b]{0.45\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+				% Vertices (counterclockwise)
+				\node[fill=red] (b1) at ( 1.0,  0.0) {1};
+				\node (b2) at ( 0.5,  0.866) {2};
+				\node (b3) at (-0.5,  0.866) {3};
+				\node (b4) at (-1.0,  0.0) {4};
+				\node (b5) at (-0.5, -0.866) {5};
+				\node (b6) at ( 0.5, -0.866) {6};
+
+				% Edges
+				\draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
+				\draw[draw=red, line width=2pt] (b1) -- (b3);
+				\draw[draw=red, line width=2pt] (b1) -- (b4);
+				\draw[draw=red, line width=2pt] (b1) -- (b5);
+			\end{tikzpicture}
+			\caption{Parent Triangulation}
+			\label{fig:hex2}
+		\end{subfigure}
+		\caption{The path difference from one root configurationq to another}
+		\label{fig:thepathdifference}
+	\end{figure}
+
+	Now in a face, there is total of $n_i - 3$ chords in any triangulation. Now in face there we found 2 safe root vertices, therefore we can have at least 2 root triangulations. One safe root $v_i$ and another one is $v_j$. Now by our completeness proof, we can explore all the triangulations from these two root triangulations by edge flipping. Therefore, to reach from $v_i$ to $v_j$ we must flip chords. See figure \ref{fig:thepathdifference} for an example of such a case in a hexagon.
+	As $v_i$ and $v_j$ are not neighbours, there must be a chord between then whether its a root trignaulation of $v_i$ or $v_j$. That means from total n-3 chords, the two triangulations share one chord. That means, there will be a need for flipping of at least n-4 chords to reach from $v_i$ root triangulation to $v_j$ root triangulation. Therefore, there will be at least n-4 different triangulations for flipping those chords one by one. Therefore, in total we have at least 1 + (n-4) = n-3 triangulations in this case.
+	Thus there will be at least $n_i - 3$ triangulations in this case as well.
 
 	\medskip
 	\noindent\textbf{Conservative lower bound:}
@@ -1679,52 +1731,6 @@ We prove $B = O(T)$ and $F = O(T)$ by induction on the number of faces. Since ea
 
 The lower bound $d_i \geq n_i - 3$ (Lemma~\ref{lem:min_triangulations}) has been validated experimentally; see \url{https://github.com/TAR2003/ThesisGraph}.
 
-%% ============================================================
-%% FIGURE 12: Time Complexity Amortization Visualization
-%% Section 5.1 - Time Complexity
-%% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[scale=1.2]
-
-		% Axes
-		\draw[-latex, thick] (0, 0) -- (10, 0) node[right, font=\small] {Triangulations $(T)$};
-		\draw[-latex, thick] (0, 0) -- (0, 5) node[above, font=\small] {Operations};
-
-		% Building cost line (B = O(T))
-		\draw[thick, blue] (0, 0) -- (9, 4.5) node[right, font=\small] {$B = O(T)$};
-
-		% Flipping cost line (F = O(T))
-		\draw[thick, green!60!black] (0, 0) -- (9, 4.5);
-		\node[green!60!black, font=\small] at (8, 4.8) {$F = O(T)$};
-
-		% Total cost line (B+F = O(T))
-		\draw[thick, red, dashed] (0, 0) -- (9, 4.5);
-		\node[red, font=\small, align=center] at (6, 3.8) {$B + F = O(T)$\\(Theorem 8)};
-
-		% Grid for reference
-		\foreach \x in {0, 2, 4, 6, 8} {
-				\draw[gray, thin, dashed] (\x, 0) -- (\x, 5);
-			}
-		\foreach \y in {0, 1, 2, 3, 4} {
-				\draw[gray, thin, dashed] (0, \y) -- (10, \y);
-			}
-
-		% Annotations with proper spacing
-		\node[draw=none, font=\small, align=left, blue!70!black] at (3, 1.5)
-		{Building:\\Root construction\\for each face};
-
-		\node[draw=none, font=\small, align=left, green!60!black] at (3, 3)
-		{Flipping:\\Edge flips in\\genealogical trees};
-
-		\node[draw=none, font=\small, align=center] at (5, -1.2)
-		{Linear growth in operations $\Rightarrow$ O(1) amortized per triangulation};
-
-	\end{tikzpicture}
-	\caption{Time complexity amortization. Building operations $B$ and flipping operations $F$ both grow linearly with the number of triangulations $T$. The total operations $B + F = O(T)$ (Theorem 8) confirms constant amortized cost per triangulation.}
-	\label{fig:time_complexity}
-\end{figure}
-
 \subsection{Space Complexity}
 
 \begin{theorem}[Linear Space Complexity]
@@ -1886,11 +1892,10 @@ Table~\ref{tab:complexity_summary} provides a comprehensive summary of all time 
 
 	\item Each individual triangulation is generated by a sequence of $O(1)$-time edge flip operations from its parent in the local genealogical tree.
 
-	\item The bound $B + F < 4T$ means the algorithm performs less than 4 elementary operations (chord insertions or edge flips) per output triangulation on average. Since each elementary operation takes $O(1)$ time, this gives $O(1)$ amortized time per triangulation.
+	\item The bound $B + F = O(T)$ means the algorithm performs constant number of operations (chord insertions or edge flips) per output triangulation on average. Since each elementary operation takes $O(1)$ time, this gives $O(1)$ amortized time per triangulation.
 
 	\item The $O(n)$ space complexity is optimal since we must store the input graph itself, which requires $\Theta(n)$ space. Importantly, space usage is independent of the number of triangulations $T$, which can be exponential in $n$.
 
-	\item The amortized analysis is tight: experimental results (Section~\ref{sec:experiments}) show that the ratio $(B+F)/T$ varies from near 1.0 (for graphs with minimal constraints) to approaching 4.0 (for highly constrained graphs), confirming both the practical effectiveness and theoretical tightness of our bounds.
 
 	\item For graphs with $k$ faces where each face has $\Omega(n/k)$ vertices, the total number of triangulations grows exponentially: $T = \prod_{i=1}^{k} d_i \geq \prod_{i=1}^{k} (n_i - 3) = \exp(\Omega(k \log(n/k)))$. The building cost $B = O(T)$ shows perfect amortization---preprocessing work grows linearly with the exponential output size.
 \end{itemize}
@@ -1976,93 +1981,6 @@ Experiments were performed on the following system configuration:
 
 All measurements were taken in isolated runs to prevent interference from background processes. The implementation uses C++ STL containers including \texttt{unordered\_set} for $O(1)$ expected-time chord lookup operations and \texttt{vector} for efficient storage of graph structures.
 
-%% ============================================================
-%% FIGURE 13: Example - Pentagon Triangulation Generation
-%% Section 6 - Implementation and Experimental Results
-%% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[scale=1.3]
-
-		% Pentagon vertices (reused for all subfigures)
-		\def\pent{
-			(0:1) node[circle, draw, fill=white, minimum size=5pt] {}
-			(72:1) node[circle, draw, fill=white, minimum size=5pt] {}
-			(144:1) node[circle, draw, fill=white, minimum size=5pt] {}
-			(216:1) node[circle, draw, fill=white, minimum size=5pt] {}
-			(288:1) node[circle, draw, fill=white, minimum size=5pt] {}
-		}
-
-		% Root triangulation
-		\begin{scope}[xshift=-4cm, yshift=2cm]
-			\node[draw=none, font=\small] at (0, 1.7) {\textbf{Root $T_1$}};
-			\foreach \a in {0, 72, 144, 216, 288} {
-					\node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
-				}
-			\draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
-			\draw[red, thick] (0:1) -- (144:1);
-			\draw[red, thick] (0:1) -- (216:1);
-		\end{scope}
-
-		% Child 1
-		\begin{scope}[xshift=0cm, yshift=2cm]
-			\node[draw=none, font=\small] at (0, 1.7) {\textbf{Child $T_2$}};
-			\foreach \a in {0, 72, 144, 216, 288} {
-					\node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
-				}
-			\draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
-			\draw[blue, thick] (72:1) -- (216:1);
-			\draw[blue, thick] (0:1) -- (216:1);
-		\end{scope}
-
-		% Child 2
-		\begin{scope}[xshift=4cm, yshift=2cm]
-			\node[draw=none, font=\small] at (0, 1.7) {\textbf{Child $T_3$}};
-			\foreach \a in {0, 72, 144, 216, 288} {
-					\node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
-				}
-			\draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
-			\draw[green!60!black, thick] (0:1) -- (144:1);
-			\draw[green!60!black, thick] (72:1) -- (288:1);
-		\end{scope}
-
-		% Child 3
-		\begin{scope}[xshift=-2cm, yshift=-2cm]
-			\node[draw=none, font=\small] at (0, 1.7) {\textbf{Child $T_4$}};
-			\foreach \a in {0, 72, 144, 216, 288} {
-					\node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
-				}
-			\draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
-			\draw[orange, thick] (144:1) -- (288:1);
-			\draw[orange, thick] (0:1) -- (144:1);
-		\end{scope}
-
-		% Child 4
-		\begin{scope}[xshift=2cm, yshift=-2cm]
-			\node[draw=none, font=\small] at (0, 1.7) {\textbf{Child $T_5$}};
-			\foreach \a in {0, 72, 144, 216, 288} {
-					\node[circle, draw, fill=white, minimum size=5pt] at (\a:1) {};
-				}
-			\draw[thick] (0:1) -- (72:1) -- (144:1) -- (216:1) -- (288:1) -- cycle;
-			\draw[purple, thick] (72:1) -- (216:1);
-			\draw[purple, thick] (72:1) -- (288:1);
-		\end{scope}
-
-		% Tree structure lines (showing parent-child)
-		\draw[-latex, gray, thick] (-4, 1) -- (-3, 0.5);
-		\draw[-latex, gray, thick] (-4, 1) -- (0, 1);
-		\draw[-latex, gray, thick] (-4, 1) -- (4, 1);
-		\draw[-latex, gray, thick] (-4, 0.5) -- (-2, -1);
-		\draw[-latex, gray, thick] (0, 0.5) -- (2, -1);
-
-		% Caption below
-		\node[draw=none, font=\small, align=center] at (0, -4)
-		{All 5 triangulations of a pentagon generated from local genealogical tree};
-
-	\end{tikzpicture}
-	\caption{Example: All triangulations of a pentagon. The root triangulation $T_1$ is constructed from a safe root vertex (bottom vertex) using a fan structure. Four children $T_2, T_3, T_4, T_5$ are generated via edge flips. This demonstrates the local genealogical tree structure for a single face. The algorithm generates all 5 triangulations (matching the Catalan number $C_3 = 5$) without duplicates.}
-	\label{fig:pentagon_example}
-\end{figure}
 
 \subsection{Performance Results}
 
