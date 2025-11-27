@@ -76,6 +76,8 @@ Parvez et al.~\cite{parvez2011} & Triconnected & $O(1)$ amortized & $O(n)$ \\
 
 The algorithm for generating all triangulations of a triconnected plane graph can be applied to biconnected plane graphs as well, but a major problem arises: the ``multi-edge'' problem. In triconnected graphs~\cite{hopcroft1974}, there cannot be any separation pairs, meaning there do not exist two vertices whose removal can disconnect the remaining graph.
 
+Biconnected graphs arise naturally in many practical applications, including VLSI layout design where circuit components must remain connected after any single point failure, mesh generation for finite element analysis where the mesh must adapt to domain boundaries that create separation pairs, and network topology design where backup paths are essential. The ability to enumerate all triangulations of biconnected graphs enables exploration of multiple geometric realizations and structural alternatives in these applications.
+
 \begin{figure}[h!]
 	\centering
 
@@ -292,8 +294,8 @@ Let $C$ be a cycle and $v_1, v_2, \ldots, v_k$ be its vertices in counterclockwi
 	\label{fig:disticttriangulationsofacycle}
 \end{figure}
 
-Figure~\ref{fig:disticttriangulationsofacycle} shows two distinct triangulations of a cycle. In a triangulation $T$, it is a maximal set of chords, meaning each chord not in $T$ intersects some chord in $T$. We list chords by their endpoints, e.g., the chord connecting vertices 1 and 3 is referred to as $\langle 1,3 \rangle$.
-We also define visibility by chords: if there is a $\langle 1,3 \rangle$ chord, we say that vertex 3 is visible from vertex 1 and vice versa.
+Figure~\ref{fig:disticttriangulationsofacycle} shows two distinct triangulations of a cycle. In a triangulation $T$, it is a maximal set of chords, meaning each chord not in $T$ intersects some chord in $T$. We list chords by their endpoints, e.g., the chord connecting vertices 1 and 3 is referred to as $(1,3)$.
+We also define visibility by chords: if there is a $(1,3)$ chord, we say that vertex 3 is visible from vertex 1 and vice versa.
 
 In this paper, we will generate triangulations for labeled biconnected graphs, meaning each vertex in the graph is distinctly labeled, and we will assume that no two edges share the same two endpoints.
 
@@ -765,6 +767,7 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\State $\text{startIndex} \gets n - 1$
 		\State $\text{endIndex} \gets 0$
 		\State
+		\State \Comment{Two-pointer approach: narrow the search window by avoiding vertices in blocking chords}
 		\While{$\text{startIndex} > \text{endIndex} + 1$}
 		\If{chord $(v_{\text{startIndex}}, v_{\text{endIndex}})$ exists in $S$}
 		\State $\text{startIndex} \gets \text{startIndex} - 1$
@@ -1097,11 +1100,11 @@ By Lemma~\ref{lem:blocking_persistence}, we know that blocking chords persist in
 		\end{scope}
 
 	\end{tikzpicture}
-	\caption{Four hexagons showing transformation paths in the genealogical tree.}
+	\caption{Four hexagons showing transformation paths in the genealogical tree. Top: Root triangulation with chords $(1,3)$, $(1,4)$, $(1,5)$. Middle: After flipping $(1,4)$, we obtain chord $(3,5)$. Bottom-left: From middle, flipping $(1,5)$ yields $(3,6)$. Bottom-right: From middle, flipping $(1,3)$ yields $(2,5)$. Each transformation involves flipping exactly one generating chord (red), demonstrating the parent-child relationships in the local genealogical tree.}
 	\label{fig:four_hexagons_arrows}
 \end{figure}
 
-In Figure~\ref{fig:four_hexagons_arrows}, at the root all three chords are flippable. Now we flip the $\langle 1,4 \rangle$ chord to obtain the $\langle 3,5 \rangle$ chord, and as a result $\langle 1,4 \rangle$ is removed from the generating set. Therefore, the new chord $\langle 3,5 \rangle$ is part of the triangulation but not a generating chord, meaning there is no chance of flipping it in descendant triangulations. Consequently, in all descendant triangulations, the chord $\langle 3,5 \rangle$ will be present. So, if we prune a branch because of an invalid blocking chord $\langle 3,5 \rangle$, all descendant triangulations would also contain that invalid blocking chord, meaning all descendant triangulations are also invalid. Hence, pruning does not eliminate any valid triangulations, ensuring completeness.
+In Figure~\ref{fig:four_hexagons_arrows}, at the root all three chords are flippable. Now we flip the $(1,4)$ chord to obtain the $(3,5)$ chord, and as a result $(1,4)$ is removed from the generating set. Therefore, the new chord $(3,5)$ is part of the triangulation but not a generating chord, meaning there is no chance of flipping it in descendant triangulations. Consequently, in all descendant triangulations, the chord $(3,5)$ will be present. So, if we prune a branch because of an invalid blocking chord $(3,5)$, all descendant triangulations would also contain that invalid blocking chord, meaning all descendant triangulations are also invalid. Hence, pruning does not eliminate any valid triangulations, ensuring completeness.
 
 If a prior face triangulation configuration $\{T_{f_1}, T_{f_2}, \ldots, T_{f_{i-1}}\}$ exists, we denote the set of chords used in these triangulations as $S$. When processing face $F_i$, our algorithm explores its genealogical tree rooted at a safe vertex $r_i$, generating all possible triangulations of $F_i$ that do not introduce multi-edges with chords in $S$. The safe root triangulation guarantees that all chords from $r_i$ to non-neighbors can be added without conflicts. As we explore the genealogical tree, we only proceed with edge flips that do not create multi-edges with chords in $S$. If we encounter a triangulation where a chord conflicts with $S$, we prune that branch, knowing that all descendants will also contain that conflicting chord (since blocking chords are never flipped). This pruning ensures we only explore valid triangulations, maintaining completeness.
 
@@ -1577,7 +1580,7 @@ Before proceeding to the complexity analysis, we establish a fundamental lower b
 	\end{figure}
 
 	Now in a face, there is total of $n_i - 3$ chords in any triangulation. Now in face there we found 2 safe root vertices, therefore we can have at least 2 root triangulations. One safe root $v_i$ and another one is $v_j$. Now by our completeness proof, we can explore all the triangulations from these two root triangulations by edge flipping. Therefore, to reach from $v_i$ to $v_j$ we must flip chords. See figure \ref{fig:thepathdifference} for an example of such a case in a hexagon.
-	As $v_i$ and $v_j$ are not neighbours, there must be a chord between then whether its a root trignaulation of $v_i$ or $v_j$. That means from total n-3 chords, the two triangulations share one chord. That means, there will be a need for flipping of at least n-4 chords to reach from $v_i$ root triangulation to $v_j$ root triangulation. Therefore, there will be at least n-4 different triangulations for flipping those chords one by one. Therefore, in total we have at least 1 + (n-4) = n-3 triangulations in this case.
+	As $v_i$ and $v_j$ are not neighbours, there must be a chord between them whether it's a root triangulation of $v_i$ or $v_j$. That means from total n-3 chords, the two triangulations share one chord. That means, there will be a need for flipping of at least n-4 chords to reach from $v_i$ root triangulation to $v_j$ root triangulation. Therefore, there will be at least n-4 different triangulations for flipping those chords one by one. Therefore, in total we have at least 1 + (n-4) = n-3 triangulations in this case.
 	Thus there will be at least $n_i - 3$ triangulations in this case as well.
 
 	\medskip
@@ -2123,7 +2126,7 @@ We conducted comprehensive benchmarking on 48 diverse biconnected plane graphs. 
 \begin{table}[htbp]
 	\centering
 	\footnotesize
-	\caption{Experimental Results (Part 1 of 2): Time and Space Complexity Analysis}
+	\caption{Experimental Results (Table 4): Time and Space Complexity Analysis - Part 1}
 	\label{tab:timing_results_part1}
 	\begin{tabular}{|l|r|r|r|r|r|}
 		\hline
@@ -2173,7 +2176,7 @@ We conducted comprehensive benchmarking on 48 diverse biconnected plane graphs. 
 \begin{table}[htbp]
 	\centering
 	\footnotesize
-	\caption{Experimental Results (Part 2 of 2): Time and Space Complexity Analysis}
+	\caption{Experimental Results (Table 5): Time and Space Complexity Analysis - Part 2}
 	\label{tab:timing_results_part2}
 	\begin{tabular}{|l|r|r|r|r|r|}
 		\hline
@@ -2293,6 +2296,16 @@ This work makes several theoretical contributions:
 \subsection{Future Directions}
 
 Promising extensions include: (1) extending to simply-connected plane graphs via block-cut tree decomposition, (2) parallel enumeration using lock-free data structures, (3) constrained triangulations for mesh generation applications, and (4) developing polynomial-time counting algorithms without explicit enumeration. Open problems include finding closed-form formulas for triangulation counts and uniform random sampling methods.
+
+The ``safe root vertex'' concept introduced in this work has potential applications beyond triangulation enumeration. This technique could be adapted to other plane graph decomposition problems where face-by-face processing creates chord conflicts, such as:
+\begin{itemize}
+	\item \textbf{Convex decomposition:} Partitioning polygons into convex pieces while avoiding multi-edges
+	\item \textbf{Visibility graph construction:} Computing visibility relationships in polygonal domains with holes
+	\item \textbf{Dual graph enumeration:} Generating all duals of plane graph embeddings
+	\item \textbf{Rectangular partition enumeration:} Finding all guillotine cuts of rectilinear polygons
+\end{itemize}
+
+Each of these problems involves selecting ``pivot'' vertices or edges to avoid conflicts during recursive decomposition, suggesting that safe root selection strategies may have broad applicability in computational geometry.
 
 \section*{Acknowledgments}
 
