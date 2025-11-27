@@ -222,92 +222,61 @@ Our algorithm for generating all triangulations of a biconnected plane graph use
 The rest of the paper is organized as follows, section \ref{sec:preliminaries} gives some definitions, section \ref{sec:algorithm} gives the outline of the algorithm for generating all triangulations of a biconnected plane graph, section \ref{sec:correctness} deals with the proofs of the correctness and completeness of our algorithm, section \ref{sec:complexity} deals with the mentioned tiome and space complexity of our algorithm, section \ref{sec:experiments} deals with the implementation and experimental validation of our algorithm. Finally, section \ref{sec:conclusion} is conclusion.
 \section{Preliminaries}
 \label{sec:preliminaries}
-
-In this section, we establish the fundamental graph-theoretic concepts and notation used throughout this paper.
-
-\subsection{Basic Graph Theory}
-
-Let $G = (V,E)$ denote a connected simple graph with vertex set $V$ and edge set $E$. We denote an edge connecting vertices $v_i$ and $v_j$ in $V$ by $(v_i,v_j)$. The \emph{degree} of a vertex $v$ is the number of edges incident to $v$ in $G$.
-
-The \emph{connectivity} $\kappa(G)$ of a graph $G$ is the minimum number of vertices whose removal results in either a disconnected graph or a single-vertex graph. A graph is \emph{$k$-connected} if $\kappa(G) \geq k$. In particular, a graph is \emph{biconnected} if it is 2-connected (i.e., it has no cut vertices) and \emph{triconnected} if it is 3-connected (i.e., it has no separation pairs).
+In this section, we define some terms used in the paper.
+Let $G = (V, E)$ be a connected simple graph with vertex set $V$ and edge set $E$.  
+Every edge $e \in E$ has endpoints $(v_i, v_j)$ where $v_i, v_j \in V$ and $v_i \neq v_j$.  
+The connectivity of a graph is the minimum number of vertices whose removal disconnects the graph.  
+A graph is called $k$-connected if removing fewer than $k$ vertices leaves the graph connected;  
+equivalently, at least $k$ vertices must be removed to disconnect the graph.
 
 
-\subsection{Plane Graphs and Plane Embeddings}
+A graph G is planar if it can be embedded in a plane where no two edges intersect geometrically except at a vertex to which both of them are incident. A plane graph is a planar graph with a fixed embedding in  a plane. A plane graph divided a plane, the edges acts like boundary to separated regions, called faces. The inner bound faces are called the inner faces and the outer region is called the outer face. If in a plane graph, each face boundary consist of exactly three vertices, it will be called a plane triangulation. Here edges are not necessarily a straight line. 
 
-A graph $G$ is \emph{planar} if it can be embedded in the plane such that no two edges intersect except at their common endpoints. A \emph{plane graph} is a planar graph with a fixed embedding in the plane. Such an embedding partitions the plane into connected regions called \emph{faces}. The unbounded face is referred to as the \emph{outer face}, while all other faces are \emph{inner faces}.
+Now to make a graph triangulated, we add edges to a graph between vertices, where no edges are previously present. If we add edges between two vertices where an edge is already present, then it will be a multi-edge, and the graph will no longer be a simple graph.
 
-A plane graph is called a \emph{plane triangulation} if every face, including the outer face, is bounded by exactly three edges. In this paper, we allow edges to be represented by non-straight curves, consistent with standard practice in topological graph theory.
+A face in a plane graph can also be considered a cycle, where all of the vertices $v_1, v_2,...,v_k$ have edges only ($v_1, v_2$), ($v_2, v_3$),...,($v_{k-1}, v_k$), ($v_k, v_1$). The region inside the cycle would be the inner region of the face and the outer region would be called the outer region of the face.
 
-\subsection{Cycles and Chords}
+Let C be a cycle and $v_1, v_2,...,v_k$ be the vertices of it in counter clockwise order. We  call an edge between ($v_i, v_j$) a chord of C if $|i-j| \neq 1$ and $\{i,j\} \neq \{1,k\}$ and ($v_i, v_j$) is contained in the face of G. A chord ($v_i, v_j$) divided the cycle into two smaller cycles, $v_i, v_i+1, ..., v_j$ and $v_j, v_j+1,..., v_i$. These two smaller cycles are called the sub-cycles of the chord ($v_i, v_j$). The decomposition of a cycle into triangles by a set of non intersecting chords is called a triangulation of the cycle.
 
-A \emph{cycle} $C$ in a graph $G$ is a sequence of distinct vertices $v_1, v_2, \dots, v_k$ such that the edges $(v_i, v_{i+1})$ exist for $1 \leq i < k$, and $(v_k, v_1)$ closes the cycle. In a plane graph, a cycle divides the plane into two regions: the \emph{inner region}, enclosed by $C$, and the \emph{outer region}, which lies outside $C$. If the entire graph $G$ is itself a cycle, both the inner and outer regions correspond to faces.
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.45\textwidth}
+        \centering
+         \begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+            % Coordinates of hexagon vertices
+            \foreach \i/\angle in {1/90, 2/30, 3/-30, 4/-90, 5/-150, 6/150}
+            {
+                \node (a\i) at (\angle:1) {\i};
+            }
+            % Edges
+            \draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
+            \draw (a2) -- (a4) -- (a6) -- (a2);
+        \end{tikzpicture}
+        \caption{First hexagon}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+            % Coordinates of hexagon vertices
+            \foreach \i/\angle in {1/90, 2/30, 3/-30, 4/-90, 5/-150, 6/150}
+            {
+                \node (b\i) at (\angle:1) {\i};
+            }
+            % Edges
+            \draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
+            \draw (b1) -- (b3) -- (b5) -- (b1);
+        \end{tikzpicture}
+        \caption{Second hexagon}
+    \end{subfigure}
+    \caption{Two distinct triangulations of a cycle}
+	\label{fig:disticttriangulationsofacycle}
+\end{figure}
 
-Consider a cycle $C$ bounding a face $F$ in a plane graph $G$, with vertices $v_1, v_2, \dots, v_n$ arranged in counterclockwise order. We denote this cycle as $C = \langle v_1, v_2, \dots, v_n \rangle$.
+Figure \ref{fig:disticttriangulationsofacycle} shows two distinct triangulations of a cycle. In a triangulation T, it is a set of chords which are maximal, meaning each chords not in T intersects some chords in T. We are listing chords by its endpoints like chords 1,3 will be referred as <1,3>.
+Now, we also define visibility by chords, meaning if there is a <1,3> chord, we will say that vertex 3 is visible from 1 and vice versa.
 
-An edge $(v_i, v_j)$ between two vertices on $C$ is called a \emph{chord} of $C$ if it satisfies:
-\begin{itemize}
-	\item $(v_i, v_j) \notin E(C)$, i.e., it is not an edge of the cycle itself, and
-	\item the edge $(v_i, v_j)$ lies entirely within the interior of the face $F$ bounded by $C$.
-\end{itemize}
-
-Such a chord partitions the cycle $C$ into two smaller cycles: one containing vertices $v_i, v_{i+1}, \dots, v_j$, and the other containing vertices $v_j, v_{j+1}, \dots, v_i$.
-
-\subsection{Triangulations}
-
-A \emph{triangulation of a cycle} $C$ is a maximal set of non-crossing chords that decomposes the inner region of $C$ into triangles. In a triangulation $T$ of $C$, the chord set is maximal in the sense that any chord not in $T$ must intersect at least one chord in $T$. The sides of the resulting triangles are either chords from $T$ or edges from the original cycle $C$.
-
-For a cycle $C$ with $n$ vertices, any triangulation contains exactly $n-3$ chords and produces exactly $n-2$ triangular faces. We represent each triangulation $T$ of $C$ by the set of its chords. Given this chord set, the triangulation can be uniquely reconstructed.
-
-A triangulation of a cycle $C$ is called a \emph{labeled triangulation} if the vertices of $C$ are explicitly numbered sequentially from $v_1$ to $v_n$. If the vertices are not numbered, the triangulations are called \emph{unlabeled triangulations}.
-
-\subsection{Visibility in Triangulations}
-
-In a triangulation $T$ of a cycle $C$, we say that a vertex $y$ is \emph{visible from} a vertex $x$ if there exists a chord $(x,y)$ in $T$. This notion of visibility is fundamental to the structure of triangulations and plays a key role in our algorithm's construction of root triangulations.
-
-\subsection{Key Definitions for Our Algorithm}
-
-We now introduce several specialized definitions that are central to our algorithm for biconnected graphs.
-
-\begin{definition}[Multi-edge]
-	A \emph{multi-edge} occurs when two or more distinct edges connect the same pair of vertices in a graph. A \emph{simple graph} contains no multi-edges or self-loops. All triangulations considered in this paper must be simple graphs.
-\end{definition}
-
-\begin{definition}[Separation Pair]
-	A \emph{separation pair} in a biconnected graph $G$ is an unordered pair of vertices $\{u,v\}$ whose removal disconnects $G$ into two or more components.
-\end{definition}
-
-\begin{definition}[Safe Root Vertex]
-	A vertex $r$ in a face $F$ of a biconnected plane graph is called a \emph{safe root vertex} if constructing a root triangulation from $r$ does not create any multi-edge. Specifically, $r$ is safe if for every non-neighboring vertex $v$ of $r$ on the face boundary, the chord $(r, v)$ does not already exist in the global chord set $S$ from previously triangulated faces.
-\end{definition}
-
-\begin{definition}[Genealogical Tree]
-	A \emph{genealogical tree} of triangulations for a cycle $C$ is a rooted tree structure where:
-	\begin{itemize}
-		\item Each node represents a distinct triangulation of $C$,
-		\item The root is the root triangulation from a designated safe root vertex,
-		\item Each edge represents a single chord flip operation that transforms one triangulation into another, and
-		\item The parent-child relationship is defined by a unique generating chord.
-	\end{itemize}
-\end{definition}
-
-\begin{definition}[Global Chord Set]
-	The \emph{global chord set} is a dynamic data structure (typically implemented as a hash set) that maintains all chords currently present in the partially triangulated graph during the recursive enumeration process. This set enables constant-time detection and prevention of multi-edge formation.
-\end{definition}
-
-\begin{definition}[Hash Set]
-	A \emph{hash set} is a data structure implementing the set abstract data type using a hash table, providing average-case $O(1)$ time complexity for insertion, deletion, and membership testing operations.
-\end{definition}
-
-\begin{definition}[Leftmost Chord and Vertex Ordering]
-	Let $C = \langle v_1, v_2, \ldots, v_n \rangle$ be a cycle with vertices labeled in counterclockwise order. Chord $(v_i, v_j)$ is \textbf{to the left of} chord $(v_k, v_l)$ if: (1) $\min(i, j) < \min(k, l)$, OR (2) $\min(i, j) = \min(k, l)$ AND $\max(i, j) < \max(k, l)$. The \textbf{leftmost chord} is the chord to the left of all others.
-\end{definition}
-
-\begin{definition}[Edge Flip Notation]
-	\label{def:edgeflip}
-	Given triangulation $T$ with chord set $C$ and potential chord $e = (v_a, v_b)$: Let $e'$ be the unique chord in $C$ intersecting $e$. We denote $\mathbf{T(e)} = T \setminus \{e'\} \cup \{e\}$ as the triangulation obtained by flipping. $\mathbf{T_i(v_1, v_j)}$ denotes the triangulation from $T_i$ by flipping to create $(v_1, v_j)$.
-\end{definition}
-
-These definitions provide the foundation for understanding our algorithm's approach to handling the multi-edge problem in biconnected graphs.
+In this paper we will be generating triangulations for labeled biconnected graphs, meaning each vertex in the graph is distinctly labeled, and we will consider that no two edges share the same two endpoints. 
 
 
 \section{The Algorithm}
