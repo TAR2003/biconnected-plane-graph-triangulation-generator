@@ -298,78 +298,78 @@ Our algorithm generates all triangulations of a biconnected plane graph $G$ with
 %% FIGURE 11: Complete Algorithm Workflow
 %% Section 3 - The Algorithm
 %% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[
-			node distance=1.2cm,
-			startstop/.style={rectangle, rounded corners, minimum width=3cm, minimum height=1cm,
-					text centered, align=center, draw=black, fill=red!20, font=\small},
-			process/.style={rectangle, minimum width=3cm, minimum height=1cm,
-					text centered, align=center, draw=black, fill=blue!20, font=\small},
-			decision/.style={diamond, aspect=2, minimum width=2.5cm, minimum height=1cm,
-					text centered, align=center, draw=black, fill=green!20, font=\small},
-			arrow/.style={thick,-latex}
-		]
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{tikzpicture}[
+% 			node distance=0.8cm,
+% 			startstop/.style={rectangle, rounded corners, minimum width=3cm, minimum height=1cm,
+% 					text centered, align=center, draw=black, fill=red!20, font=\small},
+% 			process/.style={rectangle, minimum width=3cm, minimum height=1cm,
+% 					text centered, align=center, draw=black, fill=blue!20, font=\small},
+% 			decision/.style={diamond, aspect=2, minimum width=2.5cm, minimum height=1cm,
+% 					text centered, align=center, draw=black, fill=green!20, font=\small},
+% 			arrow/.style={thick,-latex}
+% 		]
 
-		% Start
-		\node (start) [startstop] {Start: $S = \emptyset$};
+% 		% Start
+% 		\node (start) [startstop] {Start: $S = \emptyset$};
 
-		% Step 1
-		\node (step1) [process, below=of start] {Initialize faces\\$F_1, \ldots, F_k$};
+% 		% Step 1
+% 		\node (step1) [process, below=of start] {Initialize faces\\$F_1, \ldots, F_k$};
 
-		% Step 2
-		\node (step2) [process, below=of step1] {Select face $F_i$};
+% 		% Step 2
+% 		\node (step2) [process, below=of step1] {Select face $F_i$};
 
-		% Step 3
-		\node (step3) [process, below=of step2] {Find safe root $r$\\(Algorithm 2)};
+% 		% Step 3
+% 		\node (step3) [process, below=of step2] {Find safe root $r$\\(Algorithm 2)};
 
-		% Step 4
-		\node (step4) [process, below=of step3] {Build root\\triangulation $T_r$};
+% 		% Step 4
+% 		\node (step4) [process, below=of step3] {Build root\\triangulation $T_r$};
 
-		% Step 5
-		\node (step5) [process, below=of step4] {Add $T_r$ chords to $S$};
+% 		% Step 5
+% 		\node (step5) [process, below=of step4] {Add $T_r$ chords to $S$};
 
-		% Step 6
-		\node (step6) [process, below=of step5] {Explore local tree\\via DFS};
+% 		% Step 6
+% 		\node (step6) [process, below=of step5] {Explore local tree\\via DFS};
 
-		% Decision 1
-		\node (dec1) [decision, below=of step6, yshift=-0.5cm] {More\\faces?};
+% 		% Decision 1
+% 		\node (dec1) [decision, below=of step6, yshift=-0.5cm] {More\\faces?};
 
-		% Step 7
-		\node (step7) [process, right=2.5cm of dec1] {Output\\triangulation};
+% 		% Step 7
+% 		\node (step7) [process, right=2.5cm of dec1] {Output\\triangulation};
 
-		% Step 8
-		\node (step8) [process, below=of dec1, yshift=-0.5cm] {Remove $T_r$\\from $S$};
+% 		% Step 8
+% 		\node (step8) [process, below=of dec1, yshift=-0.5cm] {Remove $T_r$\\from $S$};
 
-		% Decision 2
-		\node (dec2) [decision, below=of step8, yshift=-0.5cm] {More\\triangulations\\in tree?};
+% 		% Decision 2
+% 		\node (dec2) [decision, below=of step8, yshift=-0.5cm] {More\\triangulations\\in tree?};
 
-		% End
-		\node (end) [startstop, below=of dec2, yshift=-0.5cm] {End};
+% 		% End
+% 		\node (end) [startstop, below=of dec2, yshift=-0.5cm] {End};
 
-		% Arrows
-		\draw [arrow] (start) -- (step1);
-		\draw [arrow] (step1) -- (step2);
-		\draw [arrow] (step2) -- (step3);
-		\draw [arrow] (step3) -- (step4);
-		\draw [arrow] (step4) -- (step5);
-		\draw [arrow] (step5) -- (step6);
-		\draw [arrow] (step6) -- (dec1);
-		\draw [arrow] (dec1) -- node[above, font=\scriptsize] {Yes} (step7);
-		\draw [arrow] (dec1) -- node[left, font=\scriptsize] {No} (step8);
-		\draw [arrow] (step8) -- (dec2);
-		\draw [arrow] (dec2) -- node[left, font=\scriptsize] {No} (end);
+% 		% Arrows
+% 		\draw [arrow] (start) -- (step1);
+% 		\draw [arrow] (step1) -- (step2);
+% 		\draw [arrow] (step2) -- (step3);
+% 		\draw [arrow] (step3) -- (step4);
+% 		\draw [arrow] (step4) -- (step5);
+% 		\draw [arrow] (step5) -- (step6);
+% 		\draw [arrow] (step6) -- (dec1);
+% 		\draw [arrow] (dec1) -- node[above, font=\scriptsize] {Yes} (step7);
+% 		\draw [arrow] (dec1) -- node[left, font=\scriptsize] {No} (step8);
+% 		\draw [arrow] (step8) -- (dec2);
+% 		\draw [arrow] (dec2) -- node[left, font=\scriptsize] {No} (end);
 
-		% Backtrack arrow
-		\draw [arrow, dashed, red] (dec2.east) -- ++(1.5,0) |- node[near start, right, font=\scriptsize] {Yes} (step6.east);
+% 		% Backtrack arrow
+% 		\draw [arrow, dashed, red] (dec2.east) -- ++(1.5,0) |- node[near start, right, font=\scriptsize] {Yes} (step6.east);
 
-		% Next face arrow
-		\draw [arrow] (step7.north) |- (step2.east);
+% 		% Next face arrow
+% 		\draw [arrow] (step7.north) |- (step2.east);
 
-	\end{tikzpicture}
-	\caption{Complete algorithm workflow. The algorithm processes faces sequentially, constructing a local genealogical tree for each face from a safe root vertex. The global chord set $S$ is maintained through push/pop operations during DFS exploration. When all faces are triangulated, a complete graph triangulation is output. Backtracking explores all valid combinations.}
-	\label{fig:algorithm_workflow}
-\end{figure}
+% 	\end{tikzpicture}
+% 	\caption{Complete algorithm workflow. The algorithm processes faces sequentially, constructing a local genealogical tree for each face from a safe root vertex. The global chord set $S$ is maintained through push/pop operations during DFS exploration. When all faces are triangulated, a complete graph triangulation is output. Backtracking explores all valid combinations.}
+% 	\label{fig:algorithm_workflow}
+% \end{figure}
 
 \subsection{Key Innovations}
 
@@ -392,111 +392,111 @@ This decomposition enables independent triangulation of each face while maintain
 %% FIGURE 8: Algorithm Recursion Structure (DFS with Backtracking)
 %% Section 3.1 - Algorithm Overview
 %% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[
-			level 1/.style={sibling distance=5cm, level distance=2cm},
-			level 2/.style={sibling distance=2.5cm, level distance=1.8cm},
-			level 3/.style={sibling distance=1.5cm, level distance=1.5cm},
-			every node/.style={rectangle, rounded corners, minimum width=1.8cm, minimum height=0.7cm, align=center, font=\scriptsize},
-			edge from parent/.style={draw, -latex}
-		]
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{tikzpicture}[
+% 			level 1/.style={sibling distance=5cm, level distance=2cm},
+% 			level 2/.style={sibling distance=2.5cm, level distance=1.8cm},
+% 			level 3/.style={sibling distance=1.5cm, level distance=1.5cm},
+% 			every node/.style={rectangle, rounded corners, minimum width=1.8cm, minimum height=0.7cm, align=center, font=\scriptsize},
+% 			edge from parent/.style={draw, -latex}
+% 		]
 
-		\node[draw, fill=blue!30, font=\small] {Start\\$S = \emptyset$}
-		child {
-				node[draw, fill=blue!20] {Face $F_1$\\$T_{1,1}$}
-				child {
-						node[draw, fill=green!20] {Face $F_2$\\$T_{2,1}$}
-						child {
-								node[draw, fill=yellow!20] {$F_3$: Output}
-								edge from parent node[left, draw=none, font=\tiny] {$S$ updated}
-							}
-						edge from parent node[left, draw=none, font=\tiny] {Add $T_{2,1}$ to $S$}
-					}
-				child {
-						node[draw, fill=green!20] {Face $F_2$\\$T_{2,2}$}
-						child {
-								node[draw, fill=yellow!20] {$F_3$: Output}
-							}
-						edge from parent node[right, draw=none, font=\tiny] {Backtrack,\\try $T_{2,2}$}
-					}
-				edge from parent node[left, draw=none, font=\tiny] {Add $T_{1,1}$ to $S$}
-			}
-		child {
-				node[draw, fill=blue!20] {Face $F_1$\\$T_{1,2}$}
-				child {
-						node[draw, fill=green!20] {Face $F_2$\\$T_{2,1}$}
-						child {
-								node[draw, fill=yellow!20] {$F_3$: Output}
-							}
-					}
-				edge from parent node[right, draw=none, font=\tiny] {Backtrack,\\try $T_{1,2}$}
-			};
+% 		\node[draw, fill=blue!30, font=\small] {Start\\$S = \emptyset$}
+% 		child {
+% 				node[draw, fill=blue!20] {Face $F_1$\\$T_{1,1}$}
+% 				child {
+% 						node[draw, fill=green!20] {Face $F_2$\\$T_{2,1}$}
+% 						child {
+% 								node[draw, fill=yellow!20] {$F_3$: Output}
+% 								edge from parent node[left, draw=none, font=\tiny] {$S$ updated}
+% 							}
+% 						edge from parent node[left, draw=none, font=\tiny] {Add $T_{2,1}$ to $S$}
+% 					}
+% 				child {
+% 						node[draw, fill=green!20] {Face $F_2$\\$T_{2,2}$}
+% 						child {
+% 								node[draw, fill=yellow!20] {$F_3$: Output}
+% 							}
+% 						edge from parent node[right, draw=none, font=\tiny] {Backtrack,\\try $T_{2,2}$}
+% 					}
+% 				edge from parent node[left, draw=none, font=\tiny] {Add $T_{1,1}$ to $S$}
+% 			}
+% 		child {
+% 				node[draw, fill=blue!20] {Face $F_1$\\$T_{1,2}$}
+% 				child {
+% 						node[draw, fill=green!20] {Face $F_2$\\$T_{2,1}$}
+% 						child {
+% 								node[draw, fill=yellow!20] {$F_3$: Output}
+% 							}
+% 					}
+% 				edge from parent node[right, draw=none, font=\tiny] {Backtrack,\\try $T_{1,2}$}
+% 			};
 
-		% Annotations with spacing
-		\node[draw=none, font=\small, align=left, blue!70!black] at (-6, 0)
-		{Process faces\\$F_1, F_2, \ldots, F_k$\\sequentially};
+% 		% Annotations with spacing
+% 		\node[draw=none, font=\small, align=left, blue!70!black] at (-6, 0)
+% 		{Process faces\\$F_1, F_2, \ldots, F_k$\\sequentially};
 
-		\node[draw=none, font=\small, align=left, green!60!black] at (6.5, -2)
-		{For each face,\\explore all\\local tree\\triangulations};
+% 		\node[draw=none, font=\small, align=left, green!60!black] at (6.5, -2)
+% 		{For each face,\\explore all\\local tree\\triangulations};
 
-		\node[draw=none, font=\small, align=left, orange!70!black] at (6.5, -5)
-		{Backtrack:\\Remove chords\\from $S$};
+% 		\node[draw=none, font=\small, align=left, orange!70!black] at (6.5, -5)
+% 		{Backtrack:\\Remove chords\\from $S$};
 
-	\end{tikzpicture}
-	\caption{DFS recursion structure with backtracking. The algorithm processes faces sequentially, exploring all triangulations in each face's local genealogical tree. The global chord set $S$ is updated when entering a branch (add chords) and restored when backtracking (remove chords). Each path from root to leaf represents a unique complete triangulation of the graph.}
-	\label{fig:recursion_structure}
-\end{figure}
+% 	\end{tikzpicture}
+% 	\caption{DFS recursion structure with backtracking. The algorithm processes faces sequentially, exploring all triangulations in each face's local genealogical tree. The global chord set $S$ is updated when entering a branch (add chords) and restored when backtracking (remove chords). Each path from root to leaf represents a unique complete triangulation of the graph.}
+% 	\label{fig:recursion_structure}
+% \end{figure}
 
 %% ============================================================
 %% FIGURE 3: Local Genealogical Tree Structure
 %% Section 3.2.1 - Innovation 1: Local Genealogical Trees
 %% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[
-			level distance=1.5cm,
-			sibling distance=2.5cm,
-			every node/.style={rectangle, draw, rounded corners, minimum width=1.5cm, minimum height=0.8cm, align=center, font=\small},
-			edge from parent/.style={draw, -latex, thick}
-		]
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{tikzpicture}[
+% 			level distance=1.5cm,
+% 			sibling distance=2.5cm,
+% 			every node/.style={rectangle, draw, rounded corners, minimum width=1.5cm, minimum height=0.8cm, align=center, font=\small},
+% 			edge from parent/.style={draw, -latex, thick}
+% 		]
 
-		% Root triangulation
-		\node[fill=blue!20] {Root $T_r$\\(safe fan)}
-		child {
-				node[fill=green!15] {Child\\flip 1}
-				child {node[fill=yellow!15] {Leaf 1}}
-				child {node[fill=yellow!15] {Leaf 2}}
-			}
-		child {
-				node[fill=green!15] {Child\\flip 2}
-				child {node[fill=yellow!15] {Leaf 3}}
-			}
-		child {
-				node[fill=green!15] {Child\\flip 3}
-				child {
-						node[fill=orange!15] {Child\\flip 4}
-						child {node[fill=yellow!15] {Leaf 4}}
-					}
-			};
+% 		% Root triangulation
+% 		\node[fill=blue!20] {Root $T_r$\\(safe fan)}
+% 		child {
+% 				node[fill=green!15] {Child\\flip 1}
+% 				child {node[fill=yellow!15] {Leaf 1}}
+% 				child {node[fill=yellow!15] {Leaf 2}}
+% 			}
+% 		child {
+% 				node[fill=green!15] {Child\\flip 2}
+% 				child {node[fill=yellow!15] {Leaf 3}}
+% 			}
+% 		child {
+% 				node[fill=green!15] {Child\\flip 3}
+% 				child {
+% 						node[fill=orange!15] {Child\\flip 4}
+% 						child {node[fill=yellow!15] {Leaf 4}}
+% 					}
+% 			};
 
-		% Annotations with proper spacing
-		\node[draw=none, font=\small, align=left, blue!70!black] at (-5, 0.5)
-		{Root from\\safe vertex $r$};
+% 		% Annotations with proper spacing
+% 		\node[draw=none, font=\small, align=left, blue!70!black] at (-5, 0.5)
+% 		{Root from\\safe vertex $r$};
 
-		\node[draw=none, font=\small, align=left, green!60!black] at (5.5, -1.5)
-		{Each edge flip\\creates child};
+% 		\node[draw=none, font=\small, align=left, green!60!black] at (5.5, -1.5)
+% 		{Each edge flip\\creates child};
 
-		\node[draw=none, font=\small, align=left, orange!70!black] at (5.5, -4)
-		{Recursive\\descent};
+% 		\node[draw=none, font=\small, align=left, orange!70!black] at (5.5, -4)
+% 		{Recursive\\descent};
 
-		\node[draw=none, font=\small, align=center] at (0, -5.5)
-		{Local Genealogical Tree for Face $F_i$};
+% 		\node[draw=none, font=\small, align=center] at (0, -5.5)
+% 		{Local Genealogical Tree for Face $F_i$};
 
-	\end{tikzpicture}
-	\caption{Structure of a local genealogical tree for a single face. The root is constructed from a safe root vertex using a fan triangulation. Each child is obtained by flipping the generating chord (leftmost non-root chord). The tree structure ensures each triangulation appears exactly once, with unique parent-child relationships defined by edge flips.}
-	\label{fig:local_tree}
-\end{figure}
+% 	\end{tikzpicture}
+% 	\caption{Structure of a local genealogical tree for a single face. The root is constructed from a safe root vertex using a fan triangulation. Each child is obtained by flipping the generating chord (leftmost non-root chord). The tree structure ensures each triangulation appears exactly once, with unique parent-child relationships defined by edge flips.}
+% 	\label{fig:local_tree}
+% \end{figure}
 
 \subsubsection{Innovation 2: Safe Root Vertex Selection}
 
@@ -528,71 +528,71 @@ This ensures $S$ always reflects exactly the chords in the current exploration p
 %% FIGURE 9: Global Chord Set Management (Push/Pop)
 %% Section 3.2.3 - Dynamic Global Chord Management
 %% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[scale=1.3]
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{tikzpicture}[scale=1.3]
 
-		% Timeline representation
-		\foreach \x/\label in {0/Start, 3/Face 1, 6/Face 2, 9/Backtrack, 12/Face 1'} {
-				\node[font=\small] at (\x, 3.5) {\label};
-				\draw[dashed, gray] (\x, 3.2) -- (\x, -0.5);
-			}
+% 		% Timeline representation
+% 		\foreach \x/\label in {0/Start, 3/Face 1, 6/Face 2, 9/Backtrack, 12/Face 1'} {
+% 				\node[font=\small] at (\x, 3.5) {\label};
+% 				\draw[dashed, gray] (\x, 3.2) -- (\x, -0.5);
+% 			}
 
-		% S contents over time
-		\node[draw=none, font=\small, align=left] at (-1.5, 2.5) {Global\\Set $S$:};
+% 		% S contents over time
+% 		\node[draw=none, font=\small, align=left] at (-1.5, 2.5) {Global\\Set $S$:};
 
-		% Empty at start
-		\node[draw, minimum width=2cm, minimum height=0.8cm] at (1.5, 2.5) {$\emptyset$};
+% 		% Empty at start
+% 		\node[draw, minimum width=2cm, minimum height=0.8cm] at (1.5, 2.5) {$\emptyset$};
 
-		% After Face 1
-		\draw[-latex, thick, blue] (2.5, 2.5) -- (3.5, 2.5);
-		\node[draw=none, font=\scriptsize, blue, above] at (3, 2.7) {Push};
-		\node[draw, minimum width=2cm, minimum height=0.8cm, fill=blue!10] at (4.5, 2.5)
-		{$\{e_1, e_2\}$};
+% 		% After Face 1
+% 		\draw[-latex, thick, blue] (2.5, 2.5) -- (3.5, 2.5);
+% 		\node[draw=none, font=\scriptsize, blue, above] at (3, 2.7) {Push};
+% 		\node[draw, minimum width=2cm, minimum height=0.8cm, fill=blue!10] at (4.5, 2.5)
+% 		{$\{e_1, e_2\}$};
 
-		% After Face 2
-		\draw[-latex, thick, green!60!black] (5.5, 2.5) -- (6.5, 2.5);
-		\node[draw=none, font=\scriptsize, green!60!black, above] at (6, 2.7) {Push};
-		\node[draw, minimum width=2.5cm, minimum height=0.8cm, fill=green!10] at (7.5, 2.5)
-		{$\{e_1, e_2, e_3, e_4\}$};
+% 		% After Face 2
+% 		\draw[-latex, thick, green!60!black] (5.5, 2.5) -- (6.5, 2.5);
+% 		\node[draw=none, font=\scriptsize, green!60!black, above] at (6, 2.7) {Push};
+% 		\node[draw, minimum width=2.5cm, minimum height=0.8cm, fill=green!10] at (7.5, 2.5)
+% 		{$\{e_1, e_2, e_3, e_4\}$};
 
-		% Backtrack from Face 2
-		\draw[-latex, thick, red] (8.5, 2.5) -- (9.5, 2.5);
-		\node[draw=none, font=\scriptsize, red, above] at (9, 2.7) {Pop};
-		\node[draw, minimum width=2cm, minimum height=0.8cm, fill=blue!10] at (10.5, 2.5)
-		{$\{e_1, e_2\}$};
+% 		% Backtrack from Face 2
+% 		\draw[-latex, thick, red] (8.5, 2.5) -- (9.5, 2.5);
+% 		\node[draw=none, font=\scriptsize, red, above] at (9, 2.7) {Pop};
+% 		\node[draw, minimum width=2cm, minimum height=0.8cm, fill=blue!10] at (10.5, 2.5)
+% 		{$\{e_1, e_2\}$};
 
-		% Try different Face 1 triangulation
-		\draw[-latex, thick, orange] (11.5, 2.5) -- (12.5, 2.5);
-		\node[draw=none, font=\scriptsize, orange, above] at (12, 2.7) {Pop+Push};
-		\node[draw, minimum width=2.5cm, minimum height=0.8cm, fill=orange!10] at (13.8, 2.5)
-		{$\{e_1', e_2', e_3'\}$};
+% 		% Try different Face 1 triangulation
+% 		\draw[-latex, thick, orange] (11.5, 2.5) -- (12.5, 2.5);
+% 		\node[draw=none, font=\scriptsize, orange, above] at (12, 2.7) {Pop+Push};
+% 		\node[draw, minimum width=2.5cm, minimum height=0.8cm, fill=orange!10] at (13.8, 2.5)
+% 		{$\{e_1', e_2', e_3'\}$};
 
-		% Action annotations below
-		\node[draw=none, font=\scriptsize, align=center] at (1.5, 0.8)
-		{Initialize};
+% 		% Action annotations below
+% 		\node[draw=none, font=\scriptsize, align=center] at (1.5, 0.8)
+% 		{Initialize};
 
-		\node[draw=none, font=\scriptsize, align=center, blue!70!black] at (4.5, 0.8)
-		{Add chords\\from $F_1$\\triangulation};
+% 		\node[draw=none, font=\scriptsize, align=center, blue!70!black] at (4.5, 0.8)
+% 		{Add chords\\from $F_1$\\triangulation};
 
-		\node[draw=none, font=\scriptsize, align=center, green!60!black] at (7.5, 0.8)
-		{Add chords\\from $F_2$\\triangulation};
+% 		\node[draw=none, font=\scriptsize, align=center, green!60!black] at (7.5, 0.8)
+% 		{Add chords\\from $F_2$\\triangulation};
 
-		\node[draw=none, font=\scriptsize, align=center, red!70!black] at (10.5, 0.8)
-		{Remove $F_2$\\chords\\(backtrack)};
+% 		\node[draw=none, font=\scriptsize, align=center, red!70!black] at (10.5, 0.8)
+% 		{Remove $F_2$\\chords\\(backtrack)};
 
-		\node[draw=none, font=\scriptsize, align=center, orange!70!black] at (13.8, 0.8)
-		{Try different\\$F_1$ triangulation};
+% 		\node[draw=none, font=\scriptsize, align=center, orange!70!black] at (13.8, 0.8)
+% 		{Try different\\$F_1$ triangulation};
 
-		% Bottom explanation
-		\node[draw=none, font=\small, align=center] at (7, -1.5)
-		{Dynamic management: Push chords when exploring, Pop when backtracking\\
-			$S$ always reflects current path in recursion tree};
+% 		% Bottom explanation
+% 		\node[draw=none, font=\small, align=center] at (7, -1.5)
+% 		{Dynamic management: Push chords when exploring, Pop when backtracking\\
+% 			$S$ always reflects current path in recursion tree};
 
-	\end{tikzpicture}
-	\caption{Dynamic global chord set management. As the algorithm explores the recursion tree via DFS, chords are added to $S$ when entering a branch (push) and removed when backtracking (pop). This ensures $S$ always contains exactly the chords from the current partial triangulation on the exploration path, enabling efficient multi-edge detection.}
-	\label{fig:global_chord_management}
-\end{figure}
+% 	\end{tikzpicture}
+% 	\caption{Dynamic global chord set management. As the algorithm explores the recursion tree via DFS, chords are added to $S$ when entering a branch (push) and removed when backtracking (pop). This ensures $S$ always contains exactly the chords from the current partial triangulation on the exploration path, enabling efficient multi-edge detection.}
+% 	\label{fig:global_chord_management}
+% \end{figure}
 
 \noindent\rule{\textwidth}{0.4pt}
 
@@ -608,47 +608,27 @@ Once a safe root vertex $r$ is identified, we construct the \textbf{root triangu
 %% FIGURE 4: Root Triangulation Construction (Fan Structure)
 %% Section 3.3.1 - Root Triangulation
 %% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[scale=1.8]
 
-		% Pentagon example
-		\begin{scope}
-			\node[draw=none, font=\small, align=center] at (0, 2) {\textbf{Root Triangulation from Safe Root $r = v_1$}};
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[scale=2, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+        % Hexagon vertices (counterclockwise)
+        \node[fill=red] (v1) at ( 1.0000,  0.0000) {1};
+        \node (v2) at ( 0.5000,  0.8660) {2};
+        \node (v3) at (-0.5000,  0.8660) {3};
+        \node (v4) at (-1.0000,  0.0000) {4};
+        \node (v5) at (-0.5000, -0.8660) {5};
+        \node (v6) at ( 0.5000, -0.8660) {6};
 
-			% Vertices
-			\node[circle, draw, fill=red!30, minimum size=8pt, label=left:$v_1$ (root)] (v1) at (0, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=above:$v_2$] (v2) at (0.8, 1.2) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_3$] (v3) at (1.5, 0.3) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=below:$v_4$] (v4) at (1, -1) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=below:$v_5$] (v5) at (-0.5, -1) {};
+        % Edges (perimeter)
+        \draw (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
 
-			% Boundary edges
-			\draw[thick, blue] (v1) -- (v2);
-			\draw[thick] (v2) -- (v3);
-			\draw[thick] (v3) -- (v4);
-			\draw[thick] (v4) -- (v5);
-			\draw[thick, blue] (v5) -- (v1);
-
-			% Fan chords from root
-			\draw[thick, red, ->] (v1) -- (v3) node[midway, above right, draw=none, font=\scriptsize] {$(v_1, v_3)$};
-			\draw[thick, red, ->] (v1) -- (v4) node[midway, below right, draw=none, font=\scriptsize] {$(v_1, v_4)$};
-
-			% Adjacent vertices annotation
-			\node[draw=none, font=\scriptsize, align=center, blue!70!black] at (-0.5, 0.6) {Adjacent\\to $r$};
-			\node[draw=none, font=\scriptsize, align=center, blue!70!black] at (-0.7, -0.5) {Adjacent\\to $r$};
-
-			% Non-adjacent vertices annotation
-			\node[draw=none, font=\scriptsize, align=center, red!70!black] at (2.2, 0.3) {Non-adjacent\\$\Rightarrow$ add chord};
-			\node[draw=none, font=\scriptsize, align=center, red!70!black] at (1.5, -1.3) {Non-adjacent\\$\Rightarrow$ add chord};
-
-			\node[draw=none, font=\small, align=center] at (0.5, -2.2)
-			{Fan triangulation: Add all chords from $r$ to non-neighbors};
-		\end{scope}
-
-	\end{tikzpicture}
-	\caption{Construction of root triangulation from safe root vertex $r = v_1$ in a pentagon. The algorithm adds chords from $r$ to all non-adjacent vertices ($v_3$ and $v_4$), creating a fan structure. Vertices $v_2$ and $v_5$ are already adjacent to $r$ on the cycle boundary (blue edges), so no chords are needed. This construction guarantees no multi-edges if $r$ is a safe root.}
-	\label{fig:root_triangulation}
+        % Optional chords inside the hexagon
+        \draw[draw=red, line width=2pt] (v1) -- (v3);
+		\draw[draw=red, line width=2pt] (v1) -- (v4);
+		\draw[draw=red, line width=2pt] (v1) -- (v5);
+    \end{tikzpicture}
+    \caption{Root triangulation with safe root vertex 1. Chords from vertex 1 to all non-neighboring vertices (3, 4, 5) form a fan structure, ensuring no multi-edge conflicts with previously added chords.}
 \end{figure}
 
 \subsubsection{Local Genealogical Tree Structure}
@@ -673,87 +653,59 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 %% FIGURE 6: Generating Chord and Parent-Child Relationship
 %% Section 3.3.2 - Local Genealogical Tree Structure
 %% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[scale=1.5]
 
-		% Current triangulation
-		\begin{scope}[xshift=-4cm]
-			\node[draw=none, font=\small] at (0, 2.3) {\textbf{Current Triangulation $T$}};
+\begin{figure}[h]
+    \centering
+    % ----- Subfigure (a) -----
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+            % Vertices (counterclockwise)
+            \node[fill=red] (a1) at ( 1.0,  0.0) {1};
+            \node (a2) at ( 0.5,  0.866) {2};
+            \node (a3) at (-0.5,  0.866) {3};
+            \node (a4) at (-1.0,  0.0) {4};
+            \node (a5) at (-0.5, -0.866) {5};
+            \node (a6) at ( 0.5, -0.866) {6};
 
-			% Vertices (hexagon with root v1)
-			\node[circle, draw, fill=red!30, minimum size=8pt, label=left:$v_1$ (root)] (v1) at (0, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=above left:$v_2$] (v2) at (0.7, 1) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=above right:$v_3$] (v3) at (1.8, 0.8) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_4$] (v4) at (2.2, -0.3) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=below:$v_5$] (v5) at (1.2, -1.2) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=below left:$v_6$] (v6) at (0, -0.8) {};
+            % Edges
+            \draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
+            \draw (a1) -- (a3);
+			\draw[draw=red, line width=2pt] (a3) -- (a5);
+			\draw (a1) -- (a5);
+        \end{tikzpicture}
+        \caption{Child Triangulation }
+        \label{fig:hex1}
+    \end{subfigure}
+    \hfill
+    % ----- Subfigure (b) -----
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+            % Vertices (counterclockwise)
+            \node[fill=red] (b1) at ( 1.0,  0.0) {1};
+            \node (b2) at ( 0.5,  0.866) {2};
+            \node (b3) at (-0.5,  0.866) {3};
+            \node (b4) at (-1.0,  0.0) {4};
+            \node (b5) at (-0.5, -0.866) {5};
+            \node (b6) at ( 0.5, -0.866) {6};
 
-			% Boundary
-			\draw[thick, gray] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- cycle;
-
-			% Root chords (thin, blue)
-			\draw[blue, thin] (v1) -- (v3);
-			\draw[blue, thin] (v1) -- (v4);
-			\draw[blue, thin] (v1) -- (v5);
-
-			% Generating chord (LEFTMOST non-root, red thick)
-			\draw[red, ultra thick] (v3) -- (v5);
-			\node[draw=none, font=\small, red, align=center] at (2.5, 0.2)
-			{Generating\\chord\\$(v_3, v_5)$};
-
-			% Other non-root chord
-			\draw[thin] (v3) -- (v6);
-
-		\end{scope}
-
-		% Arrow
-		\draw[-latex, ultra thick, blue!50] (-0.8, 0) -- (0.5, 0) node[midway, above, draw=none, font=\scriptsize] {Flip $(v_3, v_5)$};
-
-		% Parent triangulation
-		\begin{scope}[xshift=4cm]
-			\node[draw=none, font=\small] at (0, 2.3) {\textbf{Parent Triangulation}};
-
-			% Same vertices
-			\node[circle, draw, fill=red!30, minimum size=8pt, label=left:$v_1$] (w1) at (0, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=above left:$v_2$] (w2) at (0.7, 1) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=above right:$v_3$] (w3) at (1.8, 0.8) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_4$] (w4) at (2.2, -0.3) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=below:$v_5$] (w5) at (1.2, -1.2) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=below left:$v_6$] (w6) at (0, -0.8) {};
-
-			% Boundary
-			\draw[thick, gray] (w1) -- (w2) -- (w3) -- (w4) -- (w5) -- (w6) -- cycle;
-
-			% Root chords (unchanged)
-			\draw[blue, thin] (w1) -- (w3);
-			\draw[blue, thin] (w1) -- (w4);
-			\draw[blue, thin] (w1) -- (w5);
-
-			% Flipped chord (green thick)
-			\draw[green!60!black, ultra thick] (w4) -- (w6);
-			\node[draw=none, font=\small, green!60!black, align=center] at (2.5, -0.7)
-			{New chord\\$(v_4, v_6)$};
-
-			% Other chord
-			\draw[thin] (w3) -- (w6);
-		\end{scope}
-
-		% Explanation with spacing
-		\node[draw=none, font=\small, align=center] at (0, -2.5)
-		{The parent of $T$ is obtained by flipping the \textbf{generating chord}\\
-			(leftmost chord not incident to root $v_1$)};
-
-	\end{tikzpicture}
-	\caption{Parent-child relationship via generating chord. The generating chord is the leftmost chord in the triangulation that does not involve the root vertex. Flipping this chord produces the unique parent triangulation. This defines a tree structure where each non-root triangulation has exactly one parent.}
-	\label{fig:generating_chord}
+            % Edges
+            \draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
+            \draw (b1) -- (b3);
+			\draw[draw=red, line width=2pt] (b1) -- (b4);
+			\draw (b1) -- (b5);
+        \end{tikzpicture}
+        \caption{Parent Triangulation}
+        \label{fig:hex2}
+    \end{subfigure}
+    \caption{Get the child triangulation from parent triangulation from flipping a generating set}
+    \label{fig:hexagons}
 \end{figure}
 
 \noindent\rule{\textwidth}{0.4pt}
 
 \subsection{Algorithm Specification}
-
-\subsubsection*{Algorithm 1: Main Entry Point}
 
 \begin{algorithm}[H]
 	\caption{StartTriangulation}
@@ -766,8 +718,6 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
-
-\subsubsection*{Algorithm 2: Safe Root Construction}
 
 \begin{algorithm}[H]
 	\caption{ConstructRootTriangulation}
@@ -811,8 +761,6 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 
 \textbf{Time Complexity}: $\mathcal{O}(n)$ where $n$ is the number of vertices in the face.
 
-\subsubsection*{Algorithm 3: Face-Level Triangulation}
-
 \begin{algorithm}[H]
 	\caption{FindAllTriangulationsCycle}
 	\begin{algorithmic}[1]
@@ -836,8 +784,6 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
-
-\subsubsection*{Algorithm 4: Recursive Child Generation}
 
 \textbf{Understanding the Critical Condition}: The algorithm explores a child triangulation whenever \textit{at least one} of these conditions holds:
 
@@ -873,7 +819,6 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 
 \textbf{Key Property}: The algorithm explores \textit{all} valid branches (every $j$ satisfying the condition), ensuring completeness.
 
-\subsubsection*{Algorithm 5: Output Control}
 
 \begin{algorithm}[H]
 	\caption{OutputTriangulation}
@@ -917,24 +862,24 @@ An edge flip transforms one triangulation into another by replacing a chord:
 
 			% Quadrilateral
 			\node[circle, draw, fill=white, minimum size=6pt, label=left:$v_a$] (a) at (0, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_b$] (b) at (2, 0) {};
+			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_b$] (b) at (2.5, 0) {};
 			\node[circle, draw, fill=white, minimum size=6pt, label=above:$v_p$] (p) at (0.5, 1.5) {};
 			\node[circle, draw, fill=white, minimum size=6pt, label=below:$v_q$] (q) at (1.5, -1.5) {};
 
 			% Boundary
 			\draw[thick] (a) -- (p) -- (b) -- (q) -- cycle;
+			\draw[thick] (a) -- (q);
 
 			% Chord to be flipped (red)
 			\draw[red, very thick] (a) -- (b);
 			\node[draw=none, font=\small, red] at (1, -0.3) {$(v_a, v_b)$};
 
 			% Triangles annotation
-			\node[draw=none, font=\scriptsize, blue!70!black] at (0.5, 0.7) {Triangle 1};
+			\node[draw=none, font=\scriptsize, blue!70!black] at (0.7, 0.7) {Triangle 1};
 			\node[draw=none, font=\scriptsize, blue!70!black] at (1.2, -0.7) {Triangle 2};
 		\end{scope}
 
-		% Arrow
-		\draw[-latex, ultra thick, blue!50] (-1, 0) -- (0.5, 0) node[midway, above, draw=none, font=\small] {Flip};
+		
 
 		% After flip
 		\begin{scope}[xshift=3.5cm]
@@ -942,20 +887,21 @@ An edge flip transforms one triangulation into another by replacing a chord:
 
 			% Same vertices
 			\node[circle, draw, fill=white, minimum size=6pt, label=left:$v_a$] (a2) at (0, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_b$] (b2) at (2, 0) {};
+			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_b$] (b2) at (2.5, 0) {};
 			\node[circle, draw, fill=white, minimum size=6pt, label=above:$v_p$] (p2) at (0.5, 1.5) {};
 			\node[circle, draw, fill=white, minimum size=6pt, label=below:$v_q$] (q2) at (1.5, -1.5) {};
 
 			% Boundary
 			\draw[thick] (a2) -- (p2) -- (b2) -- (q2) -- cycle;
+			\draw[thick] (a2) -- (q2);
 
 			% New chord (green)
 			\draw[green!60!black, very thick] (p2) -- (q2);
 			\node[draw=none, font=\small, green!60!black] at (1.3, 0.3) {$(v_p, v_q)$};
 
 			% New triangles annotation
-			\node[draw=none, font=\scriptsize, blue!70!black] at (0.3, 0.5) {Triangle 1'};
-			\node[draw=none, font=\scriptsize, blue!70!black] at (1.5, 0.2) {Triangle 2'};
+			\node[draw=none, font=\scriptsize, blue!70!black] at (0.6, -0.1) {Triangle 1'};
+			\node[draw=none, font=\scriptsize, blue!70!black] at (1.7, -0.4) {Triangle 2'};
 		\end{scope}
 
 		% Bottom explanation with spacing
@@ -1012,17 +958,6 @@ The fundamental challenge in biconnected graphs is that prior face triangulation
 
 When a chord from the current triangulation already exists in $S$ (a ``blocking chord''), we prune that branch. Lemma Y proves that blocking chords never get flipped in descendant triangulations---if triangulation $T$ contains a blocking chord, all descendants must contain it, creating multi-edges. Therefore, pruning eliminates only invalid triangulations; every valid triangulation is found along branches without blocking chords.
 
-\subsubsection{The Three Pillars}
-
-Our algorithm rests on three mechanisms working in concert:
-
-\begin{enumerate}
-	\item \textbf{Safe roots (Theorem X)}: Guaranteed valid initialization for every face via outerplane degree-2 vertices
-	\item \textbf{Local tree structure}: Unique parent-child relationships within faces prevent local duplicates
-	\item \textbf{Global pruning (Theorem Z)}: Backtracking with blocking chord detection prevents global duplicates while preserving completeness
-\end{enumerate}
-
-Together, these pillars eliminate the need for isomorphism testing or explicit triangulation storage, achieving $\mathcal{O}(1)$ amortized time per triangulation.
 
 % ================================================================
 % CORRECTNESS AND COMPLETENESS
@@ -1146,76 +1081,6 @@ The cornerstone of our algorithm is the guaranteed existence of safe root vertic
 % SUBSECTION: Lower Bound on Triangulations
 % ----------------------------------------------------------------
 
-\subsection{Lower Bound on the Number of Triangulations}
-
-Before proceeding to the completeness proof, we establish a fundamental lower bound on the number of triangulations for any face. This result is crucial for the time complexity analysis in Section~\ref{sec:complexity}.
-
-\begin{lemma}[Minimum Triangulations per Face]
-	\label{lem:min_triangulations}
-	For any face $F_i$ with $n_i$ vertices, the number of valid triangulations $d_i$ satisfies
-	\[
-		d_i \geq n_i - 3
-	\]
-	even under maximal constraints from previously triangulated faces.
-\end{lemma}
-
-\begin{proof}
-	Consider face $F_i$ with vertices $v_1, v_2, \ldots, v_{n_i}$ in counterclockwise order. Let $S$ be the global chord set from previously processed faces containing $m$ chords with both endpoints in $F_i$.
-
-	\medskip
-	\noindent\textbf{Case 1: No existing chords ($m = 0$).}
-
-	If no chords from $S$ lie within $F_i$, we are triangulating a simple $n_i$-gon with no constraints. The number of triangulations is the $(n_i-2)$-th Catalan number:
-	\[
-		C_{n_i-2} = \frac{1}{n_i-1}\binom{2n_i-4}{n_i-2}
-	\]
-
-	For $n_i \geq 3$, we have $C_{n_i-2} \geq n_i - 3$. This can be verified directly:
-	\begin{itemize}
-		\item $n_i = 3$: $C_1 = 1 \geq 0$ \checkmark
-		\item $n_i = 4$: $C_2 = 2 \geq 1$ \checkmark
-		\item $n_i = 5$: $C_3 = 5 \geq 2$ \checkmark
-		\item $n_i = 6$: $C_4 = 14 \geq 3$ \checkmark
-		\item For $n_i \geq 7$: $C_{n_i-2}$ grows exponentially, far exceeding $n_i - 3$
-	\end{itemize}
-
-	\medskip
-	\noindent\textbf{Case 2: Existing chords present ($m \geq 1$).}
-
-	When $S$ contains chords within $F_i$, these chords subdivide the face into smaller regions. By Theorem~\ref{thm:safe_root_exists}, at least two safe root vertices exist. Each safe root vertex $r$ yields a distinct root triangulation (the fan structure from $r$).
-
-	\medskip
-	\noindent\textbf{Key observation:} Different safe roots produce different root triangulations because the fan from vertex $v_i$ contains chords $(v_i, v_{i+2}), (v_i, v_{i+3}), \ldots, (v_i, v_{i+n_i-2})$, while the fan from vertex $v_j \neq v_i$ contains a distinct set of chords. These chord sets share no common chords except possibly boundary edges.
-
-	Therefore, with at least 2 safe roots, we obtain at least 2 distinct root triangulations. Each root triangulation serves as the root of a local genealogical tree containing at least 1 triangulation (itself). Furthermore, from each root triangulation, we can generate additional triangulations via edge flips that do not violate the constraints in $S$.
-
-	\medskip
-	\noindent\textbf{Conservative lower bound:}
-
-	Even in the most constrained scenario (where $S$ blocks many potential chords), the algorithm explores at least:
-	\begin{itemize}
-		\item All root triangulations from safe roots: $\geq 2$
-		\item Plus descendants from edge flips in local genealogical trees
-	\end{itemize}
-
-	Empirical evidence (see Table~\ref{tab:triangulation_counts}) and the structure of genealogical trees show that $d_i \geq n_i - 3$. For small cases:
-	\begin{itemize}
-		\item $n_i = 3$ (triangle): Already triangulated, $d_i = 1 \geq 0$ \checkmark
-		\item $n_i = 4$ (quadrilateral): Two diagonals, $d_i \geq 1$ (often $d_i = 2$)
-		\item $n_i = 5$ (pentagon): $d_i \geq 2$ (often $d_i \geq 5$ in practice)
-		\item $n_i = 6$ (hexagon): $d_i \geq 3$ (often $d_i \geq 4$ in practice)
-	\end{itemize}
-
-	The bound is conservative and often exceeded in practice due to the exponential growth of triangulation spaces.
-\end{proof}
-
-\begin{remark}
-	This lemma provides a critical lower bound for the time complexity analysis (Section~\ref{sec:complexity}). The bound $d_i \geq n_i - 3$ ensures that building and flipping costs can be amortized across a sufficient number of triangulations, yielding $O(1)$ amortized time per triangulation. In practice, the actual number of triangulations often far exceeds this lower bound, as confirmed by experimental data in Table~\ref{tab:triangulation_counts}.
-\end{remark}
-
-% ----------------------------------------------------------------
-% SUBSECTION: Completeness via Pruning
-% ----------------------------------------------------------------
 
 \subsection{Completeness via Strategic Pruning}
 
@@ -1468,6 +1333,74 @@ Our algorithm processes faces in an arbitrary order as specified in Algorithm~1,
 
 \section{Complexity Analysis}
 \label{sec:complexity}
+
+\subsection{Lower Bound on the Number of Triangulations}
+
+Before proceeding to the completeness proof, we establish a fundamental lower bound on the number of triangulations for any face. This result is crucial for the time complexity analysis in Section~\ref{sec:complexity}.
+
+\begin{lemma}[Minimum Triangulations per Face]
+	\label{lem:min_triangulations}
+	For any face $F_i$ with $n_i$ vertices, the number of valid triangulations $d_i$ satisfies
+	\[
+		d_i \geq n_i - 3
+	\]
+	even under maximal constraints from previously triangulated faces.
+\end{lemma}
+
+\begin{proof}
+	Consider face $F_i$ with vertices $v_1, v_2, \ldots, v_{n_i}$ in counterclockwise order. Let $S$ be the global chord set from previously processed faces containing $m$ chords with both endpoints in $F_i$.
+
+	\medskip
+	\noindent\textbf{Case 1: No existing chords ($m = 0$).}
+
+	If no chords from $S$ lie within $F_i$, we are triangulating a simple $n_i$-gon with no constraints. The number of triangulations is the $(n_i-2)$-th Catalan number:
+	\[
+		C_{n_i-2} = \frac{1}{n_i-1}\binom{2n_i-4}{n_i-2}
+	\]
+
+	For $n_i \geq 3$, we have $C_{n_i-2} \geq n_i - 3$. This can be verified directly:
+	\begin{itemize}
+		\item $n_i = 3$: $C_1 = 1 \geq 0$ \checkmark
+		\item $n_i = 4$: $C_2 = 2 \geq 1$ \checkmark
+		\item $n_i = 5$: $C_3 = 5 \geq 2$ \checkmark
+		\item $n_i = 6$: $C_4 = 14 \geq 3$ \checkmark
+		\item For $n_i \geq 7$: $C_{n_i-2}$ grows exponentially, far exceeding $n_i - 3$
+	\end{itemize}
+
+	\medskip
+	\noindent\textbf{Case 2: Existing chords present ($m \geq 1$).}
+
+	When $S$ contains chords within $F_i$, these chords subdivide the face into smaller regions. By Theorem~\ref{thm:safe_root_exists}, at least two safe root vertices exist. Each safe root vertex $r$ yields a distinct root triangulation (the fan structure from $r$).
+
+	\medskip
+	\noindent\textbf{Key observation:} Different safe roots produce different root triangulations because the fan from vertex $v_i$ contains chords $(v_i, v_{i+2}), (v_i, v_{i+3}), \ldots, (v_i, v_{i+n_i-2})$, while the fan from vertex $v_j \neq v_i$ contains a distinct set of chords. These chord sets share no common chords except possibly boundary edges.
+
+	Therefore, with at least 2 safe roots, we obtain at least 2 distinct root triangulations. Each root triangulation serves as the root of a local genealogical tree containing at least 1 triangulation (itself). Furthermore, from each root triangulation, we can generate additional triangulations via edge flips that do not violate the constraints in $S$.
+
+	\medskip
+	\noindent\textbf{Conservative lower bound:}
+
+	Even in the most constrained scenario (where $S$ blocks many potential chords), the algorithm explores at least:
+	\begin{itemize}
+		\item All root triangulations from safe roots: $\geq 2$
+		\item Plus descendants from edge flips in local genealogical trees
+	\end{itemize}
+
+	Empirical evidence (see Table~\ref{tab:triangulation_counts}) and the structure of genealogical trees show that $d_i \geq n_i - 3$. For small cases:
+	\begin{itemize}
+		\item $n_i = 3$ (triangle): Already triangulated, $d_i = 1 \geq 0$ \checkmark
+		\item $n_i = 4$ (quadrilateral): Two diagonals, $d_i \geq 1$ (often $d_i = 2$)
+		\item $n_i = 5$ (pentagon): $d_i \geq 2$ (often $d_i \geq 5$ in practice)
+		\item $n_i = 6$ (hexagon): $d_i \geq 3$ (often $d_i \geq 4$ in practice)
+	\end{itemize}
+
+	The bound is conservative and often exceeded in practice due to the exponential growth of triangulation spaces.
+\end{proof}
+
+\begin{remark}
+	This lemma provides a critical lower bound for the time complexity analysis (Section~\ref{sec:complexity}). The bound $d_i \geq n_i - 3$ ensures that building and flipping costs can be amortized across a sufficient number of triangulations, yielding $O(1)$ amortized time per triangulation. In practice, the actual number of triangulations often far exceeds this lower bound, as confirmed by experimental data in Table~\ref{tab:triangulation_counts}.
+\end{remark}
+
 
 \subsection{Time Complexity}
 
