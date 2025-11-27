@@ -1,4 +1,4 @@
-﻿﻿﻿\documentclass[12pt,a4paper]{article}
+﻿﻿﻿﻿﻿\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -206,31 +206,31 @@ In the Parvez, Rahman and Nakano algorithm, we are sure that there will not be a
 		\draw (b4) -- (b5);
 		\draw (b5) -- (b6);
 		\draw (b6) -- (b7);
-        \draw (b3) -- (b7);
+		\draw (b3) -- (b7);
 		\draw (b1) -- (b7);
 		\draw (b3) -- (b9);
 		\draw (b7) -- (b9);
 	\end{tikzpicture}
 	\caption{The left one is a biconnected graph, where (3,7) has a possiblity of being multi edge, but on the right one, (3,7) cannot be multi edge because is it a triconnected graph}
-    \label{fig:occurranceofmultiedge}
+	\label{fig:occurranceofmultiedge}
 \end{figure}
 Here there can not be any multi edge problem in the right graph, as triangulating face F1 and F2 separately can not generate an edge where both of the endpoints are same (as there is no separation pair). But this problem can happen in left graph of figure \ref{fig:occurranceofmultiedge}, where (3,7) is a separation pair, thus by independent triangulating of F1 face and F2 face, there can be two chords (3,7) at the same time., creating the multi edge problem. So, this algorithm can not be used for for biconnected plane graphs.
 
-For this reason in this paper we developed a new algorithm, which uses the canonical genealogical tree feature of this algorithm, but only for a face, the combination of triangulations are handled by a recirsive tree struture, where only the leaves of the trees are actual total triangulations. 
+For this reason in this paper we developed a new algorithm, which uses the canonical genealogical tree feature of this algorithm, but only for a face, the combination of triangulations are handled by a recirsive tree struture, where only the leaves of the trees are actual total triangulations.
 
-Our algorithm for generating all triangulations of a biconnected plane graph uses O(1) amortized time per triangulation and O(n) space constantly. 
+Our algorithm for generating all triangulations of a biconnected plane graph uses O(1) amortized time per triangulation and O(n) space constantly.
 The rest of the paper is organized as follows, section \ref{sec:preliminaries} gives some definitions, section \ref{sec:algorithm} gives the outline of the algorithm for generating all triangulations of a biconnected plane graph, section \ref{sec:correctness} deals with the proofs of the correctness and completeness of our algorithm, section \ref{sec:complexity} deals with the mentioned tiome and space complexity of our algorithm, section \ref{sec:experiments} deals with the implementation and experimental validation of our algorithm. Finally, section \ref{sec:conclusion} is conclusion.
 \section{Preliminaries}
 \label{sec:preliminaries}
 In this section, we define some terms used in the paper.
-Let $G = (V, E)$ be a connected simple graph with vertex set $V$ and edge set $E$.  
-Every edge $e \in E$ has endpoints $(v_i, v_j)$ where $v_i, v_j \in V$ and $v_i \neq v_j$.  
-The connectivity of a graph is the minimum number of vertices whose removal disconnects the graph.  
-A graph is called $k$-connected if removing fewer than $k$ vertices leaves the graph connected;  
+Let $G = (V, E)$ be a connected simple graph with vertex set $V$ and edge set $E$.
+Every edge $e \in E$ has endpoints $(v_i, v_j)$ where $v_i, v_j \in V$ and $v_i \neq v_j$.
+The connectivity of a graph is the minimum number of vertices whose removal disconnects the graph.
+A graph is called $k$-connected if removing fewer than $k$ vertices leaves the graph connected;
 equivalently, at least $k$ vertices must be removed to disconnect the graph.
 
 
-A graph G is planar if it can be embedded in a plane where no two edges intersect geometrically except at a vertex to which both of them are incident. A plane graph is a planar graph with a fixed embedding in  a plane. A plane graph divided a plane, the edges acts like boundary to separated regions, called faces. The inner bound faces are called the inner faces and the outer region is called the outer face. If in a plane graph, each face boundary consist of exactly three vertices, it will be called a plane triangulation. Here edges are not necessarily a straight line. 
+A graph G is planar if it can be embedded in a plane where no two edges intersect geometrically except at a vertex to which both of them are incident. A plane graph is a planar graph with a fixed embedding in  a plane. A plane graph divided a plane, the edges acts like boundary to separated regions, called faces. The inner bound faces are called the inner faces and the outer region is called the outer face. If in a plane graph, each face boundary consist of exactly three vertices, it will be called a plane triangulation. Here edges are not necessarily a straight line.
 
 Now to make a graph triangulated, we add edges to a graph between vertices, where no edges are previously present. If we add edges between two vertices where an edge is already present, then it will be a multi-edge, and the graph will no longer be a simple graph.
 
@@ -239,44 +239,44 @@ A face in a plane graph can also be considered a cycle, where all of the vertice
 Let C be a cycle and $v_1, v_2,...,v_k$ be the vertices of it in counter clockwise order. We  call an edge between ($v_i, v_j$) a chord of C if $|i-j| \neq 1$ and $\{i,j\} \neq \{1,k\}$ and ($v_i, v_j$) is contained in the face of G. A chord ($v_i, v_j$) divided the cycle into two smaller cycles, $v_i, v_i+1, ..., v_j$ and $v_j, v_j+1,..., v_i$. These two smaller cycles are called the sub-cycles of the chord ($v_i, v_j$). The decomposition of a cycle into triangles by a set of non intersecting chords is called a triangulation of the cycle.
 
 \begin{figure}[h]
-    \centering
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-         \begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-            % Coordinates of hexagon vertices
-            \foreach \i/\angle in {1/90, 2/30, 3/-30, 4/-90, 5/-150, 6/150}
-            {
-                \node (a\i) at (\angle:1) {\i};
-            }
-            % Edges
-            \draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
-            \draw (a2) -- (a4) -- (a6) -- (a2);
-        \end{tikzpicture}
-        \caption{First hexagon}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-            % Coordinates of hexagon vertices
-            \foreach \i/\angle in {1/90, 2/30, 3/-30, 4/-90, 5/-150, 6/150}
-            {
-                \node (b\i) at (\angle:1) {\i};
-            }
-            % Edges
-            \draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
-            \draw (b1) -- (b3) -- (b5) -- (b1);
-        \end{tikzpicture}
-        \caption{Second hexagon}
-    \end{subfigure}
-    \caption{Two distinct triangulations of a cycle}
+	\centering
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Coordinates of hexagon vertices
+			\foreach \i/\angle in {1/90, 2/30, 3/-30, 4/-90, 5/-150, 6/150}
+				{
+					\node (a\i) at (\angle:1) {\i};
+				}
+			% Edges
+			\draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
+			\draw (a2) -- (a4) -- (a6) -- (a2);
+		\end{tikzpicture}
+		\caption{First hexagon}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Coordinates of hexagon vertices
+			\foreach \i/\angle in {1/90, 2/30, 3/-30, 4/-90, 5/-150, 6/150}
+				{
+					\node (b\i) at (\angle:1) {\i};
+				}
+			% Edges
+			\draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
+			\draw (b1) -- (b3) -- (b5) -- (b1);
+		\end{tikzpicture}
+		\caption{Second hexagon}
+	\end{subfigure}
+	\caption{Two distinct triangulations of a cycle}
 	\label{fig:disticttriangulationsofacycle}
 \end{figure}
 
 Figure \ref{fig:disticttriangulationsofacycle} shows two distinct triangulations of a cycle. In a triangulation T, it is a set of chords which are maximal, meaning each chords not in T intersects some chords in T. We are listing chords by its endpoints like chords 1,3 will be referred as <1,3>.
 Now, we also define visibility by chords, meaning if there is a <1,3> chord, we will say that vertex 3 is visible from 1 and vice versa.
 
-In this paper we will be generating triangulations for labeled biconnected graphs, meaning each vertex in the graph is distinctly labeled, and we will consider that no two edges share the same two endpoints. 
+In this paper we will be generating triangulations for labeled biconnected graphs, meaning each vertex in the graph is distinctly labeled, and we will consider that no two edges share the same two endpoints.
 
 
 \section{The Algorithm}
@@ -610,25 +610,25 @@ Once a safe root vertex $r$ is identified, we construct the \textbf{root triangu
 %% ============================================================
 
 \begin{figure}[h]
-    \centering
-    \begin{tikzpicture}[scale=2, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-        % Hexagon vertices (counterclockwise)
-        \node[fill=red] (v1) at ( 1.0000,  0.0000) {1};
-        \node (v2) at ( 0.5000,  0.8660) {2};
-        \node (v3) at (-0.5000,  0.8660) {3};
-        \node (v4) at (-1.0000,  0.0000) {4};
-        \node (v5) at (-0.5000, -0.8660) {5};
-        \node (v6) at ( 0.5000, -0.8660) {6};
+	\centering
+	\begin{tikzpicture}[scale=2, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+		% Hexagon vertices (counterclockwise)
+		\node[fill=red] (v1) at ( 1.0000,  0.0000) {1};
+		\node (v2) at ( 0.5000,  0.8660) {2};
+		\node (v3) at (-0.5000,  0.8660) {3};
+		\node (v4) at (-1.0000,  0.0000) {4};
+		\node (v5) at (-0.5000, -0.8660) {5};
+		\node (v6) at ( 0.5000, -0.8660) {6};
 
-        % Edges (perimeter)
-        \draw (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
+		% Edges (perimeter)
+		\draw (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
 
-        % Optional chords inside the hexagon
-        \draw[draw=red, line width=2pt] (v1) -- (v3);
+		% Optional chords inside the hexagon
+		\draw[draw=red, line width=2pt] (v1) -- (v3);
 		\draw[draw=red, line width=2pt] (v1) -- (v4);
 		\draw[draw=red, line width=2pt] (v1) -- (v5);
-    \end{tikzpicture}
-    \caption{Root triangulation with safe root vertex 1. Chords from vertex 1 to all non-neighboring vertices (3, 4, 5) form a fan structure, ensuring no multi-edge conflicts with previously added chords.}
+	\end{tikzpicture}
+	\caption{Root triangulation with safe root vertex 1. Chords from vertex 1 to all non-neighboring vertices (3, 4, 5) form a fan structure, ensuring no multi-edge conflicts with previously added chords.}
 \end{figure}
 
 \subsubsection{Local Genealogical Tree Structure}
@@ -655,52 +655,52 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 %% ============================================================
 
 \begin{figure}[h]
-    \centering
-    % ----- Subfigure (a) -----
-    \begin{subfigure}[b]{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-            % Vertices (counterclockwise)
-            \node[fill=red] (a1) at ( 1.0,  0.0) {1};
-            \node (a2) at ( 0.5,  0.866) {2};
-            \node (a3) at (-0.5,  0.866) {3};
-            \node (a4) at (-1.0,  0.0) {4};
-            \node (a5) at (-0.5, -0.866) {5};
-            \node (a6) at ( 0.5, -0.866) {6};
+	\centering
+	% ----- Subfigure (a) -----
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Vertices (counterclockwise)
+			\node[fill=red] (a1) at ( 1.0,  0.0) {1};
+			\node (a2) at ( 0.5,  0.866) {2};
+			\node (a3) at (-0.5,  0.866) {3};
+			\node (a4) at (-1.0,  0.0) {4};
+			\node (a5) at (-0.5, -0.866) {5};
+			\node (a6) at ( 0.5, -0.866) {6};
 
-            % Edges
-            \draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
-            \draw (a1) -- (a3);
+			% Edges
+			\draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
+			\draw (a1) -- (a3);
 			\draw[draw=red, line width=2pt] (a3) -- (a5);
 			\draw (a1) -- (a5);
-        \end{tikzpicture}
-        \caption{Child Triangulation }
-        \label{fig:hex1}
-    \end{subfigure}
-    \hfill
-    % ----- Subfigure (b) -----
-    \begin{subfigure}[b]{0.45\textwidth}
-        \centering
-        \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-            % Vertices (counterclockwise)
-            \node[fill=red] (b1) at ( 1.0,  0.0) {1};
-            \node (b2) at ( 0.5,  0.866) {2};
-            \node (b3) at (-0.5,  0.866) {3};
-            \node (b4) at (-1.0,  0.0) {4};
-            \node (b5) at (-0.5, -0.866) {5};
-            \node (b6) at ( 0.5, -0.866) {6};
+		\end{tikzpicture}
+		\caption{Child Triangulation }
+		\label{fig:hex1}
+	\end{subfigure}
+	\hfill
+	% ----- Subfigure (b) -----
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Vertices (counterclockwise)
+			\node[fill=red] (b1) at ( 1.0,  0.0) {1};
+			\node (b2) at ( 0.5,  0.866) {2};
+			\node (b3) at (-0.5,  0.866) {3};
+			\node (b4) at (-1.0,  0.0) {4};
+			\node (b5) at (-0.5, -0.866) {5};
+			\node (b6) at ( 0.5, -0.866) {6};
 
-            % Edges
-            \draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
-            \draw (b1) -- (b3);
+			% Edges
+			\draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
+			\draw (b1) -- (b3);
 			\draw[draw=red, line width=2pt] (b1) -- (b4);
 			\draw (b1) -- (b5);
-        \end{tikzpicture}
-        \caption{Parent Triangulation}
-        \label{fig:hex2}
-    \end{subfigure}
-    \caption{Get the child triangulation from parent triangulation from flipping a generating set}
-    \label{fig:hexagons}
+		\end{tikzpicture}
+		\caption{Parent Triangulation}
+		\label{fig:hex2}
+	\end{subfigure}
+	\caption{Get the child triangulation from parent triangulation from flipping a generating set}
+	\label{fig:hexagons}
 \end{figure}
 
 \noindent\rule{\textwidth}{0.4pt}
@@ -879,7 +879,7 @@ An edge flip transforms one triangulation into another by replacing a chord:
 			\node[draw=none, font=\scriptsize, blue!70!black] at (1.2, -0.7) {Triangle 2};
 		\end{scope}
 
-		
+
 
 		% After flip
 		\begin{scope}[xshift=3.5cm]
@@ -971,265 +971,363 @@ In this section, we establish the theoretical foundation of our algorithm by pro
 % ----------------------------------------------------------------
 % SUBSECTION: Safe Root Vertices
 % ----------------------------------------------------------------
+\subsection{Completeness via Strategic Pruning}
+\label{proof:pruning}
+Now our algorithm is a double tree structure, we can think of it like this. For a a triangulation $T_1$ of face $F_1$, we search every other possible triangulations which are compatible with $T_1$ in the second face $F_2$. For each compatible triangulation $T_2$ of face $F_2$, we then search every other possible triangulations which are compatible with both $T_1$ and $T_2$ in the third face $F_3$, and so on. This way, we explore every possible combination of triangulations across all faces, while ensuring compatibility at each step.
+
+So, we always move towards 1....k.
+That means, for deiciding validity, we only have to determine whether the new chord conflict with any of the chords in prior faces. . If we find any triangulation in face $F_i$ which have a duplicate chord with any of the prior faces $F_1, F_2, \ldots, F_{i-1}$, we can safely prune that branch because all descendant triangulations will also contain that duplicate chord.
+
+From the algorithm,, we only flip the generatiung set , meaning that we never flip blocking chords. So if both of the endpoints of a chord are not the root vertex then that chord will persist in all descendant triangulations. Therefore, pruning branches with invalid blocking chords does not eliminate any valid triangulations, ensuring completeness because all of its descendants would have also contained the invaliud blocking chord.
+
+\begin{figure}[h]
+	\centering
+	\begin{tikzpicture}[scale=1.2, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+
+		% First row: Hexagon 1
+		\begin{scope}[yshift=4cm]
+			\node (a1) at ( 1.0,  0.0) {1};
+			\node (a2) at ( 0.5,  0.866) {2};
+			\node (a3) at (-0.5,  0.866) {3};
+			\node (a4) at (-1.0,  0.0) {4};
+			\node (a5) at (-0.5, -0.866) {5};
+			\node (a6) at ( 0.5, -0.866) {6};
+			\draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
+			\draw[draw=red, line width=1.5pt] (a1) -- (a3);
+			\draw[draw=red, line width=1.5pt] (a1) -- (a4);
+			\draw[draw=red, line width=1.5pt] (a1) -- (a5);
+		\end{scope}
+		\vspace{2cm}
+		% Arrow from first to second
+		\draw[->, thick] (0,2.8) -- (0,2.2);
+		\vspace{2cm}
+		% Second row: Hexagon 2
+		\begin{scope}[yshift=1cm]
+			\node (b1) at ( 1.0,  0.0) {1};
+			\node (b2) at ( 0.5,  0.866) {2};
+			\node (b3) at (-0.5,  0.866) {3};
+			\node (b4) at (-1.0,  0.0) {4};
+			\node (b5) at (-0.5, -0.866) {5};
+			\node (b6) at ( 0.5, -0.866) {6};
+			\draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
+			\draw[draw=red, line width=1.5pt] (b1) -- (b3);
+			\draw (b3) -- (b5);
+			\draw[draw=red, line width=1.5pt] (b1) -- (b5);
+		\end{scope}
+		\vspace{2cm}
+		% Arrows from second to third row
+		\draw[->, thick] (-1,0.5) -- (-2,-0.5);
+		\draw[->, thick] (1,0.5) -- (2,-0.5);
+		\vspace{2cm}
+		% Third row left: Hexagon 3
+		\begin{scope}[xshift=-3cm, yshift=-2cm]
+			\node (c1) at ( 1.0,  0.0) {1};
+			\node (c2) at ( 0.5,  0.866) {2};
+			\node (c3) at (-0.5,  0.866) {3};
+			\node (c4) at (-1.0,  0.0) {4};
+			\node (c5) at (-0.5, -0.866) {5};
+			\node (c6) at ( 0.5, -0.866) {6};
+			\draw (c1) -- (c2) -- (c3) -- (c4) -- (c5) -- (c6) -- (c1);
+			\draw[draw=red, line width=1.5pt] (c1) -- (c3);
+			\draw (c3) -- (c5);
+			\draw (c3) -- (c6);
+		\end{scope}
+
+		% Third row right: Hexagon 4
+		\begin{scope}[xshift=3cm, yshift=-2cm]
+			\node (d1) at ( 1.0,  0.0) {1};
+			\node (d2) at ( 0.5,  0.866) {2};
+			\node (d3) at (-0.5,  0.866) {3};
+			\node (d4) at (-1.0,  0.0) {4};
+			\node (d5) at (-0.5, -0.866) {5};
+			\node (d6) at ( 0.5, -0.866) {6};
+			\draw (d1) -- (d2) -- (d3) -- (d4) -- (d5) -- (d6) -- (d1);
+			\draw[draw=red, line width=1.5pt] (d1) -- (d5);
+			\draw (d2) -- (d5);
+			\draw (d3) -- (d5);
+		\end{scope}
+
+	\end{tikzpicture}
+	\caption{Four hexagons showing transformation paths}
+	\label{fig:four_hexagons_arrows}
+\end{figure}
+
+In the figure \ref{fig:four_hexagons_arrows} the root all of the 3 chords are flippable. Now we flip the <1,4> chord to get the <3,5> chord, and as a result <1,4> is removed from the generating set. So, the new chord <3,5> is a part of the triangulation but not a generating set, meaning that there is no chance of its flipping in the descendant triangulations. Therefore, in all descendant triangulations, the chord <3,5> will be present. So, if we prune a branch because of an invalid blocking chord <3,5>, all of the descendant triangulations would have also contained that invalid blocking chord, meaning all of the descendant triangulations are also invalid. Hence, pruning does not eliminate any valid triangulations, ensuring completeness.
+
+If a prior face triangulation configuration {$T_{f_1}$, $T_{f_2}$, \ldots, $T_{f_{i-1}}$} exists, we denote the set of chords used in these triangulations as $S$. When processing face $F_i$, our algorithm explores its genealogical tree rooted at a safe vertex $r_i$, generating all possible triangulations of $F_i$ that do not introduce multi-edges with chords in $S$. it guarantees that once we safe root triangulation for face $F_i$, all chords from $r_i$ to non-neighbors can be added without conflicts. As we explore the genealogical tree, we only proceed with edge flips that do not create multi-edges with chords in $S$. If we encounter a triangulation where a chord conflicts with $S$, we prune that branch, knowing that all descendants will also contain that conflicting chord (by Lemma Y). This pruning ensures we only explore valid triangulations, maintaining completeness.
 
 \subsection{Existence of Safe Root Vertices}
+\label{proof:saferoot}
+Now the problem arrives is the safe root configuration. To find a safe root vertex, our algorithm use a safe root finding procedure . The method gives us a safe root vertex which guarantees that all chords from the safe root to non-neighbors can be added without conflicts with any of the prior face triangulations.
 
-The cornerstone of our algorithm is the guaranteed existence of safe root vertices, which provide valid starting points for triangulating each face regardless of prior constraints.
+So to find that we use a two-pointer technique. We start with two pointers: one at the end of the vertex list (startIndex) and one at the beginning (endIndex). We then move these pointers towards each other based on the presence of chords in the global set $S$. If the chord between the vertices at these pointers exists in $S$, we move the startIndex pointer leftward; otherwise, we move the endIndex pointer rightward. This process continues until the two pointers converge. At this point, the vertex at the startIndex pointer is guaranteed to be a safe root vertex. This is because all chords from this vertex to non-neighbors do not exist in $S$, ensuring no conflicts with prior triangulations.
 
-\begin{theorem}[Existence of Safe Roots]
-	\label{thm:safe_root_exists}
-	For any face of a biconnected plane graph during the triangulation process, there exist at least two safe root vertices.
-\end{theorem}
-
-\begin{proof}
-	Consider face $F_i$ with vertices $v_1, v_2, \ldots, v_n$ in counterclockwise order. Let $S$ denote the global chord set from previously processed faces.
-
-	\medskip
-	\noindent\textbf{Case 1: No existing chords within the face.}
-
-	If $S$ contains no chords with both endpoints in $F_i$, then every vertex qualifies as a safe root, since no conflicting chords exist. This trivially satisfies the theorem.
-
-	\medskip
-	\noindent\textbf{Case 2: Existing chords form an outerplane structure.}
-
-	Suppose $S$ contains chords with both endpoints in $F_i$. View the face as an outerplane graph $G$ where:
-	\begin{itemize}
-		\item The \textbf{outer cycle} consists of boundary edges: $(v_1, v_2), (v_2, v_3), \ldots, (v_n, v_1)$
-		\item The \textbf{internal edges} are chords from $S$ lying entirely within $F_i$
-	\end{itemize}
-
-	By adding all possible non-crossing chords between vertices of $F_i$ that do not conflict with existing chords in $S$, we extend $G$ to a \textbf{maximal outerplane graph} (where no additional chords can be added without violating planarity or creating crossings).
-
-	A fundamental result in graph theory~\cite{diestel2017} states:
-	\begin{quote}
-		\textit{In any maximal outerplane graph with $n \geq 3$ vertices, the outer cycle contains at least two vertices of degree~2.}
-	\end{quote}
-
-	A vertex $v$ with degree 2 on the outer cycle has exactly two neighbors: its adjacent vertices on the boundary. Crucially, \textbf{$v$ has no incident chords from $S$} since all its connections are boundary edges.
-
-	Therefore, for any vertex $v$ with degree 2 on the outer cycle:
-	\begin{itemize}
-		\item All vertices at distance $\geq 2$ from $v$ along the boundary are non-neighbors
-		\item No chord from $v$ to these non-neighbors exists in $S$ (since $v$ has no internal edges)
-		\item Hence, all such chords can be added without conflicts
-	\end{itemize}
-
-	This precisely satisfies the definition of a \textbf{safe root vertex}. Since every maximal outerplane graph has at least two degree-2 vertices on the outer cycle, every face $F_i$ has at least two safe root vertices.
-
-	\medskip
-	\noindent\textbf{Edge case:} If the face is already fully triangulated by chords in $S$, no further triangulations are needed, and the algorithm completes with $d_i = 1$ (the single existing triangulation).
-\end{proof}
-
-\begin{remark}
-	The outerplane graph interpretation provides both elegance and rigor. The existence of safe roots is guaranteed by a classical structural theorem, eliminating the need for iterative reduction arguments. This result holds regardless of the complexity of the existing chord structure within the face.
-\end{remark}
-
-\begin{figure}[htbp]
+Now we will prove that there will always be at least two safe root configurations in any biconnected plane graph.
+Proof:
+Consider a biconnected plane graph $G$ with faces $F_1, F_2, \ldots, F_k$. Each face $F_i$ is a simple cycle with at least three vertices. Now, we start at any arbitrary face with k vertices. The outer region of the face can have many edges, and chords, some or all of whom can have one or both endpoints inside the k vertices of our current face.
+\begin{figure}[h]
 	\centering
-	\begin{tikzpicture}[scale=1.3]
-		% Face boundary (hexagon)
-		\node[circle,draw,fill=green!20,minimum size=8pt,inner sep=2pt,thick] (v1) at (90:2) {$v_1$};
-		\node[circle,draw,fill=white,minimum size=8pt,inner sep=2pt] (v2) at (30:2) {$v_2$};
-		\node[circle,draw,fill=white,minimum size=8pt,inner sep=2pt] (v3) at (-30:2) {$v_3$};
-		\node[circle,draw,fill=green!20,minimum size=8pt,inner sep=2pt,thick] (v4) at (-90:2) {$v_4$};
-		\node[circle,draw,fill=white,minimum size=8pt,inner sep=2pt] (v5) at (-150:2) {$v_5$};
-		\node[circle,draw,fill=white,minimum size=8pt,inner sep=2pt] (v6) at (150:2) {$v_6$};
+	\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+		% Vertices using exact x,y coordinates
+		\node (1) at (2.0, 0.0) {1};
+		\node (2) at (1.0, 1.732) {2};
+		\node (3) at (-1.0, 1.732) {..};
+		\node (4) at (-2.0, 0.0) {..};
+		\node (5) at (-1.0, -1.732) {k-1};
+		\node (6) at (1.0, -1.732) {k};
 
-		% Boundary edges (outer cycle)
-		\draw[thick,blue] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- cycle;
-
-		% Existing chords from S (internal edges)
-		\draw[thick,red,dashed] (v2) -- (v5) node[midway,above left,font=\small] {$(v_2,v_5) \in S$};
-		\draw[thick,red,dashed] (v3) -- (v6) node[midway,above right,font=\small] {$(v_3,v_6) \in S$};
-
-		% Highlight safe roots
-		\node[above,font=\small,green!50!black] at (v1.north) {Safe root};
-		\node[below,font=\small,green!50!black] at (v4.south) {Safe root};
-
-		% Degree annotations
-		\node[right,font=\footnotesize,align=left] at (3,1.5) {
-			$v_1$: degree 2 on outer cycle\\
-			(neighbors: $v_6, v_2$)\\
-			No internal chords\\
-			$\Rightarrow$ \textbf{safe root}
-		};
-
-		\node[right,font=\footnotesize,align=left] at (3,-1.5) {
-			$v_4$: degree 2 on outer cycle\\
-			(neighbors: $v_3, v_5$)\\
-			No internal chords\\
-			$\Rightarrow$ \textbf{safe root}
-		};
-
-		% Annotation for non-safe vertices
-		\node[left,font=\footnotesize,align=right,gray] at (-3,0.5) {
-			$v_2, v_3, v_5, v_6$:\\
-			Have internal chords\\
-			$\Rightarrow$ not safe roots
-		};
-
-		% Title
-		\node[above,font=\small\bfseries] at (0,2.7) {
-			Outerplane Graph View of Face with Existing Chords
-		};
+		% Edges using -- syntax
+		\draw (1) -- (2) -- (3) -- (4) -- (5) -- (6) -- (1);
 	\end{tikzpicture}
-	\caption{Illustration of Theorem~\ref{thm:safe_root_exists}: A hexagonal face with two existing chords $(v_2, v_5)$ and $(v_3, v_6)$ from previously processed faces (red dashed lines). Viewing this as an outerplane graph, vertices $v_1$ and $v_4$ have degree 2 on the outer cycle (blue boundary) with no incident internal edges. By the classical theorem, at least two such vertices exist, guaranteeing safe roots for algorithm initialization.}
-	\label{fig:safe_roots}
+	\caption{Hexagon using x,y coordinates}
+	\label{fig:hexagon_xy}
 \end{figure}
 
-% ----------------------------------------------------------------
-% SUBSECTION: Lower Bound on Triangulations
-% ----------------------------------------------------------------
+Now there can be 2 possiblites,
+\begin{enumerate}
+	\item There is no chords in the prior face triangulation configuration which has both endpoints in the k vertices of our current face. In this case, all vertices are safe root vertices, and we can choose any of them as the safe root.
+	\item There is at least one chord in the prior face triangulation configuration which has both endpoints inside the vertices 1,2,..,k of our current face.
+\end{enumerate}
 
+Now, the first case, all k vertices of the face are safe root vertices, as there is no possiblity of having a multi edge having chords added between them.
+But in the second case, , there can be at least one chord between two vertices in the face in the outer region of the current face.
 
-\subsection{Completeness via Strategic Pruning}
-
-We now establish the correctness of our pruning strategy by proving that blocking chords persist in descendant triangulations, allowing safe elimination of invalid branches without compromising completeness.
-
-\begin{lemma}[Root Chord Invariant]
-	\label{lem:root_chord_invariant}
-	In any local genealogical tree rooted at vertex $r$, all chords incident to $r$ are established in the root triangulation and remain unchanged throughout all descendants.
-\end{lemma}
-
-\begin{proof}
-	The root triangulation $T_{ir}$ is constructed by drawing all chords from the safe root vertex $r$ to create a fan triangulation. By definition of the local genealogical tree structure, child triangulations are generated by flipping non-root chords (i.e., chords where neither endpoint is $r$).
-
-	The generating chord, which determines the parent-child relationship, must satisfy the condition that neither of its endpoints is the root vertex (Definition~\ref{def:generating_chord}). Therefore, no chord incident to $r$ can ever be flipped in any descendant triangulation, and all such chords persist unchanged.
-\end{proof}
-
-This lemma ensures that the fan structure emanating from the safe root remains stable throughout the exploration of the local genealogical tree, providing a consistent reference frame for all triangulations.
-
-\begin{lemma}[Blocking Chords Persist]
-	\label{lem:blocking_chord_persists}
-	In a local genealogical tree, a blocking chord (one that already exists in the global set $S$) in triangulation $T$ is never the generating chord of $T$. Consequently, the blocking chord persists in all descendants of $T$ in the tree.
-\end{lemma}
-
-%% ============================================================
-%% FIGURE 7: Blocking Chord Persistence (Lemma 4)
-%% Section 4.3 - Completeness via Strategic Pruning
-%% ============================================================
-\begin{figure}[htbp]
+\begin{figure}[h]
 	\centering
-	\begin{tikzpicture}[
-			level distance=2cm,
-			sibling distance=3cm,
-			every node/.style={rectangle, rounded corners, minimum width=2cm, minimum height=1cm, align=center, font=\small},
-			edge from parent/.style={draw, -latex, thick}
-		]
+	\begin{tikzpicture}[scale=1.2, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+		% Hexagon vertices
+		\node (v1) at (2.0, 0.0) {$v_{j+1}$};
+		\node (v2) at (1.0, 1.732) {$v_j$};
+		\node (v3) at (-1.0, 1.732) {$v_{j-1}$};
+		\node (v4) at (-2.0, 0.0) {$v_{i+1}$};
+		\node (v5) at (-1.0, -1.732) {$v_i$};
+		\node (v6) at (1.0, -1.732) {$v_{i-1}$};
 
-		% Root
-		\node[draw, fill=blue!20] {$T_{root}$\\No blocking\\chords}
-		child {
-				node[draw, fill=yellow!20] {$T_1$\\Contains\\$(u,v) \in S$}
-				child {
-						node[draw=red, very thick, fill=red!10] {$T_2$\\$(u,v)$ persists\\PRUNED}
-						edge from parent[draw=red, very thick, dashed]
-					}
-				child {
-						node[draw=red, very thick, fill=red!10] {$T_3$\\$(u,v)$ persists\\PRUNED}
-						edge from parent[draw=red, very thick, dashed]
-					}
-				edge from parent node[left, draw=none, font=\scriptsize] {Flip adds\\$(u,v)$}
-			}
-		child {
-				node[draw, fill=green!20] {$T_4$\\Valid\\(no conflicts)}
-				child {
-						node[draw, fill=green!15] {$T_5$\\Valid}
-					}
-				edge from parent node[right, draw=none, font=\scriptsize] {Safe flip}
-			};
+		% Hexagon edges
+		\draw (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
 
-		% Annotations with spacing
-		\node[draw=none, font=\small, align=left, red!70!black] at (5.5, -3)
-		{Blocking chord $(u,v) \in S$\\persists in all descendants\\$\Rightarrow$ Safe to prune};
-
-		\node[draw=none, font=\small, align=left, green!60!black] at (-5.5, -2)
-		{No conflicts\\$\Rightarrow$ Continue\\exploration};
-
-		\node[draw=none, font=\small, align=center] at (0, -5.5)
-		{Blocking chords never get flipped (Lemma 4),\\so pruning eliminates only invalid triangulations};
-
+		% Edge completely outside using Bezier curve
+		\draw[red, thick]
+		(v5) .. controls (4,-5) and (4,1) .. (v2);
 	\end{tikzpicture}
-	\caption{Illustration of Lemma 4: Blocking chord persistence. When a triangulation $T_1$ contains a chord $(u,v)$ that already exists in the global set $S$ (a blocking chord), this chord cannot be the generating chord and thus persists in all descendants $T_2, T_3, \ldots$ Creating multi-edges in all descendants. Therefore, pruning this entire subtree (red dashed edges) is safe and eliminates only invalid triangulations.}
-	\label{fig:blocking_chord}
+	\caption{Hexagon with $v_i$-$v_j$ edge completely outside}
+	\label{fig:hexagon_outer_edge}
 \end{figure}
 
-\begin{proof}
-	Let $(v_a, v_b)$ be a blocking chord in triangulation $T$ where $(v_a, v_b) \in S$. Since $T$ triangulates the face, vertices $v_p$ and $v_q$ form triangles on opposite sides of $(v_a, v_b)$. The generating chord must: \textbf{(1)} not involve the root $r = v_1$, and \textbf{(2)} be leftmost among such chords.
+Now notice that in the figure \ref{fig:hexagon_outer_edge}, the chord $(v_i, v_j)$ lies completely outside the face formed by vertices $v_{j+1}, v_j, \ldots, v_{i-1}, v_i$. This chord is an element of the global set $S$ from prior face triangulations. This particular chord has added a limitation for the possible multi edges in the outside region. Notice that the vertices \{$v_{i+1},..,v_{j-1}$\} and \{$v_{j+1},..,v_{i-1}$\} are separated by the chord $(v_i, v_j)$. Therefore, any chord connecting a vertex from the first set to a vertex from the second set would cross the chord $(v_i, v_j)$, which is not allowed in a planar graph. As a result only mutliedges in the prior face triangulations can occur where both endpoints belong to \{$v_{i+1},..,v_{j-1}$\} or both endpoints belong to \{$v_{j+1},..,v_{i-1}$\}. Notice that it has created two separate structures.
 
-	We show $(v_a, v_b)$ cannot be the generating chord by analyzing $v_p$'s position:
+\begin{figure}[h]
+	\centering
 
-	\medskip
-	\noindent\textbf{Case 1:} If $v_p < v_a < v_b$, then chord $(v_p, v_b)$ exists and is left of $(v_a, v_b)$ since $\min(p,b) < \min(a,b)$. If $v_p \neq r$, then $(v_p, v_b)$ is a leftmost candidate, so $(v_a, v_b)$ cannot be generating.
+	% First subfigure
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Vertices
+			\node (v1) at (0,0) {1};
+			\node (v2) at (2,0) {2};
+			\node (v3) at (4,0) {3};
+			\node (v4) at (6,0) {4};
 
-	\medskip
-	\noindent\textbf{Case 2:} If $v_a < v_p < v_b$, then chord $(v_a, v_p)$ exists and is left of $(v_a, v_b)$ (same minimum endpoint, smaller maximum). If $v_a \neq r$, then $(v_a, v_p)$ is leftmost, so $(v_a, v_b)$ cannot be generating.
+			% Path edges
+			\draw (v1) -- (v2) -- (v3) -- (v4);
 
-	\medskip
-	\noindent\textbf{Case 3:} If $v_p = r$, flipping $(v_a, v_b)$ would create chord $(r, v_q)$, violating the root chord invariant (Lemma~\ref{lem:root_chord_invariant}), which states all chords from $r$ are fixed in the root triangulation.
+			% Curved edge from v1 to v4 (above the path)
+			\draw[thick, bend left=45] (v1) to (v4);
+		\end{tikzpicture}
+		\caption{Partial structure }
+		\label{fig:path4_above}
+	\end{subfigure}
+	\hfill
+	% Second subfigure
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Vertices
+			\node (v1) at (0,0) {1};
+			\node (v2) at (2,0) {2};
+			\node (v3) at (4,0) {3};
+			\node (v4) at (6,0) {4};
 
-	\medskip
-	In all cases, $(v_a, v_b)$ cannot be the generating chord and thus persists in all descendants.
-\end{proof}
+			% Path edges
+			\draw (v1) -- (v2) -- (v3) -- (v4);
 
-With these foundational lemmas established, we now prove the main correctness result.
+			% Curved edge from v1 to v4 (below the path)
+			\draw[thick, bend left=45] (v1) to (v4);
+		\end{tikzpicture}
+		\caption{Partial structure }
+		\label{fig:path4_below}
+	\end{subfigure}
 
-\begin{theorem}[Completeness]
-	\label{thm:completeness}
-	The algorithm generates all valid triangulations of the biconnected plane graph without duplications.
-\end{theorem}
+	\caption{(a) and (b) show two separate structures formed by vertices \{$v_{i+1},..,v_{j-1}$\} and \{$v_{j+1},..,v_{i-1}$\} respectively. Each structure is a simple path with no chords connecting them, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}
+	\label{fig:path4_both}
+\end{figure}
 
-\begin{proof}
-	We must establish two properties:
-	\begin{enumerate}
-		\item \textbf{Completeness:} Every valid triangulation is generated
-		\item \textbf{Uniqueness:} No triangulation is generated twice
-	\end{enumerate}
+In both of them in figure \ref{fig:path4_both} any type of multi edges can occur where both of the endpoints belong to the same structure. as there can be no chords between the two structures.  We can call them $T_n$ structures where n is the number of vertices trapped inside them. In the figure \ref{fig:path4_both} we can see two $T_2$ structures. Now as chords must happen between two non neighboring vertices, any any T structures will always be at least $T_1$, as there must be at least one vertex between two endpoints of a chord. Also, there should be at least two T structures, as the chord $(v_i, v_j)$ separates them. 
+The lowest number of n in $T_n$ structures is 1, and the highest is k - 3, where k is the total number of vertices in the current face. 
+Now, we have to prove that in any $T_n$ structure, there is always at least one safe root vertex, which do not have a chord with any of the non neightbouring vertices of the $T_n$ structures.
+We will prove it by induction on n.
+Here is $T_1$ structure:
 
-	\medskip
-	\noindent\textbf{Part 1: Soundness of Pruning}
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
+        % Vertices
+        \node (v1) at (0,0) {1};
+        \node (v2) at (2,0) {2};
+        \node (v3) at (4,0) {3};
+        
+        % Path edges
+        \draw (v1) -- (v2) -- (v3);
+        
+        % Curved edge from v1 to v4 (above the path)
+        \draw[thick, bend left=45] (v1) to (v3);
+    \end{tikzpicture}
+	 
+    \caption{$T_1$ structure}
+    \label{fig:T1_structure}
+\end{figure}
 
-	When the algorithm encounters a triangulation $T$ containing a blocking chord (a chord that already exists in the global set $S$ from a previously processed face), it prunes that branch of the search tree.
+Here both 1 and 3 are neighbours of vertex 2, which means that vertex 2 cannot have any chords with any of them. Thus, vertex 2 will be a safe vertex.
 
-	By Lemma~\ref{lem:blocking_chord_persists}, this blocking chord persists in all descendants of $T$ in the local genealogical tree. Since the blocking chord creates a multi-edge (it would be added twice to the graph), $T$ and all its descendants are invalid.
+Now for $T_2$ structures.
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+        % Vertices
+        \node (v1) at (1,0) {1};
+        \node (v2) at (2,0) {2};
+        \node (v3) at (3,0) {3};
+		\node (v4) at (4,0) {4};
+        
+        % Path edges
+        \draw (v1) -- (v2) -- (v3) -- (v4);
+        
+        % Curved edge from v1 to v4 (above the path)
+        \draw[thick, bend left=45] (v1) to (v4);
+    \end{tikzpicture}
+	 
+    \caption{$T_2$ structure}
+    \label{fig:T2_structure}
+\end{figure}
 
-	Therefore, pruning such branches eliminates no valid triangulations, preserving completeness.
+In this case, vertex 2 can only have a chord with vertex 4, as vertex 1 is its neighbour. Similarly, vertex 3 can only have a chord with vertex 1. Therefore, if vertex 2 have a chord with vertex 4, then it will create a new $T_1$ structure with vertex 3, making vertex 3 a safe root vertex. On the other hand, if vertex 3 have a chord with vertex 1, then it will create a new $T_1$ structure with vertex 2, making vertex 2 a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_2$ structure.
 
-	\medskip
-	\noindent\textbf{Part 2: Validity of Generated Triangulations}
+\begin{figure}[h]
+    \centering
+    
+    % First subfigure - Original with 2-4 chord
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+            % Vertices
+            \node (v1) at (1,0) {1};
+            \node (v2) at (2,0) {2};
+            \node (v3) at (3,0) {3};
+            \node (v4) at (4,0) {4};
+            
+            % Path edges
+            \draw (v1) -- (v2) -- (v3) -- (v4);
+            
+            % Curved edges
+            \draw[thick, bend left=45] (v1) to (v4);
+            \draw[red, thick, bend left=45] (v2) to (v4);
+        \end{tikzpicture}
+        \caption{$T_1$ with chord 2--4}
+        \label{fig:T1_24}
+    \end{subfigure}
+    \hfill
+    % Second subfigure - Modified with 1-3 chord
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+            % Vertices
+            \node (v1) at (1,0) {1};
+            \node (v2) at (2,0) {2};
+            \node (v3) at (3,0) {3};
+            \node (v4) at (4,0) {4};
+            
+            % Path edges
+            \draw (v1) -- (v2) -- (v3) -- (v4);
+            
+            % Curved edges
+            \draw[thick, bend left=45] (v1) to (v4);
+            \draw[red, thick, bend left=45] (v1) to (v3);
+        \end{tikzpicture}
+        \caption{$T_1$ with chord 1--3}
+        \label{fig:T1_13}
+    \end{subfigure}
+    
+    \caption{$T_1$ structures with different chords}
+    \label{fig:T1_structures}
+\end{figure}
 
-	Every triangulation generated by the algorithm satisfies:
-	\begin{itemize}
-		\item \textbf{No multi-edges:} Constructed by adding chords that do not exist in $S$ (blocking chords are detected and pruned)
-		\item \textbf{Complete triangulation:} All internal faces become triangles
-		\item \textbf{Planarity:} Chords are added within a face; no crossings occur
-	\end{itemize}
+Now in the case for $T_1$ with figure \ref{fig:T1_24}, vertex 3 becomes a safe root vertex. In the case for $T_1$ with figure \ref{fig:T1_13}, vertex 2 becomes a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_1$ structure.
 
-	These triangulations correspond exactly to the valid triangulations of the face given the constraints from $S$.
+now we will go with induction. we assume that for all $T_i$ structures where i < k, there is at least one safe root vertex. Now we will prove it for $T_k$ structure.
 
-	\medskip
-	\noindent\textbf{Part 3: No Duplicates}
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+        % Vertices
+        \node (v1) at (0,0) {$v_i$};
+        \node (v2) at (2,0) {$v_{i+1}$};
+        \node (v3) at (4,0) {$v_{i+2}$};
+		\node (vall) at (6,0) {...};
+		\node (v4) at (8,0) {$v_{j-1}$};
+		\node (v5) at (10,0) {$v_j$};
+        
+        % Path edges
+        \draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
+        
+        % Curved edge from v1 to v4 (above the path)
+        \draw[thick, bend left=60] (v1) to (v5);
+    \end{tikzpicture}
+	 
+    \caption{$T_k$ structure}
+    \label{fig:Tk_structure}
+\end{figure}
 
-	The local genealogical tree structure for each face ensures unique parent-child relationships:
-	\begin{itemize}
-		\item Each triangulation (except the root) has exactly one parent, obtained by flipping its unique generating chord (the leftmost chord not involving the root)
-		\item This defines a tree structure (not a DAG), preventing cycles
-		\item Each triangulation appears exactly once in the tree
-	\end{itemize}
+Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chord with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, $v_j$, as all other vertices are its neighbours. There can be two possibilites
+\begin{enumerate}
+	\item vertex $v_{i+1}$ have a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, $v_j$.
+	\item vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$.
+\end{enumerate}
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+        % Vertices
+        \node (v1) at (0,0) {$v_i$};
+        \node (v2) at (2,0) {$v_{i+1}$};
+        \node (v3) at (4,0) {$v_{i+2}$};
+		\node (vall) at (6,0) {...};
+		\node (v4) at (8,0) {$v_{j-1}$};
+		\node (v5) at (10,0) {$v_j$};
+        
+        % Path edges
+        \draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
+        
+        % Curved edge from v1 to v4 (above the path)
+        \draw[thick, bend left=60] (v1) to (v5);
+		\draw[red, thick, dotted, bend left=60] (v2) to (vall);
+		\draw[red, thick, dotted, bend left=60] (v2) to (v3);
+		\draw[red, thick, dotted, bend left=60] (v2) to (v4);
+		\draw[red, thick, dotted, bend left=60] (v2) to (v5);
 
-	Across faces, the recursive DFS exploration with backtracking ensures that each combination of face triangulations is explored exactly once:
-	\begin{itemize}
-		\item The global chord set $S$ is updated when entering a face triangulation
-		\item $S$ is restored when backtracking (maintaining correct state)
-		\item Each path from root to leaf in the recursion tree represents a unique global triangulation
-	\end{itemize}
+    \end{tikzpicture}
+	 
+    \caption{new $T_m$ structure, where m < k}
+    \label{fig:firstcase}
+\end{figure}
+In the first case in figure \ref{fig:firstcase}, if vertex $v_{i+1}$ have a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, $v_j$, then it will create a new $T_m$ structure where m < k, as at least one vertex is removed from the original $T_k$ structure. By our induction hypothesis, this new $T_m$ structure will have at least one safe root vertex.
 
-	Therefore, the algorithm generates all valid triangulations exactly once.
-\end{proof}
+in the second case in figure \ref{fig:Tk_structure} , if vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, then vertex $v_{i+1}$ itself is a safe root vertex, as it does not have any chords with any of its non-neighbouring vertices.
 
-% ----------------------------------------------------------------
-% SUBSECTION: Order-Independence
-% ----------------------------------------------------------------
+Therefore, in both cases, there is at least one safe root vertex in the $T_k$ structure. By the principle of mathematical induction, we conclude that for all $T_n$ structures, there is always at least one safe root vertex.
+
+Now we already know, there is at least two T structures in any biconnected plane graph. Therefore, there are at least two safe root vertices in any biconnected plane graph. (Proved)
+
+
 
 \subsection{Order-Independence of Face Processing}
 
@@ -1336,7 +1434,7 @@ Our algorithm processes faces in an arbitrary order as specified in Algorithm~1,
 
 \subsection{Lower Bound on the Number of Triangulations}
 
-Before proceeding to the completeness proof, we establish a fundamental lower bound on the number of triangulations for any face. This result is crucial for the time complexity analysis in Section~\ref{sec:complexity}.
+Before proceeding to the complexity analysis, we establish a fundamental lower bound and upper bound on the number of triangulations for any face. This result is crucial for the time complexity analysis in Section~\ref{sec:complexity}.
 
 \begin{lemma}[Minimum Triangulations per Face]
 	\label{lem:min_triangulations}
