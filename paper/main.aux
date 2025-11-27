@@ -2,17 +2,29 @@
 \providecommand\hyper@newdestlabel[2]{}
 \providecommand\HyField@AuxAddToFields[1]{}
 \providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{berg2008}
+\citation{kozminski1985}
+\citation{nishizeki2004}
+\citation{read1978,avis1996}
+\citation{read1978}
+\citation{chazelle1991,hanke1996,sleator1988,hurtado1999}
 \citation{li2001}
 \citation{parvez2011}
+\citation{hopcroft1974}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \newlabel{sec:introduction}{{1}{1}{Introduction}{section.1}{}}
+\citation{parvez2011}
+\citation{parvez2011}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}.}}{2}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{separationpair}{{1}{2}{Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}}{figure.caption.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces (3,7) separation pair can have a chord between them in more than one way. }}{2}{figure.caption.2}\protected@file@percent }
-\newlabel{fig:multiedgeinseparationpair}{{2}{2}{(3,7) separation pair can have a chord between them in more than one way}{figure.caption.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The left one is a biconnected graph, where (3,7) has a possiblity of being multi edge, but on the right one, (3,7) cannot be multi edge because is it a triconnected graph}}{2}{figure.caption.3}\protected@file@percent }
-\newlabel{fig:occurranceofmultiedge}{{3}{2}{The left one is a biconnected graph, where (3,7) has a possiblity of being multi edge, but on the right one, (3,7) cannot be multi edge because is it a triconnected graph}{figure.caption.3}{}}
+\newlabel{fig:separationpair}{{1}{2}{Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}}{figure.caption.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The $(3,7)$ separation pair can have a chord between the vertices in more than one way.}}{2}{figure.caption.2}\protected@file@percent }
+\newlabel{fig:multiedgeinseparationpair}{{2}{2}{The $(3,7)$ separation pair can have a chord between the vertices in more than one way}{figure.caption.2}{}}
+\citation{diestel2017}
+\citation{hopcroft1974}
+\citation{chazelle1991}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The left graph is biconnected, where $(3,7)$ has the possibility of becoming a multi-edge, but in the right graph, $(3,7)$ cannot be a multi-edge because it is a triconnected graph.}}{3}{figure.caption.3}\protected@file@percent }
+\newlabel{fig:occurranceofmultiedge}{{3}{3}{The left graph is biconnected, where $(3,7)$ has the possibility of becoming a multi-edge, but in the right graph, $(3,7)$ cannot be a multi-edge because it is a triconnected graph}{figure.caption.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Preliminaries}{3}{section.2}\protected@file@percent }
 \newlabel{sec:preliminaries}{{2}{3}{Preliminaries}{section.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Two distinct triangulations of a cycle}}{4}{figure.caption.4}\protected@file@percent }
@@ -30,10 +42,10 @@
 \newlabel{def:generating_chord}{{1}{5}{Generating Chord}{definition.1}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Root triangulation with safe root vertex 1. Chords from vertex 1 to all non-neighboring vertices (3, 4, 5) form a fan structure, ensuring no multi-edge conflicts with previously added chords.}}{6}{figure.caption.5}\protected@file@percent }
 \newlabel{def:parent_child}{{2}{6}{Parent-Child Relationship}{definition.2}{}}
-\newlabel{fig:hex1}{{6a}{6}{Child Triangulation}{figure.caption.6}{}}
-\newlabel{sub@fig:hex1}{{a}{6}{Child Triangulation}{figure.caption.6}{}}
-\newlabel{fig:hex2}{{6b}{6}{Parent Triangulation}{figure.caption.6}{}}
-\newlabel{sub@fig:hex2}{{b}{6}{Parent Triangulation}{figure.caption.6}{}}
+\newlabel{fig:lower_bound_hex1}{{6a}{6}{Child Triangulation}{figure.caption.6}{}}
+\newlabel{sub@fig:lower_bound_hex1}{{a}{6}{Child Triangulation}{figure.caption.6}{}}
+\newlabel{fig:lower_bound_hex2}{{6b}{6}{Parent Triangulation}{figure.caption.6}{}}
+\newlabel{sub@fig:lower_bound_hex2}{{b}{6}{Parent Triangulation}{figure.caption.6}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Get the child triangulation from parent triangulation from flipping a generating set}}{6}{figure.caption.6}\protected@file@percent }
 \newlabel{fig:hexagons}{{6}{6}{Get the child triangulation from parent triangulation from flipping a generating set}{figure.caption.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Algorithm Specification}{6}{subsection.3.4}\protected@file@percent }
@@ -57,20 +69,22 @@
 \newlabel{sec:correctness}{{4}{11}{Correctness and Completeness}{section.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Completeness via Strategic Pruning}{11}{subsection.4.1}\protected@file@percent }
 \newlabel{proof:pruning}{{4.1}{11}{Completeness via Strategic Pruning}{subsection.4.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Four hexagons showing transformation paths}}{12}{figure.caption.8}\protected@file@percent }
-\newlabel{fig:four_hexagons_arrows}{{8}{12}{Four hexagons showing transformation paths}{figure.caption.8}{}}
+\newlabel{thm:completeness}{{1}{11}{Completeness}{theorem.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Four hexagons showing transformation paths in the genealogical tree.}}{12}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:four_hexagons_arrows}{{8}{12}{Four hexagons showing transformation paths in the genealogical tree}{figure.caption.8}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Existence of Safe Root Vertices}{12}{subsection.4.2}\protected@file@percent }
 \newlabel{proof:saferoot}{{4.2}{12}{Existence of Safe Root Vertices}{subsection.4.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Hexagon using x,y coordinates}}{13}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:hexagon_xy}{{9}{13}{Hexagon using x,y coordinates}{figure.caption.9}{}}
+\newlabel{thm:safe_root_exists}{{2}{12}{Existence of Safe Root Vertices}{theorem.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces A face with $k$ vertices}}{13}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:face_k_vertices}{{9}{13}{A face with $k$ vertices}{figure.caption.9}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Hexagon with $v_i$-$v_j$ edge completely outside}}{13}{figure.caption.10}\protected@file@percent }
 \newlabel{fig:hexagon_outer_edge}{{10}{13}{Hexagon with $v_i$-$v_j$ edge completely outside}{figure.caption.10}{}}
 \newlabel{fig:path4_above}{{11a}{14}{Partial structure}{figure.caption.11}{}}
 \newlabel{sub@fig:path4_above}{{a}{14}{Partial structure}{figure.caption.11}{}}
 \newlabel{fig:path4_below}{{11b}{14}{Partial structure}{figure.caption.11}{}}
 \newlabel{sub@fig:path4_below}{{b}{14}{Partial structure}{figure.caption.11}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces (a) and (b) show two separate structures formed by vertices \{$v_{i+1},..,v_{j-1}$\} and \{$v_{j+1},..,v_{i-1}$\} respectively. Each structure is a simple path with no chords connecting them, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}}{14}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:path4_both}{{11}{14}{(a) and (b) show two separate structures formed by vertices \{$v_{i+1},..,v_{j-1}$\} and \{$v_{j+1},..,v_{i-1}$\} respectively. Each structure is a simple path with no chords connecting them, ensuring that at least one endpoint in each structure can serve as a safe root vertex}{figure.caption.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces (a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots  , v_{j-1}\}$ and $\{v_{j+1}, \ldots  , v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}}{14}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:path4_both}{{11}{14}{(a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots , v_{j-1}\}$ and $\{v_{j+1}, \ldots , v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex}{figure.caption.11}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces $T_1$ structure}}{14}{figure.caption.12}\protected@file@percent }
 \newlabel{fig:T1_structure}{{12}{14}{$T_1$ structure}{figure.caption.12}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces $T_2$ structure}}{14}{figure.caption.13}\protected@file@percent }
@@ -83,14 +97,14 @@
 \newlabel{fig:T1_structures}{{14}{15}{$T_1$ structures with different chords}{figure.caption.14}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces $T_k$ structure}}{15}{figure.caption.15}\protected@file@percent }
 \newlabel{fig:Tk_structure}{{15}{15}{$T_k$ structure}{figure.caption.15}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Order-Independence of Face Processing}{15}{subsection.4.3}\protected@file@percent }
-\newlabel{thm:order_independence}{{1}{15}{Order-Independence}{theorem.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces new $T_m$ structure, where $m < k$}}{16}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:firstcase}{{16}{16}{new $T_m$ structure, where $m < k$}{figure.caption.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces new $T_m$ structure, where $m < k$}}{15}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:firstcase}{{16}{15}{new $T_m$ structure, where $m < k$}{figure.caption.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Order-Independence of Face Processing}{16}{subsection.4.3}\protected@file@percent }
+\newlabel{thm:order_independence}{{3}{16}{Order-Independence}{theorem.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5}Complexity Analysis}{17}{section.5}\protected@file@percent }
 \newlabel{sec:complexity}{{5}{17}{Complexity Analysis}{section.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Lower Bound on the Number of Triangulations}{17}{subsection.5.1}\protected@file@percent }
-\newlabel{lem:min_triangulations}{{2}{17}{Minimum Triangulations per Face}{theorem.2}{}}
+\newlabel{lem:min_triangulations}{{4}{17}{Minimum Triangulations per Face}{theorem.4}{}}
 \newlabel{fig:hex1}{{17a}{18}{Child Triangulation}{figure.caption.17}{}}
 \newlabel{sub@fig:hex1}{{a}{18}{Child Triangulation}{figure.caption.17}{}}
 \newlabel{fig:hex2}{{17b}{18}{Parent Triangulation}{figure.caption.17}{}}
@@ -101,14 +115,14 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Cost Model}{19}{subsubsection.5.2.1}\protected@file@percent }
 \newlabel{def:elementary_ops}{{3}{19}{Elementary Operations}{definition.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Minimum Triangulations Guarantee}{20}{subsubsection.5.2.2}\protected@file@percent }
-\newlabel{lem:min_triangulations_simplified}{{3}{20}{Minimum Triangulations}{theorem.3}{}}
+\newlabel{lem:min_triangulations_simplified}{{5}{20}{Minimum Triangulations}{theorem.5}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Empirical Triangulation Counts for Simple Polygons}}{21}{table.caption.18}\protected@file@percent }
 \newlabel{tab:triangulation_counts}{{1}{21}{Empirical Triangulation Counts for Simple Polygons}{table.caption.18}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.3}Main Time Complexity Theorem}{21}{subsubsection.5.2.3}\protected@file@percent }
-\newlabel{thm:time_complexity}{{4}{21}{Amortized Constant Time}{theorem.4}{}}
-\newlabel{cor:linear_time}{{5}{22}{Amortized Linear Time}{theorem.5}{}}
+\newlabel{thm:time_complexity}{{6}{21}{Amortized Constant Time}{theorem.6}{}}
+\newlabel{cor:linear_time}{{7}{22}{Amortized Linear Time}{theorem.7}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Space Complexity}{22}{subsection.5.3}\protected@file@percent }
-\newlabel{thm:space_complexity}{{6}{22}{Linear Space Complexity}{theorem.6}{}}
+\newlabel{thm:space_complexity}{{8}{22}{Linear Space Complexity}{theorem.8}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Complexity Summary}{23}{subsection.5.4}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them.}}{24}{figure.caption.19}\protected@file@percent }
 \newlabel{fig:space_complexity}{{18}{24}{Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them}{figure.caption.19}{}}
@@ -139,8 +153,18 @@
 \bibstyle{plain}
 \bibdata{references}
 \bibcite{avis1996}{1}
-\bibcite{li2001}{2}
-\bibcite{parvez2011}{3}
+\bibcite{chazelle1991}{2}
+\bibcite{berg2008}{3}
+\bibcite{diestel2017}{4}
 \@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Theoretical Significance}{31}{subsection.7.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Future Directions}{31}{subsection.7.3}\protected@file@percent }
-\gdef \@abspage@last{31}
+\bibcite{hanke1996}{5}
+\bibcite{hopcroft1974}{6}
+\bibcite{hurtado1999}{7}
+\bibcite{kozminski1985}{8}
+\bibcite{li2001}{9}
+\bibcite{nishizeki2004}{10}
+\bibcite{parvez2011}{11}
+\bibcite{read1978}{12}
+\bibcite{sleator1988}{13}
+\gdef \@abspage@last{32}

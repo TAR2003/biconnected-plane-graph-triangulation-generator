@@ -44,18 +44,18 @@ Dhaka-1000, Bangladesh}
 \maketitle
 
 \begin{abstract}
-	In this paper, we deal with the problem of generating all triangulations of a given biconnected plane graph. We give an algorithm for generating all triangulations of a given biconnected  plane graph G with n vertices. Our algorithm establishes a double layer tree structure , a recursive tree structure for each of the faces and then generating triangulations of each faces through a genealogical tree structure. This algorithm uses amortized O(1) time complexity per triangulation generation and O(n) space complexity throughout the algorithm. To the best of our knowledge. this is the is the first algorithm for generating all triangulations of a biconnected plane graph in amortized O(1) time complexity per trignaulation. Finally, we present experimental validation for our algorithm.
+	In this paper, we address the problem of generating all triangulations of a given biconnected plane graph. We present an algorithm for generating all triangulations of a biconnected plane graph $G$ with $n$ vertices. Our algorithm establishes a double-layer tree structure, consisting of a recursive tree structure for each face, and generates triangulations of each face through a genealogical tree structure. This algorithm achieves $O(1)$ amortized time complexity per triangulation and $O(n)$ space complexity. To the best of our knowledge, this is the first algorithm for generating all triangulations of a biconnected plane graph with $O(1)$ amortized time complexity per triangulation. Finally, we present experimental validation demonstrating the effectiveness of our algorithm.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:introduction}
-In this paper, we consider the problem of generating all triangulations of biconnected plane graphs, which has many applications like computational geometry, VLSI floorplanning and Graph Drawing. The main challenge of generating all triangulations is the exponential number of triangulations. The exponential number simply means that if we want to stire them, it will take exponential amount of storage.
+In this paper, we consider the problem of generating all triangulations of biconnected plane graphs, which has many applications in computational geometry~\cite{berg2008}, VLSI floorplanning~\cite{kozminski1985}, and graph drawing~\cite{nishizeki2004}. The main challenge in generating all triangulations is the exponential number of possible triangulations. This exponential growth means that if we attempt to store all triangulations, it will require an exponential amount of storage.
 
-There have been two types of algorithm for generating algoritms. One type of algorithms generate triangulations but output it only if it is a unique triangulation. This requires huge exponential space and to check them before selecting a triangulation unique. Another type of algorithm only generates a triangulation which are canonical, meaning we are sure that the triangulation which is generated is unique.
+There have been two types of algorithms for generating triangulations~\cite{read1978,avis1996}. One type of algorithm generates all triangulations but outputs only unique triangulations. This approach requires exponential space to store and check triangulations before selecting unique ones. Another type of algorithm generates only canonical triangulations~\cite{read1978}, meaning we ensure that each generated triangulation is unique by construction.
 
-There have been many detailed researches for algorithm of generating triangulations. Li and Nakano ~\cite{li2001} provided with an algorithm which generates triangulation $O(r^2 n)$ time per triangulation. After that Nakano has improved the algorithm for taking $O(rn)$ time , where r is the number of outerplanar vertices. Parvez, Rahman and Nakano provided the probably most efficient algorithm for generating all triangulations of a triconnected plane graph in O(1) time per triangulation and O(n) space complexity. ~\cite{parvez2011}
+There has been substantial research on algorithms for generating triangulations~\cite{chazelle1991,hanke1996,sleator1988,hurtado1999}. Li and Nakano~\cite{li2001} provided an algorithm that generates triangulations in $O(r^2 n)$ time per triangulation. Later, Nakano improved the algorithm to achieve $O(rn)$ time, where $r$ is the number of outerplanar vertices. Parvez, Rahman, and Nakano~\cite{parvez2011} provided the most efficient algorithm for generating all triangulations of a triconnected plane graph in $O(1)$ time per triangulation with $O(n)$ space complexity.
 
-The algorithm for generating all triangulations of a triconnected plane graph can be implemented to biconnected plane graphs as well, but the major problem occurs is the 'multi-edge' problem. In the triconnected graphs, there can be no seperation pairs, meaning that there cannot be any two vertices deleting whom can disconnect the remaining graph.
+The algorithm for generating all triangulations of a triconnected plane graph can be applied to biconnected plane graphs as well, but a major problem arises: the `multi-edge' problem. In triconnected graphs~\cite{hopcroft1974}, there cannot be any separation pairs, meaning there do not exist two vertices whose removal can disconnect the remaining graph.
 
 \begin{figure}[h!]
 	\centering
@@ -107,12 +107,12 @@ The algorithm for generating all triangulations of a triconnected plane graph ca
 
 	\end{tikzpicture}
 	\caption{Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}.}
-	\label{separationpair}
+	\label{fig:separationpair}
 \end{figure}
 
-In the biconnected graph \ref{separationpair} removing 3 and 7, disconnect the remaining graph. So, (3,7) is a separation pair. However, this property does not happen in triconnected graphs.
+In the biconnected graph shown in Figure~\ref{fig:separationpair}, removing vertices 3 and 7 disconnects the remaining graph. Therefore, $(3,7)$ is a separation pair. However, this property does not occur in triconnected graphs.
 
-In the graph, (3,7) separation pair can have a chord between them in more than one way.
+In the graph, the $(3,7)$ separation pair can have a chord between them in more than one way.
 \begin{figure}[h]
 	\centering
 	\begin{tikzpicture}[
@@ -146,12 +146,12 @@ In the graph, (3,7) separation pair can have a chord between them in more than o
 		\draw[dotted, draw=red, line width=3pt] (a3) to[bend left=-40] (a7);
 
 	\end{tikzpicture}
-	\caption{(3,7) separation pair can have a chord between them in more than one way. }
+	\caption{The $(3,7)$ separation pair can have a chord between the vertices in more than one way.}
 	\label{fig:multiedgeinseparationpair}
 \end{figure}
 \captionsetup[figure]{font=small}
-here in the figure \ref{fig:multiedgeinseparationpair}, biconnected graph, between (3,7) separation pair, there can be two chords at the same time, one in the F1 face and another one in the F2 face.
-In the Parvez, Rahman and Nakano algorithm, we are sure that there will not be any mutli edge problem, because mutli edges are not possible in triconnected plane graphs. But if we want to extend that to biconnected graphs, there is a big possibility of mutli edges.
+In Figure~\ref{fig:multiedgeinseparationpair}, within this biconnected graph, the $(3,7)$ separation pair can have two chords at the same time: one in face $F_1$ and another in face $F_2$.
+In the Parvez, Rahman, and Nakano algorithm~\cite{parvez2011}, we are assured that there will not be any multi-edge problem because multi-edges are not possible in triconnected plane graphs. However, if we want to extend that algorithm to biconnected graphs, there is a significant possibility of multi-edges.
 
 \begin{figure}[h]
 	\centering
@@ -211,32 +211,32 @@ In the Parvez, Rahman and Nakano algorithm, we are sure that there will not be a
 		\draw (b3) -- (b9);
 		\draw (b7) -- (b9);
 	\end{tikzpicture}
-	\caption{The left one is a biconnected graph, where (3,7) has a possiblity of being multi edge, but on the right one, (3,7) cannot be multi edge because is it a triconnected graph}
+	\caption{The left graph is biconnected, where $(3,7)$ has the possibility of becoming a multi-edge, but in the right graph, $(3,7)$ cannot be a multi-edge because it is a triconnected graph.}
 	\label{fig:occurranceofmultiedge}
 \end{figure}
-Here there can not be any multi edge problem in the right graph, as triangulating face F1 and F2 separately can not generate an edge where both of the endpoints are same (as there is no separation pair). But this problem can happen in left graph of figure \ref{fig:occurranceofmultiedge}, where (3,7) is a separation pair, thus by independent triangulating of F1 face and F2 face, there can be two chords (3,7) at the same time., creating the multi edge problem. So, this algorithm can not be used for for biconnected plane graphs.
+There cannot be any multi-edge problem in the right graph, as triangulating faces $F_1$ and $F_2$ separately cannot generate an edge where both endpoints are the same (since there is no separation pair). However, this problem can occur in the left graph of Figure~\ref{fig:occurranceofmultiedge}, where $(3,7)$ is a separation pair. Thus, by independently triangulating face $F_1$ and face $F_2$, there can be two chords $(3,7)$ at the same time, creating the multi-edge problem. Therefore, this algorithm cannot be used for biconnected plane graphs.
 
-For this reason in this paper we developed a new algorithm, which uses the canonical genealogical tree feature of this algorithm, but only for a face, the combination of triangulations are handled by a recirsive tree struture, where only the leaves of the trees are actual total triangulations.
+For this reason, in this paper we developed a new algorithm that uses the canonical genealogical tree feature of the Parvez-Rahman-Nakano algorithm~\cite{parvez2011}, but only for individual faces. The combination of triangulations is handled by a recursive tree structure, where only the leaves of the trees represent actual complete triangulations.
 
-Our algorithm for generating all triangulations of a biconnected plane graph uses O(1) amortized time per triangulation and O(n) space constantly.
-The rest of the paper is organized as follows, section \ref{sec:preliminaries} gives some definitions, section \ref{sec:algorithm} gives the outline of the algorithm for generating all triangulations of a biconnected plane graph, section \ref{sec:correctness} deals with the proofs of the correctness and completeness of our algorithm, section \ref{sec:complexity} deals with the mentioned tiome and space complexity of our algorithm, section \ref{sec:experiments} deals with the implementation and experimental validation of our algorithm. Finally, section \ref{sec:conclusion} is conclusion.
+Our algorithm for generating all triangulations of a biconnected plane graph uses $O(1)$ amortized time per triangulation and $O(n)$ space constantly.
+The rest of the paper is organized as follows: Section~\ref{sec:preliminaries} provides definitions, Section~\ref{sec:algorithm} presents the algorithm for generating all triangulations of a biconnected plane graph, Section~\ref{sec:correctness} contains proofs of correctness and completeness, Section~\ref{sec:complexity} analyzes the time and space complexity, Section~\ref{sec:experiments} describes the implementation and experimental validation. Finally, Section~\ref{sec:conclusion} concludes the paper.
 \section{Preliminaries}
 \label{sec:preliminaries}
 In this section, we define some terms used in the paper.
 Let $G = (V, E)$ be a connected simple graph with vertex set $V$ and edge set $E$.
 Every edge $e \in E$ has endpoints $(v_i, v_j)$ where $v_i, v_j \in V$ and $v_i \neq v_j$.
-The connectivity of a graph is the minimum number of vertices whose removal disconnects the graph.
+The connectivity of a graph~\cite{diestel2017} is the minimum number of vertices whose removal disconnects the graph.
 A graph is called $k$-connected if removing fewer than $k$ vertices leaves the graph connected;
 equivalently, at least $k$ vertices must be removed to disconnect the graph.
 
 
-A graph G is planar if it can be embedded in a plane where no two edges intersect geometrically except at a vertex to which both of them are incident. A plane graph is a planar graph with a fixed embedding in  a plane. A plane graph divided a plane, the edges acts like boundary to separated regions, called faces. The inner bound faces are called the inner faces and the outer region is called the outer face. If in a plane graph, each face boundary consist of exactly three vertices, it will be called a plane triangulation. Here edges are not necessarily a straight line.
+A graph $G$ is planar~\cite{hopcroft1974} if it can be embedded in the plane such that no two edges intersect geometrically except at a vertex to which both are incident. A plane graph is a planar graph with a fixed embedding in the plane. A plane graph divides the plane into regions; the edges act as boundaries separating these regions, called faces. The inner bounded faces are called inner faces, and the outer region is called the outer face. If in a plane graph each face boundary consists of exactly three vertices, it is called a plane triangulation~\cite{chazelle1991}. Note that edges are not necessarily straight lines.
 
-Now to make a graph triangulated, we add edges to a graph between vertices, where no edges are previously present. If we add edges between two vertices where an edge is already present, then it will be a multi-edge, and the graph will no longer be a simple graph.
+Now, to make a graph triangulated, we add edges between vertices where no edges are previously present. If we add an edge between two vertices where an edge already exists, this creates a multi-edge, and the graph will no longer be a simple graph.
 
-A face in a plane graph can also be considered a cycle, where all of the vertices $v_1, v_2,...,v_k$ have edges only ($v_1, v_2$), ($v_2, v_3$),...,($v_{k-1}, v_k$), ($v_k, v_1$). The region inside the cycle would be the inner region of the face and the outer region would be called the outer region of the face.
+A face in a plane graph can also be considered a cycle, where all vertices $v_1, v_2, \ldots, v_k$ have edges only $(v_1, v_2)$, $(v_2, v_3)$, $\ldots$, $(v_{k-1}, v_k)$, $(v_k, v_1)$. The region inside the cycle is the inner region of the face, and the outer region is the outer region of the face.
 
-Let C be a cycle and $v_1, v_2,...,v_k$ be the vertices of it in counter clockwise order. We  call an edge between ($v_i, v_j$) a chord of C if $|i-j| \neq 1$ and $\{i,j\} \neq \{1,k\}$ and ($v_i, v_j$) is contained in the face of G. A chord ($v_i, v_j$) divided the cycle into two smaller cycles, $v_i, v_i+1, ..., v_j$ and $v_j, v_j+1,..., v_i$. These two smaller cycles are called the sub-cycles of the chord ($v_i, v_j$). The decomposition of a cycle into triangles by a set of non intersecting chords is called a triangulation of the cycle.
+Let $C$ be a cycle and $v_1, v_2, \ldots, v_k$ be its vertices in counterclockwise order. We call an edge $(v_i, v_j)$ a chord of $C$ if $|i-j| \neq 1$ and $\{i,j\} \neq \{1,k\}$ and $(v_i, v_j)$ is contained in the face of $G$. A chord $(v_i, v_j)$ divides the cycle into two smaller cycles: $v_i, v_{i+1}, \ldots, v_j$ and $v_j, v_{j+1}, \ldots, v_i$. These two smaller cycles are called the sub-cycles of the chord $(v_i, v_j)$. The decomposition of a cycle into triangles by a set of non-intersecting chords is called a triangulation of the cycle.
 
 \begin{figure}[h]
 	\centering
@@ -273,10 +273,10 @@ Let C be a cycle and $v_1, v_2,...,v_k$ be the vertices of it in counter clockwi
 	\label{fig:disticttriangulationsofacycle}
 \end{figure}
 
-Figure \ref{fig:disticttriangulationsofacycle} shows two distinct triangulations of a cycle. In a triangulation T, it is a set of chords which are maximal, meaning each chords not in T intersects some chords in T. We are listing chords by its endpoints like chords 1,3 will be referred as <1,3>.
-Now, we also define visibility by chords, meaning if there is a <1,3> chord, we will say that vertex 3 is visible from 1 and vice versa.
+Figure~\ref{fig:disticttriangulationsofacycle} shows two distinct triangulations of a cycle. In a triangulation $T$, it is a maximal set of chords, meaning each chord not in $T$ intersects some chord in $T$. We list chords by their endpoints, e.g., the chord connecting vertices 1 and 3 is referred to as $\langle 1,3 \rangle$.
+We also define visibility by chords: if there is a $\langle 1,3 \rangle$ chord, we say that vertex 3 is visible from vertex 1 and vice versa.
 
-In this paper we will be generating triangulations for labeled biconnected graphs, meaning each vertex in the graph is distinctly labeled, and we will consider that no two edges share the same two endpoints.
+In this paper, we will generate triangulations for labeled biconnected graphs, meaning each vertex in the graph is distinctly labeled, and we will assume that no two edges share the same two endpoints.
 
 
 \section{The Algorithm}
@@ -504,7 +504,7 @@ To ensure the root triangulation does not create multi-edges with previously tri
 
 \textbf{Definition (Safe Root Vertex)}: A vertex $r$ of face $F_i$ is a \textit{safe root vertex} if adding chords from $r$ to all non-neighboring vertices of $F_i$ does not conflict with any chord in the global set $S$ (from previously triangulated faces $F_1, \ldots, F_{i-1}$).
 
-The safe root vertex guarantees a valid starting point for the local genealogical tree. We prove (Theorem X) that every face contains at least two safe root vertices, regardless of prior triangulations.
+The safe root vertex guarantees a valid starting point for the local genealogical tree. We prove (Theorem~\ref{thm:safe_root_exists}) that every face contains at least two safe root vertices, regardless of prior triangulations.
 
 \subsubsection{Innovation 3: Dynamic Global Chord Management}
 
@@ -675,7 +675,7 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 			\draw (a1) -- (a5);
 		\end{tikzpicture}
 		\caption{Child Triangulation }
-		\label{fig:hex1}
+		\label{fig:lower_bound_hex1}
 	\end{subfigure}
 	\hfill
 	% ----- Subfigure (b) -----
@@ -697,7 +697,7 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 			\draw (b1) -- (b5);
 		\end{tikzpicture}
 		\caption{Parent Triangulation}
-		\label{fig:hex2}
+		\label{fig:lower_bound_hex2}
 	\end{subfigure}
 	\caption{Get the child triangulation from parent triangulation from flipping a generating set}
 	\label{fig:hexagons}
@@ -932,10 +932,10 @@ The genealogical tree has these essential properties:
 The genealogical tree guarantees we find all triangulations:
 
 \begin{itemize}
-	\item \textbf{Valid root}: The fan from safe root $r$ never creates multi-edges (Theorem X)
+	\item \textbf{Valid root}: The fan from safe root $r$ never creates multi-edges (Theorem~\ref{thm:safe_root_exists})
 	\item \textbf{Reachability}: Every valid triangulation is reachable from the root via edge flips
 	\item \textbf{No duplicates}: Each triangulation's unique generating chord defines its single parent
-	\item \textbf{Efficient pruning}: When $(v_1, v_j) \in S$ but $(v_1, v_j) \notin T_i$, the chord persists in all descendants (Lemma Y), so pruning eliminates only invalid triangulations
+	\item \textbf{Efficient pruning}: When $(v_1, v_j) \in S$ but $(v_1, v_j) \notin T_i$, the chord persists in all descendants (since only generating chords are flipped), so pruning eliminates only invalid triangulations
 \end{itemize}
 
 \noindent\rule{\textwidth}{0.4pt}
@@ -956,7 +956,7 @@ The fundamental challenge in biconnected graphs is that prior face triangulation
 
 \subsubsection{Pruning Preserves Completeness}
 
-When a chord from the current triangulation already exists in $S$ (a ``blocking chord''), we prune that branch. Lemma Y proves that blocking chords never get flipped in descendant triangulations---if triangulation $T$ contains a blocking chord, all descendants must contain it, creating multi-edges. Therefore, pruning eliminates only invalid triangulations; every valid triangulation is found along branches without blocking chords.
+When a chord from the current triangulation already exists in $S$ (a ``blocking chord''), we prune that branch. As proved in our completeness theorem (Theorem~\ref{thm:completeness}), blocking chords never get flipped in descendant triangulations---if triangulation $T$ contains a blocking chord, all descendants must contain it, creating multi-edges. Therefore, pruning eliminates only invalid triangulations; every valid triangulation is found along branches without blocking chords.
 
 
 % ================================================================
@@ -973,12 +973,18 @@ In this section, we establish the theoretical foundation of our algorithm by pro
 % ----------------------------------------------------------------
 \subsection{Completeness via Strategic Pruning}
 \label{proof:pruning}
-Now our algorithm is a double tree structure, we can think of it like this. For a a triangulation $T_1$ of face $F_1$, we search every other possible triangulations which are compatible with $T_1$ in the second face $F_2$. For each compatible triangulation $T_2$ of face $F_2$, we then search every other possible triangulations which are compatible with both $T_1$ and $T_2$ in the third face $F_3$, and so on. This way, we explore every possible combination of triangulations across all faces, while ensuring compatibility at each step.
 
-So, we always move towards 1....k.
-That means, for deiciding validity, we only have to determine whether the new chord conflict with any of the chords in prior faces. . If we find any triangulation in face $F_i$ which have a duplicate chord with any of the prior faces $F_1, F_2, \ldots, F_{i-1}$, we can safely prune that branch because all descendant triangulations will also contain that duplicate chord.
+\begin{theorem}[Completeness]
+\label{thm:completeness}
+The algorithm generates all valid triangulations of a biconnected plane graph without duplicates.
+\end{theorem}
 
-From the algorithm,, we only flip the generatiung set , meaning that we never flip blocking chords. So if both of the endpoints of a chord are not the root vertex then that chord will persist in all descendant triangulations. Therefore, pruning branches with invalid blocking chords does not eliminate any valid triangulations, ensuring completeness because all of its descendants would have also contained the invaliud blocking chord.
+Now our algorithm uses a double-tree structure. We can think of it as follows: For a triangulation $T_1$ of face $F_1$, we search for all other possible triangulations that are compatible with $T_1$ in the second face $F_2$. For each compatible triangulation $T_2$ of face $F_2$, we then search for all other possible triangulations that are compatible with both $T_1$ and $T_2$ in the third face $F_3$, and so on. This way, we explore every possible combination of triangulations across all faces while ensuring compatibility at each step.
+
+Therefore, we always process faces in order from $1$ to $k$.
+This means that for deciding validity, we only need to determine whether the new chord conflicts with any of the chords in prior faces. If we find any triangulation in face $F_i$ that has a duplicate chord with any of the prior faces $F_1, F_2, \ldots, F_{i-1}$, we can safely prune that branch because all descendant triangulations will also contain that duplicate chord.
+
+From the algorithm, we only flip the generating chords, meaning that we never flip blocking chords. Therefore, if both endpoints of a chord are not the root vertex, then that chord will persist in all descendant triangulations. Consequently, pruning branches with invalid blocking chords does not eliminate any valid triangulations, ensuring completeness because all of its descendants would have also contained the invalid blocking chord.
 
 \begin{figure}[h]
 	\centering
@@ -1048,23 +1054,28 @@ From the algorithm,, we only flip the generatiung set , meaning that we never fl
 		\end{scope}
 
 	\end{tikzpicture}
-	\caption{Four hexagons showing transformation paths}
+	\caption{Four hexagons showing transformation paths in the genealogical tree.}
 	\label{fig:four_hexagons_arrows}
 \end{figure}
 
-In the figure \ref{fig:four_hexagons_arrows} the root all of the 3 chords are flippable. Now we flip the <1,4> chord to get the <3,5> chord, and as a result <1,4> is removed from the generating set. So, the new chord <3,5> is a part of the triangulation but not a generating set, meaning that there is no chance of its flipping in the descendant triangulations. Therefore, in all descendant triangulations, the chord <3,5> will be present. So, if we prune a branch because of an invalid blocking chord <3,5>, all of the descendant triangulations would have also contained that invalid blocking chord, meaning all of the descendant triangulations are also invalid. Hence, pruning does not eliminate any valid triangulations, ensuring completeness.
+In Figure~\ref{fig:four_hexagons_arrows}, at the root all three chords are flippable. Now we flip the $\langle 1,4 \rangle$ chord to obtain the $\langle 3,5 \rangle$ chord, and as a result $\langle 1,4 \rangle$ is removed from the generating set. Therefore, the new chord $\langle 3,5 \rangle$ is part of the triangulation but not a generating chord, meaning there is no chance of flipping it in descendant triangulations. Consequently, in all descendant triangulations, the chord $\langle 3,5 \rangle$ will be present. So, if we prune a branch because of an invalid blocking chord $\langle 3,5 \rangle$, all descendant triangulations would also contain that invalid blocking chord, meaning all descendant triangulations are also invalid. Hence, pruning does not eliminate any valid triangulations, ensuring completeness.
 
-If a prior face triangulation configuration {$T_{f_1}$, $T_{f_2}$, \ldots, $T_{f_{i-1}}$} exists, we denote the set of chords used in these triangulations as $S$. When processing face $F_i$, our algorithm explores its genealogical tree rooted at a safe vertex $r_i$, generating all possible triangulations of $F_i$ that do not introduce multi-edges with chords in $S$. it guarantees that once we safe root triangulation for face $F_i$, all chords from $r_i$ to non-neighbors can be added without conflicts. As we explore the genealogical tree, we only proceed with edge flips that do not create multi-edges with chords in $S$. If we encounter a triangulation where a chord conflicts with $S$, we prune that branch, knowing that all descendants will also contain that conflicting chord (by Lemma Y). This pruning ensures we only explore valid triangulations, maintaining completeness.
+If a prior face triangulation configuration $\{T_{f_1}, T_{f_2}, \ldots, T_{f_{i-1}}\}$ exists, we denote the set of chords used in these triangulations as $S$. When processing face $F_i$, our algorithm explores its genealogical tree rooted at a safe vertex $r_i$, generating all possible triangulations of $F_i$ that do not introduce multi-edges with chords in $S$. The safe root triangulation guarantees that all chords from $r_i$ to non-neighbors can be added without conflicts. As we explore the genealogical tree, we only proceed with edge flips that do not create multi-edges with chords in $S$. If we encounter a triangulation where a chord conflicts with $S$, we prune that branch, knowing that all descendants will also contain that conflicting chord (since blocking chords are never flipped). This pruning ensures we only explore valid triangulations, maintaining completeness.
 
 \subsection{Existence of Safe Root Vertices}
 \label{proof:saferoot}
-Now the problem arrives is the safe root configuration. To find a safe root vertex, our algorithm use a safe root finding procedure . The method gives us a safe root vertex which guarantees that all chords from the safe root to non-neighbors can be added without conflicts with any of the prior face triangulations.
 
-So to find that we use a two-pointer technique. We start with two pointers: one at the end of the vertex list (startIndex) and one at the beginning (endIndex). We then move these pointers towards each other based on the presence of chords in the global set $S$. If the chord between the vertices at these pointers exists in $S$, we move the startIndex pointer leftward; otherwise, we move the endIndex pointer rightward. This process continues until the two pointers converge. At this point, the vertex at the startIndex pointer is guaranteed to be a safe root vertex. This is because all chords from this vertex to non-neighbors do not exist in $S$, ensuring no conflicts with prior triangulations.
+\begin{theorem}[Existence of Safe Root Vertices]
+\label{thm:safe_root_exists}
+For any face $F_i$ with $k \geq 3$ vertices in a biconnected plane graph, given any set $S$ of chords from previously triangulated faces, there exist at least two safe root vertices in $F_i$.
+\end{theorem}
 
-Now we will prove that there will always be at least two safe root configurations in any biconnected plane graph.
-Proof:
-Consider a biconnected plane graph $G$ with faces $F_1, F_2, \ldots, F_k$. Each face $F_i$ is a simple cycle with at least three vertices. Now, we start at any arbitrary face with k vertices. The outer region of the face can have many edges, and chords, some or all of whom can have one or both endpoints inside the k vertices of our current face.
+Now the key challenge is finding the safe root configuration. To find a safe root vertex, our algorithm uses a safe root finding procedure. This method provides us with a safe root vertex that guarantees all chords from the safe root to non-neighbors can be added without conflicts with any chords from prior face triangulations.
+
+To find a safe root, we use a two-pointer technique. We start with two pointers: one at the end of the vertex list (startIndex) and one at the beginning (endIndex). We then move these pointers toward each other based on the presence of chords in the global set $S$. If the chord between the vertices at these pointers exists in $S$, we move the startIndex pointer leftward; otherwise, we move the endIndex pointer rightward. This process continues until the two pointers converge. At this point, the vertex at the startIndex pointer is guaranteed to be a safe root vertex, because all chords from this vertex to non-neighbors do not exist in $S$, ensuring no conflicts with prior triangulations.
+
+\begin{proof}
+Consider a biconnected plane graph $G$ with faces $F_1, F_2, \ldots, F_k$. Each face $F_i$ is a simple cycle with at least three vertices. Now, we consider an arbitrary face with $k$ vertices. The outer region of the face can have many edges and chords, some or all of which may have one or both endpoints among the $k$ vertices of our current face.
 \begin{figure}[h]
 	\centering
 	\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
@@ -1079,18 +1090,18 @@ Consider a biconnected plane graph $G$ with faces $F_1, F_2, \ldots, F_k$. Each 
 		% Edges using -- syntax
 		\draw (1) -- (2) -- (3) -- (4) -- (5) -- (6) -- (1);
 	\end{tikzpicture}
-	\caption{Hexagon using x,y coordinates}
-	\label{fig:hexagon_xy}
+	\caption{A face with $k$ vertices}
+	\label{fig:face_k_vertices}
 \end{figure}
 
-Now there can be 2 possiblites,
+There are two possibilities:
 \begin{enumerate}
-	\item There is no chords in the prior face triangulation configuration which has both endpoints in the k vertices of our current face. In this case, all vertices are safe root vertices, and we can choose any of them as the safe root.
-	\item There is at least one chord in the prior face triangulation configuration which has both endpoints inside the vertices 1,2,..,k of our current face.
+	\item There are no chords in the prior face triangulation configuration that have both endpoints among the $k$ vertices of our current face. In this case, all vertices are safe root vertices, and we can choose any of them as the safe root.
+	\item There is at least one chord in the prior face triangulation configuration that has both endpoints among the vertices $1, 2, \ldots, k$ of our current face.
 \end{enumerate}
 
-Now, the first case, all k vertices of the face are safe root vertices, as there is no possiblity of having a multi edge having chords added between them.
-But in the second case, , there can be at least one chord between two vertices in the face in the outer region of the current face.
+In the first case, all $k$ vertices of the face are safe root vertices, as there is no possibility of creating a multi-edge when adding chords between them.
+In the second case, there can be at least one chord between two vertices of the face in the outer region of the current face.
 
 \begin{figure}[h]
 	\centering
@@ -1114,7 +1125,7 @@ But in the second case, , there can be at least one chord between two vertices i
 	\label{fig:hexagon_outer_edge}
 \end{figure}
 
-Now notice that in the figure \ref{fig:hexagon_outer_edge}, the chord $(v_i, v_j)$ lies completely outside the face formed by vertices $v_{j+1}, v_j, \ldots, v_{i-1}, v_i$. This chord is an element of the global set $S$ from prior face triangulations. This particular chord has added a limitation for the possible multi edges in the outside region. Notice that the vertices \{$v_{i+1},..,v_{j-1}$\} and \{$v_{j+1},..,v_{i-1}$\} are separated by the chord $(v_i, v_j)$. Therefore, any chord connecting a vertex from the first set to a vertex from the second set would cross the chord $(v_i, v_j)$, which is not allowed in a planar graph. As a result only mutliedges in the prior face triangulations can occur where both endpoints belong to \{$v_{i+1},..,v_{j-1}$\} or both endpoints belong to \{$v_{j+1},..,v_{i-1}$\}. Notice that it has created two separate structures.
+Now notice that in Figure~\ref{fig:hexagon_outer_edge}, the chord $(v_i, v_j)$ lies completely outside the face formed by vertices $v_{j+1}, v_j, \ldots, v_{i-1}, v_i$. This chord is an element of the global set $S$ from prior face triangulations. This particular chord adds a constraint on possible multi-edges in the outside region. Notice that the vertices $\{v_{i+1}, \ldots, v_{j-1}\}$ and $\{v_{j+1}, \ldots, v_{i-1}\}$ are separated by the chord $(v_i, v_j)$. Therefore, any chord connecting a vertex from the first set to a vertex from the second set would cross the chord $(v_i, v_j)$, which is not allowed in a planar graph. As a result, multi-edges in the prior face triangulations can occur only where both endpoints belong to $\{v_{i+1}, \ldots, v_{j-1}\}$ or both endpoints belong to $\{v_{j+1}, \ldots, v_{i-1}\}$. Notice that this creates two separate structures.
 
 \begin{figure}[h]
 	\centering
@@ -1159,15 +1170,15 @@ Now notice that in the figure \ref{fig:hexagon_outer_edge}, the chord $(v_i, v_j
 		\label{fig:path4_below}
 	\end{subfigure}
 
-	\caption{(a) and (b) show two separate structures formed by vertices \{$v_{i+1},..,v_{j-1}$\} and \{$v_{j+1},..,v_{i-1}$\} respectively. Each structure is a simple path with no chords connecting them, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}
+	\caption{(a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots, v_{j-1}\}$ and $\{v_{j+1}, \ldots, v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}
 	\label{fig:path4_both}
 \end{figure}
 
-In both of them in figure \ref{fig:path4_both} any type of multi edges can occur where both of the endpoints belong to the same structure. as there can be no chords between the two structures.  We can call them $T_n$ structures where n is the number of vertices trapped inside them. In the figure \ref{fig:path4_both} we can see two $T_2$ structures. Now as chords must happen between two non neighboring vertices, any any T structures will always be at least $T_1$, as there must be at least one vertex between two endpoints of a chord. Also, there should be at least two T structures, as the chord $(v_i, v_j)$ separates them.
-The lowest number of n in $T_n$ structures is 1, and the highest is k - 3, where k is the total number of vertices in the current face.
-Now, we have to prove that in any $T_n$ structure, there is always at least one safe root vertex, which do not have a chord with any of the non neightbouring vertices of the $T_n$ structures.
-We will prove it by induction on n.
-Here is $T_1$ structure:
+In both structures shown in Figure~\ref{fig:path4_both}, multi-edges can occur where both endpoints belong to the same structure, as there cannot be any chords between the two structures. We call them $T_n$ structures, where $n$ is the number of vertices contained within them. In Figure~\ref{fig:path4_both}, we can see two $T_2$ structures. Now, since chords must connect two non-neighboring vertices, any $T$ structure will always be at least $T_1$, as there must be at least one vertex between the two endpoints of a chord. Also, there must be at least two $T$ structures, as the chord $(v_i, v_j)$ separates them.
+The minimum value of $n$ in $T_n$ structures is 1, and the maximum is $k - 3$, where $k$ is the total number of vertices in the current face.
+Now, we must prove that in any $T_n$ structure, there is always at least one safe root vertex that does not have a chord with any non-neighboring vertices of the $T_n$ structure.
+We prove this by induction on $n$.
+Here is the $T_1$ structure:
 
 \begin{figure}[h]
 	\centering
@@ -1188,7 +1199,7 @@ Here is $T_1$ structure:
 	\label{fig:T1_structure}
 \end{figure}
 
-Here both 1 and 3 are neighbours of vertex 2, which means that vertex 2 cannot have any chords with any of them. Thus, vertex 2 will be a safe vertex.
+Here both vertices 1 and 3 are neighbors of vertex 2, which means that vertex 2 cannot have any chords with either of them. Thus, vertex 2 is a safe vertex.
 
 Now for $T_2$ structures.
 \begin{figure}[h]
@@ -1211,7 +1222,7 @@ Now for $T_2$ structures.
 	\label{fig:T2_structure}
 \end{figure}
 
-In this case, vertex 2 can only have a chord with vertex 4, as vertex 1 is its neighbour. Similarly, vertex 3 can only have a chord with vertex 1. Therefore, if vertex 2 have a chord with vertex 4, then it will create a new $T_1$ structure with vertex 3, making vertex 3 a safe root vertex. On the other hand, if vertex 3 have a chord with vertex 1, then it will create a new $T_1$ structure with vertex 2, making vertex 2 a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_2$ structure.
+In this case, vertex 2 can only have a chord with vertex 4, as vertex 1 is its neighbor. Similarly, vertex 3 can only have a chord with vertex 1. Therefore, if vertex 2 has a chord with vertex 4, then it creates a new $T_1$ structure with vertex 3, making vertex 3 a safe root vertex. On the other hand, if vertex 3 has a chord with vertex 1, then it creates a new $T_1$ structure with vertex 2, making vertex 2 a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_2$ structure.
 
 \begin{figure}[h]
 	\centering
@@ -1264,7 +1275,7 @@ In this case, vertex 2 can only have a chord with vertex 4, as vertex 1 is its n
 
 Now in the case for $T_1$ with figure \ref{fig:T1_24}, vertex 3 becomes a safe root vertex. In the case for $T_1$ with figure \ref{fig:T1_13}, vertex 2 becomes a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_1$ structure.
 
-now we will go with induction. we assume that for all $T_i$ structures where i < k, there is at least one safe root vertex. Now we will prove it for $T_k$ structure.
+Now we proceed with induction. We assume that for all $T_i$ structures where $i < k$, there is at least one safe root vertex. Now we prove it for the $T_k$ structure.
 
 \begin{figure}[h]
 	\centering
@@ -1288,10 +1299,10 @@ now we will go with induction. we assume that for all $T_i$ structures where i <
 	\label{fig:Tk_structure}
 \end{figure}
 
-Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chord with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, $v_j$, as all other vertices are its neighbours. There can be two possibilites
+Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chord with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, as all other vertices are its neighbors. There are two possibilities:
 \begin{enumerate}
-	\item vertex $v_{i+1}$ have a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, $v_j$.
-	\item vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$.
+	\item Vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$.
+	\item Vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$.
 \end{enumerate}
 \begin{figure}[h]
 	\centering
@@ -1319,15 +1330,14 @@ Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chor
 	\caption{new $T_m$ structure, where $m < k$}
 	\label{fig:firstcase}
 \end{figure}
-In the first case in figure \ref{fig:firstcase}, if vertex $v_{i+1}$ have a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, $v_j$, then it will create a new $T_m$ structure where m < k, as at least one vertex is removed from the original $T_k$ structure. By our induction hypothesis, this new $T_m$ structure will have at least one safe root vertex.
+In the first case shown in Figure~\ref{fig:firstcase}, if vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, then it creates a new $T_m$ structure where $m < k$, as at least one vertex is removed from the original $T_k$ structure. By our induction hypothesis, this new $T_m$ structure has at least one safe root vertex.
 
-in the second case in figure \ref{fig:Tk_structure} , if vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, then vertex $v_{i+1}$ itself is a safe root vertex, as it does not have any chords with any of its non-neighbouring vertices.
+In the second case shown in Figure~\ref{fig:Tk_structure}, if vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, then vertex $v_{i+1}$ itself is a safe root vertex, as it does not have any chords with any of its non-neighboring vertices.
 
 Therefore, in both cases, there is at least one safe root vertex in the $T_k$ structure. By the principle of mathematical induction, we conclude that for all $T_n$ structures, there is always at least one safe root vertex.
 
-Now we already know, there is at least two T structures in any biconnected plane graph. Therefore, there are at least two safe root vertices in any biconnected plane graph. (Proved)
-
-
+Now we already know there are at least two T structures in any biconnected plane graph. Therefore, there are at least two safe root vertices in any biconnected plane graph.
+\end{proof}
 
 \subsection{Order-Independence of Face Processing}
 
