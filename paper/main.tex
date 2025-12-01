@@ -858,16 +858,7 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 
 \subsection{The Edge Flip Mechanism}
 
-\subsubsection{How Edge Flipping Works}
-
-An edge flip transforms one triangulation into another by replacing a chord:
-
-\begin{enumerate}
-	\item \textbf{Select the chord}: Choose a chord $(v_a, v_b)$ in triangulation $T$
-	\item \textbf{Identify adjacent triangles}: Find triangles $(v_a, v_b, v_p)$ and $(v_a, v_b, v_q)$ on opposite sides
-	\item \textbf{Perform the flip}: Remove $(v_a, v_b)$ and add $(v_p, v_q)$ to create $T'$
-	\item \textbf{Validate}: Verify $(v_p, v_q) \notin S$ to avoid multi-edges
-\end{enumerate}
+An edge flip transforms one triangulation into another by replacing a chord $(v_a, v_b)$ with the opposite diagonal $(v_p, v_q)$ of the quadrilateral formed by adjacent triangles $(v_a, v_b, v_p)$ and $(v_a, v_b, v_q)$. We validate that $(v_p, v_q) \notin S$ to avoid multi-edges. We write $T(e)$ for the triangulation obtained by flipping to create chord $e$.
 
 %% ============================================================
 %% FIGURE 5: Edge Flip Operation
@@ -931,54 +922,13 @@ An edge flip transforms one triangulation into another by replacing a chord:
 			Transforms one valid triangulation into another};
 
 	\end{tikzpicture}
-	\caption{Edge flip operation. A chord $(v_a, v_b)$ forming two adjacent triangles is removed and replaced with the opposite diagonal $(v_p, v_q)$. This operation transforms one triangulation into another while preserving validity. Each child in the genealogical tree is obtained from its parent by a single edge flip.}
+	\caption{Edge flip operation: chord $(v_a, v_b)$ replaced with $(v_p, v_q)$.}
 	\label{fig:edge_flip}
 \end{figure}
 
-\textbf{Notation}: We write $T(e)$ for the triangulation obtained by flipping to create chord $e$. For example, $T_i(v_1, v_j)$ denotes the triangulation created by flipping to form chord $(v_1, v_j)$.
-
-\subsubsection{Tree Structure Properties}
-
-The genealogical tree has these essential properties:
-
-\begin{itemize}
-	\item \textbf{Unique parent}: Each triangulation (except root) has exactly one parent, determined by flipping its generating chord
-	\item \textbf{Multiple children}: A triangulation may have several children, obtained by different valid flips
-	\item \textbf{No cycles}: The tree structure (not a DAG) prevents any triangulation from appearing twice
-	\item \textbf{Complete coverage}: Every valid triangulation is reachable from the root via edge flips
-\end{itemize}
-
-\subsubsection{Completeness Through Tree Exploration}
-
-The genealogical tree guarantees we find all triangulations:
-
-\begin{itemize}
-	\item \textbf{Valid root}: The fan from safe root $r$ never creates multi-edges (Theorem~\ref{thm:safe_root_exists})
-	\item \textbf{Reachability}: Every valid triangulation is reachable from the root via edge flips
-	\item \textbf{No duplicates}: Each triangulation's unique generating chord defines its single parent
-	\item \textbf{Efficient pruning}: When $(v_1, v_j) \in S$ but $(v_1, v_j) \notin T_i$, the chord persists in all descendants (since only generating chords are flipped), so pruning eliminates only invalid triangulations
-\end{itemize}
+The local genealogical tree has these essential properties: (1) each triangulation except root has exactly one parent determined by flipping its generating chord, (2) triangulations may have multiple children from different valid flips, (3) the tree structure prevents duplicates, and (4) every valid triangulation is reachable from the safe root via edge flips. Completeness follows from Theorem~\ref{thm:completeness} (Section~\ref{sec:correctness}).
 
 \noindent\rule{\textwidth}{0.4pt}
-
-\subsection{Why This Approach Works}
-
-Before the formal correctness proofs, we provide intuition for the algorithm's success.
-
-\subsubsection{Safe Roots Solve Initialization}
-
-The fundamental challenge in biconnected graphs is that prior face triangulations create constraints---we cannot reuse existing chords. The safe root concept solves this elegantly: a safe root vertex $r$ allows all possible chords from $r$ to non-neighbors to be added without conflicts. The outerplane graph structure guarantees at least two such vertices always exist (degree-2 vertices on the outer cycle).
-
-\subsubsection{Local Trees + Global Tracking Prevent Duplicates}
-
-\textbf{Within each face}: All triangulations form a tree where parent-child relationships are defined by the generating chord. Each triangulation has exactly one parent, preventing cycles and local duplicates.
-
-\textbf{Across faces}: The global chord set $S$ enforces constraints through backtracking---chords are added when entering a branch, removed when backtracking, and branches are pruned if conflicts arise. Each complete triangulation corresponds to a unique path in the DFS recursion tree, automatically preventing duplicates without explicit storage or isomorphism testing.
-
-\subsubsection{Pruning Preserves Completeness}
-
-When a chord from the current triangulation already exists in $S$ (a ``blocking chord''), we prune that branch. As proved in our completeness theorem (Theorem~\ref{thm:completeness}), blocking chords never get flipped in descendant triangulations---if triangulation $T$ contains a blocking chord, all descendants must contain it, creating multi-edges. Therefore, pruning eliminates only invalid triangulations; every valid triangulation is found along branches without blocking chords.
-
 
 % ================================================================
 % CORRECTNESS AND COMPLETENESS
@@ -1387,101 +1337,21 @@ Now we already know there are at least two T structures in any biconnected plane
 
 \subsection{Order-Independence of Face Processing}
 
-Our algorithm processes faces in an arbitrary order as specified in Algorithm~1, line~2. We now prove that this choice does not affect completeness---all valid triangulations are generated regardless of the processing order.
+Our algorithm processes faces in arbitrary order (Algorithm~1, line~2). We prove this does not affect completeness.
 
 \begin{theorem}[Order-Independence]
 	\label{thm:order_independence}
-	Let $G$ be a biconnected plane graph with faces $F_1, F_2, \ldots, F_k$. For any valid global triangulation $T^*$ of $G$, if the algorithm generates $T^*$ under processing order $\pi = (\pi_1, \pi_2, \ldots, \pi_k)$, then it also generates $T^*$ under any other processing order $\sigma = (\sigma_1, \sigma_2, \ldots, \sigma_k)$.
+	For any biconnected plane graph $G$ with faces $F_1, F_2, \ldots, F_k$ and any valid triangulation $T^*$, if the algorithm generates $T^*$ under processing order $\pi$, it generates $T^*$ under any other order $\sigma$.
 \end{theorem}
 
-\begin{proof}
-	Let $T^*$ be any valid global triangulation of $G$. We decompose $T^*$ into face-local triangulations:
-	\[
-		T^* = (T^*_1, T^*_2, \ldots, T^*_k)
-	\]
-	where $T^*_i$ is the triangulation of face $F_i$ in $T^*$.
+\begin{proof}[Proof Sketch]
+	Any valid triangulation $T^* = (T^*_1, T^*_2, \ldots, T^*_k)$ satisfies pairwise chord compatibility: $\text{Chords}(T^*_i) \cap \text{Chords}(T^*_j) = \emptyset$ for all $i \neq j$. This property is symmetric and order-independent.
 
-	\medskip
-	\noindent\textbf{Key Observation:} The validity of $T^*$ depends solely on pairwise chord compatibility between faces, not on the order in which faces are processed. Specifically, $T^*$ is valid if and only if
-	\[
-		\forall i \neq j: \text{Chords}(T^*_i) \cap \text{Chords}(T^*_j) = \emptyset
-	\]
-	That is, no two faces share a chord, which would create a multi-edge.
-
-	\medskip
-	\noindent\textbf{Processing Order $\pi = (F_1, F_2, \ldots, F_k)$}
-
-	Assume the algorithm generates $T^*$ under order $\pi$. At each step $i$:
-	\begin{enumerate}
-		\item The global chord set is $S_i = \bigcup_{j=1}^{i-1} \text{Chords}(T^*_j)$
-		\item Face $F_i$ is triangulated with local triangulation $T^*_i$
-		\item The algorithm verifies that $\text{Chords}(T^*_i) \cap S_i = \emptyset$ (no blocking chords)
-	\end{enumerate}
-
-	Since $T^*$ is valid, this compatibility check succeeds for all $i$.
-
-	\medskip
-	\noindent\textbf{Alternative Processing Order $\sigma = (F_{\sigma_1}, F_{\sigma_2}, \ldots, F_{\sigma_k})$}
-
-	Now consider a different processing order $\sigma$. At step $j$ under order $\sigma$:
-	\begin{enumerate}
-		\item The global chord set is $S'_j = \bigcup_{\ell=1}^{j-1} \text{Chords}(T^*_{\sigma_\ell})$
-		\item Face $F_{\sigma_j}$ is processed with local triangulation $T^*_{\sigma_j}$
-		\item We must verify that $\text{Chords}(T^*_{\sigma_j}) \cap S'_j = \emptyset$
-	\end{enumerate}
-
-	\medskip
-	\noindent\textbf{Claim:} The compatibility check succeeds for all $j$ under order $\sigma$.
-
-	\textit{Proof of Claim:} Suppose by contradiction that $\text{Chords}(T^*_{\sigma_j}) \cap S'_j \neq \emptyset$. Then there exists a chord $e \in \text{Chords}(T^*_{\sigma_j})$ such that
-	\[
-		e \in \text{Chords}(T^*_{\sigma_\ell}) \text{ for some } \ell < j
-	\]
-
-	This means faces $F_{\sigma_j}$ and $F_{\sigma_\ell}$ share chord $e$ in $T^*$, contradicting the assumption that $T^*$ is a valid triangulation (no multi-edges). Therefore:
-	\[
-		\text{Chords}(T^*_{\sigma_j}) \cap S'_j = \emptyset
-	\]
-
-	\medskip
-	\noindent\textbf{Reachability in Local Genealogical Trees}
-
-	For each face $F_i$, the local genealogical tree rooted at safe vertex $r_i$ contains all valid triangulations of $F_i$ given the constraints in the global set $S$ at the time $F_i$ is processed (Theorem~\ref{thm:completeness}).
-
-	The specific contents of $S$ may differ between processing orders $\pi$ and $\sigma$, but the crucial property is:
-	\begin{itemize}
-		\item Under order $\pi$: $T^*_i$ is reachable in the genealogical tree for $F_i$ given constraint set $S_i^{(\pi)} = \bigcup_{j < i} \text{Chords}(T^*_j)$
-		\item Under order $\sigma$: $T^*_{\sigma_j}$ is reachable in the genealogical tree for $F_{\sigma_j}$ given constraint set $S_j^{(\sigma)} = \bigcup_{\ell < j} \text{Chords}(T^*_{\sigma_\ell})$
-	\end{itemize}
-
-	Since $T^*$ is valid, $\text{Chords}(T^*_i)$ is compatible with \emph{all} other face triangulations in $T^*$, not just those processed before $F_i$. Therefore, $T^*_i$ remains a valid triangulation of $F_i$ regardless of which other faces have been processed first, as long as no chord conflicts exist.
-
-	The local genealogical tree for face $F_i$ rooted at the safe vertex $r_i$ (found via Theorem~\ref{thm:safe_root_exists}) contains all triangulations that:
-	\begin{enumerate}
-		\item Are valid triangulations of the face cycle
-		\item Do not contain any chord in the current global set $S$
-	\end{enumerate}
-
-	Since $T^*_i$ satisfies both conditions under any processing order (by the pairwise compatibility argument above), it will appear in the genealogical tree regardless of order.
-
-	\medskip
-	\noindent\textbf{Combination via DFS}
-
-	The algorithm explores all combinations of face triangulations via depth-first search with backtracking. Since each face's genealogical tree contains the required local triangulation $T^*_i$ under any processing order, the DFS will eventually reach the combination $(T^*_1, T^*_2, \ldots, T^*_k)$ regardless of the order $\pi$ or $\sigma$.
-
-	\medskip
-	\noindent\textbf{Conclusion}
-
-	The validity of a global triangulation depends only on the symmetric property of chord non-overlap between all pairs of faces, which is order-independent. The algorithm's local genealogical trees and DFS exploration ensure that all valid combinations are reached regardless of face processing order. Therefore, completeness is preserved under any ordering.
+	Under any processing order, when face $F_i$ is processed with global constraint set $S$ (chords from previously processed faces), the local genealogical tree rooted at safe vertex $r_i$ (Theorem~\ref{thm:safe_root_exists}) contains all triangulations compatible with $S$. Since $T^*$ is valid, $T^*_i$ contains no chord conflicting with any $T^*_j$ ($j \neq i$), so $T^*_i$ appears in the genealogical tree regardless of which faces were processed before $F_i$. The DFS explores all combinations, ensuring $T^*$ is generated under any ordering.
 \end{proof}
 
 \begin{remark}
-	This theorem justifies the phrase ``arbitrarily'' in Algorithm~1, line~2. Implementations may choose any face ordering without affecting correctness or completeness. Examples include:
-	\begin{itemize}
-		\item \textbf{Canonical ordering:} Process faces by increasing number of vertices (smallest first)
-		\item \textbf{BFS/DFS ordering:} Process faces in breadth-first or depth-first order from the outer face
-		\item \textbf{Optimized ordering:} Process faces with fewer expected triangulations first to reduce branching factor early
-	\end{itemize}
+	Implementations may use any face ordering: canonical (by vertex count), BFS/DFS from outer face, or optimized (fewest expected triangulations first).
 \end{remark}
 
 
@@ -1612,34 +1482,7 @@ Before proceeding to the complexity analysis, we establish a fundamental lower b
 
 \subsubsection{Cost Model}
 
-Before presenting the main complexity theorem, we establish our computational cost model. We measure time complexity by counting \emph{elementary operations}, where each elementary operation takes $O(1)$ time:
-
-\begin{definition}[Elementary Operations]
-	\label{def:elementary_ops}
-	The following operations are considered elementary with $O(1)$ time cost:
-	\begin{enumerate}
-		\item \textbf{Chord insertion/deletion:} Adding or removing a single chord from a triangulation
-		\item \textbf{Edge flip:} Replacing one chord with another (involves one deletion and one insertion)
-		\item \textbf{Membership testing:} Checking whether a chord exists in the global set $S$ using hash set lookup (expected $O(1)$ time)
-		\item \textbf{Hash set operations:} Insert, delete, and query operations on the global chord set $S$
-	\end{enumerate}
-\end{definition}
-
-We count the total number of such elementary operations across the entire algorithm execution:
-
-\begin{itemize}
-	\item \textbf{Building operations ($B$):} Total number of chord insertions during root triangulation construction across all faces and all recursive calls. Constructing a root triangulation for a face with $n_i$ vertices requires adding $n_i - 3$ chords, contributing $n_i - 3$ to $B$. Since $n_i - 3 = \Theta(n_i)$, we use $n_i$ as a representative count.
-
-	\item \textbf{Flipping operations ($F$):} Total number of edge flip operations performed when generating child triangulations in local genealogical trees.
-
-	\item \textbf{Total triangulations ($T$):} The number of complete graph triangulations generated, where $T = d_1 \times d_2 \times \cdots \times d_k$ (with $d_i$ being the number of valid triangulations for face $F_i$).
-\end{itemize}
-
-Since each elementary operation takes $O(1)$ time, if we prove that $B + F = O(T)$, this establishes that the total runtime is $O(T)$, yielding $O(1)$ amortized time per triangulation.
-
-\begin{remark}
-	Throughout this analysis, when we write expressions like ``$B = n_1 + d_1 \cdot n_2 + \cdots$'', we are counting the number of elementary operations, not the actual runtime. Each unit in these expressions corresponds to $O(1)$ actual time. The variables $B$ and $F$ represent \emph{operation counts}, not time measurements directly.
-\end{remark}
+We count elementary $O(1)$-time operations: chord insertion/deletion, edge flips, and hash set operations (insert/delete/query in $S$). Let $B$ = total chord insertions during root triangulation construction, $F$ = total edge flips in genealogical trees, and $T$ = total triangulations generated. Since each operation is $O(1)$, proving $B + F = O(T)$ establishes $O(1)$ amortized time per triangulation.
 
 \subsubsection{Minimum Triangulations Guarantee}
 
