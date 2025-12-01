@@ -1982,193 +1982,56 @@ Table~\ref{tab:complexity_summary} provides a comprehensive summary of all time 
 	\end{itemize}
 	Our experimental implementation (Section~\ref{sec:experiments}) uses Java's built-in \texttt{HashSet} with default settings, achieving practical performance that closely matches the theoretical predictions.
 \end{remark}
-\section{Implementation and Experimental Results}
+\section{Experimental Validation}
 \label{sec:experiments}
-\label{sec:implementation}
-
-We implemented the algorithm in C++ and conducted comprehensive benchmarking experiments on 48 diverse biconnected plane graphs. The implementation uses hash sets for $O(1)$ chord lookup and maintains the global chord set $S$ through DFS backtracking. All test cases confirmed completeness (no duplicates) and validated the theoretical complexity bounds.
 
 \subsection{Experimental Setup}
 
-All experiments were executed using a custom C++ benchmarking framework designed to capture fine-grained time and space complexity metrics of the triangulation algorithms. Each test input file (representing a polygonal mesh face set) was automatically read from a predefined directory. For each input, the program executed 20 independent runs to ensure statistical stability of the results.
+We implemented the algorithm in C++ and conducted comprehensive benchmarking on 48 diverse biconnected plane graphs. Execution time was measured using \texttt{std::chrono::steady\_clock} with nanosecond precision. Memory usage was captured via platform-specific RSS queries (\texttt{/proc/self/smaps\_rollup} on Linux, \texttt{GetProcessMemoryInfo} on Windows, \texttt{task\_info} on macOS). All measurements represent averages over 20 independent runs.
 
-\subsubsection{Input Processing}
+\textbf{System Configuration:} AMD Ryzen 5 5600G (2 cores, 3.9 GHz, 8GB RAM), Linux Mint 22.2, GCC 13.3.0 with optimization flags. Implementation uses C++ STL containers including \texttt{unordered\_set} for $O(1)$ expected-time chord lookup operations.
 
-Each input file contained a list of polygonal faces in the following format:
-\begin{itemize}
-	\item The first line specifies the number of faces.
-	\item Each subsequent line specifies the number of vertices in a face, followed by the vertex indices.
-\end{itemize}
-
-During preprocessing, the total number of distinct vertices was determined by aggregating all unique vertex identifiers from the faces. This count was later used for normalized space analysis (e.g., memory per vertex).
-
-\subsubsection{Time Measurement}
-
-Execution time was recorded using C++'s high-resolution monotonic clock (\texttt{std::chrono::steady\_clock}), ensuring nanosecond-level precision. For each input, the following timing statistics were collected:
-\begin{itemize}
-	\item Average time per full triangulation across 20 runs.
-	\item Average nanoseconds per triangulation (computed as total time divided by the number of distinct triangulations generated).
-\end{itemize}
-
-This approach eliminates temporal noise and allows accurate comparison across different datasets.
-
-\subsubsection{Space Measurement}
-
-Peak memory usage was measured at runtime using platform-specific Resident Set Size (RSS) queries, which reflect the actual physical memory consumed by the process:
-
-\begin{itemize}
-	\item \textbf{Linux:} Primary measurement used \texttt{/proc/self/smaps\_rollup}, which provides byte-accurate RSS values since Linux kernel 4.14. In systems without this file, a fallback using \texttt{/proc/self/statm} was employed.
-	\item \textbf{Windows:} Measured using \texttt{GetProcessMemoryInfo()} from the Windows API.
-	\item \textbf{macOS:} Measured using \texttt{task\_info()} with the \texttt{MACH\_TASK\_BASIC\_INFO} structure.
-\end{itemize}
-
-The measured RSS before and after triangulation provided the incremental memory usage, and the maximum observed difference across all runs was taken as the peak memory footprint. To enable comparative analysis across models of varying sizes, memory usage was normalized by vertex count to compute memory per vertex.
-
-\textbf{Representative absolute peak RSS values:} Simple graphs like $C_3$-$C_9$ (cycles) exhibited peak memory usage of 6-12 KB total. Medium-complexity graphs like wheels ($W_4$, $W_5$) and $K_4$ used 15-30 KB. Complex graphs with 12+ vertices and multiple faces reached 30-50 KB peak RSS. These absolute values confirm the theoretical $O(n)$ space bound, with peak memory growing linearly with vertex count despite exponential growth in the number of generated triangulations.
-
-\subsubsection{System Specifications}
-
-Experiments were performed on the following system configuration:
-
-\begin{itemize}
-	\item \textbf{Operating System:} Linux Mint 22.2 (Cinnamon), based on Ubuntu 24.04 ``Noble''
-	\item \textbf{Kernel:} Linux 6.14.0-35-generic (x86\_64)
-	\item \textbf{Desktop Environment:} Cinnamon 6.4.8
-	\item \textbf{Virtualization:} VMware virtual machine
-	\item \textbf{CPU:} AMD Ryzen 5 5600G with Radeon Graphics
-	      \begin{itemize}
-		      \item Architecture: Zen 3 (7nm process)
-		      \item Cores (visible to VM): 2 cores
-		      \item Clock Speed: 3.9 GHz
-		      \item Cache: L1 128 KiB, L2 1 MiB, L3 32 MiB
-	      \end{itemize}
-	\item \textbf{RAM:} 8 GB (allocated to VM)
-	\item \textbf{Graphics:} VMware SVGA II (virtual GPU)
-	\item \textbf{Storage:} 100 GB virtual disk (ext4 filesystem)
-	\item \textbf{Compiler:} GCC 13.3.0 with optimization flags
-	\item \textbf{Programming Language:} C++ (C++17 standard)
-	\item \textbf{Source Code:} Available at \url{https://github.com/TAR2003/Thesis}
-\end{itemize}
-
-\textbf{VM Environment Considerations:} We chose a virtualized environment to ensure reproducibility---the VM configuration can be precisely documented and recreated. While virtualization introduces 5-15\% overhead compared to bare-metal execution (primarily from virtual memory management and I/O operations), this overhead affects all measurements uniformly and does not impact the asymptotic complexity analysis. Bare-metal execution would yield proportionally faster absolute times but identical amortized complexity characteristics. The VM's isolated environment eliminates interference from background processes, providing more stable and reproducible timing measurements.
-
-All measurements were taken in isolated runs to prevent interference from background processes. The implementation uses C++ STL containers including \texttt{unordered\_set} for $O(1)$ expected-time chord lookup operations and \texttt{vector} for efficient storage of graph structures.
-
+\textbf{Test Cases:} The 48 test instances include simple cycles ($C_3$--$C_9$), wheels ($W_4$, $W_5$), complete graphs ($K_3$, $K_4$), bipartite graphs ($K_{2,3}$), diamond structures, quadrilaterals, pre-triangulated graphs, and complex general plane graphs with up to 16 vertices and over 1.2 million triangulations.
 
 \subsection{Performance Results}
 
-We conducted comprehensive experiments on 48 different graph instances representing various graph structures. The graph instances include:
-\begin{itemize}
-	\item \textbf{Simple cycles:} $C_3$ (triangle), $C_4$ (square), $C_5$ (pentagon), $C_6$ (hexagon), $C_7$ (heptagon), $C_8$ (octagon), $C_9$ (nonagon)
-	\item \textbf{Wheels:} $W_4$, $W_5$ (hub vertex connected to outer cycle)
-	\item \textbf{Complete graphs:} $K_3$, $K_4$ (tetrahedron)
-\end{itemize}
+Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present detailed performance metrics. Key observations:
 
-\subsection{Analysis of Constant Factor Variations}
-\label{subsec:constant_factors}
+\textbf{Time Complexity Validation:} Time per triangulation ranges from 787ns ($K_3$) to 4,948ns ($C_4$), averaging approximately 2,100ns across all cases. The largest instance (1,282,136 triangulations) completed in 2.06 seconds at 1,606ns per triangulation, confirming $O(1)$ amortized complexity.
 
-While our theoretical analysis establishes $O(1)$ amortized time per triangulation and $O(n)$ space complexity, the experimental results reveal significant constant factor variations. This subsection analyzes these variations to provide practical insights.
-
-\subsubsection{Time per Triangulation Variations}
-
-Table 3 in the full results shows that time per triangulation varies from 787ns (for simple graphs like $K_3$) to 4,948ns (for complex graphs with V=12, E=25, F=12)---a 6.3$\times$ variation. This can be explained by several factors:
-
-\begin{itemize}
-	\item \textbf{Hash table operations}: While theoretically $O(1)$, hash table performance depends on load factor and collision rates. Graphs with more faces create larger global chord sets $S$, increasing collision probability.
-
-	\item \textbf{Cache effects}: Simpler graphs (e.g., cycles, wheels) have better memory locality, keeping data structures in L1/L2 cache. Complex graphs with many faces cause more cache misses during chord lookups.
-
-	\item \textbf{Face complexity distribution}: Graphs where all faces have similar vertex counts exhibit more predictable branching patterns, reducing branch misprediction penalties in the CPU pipeline.
-
-	\item \textbf{Depth of genealogical trees}: Complex faces generate deeper local genealogical trees, requiring more recursive calls and stack operations per triangulation.
-\end{itemize}
-
-\textbf{Practical implication}: For applications prioritizing speed over completeness, one could use early termination strategies (e.g., generate only the first $N$ triangulations) on simpler face structures to achieve sub-microsecond per-triangulation performance.
-
-\subsubsection{Memory per Vertex Variations}
-
-Table 2 shows memory per vertex ranging from 315B (complex V=12 graph) to 2,048B (K$_3$ triangle)---a 6.5$\times$ variation. This counterintuitive pattern (simpler graphs using more memory per vertex) arises from:
-
-\begin{itemize}
-	\item \textbf{Fixed overhead amortization}: Our implementation allocates fixed-size hash tables for the global chord set $S$ and other data structures (approx. 4-8 KB overhead). For $K_3$ with only 3 vertices, this overhead dominates: $\frac{6\text{KB}}{3} \approx 2\text{KB/vertex}$. For V=12 graphs, the same overhead is spread across more vertices: $\frac{6\text{KB}}{12} = 500\text{B/vertex}$.
-
-	\item \textbf{Triangulation storage}: Simpler graphs generate fewer triangulations (e.g., $K_3$ has only 1 triangulation), but the data structures for storing face information and genealogical tree nodes remain allocated. The memory measurement captures peak RSS, not memory proportional to output size.
-
-	\item \textbf{JVM/Runtime overhead}: The C++ STL containers (\texttt{unordered\_set}, \texttt{vector}) allocate memory in chunks with geometric growth. Small graphs trigger fewer allocations, but each allocation has overhead that appears proportionally larger.
-\end{itemize}
-
-\textbf{Practical implication}: For large-scale applications processing graphs with hundreds or thousands of vertices, the fixed overhead becomes negligible, and memory usage converges to the theoretical $O(n)$ with a small constant (approximately 300-500 bytes per vertex based on our implementation).
-
-\subsubsection{Scalability Observations}
-
-The experimental data confirm two key scalability properties:
-\begin{enumerate}
-	\item \textbf{Time scales with output size}: Graphs generating more triangulations exhibit total execution times proportional to the number of triangulations, confirming the $O(1)$ amortized time analysis.
-
-	\item \textbf{Memory remains linear in $n$}: Even for complex graphs with exponentially many triangulations (e.g., V=12, E=25 generates millions of triangulations), peak memory usage stays within $O(n)$ bounds, validating our space complexity analysis.
-\end{enumerate}
-
-\subsection{Performance Results (continued)}
-
-The 48 test cases also include:
-\begin{itemize}
-	\item \textbf{Bipartite:} $K_{2,3}$
-	\item \textbf{Diamond structures:} Various diamond-shaped configurations
-	\item \textbf{Quadrilaterals:} Graphs composed of quadrilateral faces (4-quad, 7-quad, 14-quad)
-	\item \textbf{Pre-triangulated:} Graphs already containing triangular faces (4-tri, 9-tri)
-	\item \textbf{Complex structures:} Octahedron dual, general plane graphs with varying vertex/edge/face counts
-\end{itemize}
-
-\subsection{Experimental Results}
-
-We conducted comprehensive benchmarking on 48 diverse biconnected plane graphs. Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present detailed performance metrics including execution time, time per triangulation, peak memory usage, and memory per vertex. All results are averaged over 20 independent runs.
+\textbf{Space Complexity Validation:} Memory per vertex ranges from 315B to 2KB, independent of output size. The complex 13-vertex graph generating 1.28 million triangulations uses only 315B/vertex, while small 3--4 vertex graphs show higher per-vertex overhead (512B--2KB) due to fixed data structure costs. This validates the $O(n)$ space bound with memory usage determined by input size, not exponential output size.
 
 \begin{table}[htbp]
 	\centering
 	\footnotesize
-	\caption{Experimental Results (Table 4): Time and Space Complexity Analysis - Part 1}
+	\caption{Representative Performance Results (Table 4: Time \& Space Analysis)}
 	\label{tab:timing_results_part1}
 	\begin{tabular}{|l|r|r|r|r|r|}
 		\hline
-		\textbf{Test Case}    & \textbf{Vertices} & \textbf{Triang.} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
+		\textbf{Test Case}    & \textbf{V} & \textbf{Triangulations} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
 		\hline
 		\multicolumn{6}{|c|}{\textit{Simple Cycles}}                                                                                \\
 		\hline
-		C4 (square)           & 4                 & 2                & 0.000010          & 4,948              & 1.00 KB             \\
-		C5 (pentagon)         & 5                 & 10               & 0.000025          & 2,497              & 819 B               \\
-		C6 (hexagon\_1)       & 6                 & 68               & 0.000143          & 2,109              & 682 B               \\
-		C6 (hexagon\_2)       & 6                 & 68               & 0.000146          & 2,140              & 682 B               \\
-		C6 (hexagon\_3)       & 6                 & 68               & 0.000137          & 2,008              & 682 B               \\
-		C7 (heptagon)         & 7                 & 546              & 0.000941          & 1,723              & 585 B               \\
-		C8 (octagon)          & 8                 & 4,872            & 0.007443          & 1,528              & 512 B               \\
-		C9 (nonagon)          & 9                 & 46,782           & 0.066701          & 1,426              & 455 B               \\
+		C4 (square)           & 4          & 2                       & 0.000010          & 4,948              & 1.00 KB             \\
+		C6 (hexagon)          & 6          & 68                      & 0.000143          & 2,109              & 682 B               \\
+		C8 (octagon)          & 8          & 4,872                   & 0.007443          & 1,528              & 512 B               \\
+		C9 (nonagon)          & 9          & 46,782                  & 0.066701          & 1,426              & 455 B               \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Large-Scale Instances}}                                                                        \\
+		\multicolumn{6}{|c|}{\textit{Large-Scale}}                                                                                  \\
 		\hline
-		complex               & 13                & 1,282,136        & 2.059353          & \textbf{1,606}     & 315 B               \\
-		graph\_V9E10F3        & 9                 & 13,880           & 0.025192          & \textbf{1,815}     & 455 B               \\
-		quadrilateral\_14quad & 16                & 16,384           & 0.037116          & \textbf{2,265}     & 512 B               \\
-		graph\_V12E25F12      & 12                & 62               & 0.000089          & 1,437              & 682 B               \\
+		complex               & 13         & 1,282,136               & 2.059353          & \textbf{1,606}     & 315 B               \\
+		graph V12E25F12       & 12         & 62                      & 0.000089          & 1,437              & 682 B               \\
+		quadrilateral 14quad  & 16         & 16,384                  & 0.037116          & \textbf{2,265}     & 512 B               \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Complete Graphs \& Tetrahedra}}                                                                \\
+		\multicolumn{6}{|c|}{\textit{Complete Graphs}}                                                                              \\
 		\hline
-		K3 (triangle)         & 3                 & 1                & 0.000001          & 787                & 1.33 KB             \\
-		K4 (tetrahedron\_1)   & 4                 & 1                & 0.000001          & 1,369              & 1.00 KB             \\
-		K4 (tetrahedron\_2)   & 4                 & 1                & 0.000001          & 1,450              & 2.00 KB             \\
-		octahedron dual       & 8                 & 1                & 0.000002          & 2,262              & 512 B               \\
+		K3 (triangle)         & 3          & 1                       & 0.000001          & 787                & 1.33 KB             \\
+		K4 (tetrahedron)      & 4          & 1                       & 0.000001          & 1,369              & 1.00 KB             \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Diamond Structures}}                                                                           \\
+		\multicolumn{6}{|c|}{\textit{Wheels \& Bipartite}}                                                                          \\
 		\hline
-		diamond\_1            & 4                 & 1                & 0.000002          & 1,925              & 1.00 KB             \\
-		diamond\_2            & 4                 & 1                & 0.000002          & 1,998              & 1.00 KB             \\
-		diamond\_3            & 4                 & 1                & 0.000002          & 1,864              & 1.00 KB             \\
-		\hline
-		\multicolumn{6}{|c|}{\textit{Wheel Graphs \& Bipartite}}                                                                    \\
-		\hline
-		W4 (wheel)            & 5                 & 2                & 0.000004          & 1,985              & 819 B               \\
-		W5 (wheel\_1)         & 6                 & 5                & 0.000008          & 1,662              & 682 B               \\
-		W5 (wheel\_2)         & 6                 & 5                & 0.000010          & 2,084              & 682 B               \\
-		K2\_3 (bipartite)     & 5                 & 4                & 0.000011          & 2,627              & 819 B               \\
+		W5 (wheel)            & 6          & 5                       & 0.000008          & 1,662              & 682 B               \\
+		K2\_3 (bipartite)     & 5          & 4                       & 0.000011          & 2,627              & 819 B               \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -2176,89 +2039,33 @@ We conducted comprehensive benchmarking on 48 diverse biconnected plane graphs. 
 \begin{table}[htbp]
 	\centering
 	\footnotesize
-	\caption{Experimental Results (Table 5): Time and Space Complexity Analysis - Part 2}
+	\caption{Additional Test Cases (Table 5)}
 	\label{tab:timing_results_part2}
 	\begin{tabular}{|l|r|r|r|r|r|}
 		\hline
-		\textbf{Test Case}    & \textbf{Vertices} & \textbf{Triang.} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
+		\textbf{Test Case}   & \textbf{V} & \textbf{Triangulations} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{General Plane Graphs (Small)}}                                                                 \\
-		\hline
-		graph\_V5E6F3         & 5                 & 4                & 0.000010          & 2,411              & 819 B               \\
-		graph\_V5E7F3         & 5                 & 2                & 0.000004          & 2,030              & 819 B               \\
-		graph\_V5E7F4\_1      & 5                 & 2                & 0.000005          & 2,298              & 1.60 KB             \\
-		graph\_V5E7F4\_2      & 5                 & 1                & 0.000002          & 2,460              & 819 B               \\
-		graph\_V5E7F4\_3      & 5                 & 2                & 0.000005          & 2,429              & 819 B               \\
-		\hline
-		\multicolumn{6}{|c|}{\textit{General Plane Graphs (Medium)}}                                                                \\
-		\hline
-		graph\_V6E7F3\_1      & 6                 & 20               & 0.000045          & 2,270              & 682 B               \\
-		graph\_V6E7F3\_2      & 6                 & 24               & 0.000052          & 2,167              & 682 B               \\
-		graph\_V6E7F3\_3      & 6                 & 20               & 0.000047          & 2,349              & 682 B               \\
-		graph\_V6E7F3\_4      & 6                 & 20               & 0.000045          & 2,228              & 682 B               \\
-		graph\_V7E9F3         & 7                 & 9                & 0.000016          & 1,757              & 585 B               \\
-		graph\_V7E11F5        & 7                 & 7                & 0.000015          & 2,120              & 585 B               \\
-		graph\_V7E14F9        & 7                 & 2                & 0.000005          & 2,633              & 585 B               \\
-		graph\_V8E10F4        & 8                 & 40               & 0.000084          & 2,094              & 1.00 KB             \\
-		graph\_V8E15F8        & 8                 & 5                & 0.000009          & 1,889              & 512 B               \\
-		\hline
-		\multicolumn{6}{|c|}{\textit{Quadrilaterals \& Pre-triangulated}}                                                           \\
-		\hline
-		quadrilateral\_4quad  & 9                 & 16               & 0.000040          & 2,488              & 455 B               \\
-		quadrilateral\_7quad  & 9                 & 72               & 0.000191          & 2,646              & 910 B               \\
-		triangulated\_4tri\_1 & 6                 & 1                & 0.000001          & 1,213              & 682 B               \\
-		triangulated\_4tri\_2 & 6                 & 1                & 0.000001          & 1,201              & 682 B               \\
-		triangulated\_9tri    & 8                 & 1                & 0.000003          & 2,523              & 512 B               \\
-		\hline
-		\multicolumn{6}{|c|}{\textit{Miscellaneous Structures}}                                                                     \\
-		\hline
-		hexagon cycle         & 6                 & 68               & 0.000133          & 1,955              & 682 B               \\
-		pentagon              & 5                 & 10               & 0.000031          & 3,111              & 819 B               \\
-		square                & 4                 & 2                & 0.000005          & 2,406              & 1.00 KB             \\
-		square with pentagon  & 5                 & 4                & 0.000009          & 2,299              & 819 B               \\
-		simple3               & 5                 & 4                & 0.000010          & 2,486              & 819 B               \\
-		triple rectangle      & 5                 & 4                & 0.000011          & 2,797              & 819 B               \\
+		graph V9E10F3        & 9          & 13,880                  & 0.025192          & 1,815              & 455 B               \\
+		graph V8E10F4        & 8          & 40                      & 0.000084          & 2,094              & 1.00 KB             \\
+		quadrilateral 7quad  & 9          & 72                      & 0.000191          & 2,646              & 910 B               \\
+		graph V7E11F5        & 7          & 7                       & 0.000015          & 2,120              & 585 B               \\
+		pentagon             & 5          & 10                      & 0.000031          & 3,111              & 819 B               \\
+		diamond structures   & 4          & 1                       & 0.000002          & $\sim$1,900        & 1.00 KB             \\
 		\hline
 	\end{tabular}
 \end{table}
 
-\subsection{Performance Analysis and Discussion}
+\textit{Full results for all 48 cases available in supplementary materials.}
 
-\textbf{Time Complexity Verification:}
+\subsection{Summary}
 
-The experimental results confirm our theoretical $O(1)$ amortized time complexity per triangulation:
-
+These experimental results confirm both theoretical complexity bounds in practice:
 \begin{itemize}
-	\item \textbf{Scalability:} The largest test case (complex graph with 1,282,136 triangulations) was processed in 2.06 seconds, achieving 1,606 nanoseconds per triangulation. This demonstrates exceptional scalability to large problem instances.
-
-	\item \textbf{Consistent Performance:} Time per triangulation remains remarkably consistent across different graph sizes and structures, ranging from 787 to 4,948 nanoseconds. The average across all 48 test cases is approximately 2,100 nanoseconds per triangulation, validating our theoretical bounds.
-
-	\item \textbf{Optimal Cases:} Highly regular structures like K3 (triangle) achieve the fastest per-triangulation time of 787 nanoseconds. Simple cycles (C8, C9) with thousands of triangulations consistently achieve sub-1600 nanosecond performance.
-
-	\item \textbf{Hardware Efficiency:} The implementation efficiently utilizes the AMD Ryzen 5 5600G architecture (even within a VM environment with 2 cores allocated), providing sufficient computational power for rapid enumeration even on instances with over a million triangulations.
-
-	\item \textbf{Statistical Reliability:} All timing measurements represent averages over 20 independent runs, ensuring that the reported values account for system variance and provide reliable performance estimates.
+	\item \textbf{$O(1)$ amortized time:} Consistent per-triangulation performance (787--4,948ns) across diverse structures, scaling to 1.28M triangulations
+	\item \textbf{$O(n)$ space:} Memory usage (315B--2KB per vertex) independent of exponential output size, confirming linear scaling with input vertices
 \end{itemize}
 
-\textbf{Space Complexity Verification:}
-
-Memory measurements confirm our theoretical $O(n)$ space complexity:
-
-\begin{itemize}
-	\item \textbf{Linear Scaling:} Peak memory usage scales linearly with the number of vertices. The memory per vertex metric remains consistently between 315 bytes and 2 KB across all test cases, independent of the number of triangulations generated.
-
-	\item \textbf{Efficient Memory Usage:} Most test cases require less than 1 KB per vertex. The complex graph with 13 vertices generating 1.28 million triangulations uses only 315 bytes per vertex, demonstrating that memory usage is independent of output size.
-
-	\item \textbf{Constant Overhead:} Small graphs (3--8 vertices) show slightly higher per-vertex memory (512 B--2 KB) due to fixed data structure overhead. As graphs grow larger, the per-vertex cost approaches the theoretical minimum.
-
-	\item \textbf{RSS-Based Precision:} Using platform-specific RSS measurements (via \texttt{/proc/self/smaps\_rollup} on Linux) provides byte-level accuracy, capturing actual physical memory consumption rather than virtual memory allocation.
-
-	\item \textbf{Output-Independent Space:} The space complexity is entirely determined by input size ($n$ vertices), not output size (number of triangulations), which can be exponential. This validates our $O(n)$ space bound.
-\end{itemize}
-
-\textbf{Summary:}
-
-These comprehensive experimental results confirm that our algorithm achieves both the theoretical $O(1)$ amortized time per triangulation and $O(n)$ space complexity in practice. The consistency of performance across diverse graph structures, from simple cycles to complex large-scale instances, demonstrates the robustness and practical efficiency of our approach for exhaustive triangulation enumeration of biconnected plane graphs.
+The implementation efficiently handles graphs ranging from simple 3-vertex triangles to complex 16-vertex structures generating millions of triangulations, validating the practical efficiency of our approach.
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
@@ -2293,17 +2100,7 @@ This work makes several theoretical contributions:
 	\item \textbf{Amortized Analysis:} The detailed amortized analysis demonstrates that building time is dominated by output size even with complex face interactions
 \end{itemize}
 
-\subsection{Future Directions}
 
-Promising extensions include: (1) extending to simply-connected plane graphs via block-cut tree decomposition, (2) parallel enumeration using lock-free data structures, (3) constrained triangulations for mesh generation applications, and (4) developing polynomial-time counting algorithms without explicit enumeration. Open problems include finding closed-form formulas for triangulation counts and uniform random sampling methods.
-
-The ``safe root vertex'' concept introduced in this work has potential applications beyond triangulation enumeration. This technique could be adapted to other plane graph decomposition problems where face-by-face processing creates chord conflicts, such as:
-\begin{itemize}
-	\item \textbf{Convex decomposition:} Partitioning polygons into convex pieces while avoiding multi-edges
-	\item \textbf{Visibility graph construction:} Computing visibility relationships in polygonal domains with holes
-	\item \textbf{Dual graph enumeration:} Generating all duals of plane graph embeddings
-	\item \textbf{Rectangular partition enumeration:} Finding all guillotine cuts of rectilinear polygons
-\end{itemize}
 
 Each of these problems involves selecting ``pivot'' vertices or edges to avoid conflicts during recursive decomposition, suggesting that safe root selection strategies may have broad applicability in computational geometry.
 
