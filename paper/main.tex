@@ -854,79 +854,6 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 	\end{algorithmic}
 \end{algorithm}
 
-\noindent\rule{\textwidth}{0.4pt}
-
-\subsection{The Edge Flip Mechanism}
-
-An edge flip transforms one triangulation into another by replacing a chord $(v_a, v_b)$ with the opposite diagonal $(v_p, v_q)$ of the quadrilateral formed by adjacent triangles $(v_a, v_b, v_p)$ and $(v_a, v_b, v_q)$. We validate that $(v_p, v_q) \notin S$ to avoid multi-edges. We write $T(e)$ for the triangulation obtained by flipping to create chord $e$.
-
-%% ============================================================
-%% FIGURE 5: Edge Flip Operation
-%% Section 3.5.1 - How Edge Flipping Works
-%% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[scale=1.6]
-
-		% Before flip
-		\begin{scope}[xshift=-3.5cm]
-			\node[draw=none, font=\small] at (0, 2) {\textbf{Before Flip}};
-
-			% Quadrilateral
-			\node[circle, draw, fill=white, minimum size=6pt, label=left:$v_a$] (a) at (0, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_b$] (b) at (2.5, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=above:$v_p$] (p) at (0.5, 1.5) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=below:$v_q$] (q) at (1.5, -1.5) {};
-
-			% Boundary
-			\draw[thick] (a) -- (p) -- (b) -- (q) -- cycle;
-			\draw[thick] (a) -- (q);
-
-			% Chord to be flipped (red)
-			\draw[red, very thick] (a) -- (b);
-			\node[draw=none, font=\small, red] at (1, -0.3) {$(v_a, v_b)$};
-
-			% Triangles annotation
-			\node[draw=none, font=\scriptsize, blue!70!black] at (0.7, 0.7) {Triangle 1};
-			\node[draw=none, font=\scriptsize, blue!70!black] at (1.2, -0.7) {Triangle 2};
-		\end{scope}
-
-
-
-		% After flip
-		\begin{scope}[xshift=3.5cm]
-			\node[draw=none, font=\small] at (0, 2) {\textbf{After Flip}};
-
-			% Same vertices
-			\node[circle, draw, fill=white, minimum size=6pt, label=left:$v_a$] (a2) at (0, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=right:$v_b$] (b2) at (2.5, 0) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=above:$v_p$] (p2) at (0.5, 1.5) {};
-			\node[circle, draw, fill=white, minimum size=6pt, label=below:$v_q$] (q2) at (1.5, -1.5) {};
-
-			% Boundary
-			\draw[thick] (a2) -- (p2) -- (b2) -- (q2) -- cycle;
-			\draw[thick] (a2) -- (q2);
-
-			% New chord (green)
-			\draw[green!60!black, very thick] (p2) -- (q2);
-			\node[draw=none, font=\small, green!60!black] at (1.3, 0.3) {$(v_p, v_q)$};
-
-			% New triangles annotation
-			\node[draw=none, font=\scriptsize, blue!70!black] at (0.6, -0.1) {Triangle 1'};
-			\node[draw=none, font=\scriptsize, blue!70!black] at (1.7, -0.4) {Triangle 2'};
-		\end{scope}
-
-		% Bottom explanation with spacing
-		\node[draw=none, font=\small, align=center] at (0, -3)
-		{Edge flip: Remove chord $(v_a, v_b)$ and add chord $(v_p, v_q)$\\
-			Transforms one valid triangulation into another};
-
-	\end{tikzpicture}
-	\caption{Edge flip operation: chord $(v_a, v_b)$ replaced with $(v_p, v_q)$.}
-	\label{fig:edge_flip}
-\end{figure}
-
-The local genealogical tree has these essential properties: (1) each triangulation except root has exactly one parent determined by flipping its generating chord, (2) triangulations may have multiple children from different valid flips, (3) the tree structure prevents duplicates, and (4) every valid triangulation is reachable from the safe root via edge flips. Completeness follows from Theorem~\ref{thm:completeness} (Section~\ref{sec:correctness}).
 
 \noindent\rule{\textwidth}{0.4pt}
 
@@ -1830,7 +1757,7 @@ Table~\ref{tab:complexity_summary} provides a comprehensive summary of all time 
 
 \subsection{Experimental Setup}
 
-We implemented the algorithm in C++ and conducted comprehensive benchmarking on 35 diverse biconnected plane graphs. Execution time was measured using \texttt{std::chrono::steady\_clock} with nanosecond precision. Memory usage was captured via platform-specific RSS queries (\texttt{/proc/self/smaps\_rollup} on Linux, \texttt{GetProcessMemoryInfo} on Windows, \texttt{task\_info} on macOS). All measurements represent averages over 20 independent runs.
+We implemented the algorithm in C++ and conducted comprehensive benchmarking on 35 diverse biconnected plane graphs. Execution time was measured using \texttt{std::chrono::steady\_clock} with nanosecond precision. Memory usage was captured via platform-specific RSS queries (\texttt{/proc/self/smaps\_rollup} on Linux, \texttt{GetProcessMemoryInfo} on Windows, \texttt{task\_info} on macOS). All measurements represent averages over 5 independent runs.
 
 \textbf{System Configuration:} AMD Ryzen 5 5600G (2 cores, 3.9 GHz, 8GB RAM), Linux Mint 22.2, GCC 13.3.0 with optimization flags. Implementation uses C++ STL containers including \texttt{unordered\_set} for $O(1)$ expected-time chord lookup operations.
 
@@ -1840,9 +1767,9 @@ We implemented the algorithm in C++ and conducted comprehensive benchmarking on 
 
 Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present detailed performance metrics. Key observations:
 
-\textbf{Time Complexity Validation:} Time per triangulation ranges from 1,267ns to 9,869ns across all test cases. The largest instance tested---a 25-vertex 5$\times$5 grid generating 81,920,000 triangulations---completed in 171.3 seconds at 2,091ns per triangulation. Other large-scale instances include a 15-vertex graph with 89,897,864 triangulations (146.6s, 1,631ns/triang), a 13-vertex graph with 10,225,274 triangulations (16.1s, 1,576ns/triang), and a 12-vertex cycle with 54,721,224 triangulations (74.0s, 1,353ns/triang). These results confirm $O(1)$ amortized complexity across problem instances spanning 6 orders of magnitude in output size.
+\textbf{Time Complexity Validation:} Time per triangulation ranges from 1,297ns to 8,817ns across all test cases. The largest instance tested---a 25-vertex 5$\times$5 grid generating 81,920,000 triangulations---completed in 171.7 seconds at 2,096ns per triangulation. Other large-scale instances include a 15-vertex graph with 89,897,864 triangulations (146.9s, 1,634ns/triang), a 13-vertex graph with 10,225,274 triangulations (16.5s, 1,618ns/triang), and a 12-vertex cycle with 54,721,224 triangulations (76.3s, 1,395ns/triang). These results confirm $O(1)$ amortized complexity across problem instances spanning 6 orders of magnitude in output size.
 
-\textbf{Space Complexity Validation:} Memory per vertex ranges from 256B to 945B, independent of output size. The complex 13-vertex graph generating 1.28 million triangulations uses only 315B/vertex, the 25-vertex grid generating 82 million triangulations uses 491B/vertex, and the 16-vertex 4$\times$4 grid uses 256B/vertex. This validates the $O(n)$ space bound with memory usage determined by input size, not exponential output size.
+\textbf{Space Complexity Validation:} Memory per vertex ranges from 315B to 1KB, independent of output size. The complex 13-vertex graph generating 1.28 million triangulations uses only 315B/vertex, the 25-vertex grid generating 82 million triangulations uses 655B/vertex, and the 15-vertex graph generating 90 million triangulations uses 546B/vertex. This validates the $O(n)$ space bound with memory usage determined by input size, not exponential output size.
 
 \begin{table}[htbp]
 	\centering
@@ -1855,33 +1782,33 @@ Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present
 		\hline
 		\multicolumn{6}{|c|}{\textit{Simple Cycles}}                                                                                   \\
 		\hline
-		C4 (square)            & 4          & 2                       & 0.000006          & 3,026              & ---                 \\
-		C5 (pentagon)          & 5          & 10                      & 0.000084          & 8,401              & ---                 \\
-		C6 (hexagon)           & 6          & 68                      & 0.000128          & 1,888              & ---                 \\
-		C7 (heptagon)          & 7          & 546                     & 0.000938          & 1,718              & ---                 \\
-		C8 (octagon)           & 8          & 4,872                   & 0.008292          & 1,702              & ---                 \\
-		C9 (nonagon)           & 9          & 46,782                  & 0.066445          & 1,420              & ---                 \\
-		C10 (decagon)          & 10         & 474,180                 & 0.660699          & 1,393              & ---                 \\
-		C11                    & 11         & 5,010,456               & 6.933153          & 1,384              & ---                 \\
-		C12                    & 12         & 54,721,224              & 74.034485         & \textbf{1,353}     & 682 B               \\
+		C4 (square)            & 4          & 2                       & 0.000005          & 2,432              & ---                 \\
+		C5 (pentagon)          & 5          & 10                      & 0.000023          & 2,324              & 819 B               \\
+		C6 (hexagon)           & 6          & 68                      & 0.000143          & 2,099              & 682 B               \\
+		C7 (heptagon)          & 7          & 546                     & 0.001034          & 1,894              & 585 B               \\
+		C8 (octagon)           & 8          & 4,872                   & 0.008137          & 1,670              & 1.00 KB             \\
+		C9 (nonagon)           & 9          & 46,782                  & 0.068060          & 1,455              & 455 B               \\
+		C10 (decagon)          & 10         & 474,180                 & 0.683944          & 1,442              & 409 B               \\
+		C11                    & 11         & 5,010,456               & 7.233983          & 1,444              & 372 B               \\
+		C12                    & 12         & 54,721,224              & 76.344777         & \textbf{1,395}     & 341 B               \\
 		\hline
 		\multicolumn{6}{|c|}{\textit{Large-Scale Grid Structures}}                                                                     \\
 		\hline
-		grid 4$\times$4        & 16         & 4,613,504               & 5.847286          & \textbf{1,267}     & 256 B               \\
-		grid 5$\times$5        & 25         & 81,920,000              & 171.303633        & \textbf{2,091}     & 491 B               \\
+		grid 4$\times$4        & 16         & 4,613,504               & 5.981606          & \textbf{1,297}     & 512 B               \\
+		grid 5$\times$5        & 25         & 81,920,000              & 171.683820        & \textbf{2,096}     & 655 B               \\
 		\hline
 		\multicolumn{6}{|c|}{\textit{Complex Graphs}}                                                                                  \\
 		\hline
-		complex                & 13         & 1,282,136               & 2.100167          & 1,638              & 315 B               \\
-		graph V13F4            & 13         & 4,236,574               & 6.107020          & 1,442              & ---                 \\
-		graph V13F4 v2         & 13         & 10,225,274              & 16.110562         & 1,576              & 945 B               \\
-		graph V15F5            & 15         & 89,897,864              & 146.598460        & 1,631              & ---                 \\
+		complex                & 13         & 1,282,136               & 2.130338          & 1,662              & 315 B               \\
+		graph V13F4            & 13         & 4,236,574               & 6.324251          & 1,493              & 315 B               \\
+		graph V13F4 v2         & 13         & 10,225,274              & 16.541969         & 1,618              & 630 B               \\
+		graph V15F5            & 15         & 89,897,864              & 146.879791        & 1,634              & 546 B               \\
 		\hline
 		\multicolumn{6}{|c|}{\textit{Medium Graphs}}                                                                                   \\
 		\hline
-		graph V11F3            & 11         & 672,902                 & 1.010348          & 1,501              & 372 B               \\
-		graph V9E10F3          & 9          & 13,880                  & 0.026958          & 1,942              & 455 B               \\
-		graph V12E25F12        & 12         & 62                      & 0.000080          & 1,287              & 341 B               \\
+		graph V11F3            & 11         & 672,902                 & 1.025228          & 1,524              & 372 B               \\
+		graph V9E10F3          & 9          & 13,880                  & 0.026242          & 1,891              & 455 B               \\
+		graph V12E25F12        & 12         & 62                      & 0.000080          & 1,297              & 682 B               \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -1895,25 +1822,25 @@ Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present
 		\hline
 		\textbf{Test Case}   & \textbf{V} & \textbf{Triangulations} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
 		\hline
-		graph V8E10F4        & 8          & 40                      & 0.000080          & 1,989              & ---                 \\
-		graph V8E15F8        & 8          & 5                       & 0.000011          & 2,152              & ---                 \\
-		graph V7E9F3         & 7          & 9                       & 0.000017          & 1,907              & ---                 \\
-		graph V7E11F5        & 7          & 7                       & 0.000014          & 2,020              & ---                 \\
-		graph V6E7F3\_1      & 6          & 20                      & 0.000040          & 1,988              & ---                 \\
-		graph V6E7F3\_2      & 6          & 24                      & 0.000048          & 2,020              & 682 B               \\
-		graph V6E7F3\_3      & 6          & 20                      & 0.000197          & 9,869              & ---                 \\
-		graph V6E7F3\_4      & 6          & 20                      & 0.000043          & 2,128              & ---                 \\
+		graph V8E10F4        & 8          & 40                      & 0.000353          & 8,817              & 512 B               \\
+		graph V8E15F8        & 8          & 5                       & 0.000010          & 1,954              & 512 B               \\
+		graph V7E9F3         & 7          & 9                       & 0.000016          & 1,764              & 585 B               \\
+		graph V7E11F5        & 7          & 7                       & 0.000013          & 1,798              & 585 B               \\
+		graph V6E7F3\_1      & 6          & 20                      & 0.000049          & 2,462              & 682 B               \\
+		graph V6E7F3\_2      & 6          & 24                      & 0.000058          & 2,432              & 682 B               \\
+		graph V6E7F3\_3      & 6          & 20                      & 0.000039          & 1,933              & 682 B               \\
+		graph V6E7F3\_4      & 6          & 20                      & 0.000050          & 2,496              & ---                 \\
 		\hline
-		quadrilateral 4quad  & 9          & 16                      & 0.000035          & 2,202              & ---                 \\
-		quadrilateral 7quad  & 9          & 72                      & 0.000286          & 3,976              & ---                 \\
-		quadrilateral 14quad & 16         & 16,384                  & 0.038305          & 2,338              & 256 B               \\
+		quadrilateral 4quad  & 9          & 16                      & 0.000048          & 2,993              & 455 B               \\
+		quadrilateral 7quad  & 9          & 72                      & 0.000201          & 2,793              & 455 B               \\
+		quadrilateral 14quad & 16         & 16,384                  & 0.036991          & 2,258              & 512 B               \\
 		\hline
-		square7              & 9          & 36                      & 0.000101          & 2,798              & 910 B               \\
-		square8              & 10         & 48                      & 0.000169          & 3,523              & 409 B               \\
-		simple3              & 5          & 4                       & 0.000011          & 2,778              & 819 B               \\
-		W5 wheel             & 6          & 5                       & 0.000009          & 1,805              & ---                 \\
-		square w/ pentagon   & 5          & 4                       & 0.000011          & 2,770              & 819 B               \\
-		triple rectangle     & 5          & 4                       & 0.000012          & 3,018              & ---                 \\
+		square7              & 9          & 36                      & 0.000102          & 2,844              & 910 B               \\
+		square8              & 10         & 48                      & 0.000179          & 3,730              & 819 B               \\
+		simple3              & 5          & 4                       & 0.000010          & 2,603              & 819 B               \\
+		W5 wheel             & 6          & 5                       & 0.000008          & 1,632              & 682 B               \\
+		square w/ pentagon   & 5          & 4                       & 0.000009          & 2,325              & ---                 \\
+		triple rectangle     & 5          & 4                       & 0.000011          & 2,661              & 819 B               \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -1924,8 +1851,8 @@ Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present
 
 These experimental results confirm both theoretical complexity bounds in practice:
 \begin{itemize}
-	\item \textbf{$O(1)$ amortized time:} Consistent per-triangulation performance (1,267--9,869ns) across diverse structures, scaling efficiently from 2 to 89.9 million triangulations. The best performance (1,267ns, 4$\times$4 grid) and typical performance (1,353--2,091ns for large instances) demonstrate the constant-factor efficiency of the approach.
-	\item \textbf{$O(n)$ space:} Memory usage (256--945B per vertex) independent of exponential output size, confirming linear scaling with input vertices. The 25-vertex grid generating 82M triangulations uses only 491B/vertex, while the 16-vertex grid uses 256B/vertex.
+	\item \textbf{$O(1)$ amortized time:} Consistent per-triangulation performance (1,297--8,817ns) across diverse structures, scaling efficiently from 2 to 89.9 million triangulations. The best performance (1,297ns, 4$\times$4 grid and graph V12E25F12) and typical performance (1,395--2,096ns for large instances) demonstrate the constant-factor efficiency of the approach.
+	\item \textbf{$O(n)$ space:} Memory usage (315B--1KB per vertex) independent of exponential output size, confirming linear scaling with input vertices. The 25-vertex grid generating 82M triangulations uses only 655B/vertex, the 15-vertex graph generating 90M triangulations uses 546B/vertex, while the 13-vertex complex graph uses just 315B/vertex.
 \end{itemize}
 
 The implementation efficiently handles graphs ranging from simple 4-vertex cycles to complex 25-vertex grids generating tens of millions of triangulations, validating the practical efficiency of our approach.

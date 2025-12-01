@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  1 DEC 2025 21:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  1 DEC 2025 23:21
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -741,11 +741,6 @@ Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on inp
 [7]
 
 [8]
-Overfull \hbox (9.11324pt too wide) in paragraph at lines 924--925
- [][] 
- []
-
-
 
 [9]
 
@@ -753,22 +748,25 @@ Overfull \hbox (9.11324pt too wide) in paragraph at lines 924--925
 
 [11]
 
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-
 [12]
 
-[13]
+LaTeX Warning: `h' float specifier changed to `ht'.
+
 
 LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+
+[13]
+Overfull \hbox (1.14388pt too wide) in paragraph at lines 1271--1272
+[][]\OT1/cmr/bx/n/12 Theorem 4 \OT1/cmr/m/n/12 (Or-der-In-de-pen-dence)\OT1/cmr/bx/n/12 . []\OT1/cmr/m/it/12 For any bi-con-nected plane graph $\OML/cmm/m/it/12 G$ \OT1/cmr/m/it/12 with faces $\OML/cmm/m/it/12 F[]; F[]; [] ; F[]$
+ []
 
 
 
 [14]
-Overfull \hbox (1.14388pt too wide) in paragraph at lines 1344--1345
-[][]\OT1/cmr/bx/n/12 Theorem 4 \OT1/cmr/m/n/12 (Or-der-In-de-pen-dence)\OT1/cmr/bx/n/12 . []\OT1/cmr/m/it/12 For any bi-con-nected plane graph $\OML/cmm/m/it/12 G$ \OT1/cmr/m/it/12 with faces $\OML/cmm/m/it/12 F[]; F[]; [] ; F[]$
- []
+
+LaTeX Warning: `h' float specifier changed to `ht'.
 
 
 
@@ -778,41 +776,38 @@ Overfull \hbox (1.14388pt too wide) in paragraph at lines 1344--1345
 
 [17]
 
-LaTeX Warning: Reference `def:elementary_ops' on page 18 undefined on input line 1561.
+LaTeX Warning: Reference `def:elementary_ops' on page 18 undefined on input line 1488.
+
+
+LaTeX Warning: Reference `def:elementary_ops' on page 18 undefined on input line 1498.
+
+
+LaTeX Warning: Reference `def:elementary_ops' on page 18 undefined on input line 1546.
 
 
 
 [18]
-
-LaTeX Warning: Reference `def:elementary_ops' on page 19 undefined on input line 1571.
-
-
-LaTeX Warning: Reference `def:elementary_ops' on page 19 undefined on input line 1619.
-
-
 
 [19]
 
 [20]
 
 [21]
-
-[22]
-Overfull \hbox (15.64922pt too wide) in paragraph at lines 1833--1834
+Overfull \hbox (15.64922pt too wide) in paragraph at lines 1760--1761
 \OT1/cmr/m/n/12 verse bi-con-nected plane graphs. Ex-e-cu-tion time was mea-sured us-ing \OT1/cmtt/m/n/12 std::chrono::steady[]clock
  []
 
 
 
+[22]
+
 [23]
 
-[24]
+[24] (main.bbl
 
-[25] (main.bbl
+[25])
 
-[26])
-
-[27] (main.aux)
+[26] (main.aux)
  ***********
 LaTeX2e <2025-06-01> patch level 1
 L3 programming layer <2025-08-13>
@@ -822,20 +817,20 @@ L3 programming layer <2025-08-13>
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 7D46B6927A3FDEB746C71341BF6833C3;5755.
+(rerunfilecheck)             Checksum: 6261FBC0F2FA8BC1954CE809ECDD96CC;5573.
  ) 
 Here is how much of TeX's memory you used:
- 36537 strings out of 468133
- 858942 string characters out of 5430229
- 1368701 words of memory out of 5000000
- 64447 multiletter control sequences out of 15000+600000
+ 36471 strings out of 468133
+ 858005 string characters out of 5430229
+ 1368600 words of memory out of 5000000
+ 64384 multiletter control sequences out of 15000+600000
  641824 words of font info for 96 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,13n,91p,963b,1077s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\TAWKIR\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1095.pk> <C:\Users\TAWKIR\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy6.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on main.pdf (27 pages, 437935 bytes).
+Output written on main.pdf (26 pages, 432787 bytes).
 PDF statistics:
- 575 PDF objects out of 1000 (max. 8388607)
- 144 named destinations out of 1000 (max. 500000)
- 269 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 564 PDF objects out of 1000 (max. 8388607)
+ 141 named destinations out of 1000 (max. 500000)
+ 261 words of extra memory for PDF output out of 10000 (max. 10000000)
 
