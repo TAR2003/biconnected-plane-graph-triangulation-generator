@@ -1830,19 +1830,19 @@ Table~\ref{tab:complexity_summary} provides a comprehensive summary of all time 
 
 \subsection{Experimental Setup}
 
-We implemented the algorithm in C++ and conducted comprehensive benchmarking on 48 diverse biconnected plane graphs. Execution time was measured using \texttt{std::chrono::steady\_clock} with nanosecond precision. Memory usage was captured via platform-specific RSS queries (\texttt{/proc/self/smaps\_rollup} on Linux, \texttt{GetProcessMemoryInfo} on Windows, \texttt{task\_info} on macOS). All measurements represent averages over 20 independent runs.
+We implemented the algorithm in C++ and conducted comprehensive benchmarking on 35 diverse biconnected plane graphs. Execution time was measured using \texttt{std::chrono::steady\_clock} with nanosecond precision. Memory usage was captured via platform-specific RSS queries (\texttt{/proc/self/smaps\_rollup} on Linux, \texttt{GetProcessMemoryInfo} on Windows, \texttt{task\_info} on macOS). All measurements represent averages over 20 independent runs.
 
 \textbf{System Configuration:} AMD Ryzen 5 5600G (2 cores, 3.9 GHz, 8GB RAM), Linux Mint 22.2, GCC 13.3.0 with optimization flags. Implementation uses C++ STL containers including \texttt{unordered\_set} for $O(1)$ expected-time chord lookup operations.
 
-\textbf{Test Cases:} The 48 test instances include simple cycles ($C_3$--$C_9$), wheels ($W_4$, $W_5$), complete graphs ($K_3$, $K_4$), bipartite graphs ($K_{2,3}$), diamond structures, quadrilaterals, pre-triangulated graphs, and complex general plane graphs with up to 16 vertices and over 1.2 million triangulations.
+\textbf{Test Cases:} The 35 test instances include simple cycles ($C_4$--$C_{12}$), grid structures (4$\times$4, 5$\times$5), complex graphs with 11--15 vertices, quadrilaterals, and various general plane graphs. The test suite spans 6 orders of magnitude in output size, from 2 triangulations (C4 square) to over 89 million triangulations (graph V15F5).
 
 \subsection{Performance Results}
 
 Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present detailed performance metrics. Key observations:
 
-\textbf{Time Complexity Validation:} Time per triangulation ranges from 787ns ($K_3$) to 4,948ns ($C_4$), averaging approximately 2,100ns across all cases. The largest instance (1,282,136 triangulations) completed in 2.06 seconds at 1,606ns per triangulation, confirming $O(1)$ amortized complexity.
+\textbf{Time Complexity Validation:} Time per triangulation ranges from 1,267ns to 9,869ns across all test cases. The largest instance tested---a 25-vertex 5$\times$5 grid generating 81,920,000 triangulations---completed in 171.3 seconds at 2,091ns per triangulation. Other large-scale instances include a 15-vertex graph with 89,897,864 triangulations (146.6s, 1,631ns/triang), a 13-vertex graph with 10,225,274 triangulations (16.1s, 1,576ns/triang), and a 12-vertex cycle with 54,721,224 triangulations (74.0s, 1,353ns/triang). These results confirm $O(1)$ amortized complexity across problem instances spanning 6 orders of magnitude in output size.
 
-\textbf{Space Complexity Validation:} Memory per vertex ranges from 315B to 2KB, independent of output size. The complex 13-vertex graph generating 1.28 million triangulations uses only 315B/vertex, while small 3--4 vertex graphs show higher per-vertex overhead (512B--2KB) due to fixed data structure costs. This validates the $O(n)$ space bound with memory usage determined by input size, not exponential output size.
+\textbf{Space Complexity Validation:} Memory per vertex ranges from 256B to 945B, independent of output size. The complex 13-vertex graph generating 1.28 million triangulations uses only 315B/vertex, the 25-vertex grid generating 82 million triangulations uses 491B/vertex, and the 16-vertex 4$\times$4 grid uses 256B/vertex. This validates the $O(n)$ space bound with memory usage determined by input size, not exponential output size.
 
 \begin{table}[htbp]
 	\centering
@@ -1851,30 +1851,37 @@ Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present
 	\label{tab:timing_results_part1}
 	\begin{tabular}{|l|r|r|r|r|r|}
 		\hline
-		\textbf{Test Case}    & \textbf{V} & \textbf{Triangulations} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
+		\textbf{Test Case}     & \textbf{V} & \textbf{Triangulations} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Simple Cycles}}                                                                                \\
+		\multicolumn{6}{|c|}{\textit{Simple Cycles}}                                                                                   \\
 		\hline
-		C4 (square)           & 4          & 2                       & 0.000010          & 4,948              & 1.00 KB             \\
-		C6 (hexagon)          & 6          & 68                      & 0.000143          & 2,109              & 682 B               \\
-		C8 (octagon)          & 8          & 4,872                   & 0.007443          & 1,528              & 512 B               \\
-		C9 (nonagon)          & 9          & 46,782                  & 0.066701          & 1,426              & 455 B               \\
+		C4 (square)            & 4          & 2                       & 0.000006          & 3,026              & ---                 \\
+		C5 (pentagon)          & 5          & 10                      & 0.000084          & 8,401              & ---                 \\
+		C6 (hexagon)           & 6          & 68                      & 0.000128          & 1,888              & ---                 \\
+		C7 (heptagon)          & 7          & 546                     & 0.000938          & 1,718              & ---                 \\
+		C8 (octagon)           & 8          & 4,872                   & 0.008292          & 1,702              & ---                 \\
+		C9 (nonagon)           & 9          & 46,782                  & 0.066445          & 1,420              & ---                 \\
+		C10 (decagon)          & 10         & 474,180                 & 0.660699          & 1,393              & ---                 \\
+		C11                    & 11         & 5,010,456               & 6.933153          & 1,384              & ---                 \\
+		C12                    & 12         & 54,721,224              & 74.034485         & \textbf{1,353}     & 682 B               \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Large-Scale}}                                                                                  \\
+		\multicolumn{6}{|c|}{\textit{Large-Scale Grid Structures}}                                                                     \\
 		\hline
-		complex               & 13         & 1,282,136               & 2.059353          & \textbf{1,606}     & 315 B               \\
-		graph V12E25F12       & 12         & 62                      & 0.000089          & 1,437              & 682 B               \\
-		quadrilateral 14quad  & 16         & 16,384                  & 0.037116          & \textbf{2,265}     & 512 B               \\
+		grid 4$\times$4        & 16         & 4,613,504               & 5.847286          & \textbf{1,267}     & 256 B               \\
+		grid 5$\times$5        & 25         & 81,920,000              & 171.303633        & \textbf{2,091}     & 491 B               \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Complete Graphs}}                                                                              \\
+		\multicolumn{6}{|c|}{\textit{Complex Graphs}}                                                                                  \\
 		\hline
-		K3 (triangle)         & 3          & 1                       & 0.000001          & 787                & 1.33 KB             \\
-		K4 (tetrahedron)      & 4          & 1                       & 0.000001          & 1,369              & 1.00 KB             \\
+		complex                & 13         & 1,282,136               & 2.100167          & 1,638              & 315 B               \\
+		graph V13F4            & 13         & 4,236,574               & 6.107020          & 1,442              & ---                 \\
+		graph V13F4 v2         & 13         & 10,225,274              & 16.110562         & 1,576              & 945 B               \\
+		graph V15F5            & 15         & 89,897,864              & 146.598460        & 1,631              & ---                 \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Wheels \& Bipartite}}                                                                          \\
+		\multicolumn{6}{|c|}{\textit{Medium Graphs}}                                                                                   \\
 		\hline
-		W5 (wheel)            & 6          & 5                       & 0.000008          & 1,662              & 682 B               \\
-		K2\_3 (bipartite)     & 5          & 4                       & 0.000011          & 2,627              & 819 B               \\
+		graph V11F3            & 11         & 672,902                 & 1.010348          & 1,501              & 372 B               \\
+		graph V9E10F3          & 9          & 13,880                  & 0.026958          & 1,942              & 455 B               \\
+		graph V12E25F12        & 12         & 62                      & 0.000080          & 1,287              & 341 B               \\
 		\hline
 	\end{tabular}
 \end{table}
@@ -1888,27 +1895,40 @@ Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present
 		\hline
 		\textbf{Test Case}   & \textbf{V} & \textbf{Triangulations} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
 		\hline
-		graph V9E10F3        & 9          & 13,880                  & 0.025192          & 1,815              & 455 B               \\
-		graph V8E10F4        & 8          & 40                      & 0.000084          & 2,094              & 1.00 KB             \\
-		quadrilateral 7quad  & 9          & 72                      & 0.000191          & 2,646              & 910 B               \\
-		graph V7E11F5        & 7          & 7                       & 0.000015          & 2,120              & 585 B               \\
-		pentagon             & 5          & 10                      & 0.000031          & 3,111              & 819 B               \\
-		diamond structures   & 4          & 1                       & 0.000002          & $\sim$1,900        & 1.00 KB             \\
+		graph V8E10F4        & 8          & 40                      & 0.000080          & 1,989              & ---                 \\
+		graph V8E15F8        & 8          & 5                       & 0.000011          & 2,152              & ---                 \\
+		graph V7E9F3         & 7          & 9                       & 0.000017          & 1,907              & ---                 \\
+		graph V7E11F5        & 7          & 7                       & 0.000014          & 2,020              & ---                 \\
+		graph V6E7F3\_1      & 6          & 20                      & 0.000040          & 1,988              & ---                 \\
+		graph V6E7F3\_2      & 6          & 24                      & 0.000048          & 2,020              & 682 B               \\
+		graph V6E7F3\_3      & 6          & 20                      & 0.000197          & 9,869              & ---                 \\
+		graph V6E7F3\_4      & 6          & 20                      & 0.000043          & 2,128              & ---                 \\
+		\hline
+		quadrilateral 4quad  & 9          & 16                      & 0.000035          & 2,202              & ---                 \\
+		quadrilateral 7quad  & 9          & 72                      & 0.000286          & 3,976              & ---                 \\
+		quadrilateral 14quad & 16         & 16,384                  & 0.038305          & 2,338              & 256 B               \\
+		\hline
+		square7              & 9          & 36                      & 0.000101          & 2,798              & 910 B               \\
+		square8              & 10         & 48                      & 0.000169          & 3,523              & 409 B               \\
+		simple3              & 5          & 4                       & 0.000011          & 2,778              & 819 B               \\
+		W5 wheel             & 6          & 5                       & 0.000009          & 1,805              & ---                 \\
+		square w/ pentagon   & 5          & 4                       & 0.000011          & 2,770              & 819 B               \\
+		triple rectangle     & 5          & 4                       & 0.000012          & 3,018              & ---                 \\
 		\hline
 	\end{tabular}
 \end{table}
 
-\textit{Full results for all 48 cases available in supplementary materials.}
+\textit{Full results for all 35 cases available in supplementary materials. Memory measurements show ``---'' where RSS delta was negligible ($<$4KB).}
 
 \subsection{Summary}
 
 These experimental results confirm both theoretical complexity bounds in practice:
 \begin{itemize}
-	\item \textbf{$O(1)$ amortized time:} Consistent per-triangulation performance (787--4,948ns) across diverse structures, scaling to 1.28M triangulations
-	\item \textbf{$O(n)$ space:} Memory usage (315B--2KB per vertex) independent of exponential output size, confirming linear scaling with input vertices
+	\item \textbf{$O(1)$ amortized time:} Consistent per-triangulation performance (1,267--9,869ns) across diverse structures, scaling efficiently from 2 to 89.9 million triangulations. The best performance (1,267ns, 4$\times$4 grid) and typical performance (1,353--2,091ns for large instances) demonstrate the constant-factor efficiency of the approach.
+	\item \textbf{$O(n)$ space:} Memory usage (256--945B per vertex) independent of exponential output size, confirming linear scaling with input vertices. The 25-vertex grid generating 82M triangulations uses only 491B/vertex, while the 16-vertex grid uses 256B/vertex.
 \end{itemize}
 
-The implementation efficiently handles graphs ranging from simple 3-vertex triangles to complex 16-vertex structures generating millions of triangulations, validating the practical efficiency of our approach.
+The implementation efficiently handles graphs ranging from simple 4-vertex cycles to complex 25-vertex grids generating tens of millions of triangulations, validating the practical efficiency of our approach.
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
