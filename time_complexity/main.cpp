@@ -157,7 +157,7 @@ int main()
     cin.tie(nullptr);
 
     string folder = "input";
-    const int testRuns = 20;
+    const int testRuns = 1;
     vector<BenchmarkResult> results;
 
     if (!fs::exists(folder) || !fs::is_directory(folder))
