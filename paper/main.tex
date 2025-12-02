@@ -311,6 +311,11 @@ We also define visibility by chords: if there is a $(1,3)$ chord, we say that ve
 
 In this paper, we will generate triangulations for labeled biconnected graphs, meaning each vertex in the graph is distinctly labeled, and we will assume that no two edges share the same two endpoints.
 
+\begin{definition}[Elementary Operation]
+\label{def:elementary_ops}
+An \textit{elementary operation} is one of the following actions executed on the RAM model in constant time: (i) inserting or deleting a chord, (ii) performing a single edge flip within a face (replacing one diagonal of a convex quadrilateral by the other), or (iii) a hash-set operation on the global chord set $S$ (insertion, deletion, or membership test). We assume each elementary operation takes $O(1)$ time in our cost model.
+\end{definition}
+
 
 \section{The Algorithm}
 \label{sec:algorithm}
