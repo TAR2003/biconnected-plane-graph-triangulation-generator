@@ -16,6 +16,7 @@
 \usepackage{hyperref}
 \usepackage{cite}
 \usepackage{float}
+\usepackage{asymptote}
 \usetikzlibrary{arrows.meta}
 
 
@@ -130,6 +131,17 @@ Biconnected graphs arise naturally in many practical applications, including VLS
 	\caption{Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}.}
 	\label{fig:separationpair}
 \end{figure}
+
+\begin{asy}
+size(4cm);
+draw((0,0)--(1,1)--(2,0)--cycle);
+\end{asy}
+
+\begin{asy}
+size(4cm);
+draw((0,0)--(1,1)--(2,0)--cycle);
+\end{asy}
+
 
 In the biconnected graph shown in Figure~\ref{fig:separationpair}, removing vertices 3 and 7 disconnects the remaining graph. Therefore, $(3,7)$ is a separation pair. However, this property does not occur in triconnected graphs.
 
