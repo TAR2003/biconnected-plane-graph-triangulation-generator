@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  4 DEC 2025 20:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.9.6)  4 DEC 2025 20:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -978,13 +978,13 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 Here is how much of TeX's memory you used:
  26797 strings out of 468133
  537926 string characters out of 5430229
- 906991 words of memory out of 5000000
+ 906974 words of memory out of 5000000
  54809 multiletter control sequences out of 15000+600000
  634466 words of font info for 67 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  128i,15n,123p,449b,954s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmss10.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmss12.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmss8.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmss9.pfb><C:/Users/TAWKIR/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb>
-Output written on main.pdf (45 pages, 192901 bytes).
+Output written on main.pdf (45 pages, 192238 bytes).
 PDF statistics:
  386 PDF objects out of 1000 (max. 8388607)
  91 named destinations out of 1000 (max. 500000)
