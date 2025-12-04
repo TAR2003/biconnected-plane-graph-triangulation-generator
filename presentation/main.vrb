@@ -1,14 +1,22 @@
-\frametitle{Main Algorithm - Start Triangulation}
-\normalsize
-	\textbf{Input:} $G$ = biconnected plane graph, $k$ = number of faces
-	
-	\begin{algorithmic}[1]
-		\Procedure{StartTriangulation}{$G, k$}
-		\State Label the faces as $F_1, F_2, \ldots, F_k$ arbitrarily
-		\State Initialize \textit{GlobalChordSet} $\gets \emptyset$
-		\State \Call{FindAllTriangulations}{$F, \emptyset, 1$}
-		\EndProcedure
-	\end{algorithmic}
-	
-	\vspace{0.5cm}
-	\textbf{Note:} This is the entry point of the algorithm. It processes faces sequentially, building up complete triangulations through recursive exploration.
+\frametitle{Step 1: Initial Graph}
+\centering
+	\begin{asy}
+		size(200);
+
+		real nodeRadius = 0.25;
+		pen nodePen = black+1;
+
+		// Function to draw a node
+		void drawNode(pair pos, string label, pen p = nodePen) {
+				draw(circle(pos,nodeRadius),p);
+				label(label,pos);
+			}
+
+		// Initial nodes
+		pair[] nodes = {(0,0),(2,0),(1,1.5)};
+
+		// Draw nodes
+		for(int i=0; i<nodes.length; ++i) {
+				drawNode(nodes[i], string(i+1));
+			}
+	\end{asy}

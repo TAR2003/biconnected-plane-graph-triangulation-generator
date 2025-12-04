@@ -1,9 +1,0 @@
-\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
-\beamer@sectionintoc {2}{Our Approach}{4}{0}{2}
-\beamer@sectionintoc {3}{Algorithm}{13}{0}{3}
-\beamer@sectionintoc {4}{Proofs}{19}{0}{4}
-\beamer@subsectionintoc {4}{1}{Proof of Completeness}{19}{0}{4}
-\beamer@subsectionintoc {4}{2}{Existence of Valid Root Triangulation}{23}{0}{4}
-\beamer@subsectionintoc {4}{3}{Time Complexity Analysis}{32}{0}{4}
-\beamer@subsectionintoc {4}{4}{Space Complexity Analysis}{37}{0}{4}
-\beamer@sectionintoc {5}{Conclusion}{38}{0}{5}

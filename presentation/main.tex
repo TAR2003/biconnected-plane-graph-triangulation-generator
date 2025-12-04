@@ -1,958 +1,2897 @@
 \documentclass{beamer}
-\usetheme{Madrid}
-\usecolortheme{default}
-\usepackage{graphicx}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{listings}
-\usepackage{xcolor}
 \usepackage{tikz}
-\usepackage{algorithm}
-\usepackage{algpseudocode}
-\usetikzlibrary{positioning} % for "below left=..." etc.
-\usetikzlibrary{arrows.meta} % for arrow tips
-\usetikzlibrary{fit} % for fit boxes
+\usepackage{subcaption}
+\usetikzlibrary{arrows.meta, positioning}
 
-\usetikzlibrary{graphs, arrows.meta, positioning, shapes.geometric, calc}
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+\setbeamertemplate{navigation symbols}{}
 
-\title{A Fast Algorithm for Generating All Triangulations of Biconnected Plane Graphs}
+\title{Algorithm Visualization with TikZ}
 \author{Tawkir Aziz Rahman}
-\institute{CSE, BUET}
-\date{}
+\date{\today}
 
 \begin{document}
 
-\begin{frame}
-	\titlepage
-\end{frame}
+\frame{\titlepage}
 
-\begin{frame}{Overview}
-	\tableofcontents
-\end{frame}
+% -----------------------------
+% Slide: Step-by-step graph
+% -----------------------------
+\begin{frame}{A biconnected plane graph with three faces}
 
-\section{Introduction}
-\begin{frame}{Introduction}
-	\textbf{The Problem:}
-	\begin{itemize}
-		\item Generate \textbf{all possible triangulations} of biconnected plane graphs
-		\item Previous methods fail with complex structures due to multi-edge creation
-		\item Important applications in graphics, engineering, and chip design
-	\end{itemize}
-
-	\vspace{0.5cm}
-	\textbf{Our Contribution:}
-	\begin{itemize}
-		\item Novel algorithm with \textbf{constant time per triangulation}
-		\item Solves the multi-edge problem using \textbf{safe root} concept
-		\item Practical for real-world applications
-	\end{itemize}
-\end{frame}
-
-
-\section{Our Approach}
-\begin{frame}{Our Approach: Key Innovations}
-	\textbf{Novel Tree Structure:}
-	\begin{itemize}
-		\item Instead of a single global genealogical tree, we use \textbf{local genealogical trees} for each face/cycle
-		\item Each face maintains its own tree of triangulations with parent-child relationships
-		\item Enables independent processing of faces while avoiding multi-edge issues
-	\end{itemize}
-
-	\vspace{0.3cm}
-	\textbf{Safe Root Concept:}
-	\begin{itemize}
-		\item Introduces \textbf{safe root vertex selection} to prevent multi-edge creation
-		\item Uses incremental chord checking to find optimal root vertex position
-		\item Ensures all initial chords from root vertex are valid and non-conflicting
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Our Approach: Recursive Tree Construction}
-	\textbf{Local Tree Generation:}
-	\begin{itemize}
-		\item For each face $F_i$, build a genealogical tree $\mathcal{T}(F_i)$
-		\item Initialize with safe root triangulation where all chords emanate from safe root vertex
-		\item Generate children by flipping generating chords while maintaining parent-child relationships
-	\end{itemize}
-
-	\vspace{0.3cm}
-	\textbf{GlobalChordSet Management:}
-	\begin{itemize}
-		\item Maintain global set of all chords used across all faces
-		\item Before adding any chord, check if it already exists in GlobalChordSet
-		\item Prevents multi-edge creation by rejecting conflicting chords
-		\item Dynamic addition/removal during recursive exploration
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Our Approach: Combinatorial Integration}
-	\textbf{Recursive Face Processing:}
-	\begin{itemize}
-		\item Process faces sequentially from $F_1$ to $F_k$
-		\item For each partial triangulation $T$, recursively triangulate remaining faces
-		\item Combine local triangulations $T_i$ to form complete graph triangulation $T + T_i$
-	\end{itemize}
-
-	\vspace{0.3cm}
-	\textbf{Efficient Output Generation:}
-	\begin{itemize}
-		\item Output complete triangulation only when all faces are processed ($i =$ face.length)
-		\item For intermediate states, recursively continue to next face
-		\item Ensures only valid complete triangulations are output
-	\end{itemize}
-
-	\vspace{0.3cm}
-	\textbf{Constant-Time Operations:}
-	\begin{itemize}
-		\item Safe root finding in $O(1)$ time per face
-		      \ chord operations and GlobalChordSet updates in constant time
-		\item Overall $O(1)$ time per triangulation generation
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Our Approach: Algorithm Overview}
 	\centering
-	\resizebox{\textwidth}{!}{%
-		\begin{tikzpicture}[node distance=1.5cm, auto]
-			\node[draw, rectangle, rounded corners, fill=blue!20, minimum width=3cm] (start) {Start with Biconnected Graph};
-			\node[draw, rectangle, rounded corners, fill=green!20, minimum width=3cm, below of=start] (faces) {Decompose into Faces $F_1, F_2, ..., F_k$};
-			\node[draw, rectangle, rounded corners, fill=yellow!20, minimum width=3cm, below of=faces] (safe) {Find Safe Root for Each Face};
-			\node[draw, rectangle, rounded corners, fill=orange!20, minimum width=3cm, below of=safe] (local) {Build Local Genealogical Trees};
-			\node[draw, rectangle, rounded corners, fill=red!20, minimum width=3cm, below of=local] (combine) {Combine Face Triangulations};
-			\node[draw, rectangle, rounded corners, fill=purple!20, minimum width=3cm, below of=combine] (output) {Output Complete Triangulations};
+	\begin{figure}[h]
+		\centering
+		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Nodes
+			\node (v1) at ( 0,0) {1};
+			\node (v2) at ( 2,0) {2};
+			\node (v3) at (2,2) {3};
+			\node (v4) at (0,2) {4};
+			\node (v5) at (-1, 1) {5};
+			\node (v6) at ( 1, 1) {6};
 
-			\draw[->, thick] (start) -- (faces);
-			\draw[->, thick] (faces) -- (safe);
-			\draw[->, thick] (safe) -- (local);
-			\draw[->, thick] (local) -- (combine);
-			\draw[->, thick] (combine) -- (output);
-		\end{tikzpicture}%
-	}
+			% Edges (perimeter)
+			\draw (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v1);
+			\draw (v1) -- (v6) -- (v4);
+
+			% Face labels (placed at approximate centers of triangles)
+			\node[draw=none] at (1.5,0.5) {Face3};
+			\node[draw=none] at (0,1) {Face2};
+			\node[draw=none] at (0,2.7) {Face1};
+		\end{tikzpicture}
+		\caption{Root triangulation with safe root vertex 1. Chords from vertex 1 to all non-neighboring vertices (3, 4, 5) form a fan structure, ensuring no multi-edge conflicts with previously added chords.}
+	\end{figure}
+
 \end{frame}
 
+\begin{frame}{Faces of the Graph}
 
-\begin{frame}{Our Approach: DFS Exploration Tree}
 	\centering
-	\vspace{-4mm}
-	\resizebox{\textwidth}{!}{%
-		\begin{tikzpicture}[
-			vertex/.style = {circle, draw, minimum size=8mm, inner sep=1pt, font=\small},
-			edge/.style   = {-{Stealth[length=3mm,width=2mm]}, thick},
-			level distance = 18mm,
-			sibling distance = 24mm
-			]
-			% tree
-			\node[vertex] (v1) {1}
-			child {
-					node[vertex] (v2) {2}
-					child {
-							node[vertex] (v4) {4}
-							child { node[vertex] (v8) {8} }
-							child { node[vertex] (v9) {9} }
-						}
-					child {
-							node[vertex] (v5) {5}
-						}
-				}
-			child {
-					node[vertex] (v3) {3}
-					child {
-							node[vertex] (v6) {6}
-							child { node[vertex] (v10) {10} }
-						}
-					child {
-							node[vertex] (v7) {7}
-						}
-				}
-			;
+	\begin{figure}[h]
+		\centering
 
-			% arrows
-			\foreach \u/\v in {v1/v2, v1/v3, v2/v4, v2/v5, v3/v6, v3/v7, v4/v8, v4/v9, v6/v10}
-			\draw[edge] (\u) -- (\v);
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-			% dashed level lines
-			\foreach \y/\level in {0/0, -1.8/1, -3.6/2, -5.4/3, -7.2/4} {
-					\draw[dashed, gray] (-5,\y) -- (5,\y);
-					\node[left, gray] at (-5,\y) {Level \level};
-				}
-		\end{tikzpicture}%
-	}
+	\end{figure}
+
 \end{frame}
 
 
+\begin{frame}{Find safe root of face 1}
 
-\begin{frame}{Our Approach: Face Processing Workflow}
 	\centering
-	\resizebox{\textwidth}{!}{%
-		\begin{tikzpicture}[
-				node distance=2.5cm,
-				box/.style={rectangle, rounded corners, draw, thick, minimum width=2.5cm, minimum height=1cm, align=center},
-				arrow/.style={->, thick, blue}
-			]
+	\begin{figure}[h]
+		\centering
 
-			% Main workflow
-			\node[box, fill=blue!20] (f1) {Face 1\\$F_{1,1}, F_{1,2}, ...$};
-			\node[box, fill=green!20, right of=f1] (f2) {Face 2\\$F_{2,1}, F_{2,2}, ...$};
-			\node[box, fill=yellow!20, right of=f2] (f3) {Face 3\\$F_{3,1}, F_{3,2}, ...$};
-			\node[box, fill=red!20, below of=f2] (output) {Complete\\Triangulation};
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 1}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-			\draw[arrow] (f1) -- (f2) node[midway, above] {DFS};
-			\draw[arrow] (f2) -- (f3) node[midway, above] {DFS};
-			\draw[arrow] (f3) -- (output) node[midway, right] {Output};
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-			% Backtracking arrows
-			\draw[arrow, dashed, red] (f3) to [bend left=30] (f2) node[midway, above] {Backtrack};
-			\draw[arrow, dashed, red] (f2) to [bend left=30] (f1) node[midway, above] {Backtrack};
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6)
+				\end{tabular}
+			};
+		\end{tikzpicture}
 
-			% Combinations examples
-			\node[below=0.3cm of f1, font=\footnotesize] {$F_{1,1}$};
-			\node[below=0.3cm of f2, font=\footnotesize] {$F_{2,1}, F_{2,2}$};
-			\node[below=0.3cm of f3, font=\footnotesize] {$F_{3,1}, F_{3,2}$};
 
-		\end{tikzpicture}%
-	}
+	\end{figure}
 
-	\vspace{0.5cm}
-	\textbf{Process:} For each triangulation of Face $i$, recursively find all compatible triangulations for Face $i+1$
 \end{frame}
 
-\begin{frame}{Our Approach: Safe Root Concept Visualization}
+
+\begin{frame}{Root Triangulation of face 1}
+
 	\centering
-	\resizebox{\textwidth}{!}{%
-		\begin{tikzpicture}[scale=1.2]
-			% Face vertices
-			\coordinate (v1) at (0,0);
-			\coordinate (v2) at (2,0);
-			\coordinate (v3) at (3,1.5);
-			\coordinate (v4) at (2,3);
-			\coordinate (v5) at (0,3);
-			\coordinate (v6) at (-1,1.5);
+	\begin{figure}[h]
+		\centering
 
-			% Draw the face boundary
-			\draw[thick, black] (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- cycle;
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 1}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-			% Label vertices
-			\node[below left] at (v1) {$v_1$};
-			\node[below right] at (v2) {$v_2$};
-			\node[right] at (v3) {$v_3$};
-			\node[above right] at (v4) {$v_4$};
-			\node[above left] at (v5) {$v_5$};
-			\node[left] at (v6) {$v_6$};
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-			% Draw vertices
-			\fill[red] (v1) circle (3pt);
-			\fill[black] (v2) circle (2pt);
-			\fill[black] (v3) circle (2pt);
-			\fill[black] (v4) circle (2pt);
-			\fill[black] (v5) circle (2pt);
-			\fill[black] (v6) circle (2pt);
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
 
-			% Draw chords from safe root (v1)
-			\draw[dashed, red, thick] (v1) -- (v3);
-			\draw[dashed, red, thick] (v1) -- (v4);
-			\draw[dashed, red, thick] (v1) -- (v5);
 
-			% Labels for chords
-			\node[red, font=\footnotesize] at (1.5, 0.8) {$(v_1, v_3)$};
-			\node[red, font=\footnotesize] at (1, 1.8) {$(v_1, v_4)$};
-			\node[red, font=\footnotesize] at (0, 2) {$(v_1, v_5)$};
+	\end{figure}
 
-		\end{tikzpicture}%
-	}
-
-	\vspace{0.3cm}
-	\textbf{Safe Root $v_1$:} All triangulating chords emanate from this vertex, ensuring no multi-edges when combined with other faces
 \end{frame}
 
-\begin{frame}{Our Approach: GlobalChordSet Management}
+\begin{frame}{Now we move to face 2}
+
 	\centering
-	\resizebox{0.95\textwidth}{!}{%
-		\begin{tikzpicture}[
-				chord/.style={rectangle, rounded corners, draw, fill=blue!10,
-						minimum width=1cm, minimum height=0.4cm,
-						font=\scriptsize, text centered},
-				process/.style={rectangle, rounded corners, draw, fill=green!20,
-						minimum width=2cm, minimum height=0.5cm,
-						font=\scriptsize, text centered}
-			]
+	\begin{figure}[h]
+		\centering
 
-			% GlobalChordSet representation - individual nodes instead of tabular
-			\node[chord] (c11) at (0,1) {\((v_1,v_3)\)};
-			\node[chord] (c12) at (1.3,1) {\((v_2,v_5)\)};
-			\node[chord] (c13) at (2.6,1) {\((v_4,v_7)\)};
-			\node[chord] (c14) at (3.9,1) {\((v_3,v_6)\)};
-			\node[chord] (c21) at (0,0) {\((v_1,v_8)\)};
-			\node[chord] (c22) at (1.3,0) {\((v_5,v_9)\)};
-			\node[chord] (c23) at (2.6,0) {\((v_2,v_4)\)};
-			\node[chord] (c24) at (3.9,0) {$\dots$};
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-			\node[draw, rectangle, inner sep=0.15cm, fill=yellow!10, fit={(c11) (c12) (c13) (c14) (c21) (c22) (c23) (c24)}] (globalset) {};
-			\node[above=0.1cm of globalset.north] {\scriptsize\textbf{GlobalChordSet}};
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-			% Process boxes
-			\node[process, below left=0.6cm and 0.2cm of globalset.south] (check) {Check Before Adding};
-			\node[process, below right=0.6cm and 0.2cm of globalset.south] (add) {Add/Remove DFS};
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
 
-			% Arrows
-			\draw[->, thick] (check) -- (globalset.south west);
-			\draw[->, thick] (add) -- (globalset.south east);
 
-		\end{tikzpicture}%
-	}
+	\end{figure}
 
-	\vspace{0.2cm}
-	\scriptsize \textbf{Purpose:} Prevents multi-edge creation by tracking\\all chords used across faces
 \end{frame}
 
+\begin{frame}{Find safe root of face 2}
 
-
-\begin{frame}{Our Approach: Complete Algorithm Flow}
 	\centering
-	\resizebox{0.95\textwidth}{!}{%
-		\begin{tikzpicture}[
-				node distance=0.5cm,
-				stepbox/.style={rectangle, rounded corners, draw, thick, minimum width=2.5cm, minimum height=0.7cm, font=\footnotesize, align=center},
-				decision/.style={diamond, draw, thick, minimum width=1.4cm, minimum height=0.9cm, font=\footnotesize, align=center},
-				arrow/.style={->, thick}
-			]
+	\begin{figure}[h]
+		\centering
 
-			\node[stepbox, fill=blue!20] (start) {Initialize\\Face Index $i=1$};
-			\node[stepbox, fill=green!20, below=of start] (safe) {Find Safe Root\\for Face $F_i$};
-			\node[stepbox, fill=yellow!20, below=of safe] (build) {Build Local Tree\\$\mathcal{T}(F_i)$};
-			\node[decision, fill=orange!20, below=of build] (last) {Last\\Face?};
-			\node[stepbox, fill=red!20, right=1.8cm of last] (output) {Output Complete\\Triangulation};
-			\node[stepbox, fill=purple!20, below=of last] (next) {Move to\\Face $F_{i+1}$};
-			\node[stepbox, fill=gray!20, below=of next] (backtrack) {Backtrack\\Remove Chords};
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-			\draw[arrow] (start) -- (safe);
-			\draw[arrow] (safe) -- (build);
-			\draw[arrow] (build) -- (last);
-			\draw[arrow] (last) -- (output) node[midway, above] {Yes};
-			\draw[arrow] (last) -- (next) node[midway, right] {No};
-			\draw[arrow] (next) -- (backtrack);
-			\draw[arrow] (backtrack) to [bend left=80] (safe);
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-		\end{tikzpicture}%
-	}
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Root Triangulation of face 2}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Now we move to face 3}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Find safe root of face 3}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node[fill=red] (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Root Triangulation of face 3}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node[fill=red] (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v2) -- (f3v4);
+				\draw (f3v2) -- (f3v6);
+
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6). (2,4), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{There is no other faces after face 3, so its a complete valid triangulation}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node[fill=red] (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v2) -- (f3v4);
+				\draw (f3v2) -- (f3v6);
+
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6). (2,4), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{So the actual triangulation looks like this:}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Nodes
+			\node (v1) at ( 0,0) {1};
+			\node (v2) at ( 2,0) {2};
+			\node (v3) at (2,2) {3};
+			\node (v4) at (0,2) {4};
+			\node (v5) at (-1, 1) {5};
+			\node (v6) at ( 1, 1) {6};
+
+			% Face labels (placed at approximate centers of triangles)
+			\node[draw=none] at (1.5,0.5) {Face3};
+			\node[draw=none] at (0,0.5) {Face2};
+			\node[draw=none] at (0,2.7) {Face1};
+
+			% Edges (perimeter)
+			\draw (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v1);
+			\draw (v1) -- (v6) -- (v4);
+			\draw (v1) .. controls (3,-1) .. (v3);
+			\draw (v1) .. controls (-2,1) .. (v4);  % curved around the left side
+
+			\draw (v6) -- (v5);
+			\draw (v2) .. controls (1.5,1.5) .. (v4);
+			\draw (v2) -- (v6);
+
+
+		\end{tikzpicture}
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6). (2,4), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Now we will start flipping of Face 3}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node[fill=red] (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v2) -- (f3v4);
+				\draw (f3v2) -- (f3v6);
+
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6). (2,4), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{We can flip the (2,4) edge, as its opposite pair is not in the global edge set}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node[fill=red] (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v3) -- (f3v6);
+				\draw (f3v2) -- (f3v6);
+
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6). (3,6), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Its a new triangulation}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node[fill=red] (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v3) -- (f3v6);
+				\draw (f3v2) -- (f3v6);
+
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6). (3,6), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
 
-\section{Algorithm}
+\begin{frame}{in the root also, cant flip (2,6) as (1,4) is present in the global edge set}
 
-\begin{frame}{Algorithm Structure Overview}
-	\textbf{Our algorithm consists of 5 main procedures:}
-	
-	\begin{enumerate}
-		\item \textbf{StartTriangulation}$(G, k)$
-		\begin{itemize}
-			\item Entry point - initializes the process
-		\end{itemize}
-		
-		\vspace{0.2cm}
-		\item \textbf{FindAllTriangulations}$(F, T, i)$
-		\begin{itemize}
-			\item Generates all triangulations for face $F_i$
-			\item Uses safe root as starting point
-		\end{itemize}
-		
-		\vspace{0.2cm}
-		\item \textbf{FindAllChildTriangulations}$(T_i, T, i)$
-		\begin{itemize}
-			\item Explores genealogical tree via chord flipping
-		\end{itemize}
-		
-		\vspace{0.2cm}
-		\item \textbf{FindSafeRoot}$(F, i)$
-		\begin{itemize}
-			\item Finds safe root vertex and creates initial triangulation
-		\end{itemize}
-		
-		\vspace{0.2cm}
-		\item \textbf{OutputTriangulation}$(T, T_i, i)$
-		\begin{itemize}
-			\item Outputs complete triangulation or continues to next face
-		\end{itemize}
-	\end{enumerate}
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node[fill=red] (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v2) -- (f3v4);
+				\draw (f3v2) -- (f3v6);
+
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6). (2,4), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}[fragile]{Find All Child Triangulations}
-	\scriptsize
-	\textbf{Input:} $T_i$ = current triangulation, $T$ = partial solution, $i$ = face index
-	
-	\begin{algorithmic}[1]
-		\Procedure{FindAllChildTriangulations}{$T_i, T, i$}
-		\State \Call{OutputTriangulation}{$T, T_i, i$}
-		\If{$T_i$ has no generating chords}
-		\State \Return
-		\EndIf
-		\State Let $(v_{b},v_{b'})$ be the \textbf{leftmost blocking chord} of $T_i$
-		\ForAll{vertices $v_j$ where $j \geq b$}
-		\If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $(v_1, v_j) \notin$ \textit{GlobalChordSet}}
-		\State Add chord $(v_1, v_j)$ to \textit{GlobalChordSet}
-		\State \Call{FindAllChildTriangulations}{$T_i(v_1, v_j), T, i$}
-		\State Remove chord $(v_1, v_j)$ from \textit{GlobalChordSet}
-		\EndIf
-		\EndFor
-		\EndProcedure
-	\end{algorithmic}
+\begin{frame}{So, there is no more triangulations possible from here, so we backtrack to face 2}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}[fragile]{Find All Triangulations for a Face}
-	\scriptsize
-	\textbf{Input:} $F$ = faces array, $T$ = partial solution, $i$ = current face index
-	
-	\begin{algorithmic}[1]
-		\Procedure{FindAllTriangulations}{$F, T, i$}
-		\State $n \gets$ number of vertices in face $F_i$
-		\State $T_{ir} \gets$ \Call{FindSafeRoot}{$F, i$} \Comment{Time: $O(1)$ per triangulation}
-		\State Add all chords of $T_{ir}$ to \textit{GlobalChordSet} \Comment{Time: $O(n)$}
-		\State \Call{OutputTriangulation}{$T, T_{ir}, i$}
-		\State $T_i \gets T_{ir}$
-		\For{$j = n-1$ \textbf{down to} $3$}
-		\If{$(v_1, v_j) \notin$ \textit{GlobalChordSet}}
-		\State Add chord $(v_1, v_j)$ to \textit{GlobalChordSet}
-		\State \Call{FindAllChildTriangulations}{$T_i(v_1, v_j), T, i$}
-		\State Remove chord $(v_1, v_j)$ from \textit{GlobalChordSet}
-		\EndIf
-		\EndFor
-		\State Remove all chords of $T_{ir}$ from \textit{GlobalChordSet} \Comment{Time: $O(n)$}
-		\EndProcedure
-	\end{algorithmic}
+\begin{frame}{We cant flip the (5,6) edge as (1,4) is present in the global edge set}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}[fragile]{Output Triangulation}
-	\normalsize
-	\textbf{Input:} $T$ = partial solution, $T_i$ = current face triangulation, $i$ = face index
-	
-	\begin{algorithmic}[1]
-		\Procedure{OutputTriangulation}{$T, T_i, i$}
-		\If{$i = $ \textit{totalFaces}}
-		\State \textbf{Output} complete triangulation $(T + T_i)$
-		\Else
-		\State \Call{FindAllTriangulations}{$F, T + T_i, i + 1$}
-		\EndIf
-		\EndProcedure
-	\end{algorithmic}
-	
-	\vspace{0.5cm}
-	\textbf{Note:} This recursive structure combines triangulations from individual faces to generate complete graph triangulations.
+\begin{frame}{So we backtrack to face 1}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v1) -- (f1v3);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 1}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(1,3), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
+\begin{frame}{We can flip the (1,3) edge, as its opposite pair is not in the global edge set}
 
-\begin{frame}[fragile]{Find Safe Root}
-	\scriptsize
-	\textbf{Input:} $F$ = faces array, $i$ = face index
-	
-	\begin{algorithmic}[1]
-		\Procedure{FindSafeRoot}{$F, i$}
-		\State $v_{root} \gets$ \Call{FindSafeRootVertex}{$F, i$}
-		\State Create triangulation by adding chords from $v_{root}$ to all non-neighbors
-		\State \Return root triangulation $T_{ir}$
-		\EndProcedure
-	\end{algorithmic}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\begin{algorithmic}[1]
-		\Procedure{FindSafeRootVertex}{$F, i$}
-		\State $n \gets$ number of vertices in face $F_i$
-		\State $startIndex \gets n - 1$
-		\State $endIndex \gets 0$
-		\While{$startIndex > endIndex + 1$}
-		\If{chord exists between $v_{startIndex}$ and $v_{endIndex}$ in \textit{GlobalChordSet}}
-		\State $startIndex \gets startIndex - 1$
-		\Else
-		\State $endIndex \gets endIndex + 1$
-		\EndIf
-		\EndWhile
-		\State \Return $v_{endIndex}$ as safe root vertex
-		\EndProcedure
-	\end{algorithmic}
-\end{frame}
-\begin{frame}[fragile]{Main Algorithm - Start Triangulation}
-	\normalsize
-	\textbf{Input:} $G$ = biconnected plane graph, $k$ = number of faces
-	
-	\begin{algorithmic}[1]
-		\Procedure{StartTriangulation}{$G, k$}
-		\State Label the faces as $F_1, F_2, \ldots, F_k$ arbitrarily
-		\State Initialize \textit{GlobalChordSet} $\gets \emptyset$
-		\State \Call{FindAllTriangulations}{$F, \emptyset, 1$}
-		\EndProcedure
-	\end{algorithmic}
-	
-	\vspace{0.5cm}
-	\textbf{Note:} This is the entry point of the algorithm. It processes faces sequentially, building up complete triangulations through recursive exploration.
-\end{frame}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 1}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-\section{Proofs}
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-\subsection{Proof of Completeness}
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
 
-\begin{frame}{Proof of Completeness: Pruning Strategy}
-	\textbf{Pruning Operations:}
-	\begin{itemize}
-		\item Algorithm prunes triangulations where blocking chord is a duplicate chord
-		\item Duplicate chord = chord that occurred in earlier faces
-		\item Prune entire branch when duplication detected
-	\end{itemize}
 
-	\vspace{0.3cm}
-	\textbf{Theorem (Completeness via Pruning):}
-	\begin{block}{}
-		All children of a pruned branch would have been invalid triangulations.
-	\end{block}
+	\end{figure}
 
-	\vspace{0.3cm}
-	\textbf{Key Insight:}
-	\begin{itemize}
-		\item Need to prove: blocking chord is never flipped in children
-		\item If blocking chord persists in all children, and it's a duplicate
-		\item Then all children are invalid, so pruning is safe
-	\end{itemize}
 \end{frame}
 
-\begin{frame}{Proof of Completeness: Blocking Chord Analysis}
-	\textbf{Setup:}
-	\begin{itemize}
-		\item Let chord $a$-$b$ be a blocking chord in triangulation tree node
-		\item Two points form triangles with $a$-$b$ chord on both sides:
-		      \begin{itemize}
-			      \item $c$: point on opposite side of root vertex
-			      \item $r$: point on root side
-		      \end{itemize}
-	\end{itemize}
+\begin{frame}{Now we move to face 2}
 
-	\vspace{0.3cm}
-	\textbf{Three Cases Based on Position of $r$:}
-	\begin{enumerate}
-		\item $r$ is on the left of root vertex
-		\item $r$ is on the right of root vertex
-		\item $r$ is at the root
-	\end{enumerate}
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Proof of Completeness: Case 1}
-	\textbf{Case 1: $r$ is on the left of the root vertex}
+\begin{frame}{Find the safe root of face 2}
 
-	\begin{itemize}
-		\item Flipping $a$-$b$ chord $\Rightarrow$ results in $r$-$c$ chord
-		\item Before flipping: $b$-$r$ chord was also a blocking chord
-		\item $b$-$r$ positioned to the left of $a$-$b$
-		\item Therefore: $a$-$b$ could not be leftmost blocking chord
-		\item After flip: $r$-$b$ chord still exists and remains left of $c$-$r$
-		\item Consequence: new $r$-$c$ chord cannot be leftmost blocking chord
-	\end{itemize}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Conclusion:}
-	\begin{block}{}
-		Flipping $a$-$b$ blocking chord is NOT permitted by algorithm in this case.
-	\end{block}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Proof of Completeness: Cases 2 \& 3}
-	\textbf{Case 2: $r$ is on the right of the root vertex}
-	\begin{itemize}
-		\item Flipping $a$-$b$ chord $\Rightarrow$ produces $r$-$c$ chord
-		\item However: $a$-$r$ chord is more to the left than $r$-$c$ chord
-		\item This flip is invalid according to the algorithm
-	\end{itemize}
+\begin{frame}{Root Triangulation of face 2}
 
-	\vspace{0.3cm}
-	\textbf{Case 3: $r$ is at the root}
-	\begin{itemize}
-		\item Flipping $a$-$b$ chord $\Rightarrow$ creates root-$c$ chord
-		\item This gives child triangulation's root vertex better visibility than parent
-		\item Violates the algorithm's constraints
-	\end{itemize}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Final Conclusion:}
-	\begin{block}{}
-		In all three cases, flipping a blocking chord is impossible. If blocking chord is duplicate, all children are invalid. Pruning is safe and complete.
-	\end{block}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v5) -- (f2v6);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\subsection{Existence of Valid Root Triangulation}
+\begin{frame}{Now we move to face 3}
 
-\begin{frame}{Existence of Valid Root: Definitions}
-	\textbf{Definition (Root Triangulation):}
-	\begin{block}{}
-		Root of the tree of triangulations, constructed by selecting a root vertex and adding chords from this root vertex to all non-neighboring vertices of the current face.
-	\end{block}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Definition (Safe Root Vertex):}
-	\begin{block}{}
-		A vertex from which adding chords to every other non-neighboring node will NOT create a multi-edge problem. None of the previous faces share a chord where one endpoint is the root vertex and the other is a vertex of the current face.
-	\end{block}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v5) -- (f2v6);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Existence of Valid Root: Main Theorem}
-	\textbf{Theorem (Existence of Safe Root):}
-	\begin{block}{}
-		In any face of a biconnected planar graph, there always exist at least two safe vertices that can serve as root vertices for valid triangulations.
-	\end{block}
+\begin{frame}{Find safe root of face 3}
 
-	\vspace{0.3cm}
-	\textbf{Proof Strategy:}
-	\begin{itemize}
-		\item Consider a face with $n$ vertices, numbered 1 to $n$
-		\item Since planar graph, chords can only exist in outer plane
-		\item Analyze two cases:
-		      \begin{enumerate}
-			      \item No chords from previous faces
-			      \item At least one chord from previous faces
-		      \end{enumerate}
-	\end{itemize}
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v5) -- (f2v6);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Existence of Valid Root: Case 1}
-	\textbf{Case 1: No chords from previous faces}
+\begin{frame}{Root Triangulation of face 3}
 
-	\begin{itemize}
-		\item If no chords from previous faces with both endpoints inside current face
-		\item Then all $n$ vertices are eligible to be safe vertices
-	\end{itemize}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.5cm}
-	\textbf{Simple but important base case!}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v5) -- (f2v6);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v1) -- (f3v3);
+				\draw (f3v3) -- (f3v6);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2, 4), (1,4), (5,6), (1,3), (3,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Existence of Valid Root: Case 2 Setup}
-	\textbf{Case 2: At least one chord from previous faces}
+\begin{frame}{There is no face after face 3, so its a complete triangulation}
 
-	\begin{itemize}
-		\item Suppose chord $a$-$b$ on outer plane from previous face
-		\item Both $a$ and $b$ are disqualified from being safe vertices
-		\item Due to planarity: chords cannot cross each other
-		\item Since $a$-$b$ chord exists, no chord on outer plane can overtake it
-	\end{itemize}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Consequence:}
-	\begin{itemize}
-		\item Nodes $(a+1, a+2, \ldots)$ might have connections between them
-		\item They CANNOT have chords with nodes $(a-1, \ldots, b+1)$
-		\item (Would violate planarity by crossing $a$-$b$ chord)
-	\end{itemize}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v5) -- (f2v6);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v1) -- (f3v3);
+				\draw (f3v3) -- (f3v6);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
 
-	\vspace{0.3cm}
-	\textbf{This creates $T_n$ structure:}
-	\begin{itemize}
-		\item $n$ = number of internal vertices between endpoints of constraining chord
-	\end{itemize}
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2, 4), (1,4), (5,6), (1,3), (3,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{$T_n$ Structures Analysis}
-	\textbf{Current face contains two complementary $T_n$ structures:}
-	\begin{enumerate}
-		\item Structure 1: $a, a+1, \ldots, b$
-		\item Structure 2: $a, a-1, \ldots, b$
-	\end{enumerate}
+\begin{frame}{Cant flip (3,6), because opposite pair is (1,4), already exists}
 
-	\vspace{0.3cm}
-	\textbf{Internal vertices:} numbered $1, \ldots, n-3$
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Range:}
-	\begin{itemize}
-		\item Minimum: $T_1$ (since $T_0$ would mean $a$ and $b$ are neighbors)
-		\item Maximum: $T_{n-3}$ (accounting for endpoints and complementary structure)
-	\end{itemize}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v5) -- (f2v6);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v1) -- (f3v3);
+				\draw (f3v3) -- (f3v6);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2, 4), (1,4), (5,6), (1,3), (3,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{$T_n$ Structures: Base Cases}
-	\textbf{Base Case: $T_1$}
-	\begin{itemize}
-		\item One internal vertex $c$ between $a$ and $b$
-		\item Both $a$ and $b$ are neighbors of $c$
-		\item Any chord from $c$ is impossible
-		\item Therefore: $c$ is a safe vertex 
-	\end{itemize}
+\begin{frame}{we can flip (1,3) to (2,6), its a new triangulation}
 
-	\vspace{0.3cm}
-	\textbf{Base Case: $T_2$}
-	\begin{itemize}
-		\item Vertices $c$ and $d$ between $a$ and $b$
-		\item If $c$ has a chord, it must be with $b$ (only non-neighbor)
-		      \begin{itemize}
-			      \item Creates $T_1$ structure containing $d$, making $d$ safe 
-		      \end{itemize}
-		\item If $d$ has a chord, it must be with $a$
-		      \begin{itemize}
-			      \item Creates $T_1$ structure containing $c$, making $c$ safe 
-		      \end{itemize}
-	\end{itemize}
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v5) -- (f2v6);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v2) -- (f3v6);
+				\draw (f3v3) -- (f3v6);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2, 4), (1,4), (5,6), (2,6), (3,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{$T_n$ Structures: General Case Algorithm}
-	\textbf{Finding a Safe Vertex in $T_n$ in $O(n)$ time:}
+\begin{frame}{Cant flip (3,6), because opposite pair is (2,4), already exists}
 
-	\begin{enumerate}
-		\item Consider vertex $a+1$
-		\item $a+1$ cannot create chords with neighbors $a$ and $a+2$
-		\item Possible chord partners: $\{a+3, \ldots, b\}$
-		\item Check from $b$ downward using hashset ($O(1)$ per check)
-	\end{enumerate}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Three outcomes:}
-	\begin{itemize}
-		\item If chord $(a+1, b)$ exists: Structure becomes $T_{n-1}$ with vertices $a+2, \ldots, b-1$
-		\item If chord $(a+1, b-k)$ exists for some $k > 0$: Structure becomes $T_{n-k-1}$
-		\item Else: $a+1$ is a safe vertex (no chords with any candidate) 
-	\end{itemize}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6)[fill=red] at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v5) -- (f2v6);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v2) -- (f3v6);
+				\draw (f3v3) -- (f3v6);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2, 4), (1,4), (5,6), (2,6), (3,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{$T_n$ Structures: Conclusion}
-	\textbf{In each iteration:}
-	\begin{itemize}
-		\item If chord found: $n$ decreases, eventually reaching $T_1$ or $T_2$
-		\item If no chord found: vertex is safe
-	\end{itemize}
+\begin{frame}{So, there is no more triangulations possible from here, so we backtrack to face 2}
 
-	\vspace{0.3cm}
-	\textbf{Since:}
-	\begin{itemize}
-		\item Every check reduces problem size or finds safe vertex
-		\item We've proven $T_1$ and $T_2$ contain safe vertices
-	\end{itemize}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Therefore:}
-	\begin{block}{}
-		Every $T_n$ structure contains at least one safe vertex.
-	\end{block}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
 
-	\vspace{0.3cm}
-	\textbf{Final Conclusion:}
-	\begin{itemize}
-		\item Face with no multi-edges: all $n$ vertices can be safe
-		\item Face with at least one multi-edge: at least two complementary $T_n$ structures, each with at least one safe vertex
-		\item \textbf{Every face has at least two safe vertices} 
-	\end{itemize}
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2, 4), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Completeness Summary}
-	\textbf{We have established:}
-	\begin{enumerate}
-		\item \textbf{Pruning preserves all valid triangulations}
-		      \begin{itemize}
-			      \item Blocking chords never flip in children
-			      \item Duplicate blocking chords make all children invalid
-			      \item Safe to prune entire branches
-		      \end{itemize}
+\begin{frame}{We cant flip the (5,6) edge as (1,4) is present in the global edge set}
 
-		      \vspace{0.2cm}
-		\item \textbf{Safe root triangulations always exist}
-		      \begin{itemize}
-			      \item Every face has at least two safe vertices
-			      \item Can always find valid starting triangulation
-			      \item Independent of calculation order
-		      \end{itemize}
-	\end{enumerate}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\begin{block}{Conclusion}
-		Our algorithm covers ALL valid planar triangulations of any planar biconnected graph.
-	\end{block}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node[fill=red] (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v6) -- (f2v5);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2, 4), (1,4), (5,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\subsection{Time Complexity Analysis}
+\begin{frame}{So we backtrack to face 1}
 
-\begin{frame}{Time Complexity: Main Theorem}
-	\textbf{Theorem (Amortized Linear Time Complexity):}
-	\begin{block}{}
-		The algorithm has amortized $O(1)$ time complexity per triangulation, or amortized linear time complexity overall.
-	\end{block}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Definition (Building Time):}
-	\begin{itemize}
-		\item Time required to calculate safe root and construct chords from root vertex for a single face
-	\end{itemize}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v1) -- (f1v4);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 1}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-	\vspace{0.3cm}
-	\textbf{Components:}
-	\begin{itemize}
-		\item Finding a safe vertex: $O(n)$
-		\item Adding all chords from the root: $O(n)$
-		\item Total building time for face with $n$ vertices: $O(n)$
-	\end{itemize}
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Time Complexity: Lower Bound on Triangulations}
-	\textbf{Lemma (Lower Bound on Triangulation Count):}
-	\begin{block}{}
-		For a face with $n$ vertices, there are at least $O(n)$ valid triangulations.
-	\end{block}
+\begin{frame}{We can flip (1,4) to (2,5)}
 
-	\vspace{0.3cm}
-	\textbf{Proof:}
-	\begin{itemize}
-		\item Every face has at least two safe vertices: $a$ and $c$
-		\item Can reach $c$-root triangulation from $a$-root through chord flips
-		\item Each flip produces a valid triangulation
-	\end{itemize}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Comparing $a$-root and $c$-root:}
-	\begin{itemize}
-		\item $a$-root: all chords have endpoint $a$
-		\item $c$-root: all chords have endpoint $c$
-		\item Only one chord may be shared: $a$-$c$
-		\item All other $n-4$ chords must be different
-		\item Requires $n-4$ flips $\Rightarrow$ at least $n-3$ triangulations
-	\end{itemize}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 1}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Time Complexity: Two-Face Graph}
-	\textbf{Let $n_1$ and $n_2$ be vertices in faces 1 and 2:}
+\begin{frame}{We can now move to Face 2}
 
-	\begin{align*}
-		\text{Total building time: } B & = n_1 + n_1 \cdot n_2           \\
-		\text{Total triangulations: } T & = n_1 \cdot n_2
-	\end{align*}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Since $n_2 \geq 3$:}
-	\begin{align*}
-		n_1 \cdot 1               & < n_1 \cdot n_2                   \\
-		B = n_1 + n_1 \cdot n_2   & < n_1 \cdot n_2 + n_1 \cdot n_2   \\
-		                          & = 2 \cdot n_1 \cdot n_2           \\
-		                          & = 2T
-	\end{align*}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-	\vspace{0.3cm}
-	\textbf{Total time complexity: $< 3T$}
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Time Complexity: Three-Face Graph}
-	\textbf{Let $n_1$, $n_2$, $n_3$ be vertices in three faces:}
+\begin{frame}{Find safe root of Face 2}
 
-	\begin{align*}
-		B & = n_1 + n_1 \cdot n_2 + n_1 \cdot n_2 \cdot n_3 \\
-		T & = n_1 \cdot n_2 \cdot n_3
-	\end{align*}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.2cm}
-	\textbf{From two-face case:} $n_1 + n_1 \cdot n_2 < 2 \cdot n_1 \cdot n_2$
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-	\vspace{0.2cm}
-	\textbf{Therefore:}
-	\begin{align*}
-		B & < 2 \cdot n_1 \cdot n_2 + n_1 \cdot n_2 \cdot n_3
-	\end{align*}
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-	\textbf{Since $n_3 \geq 3$, we have $2 < n_3$:}
-	\begin{align*}
-		2 \cdot n_1 \cdot n_2 & < n_1 \cdot n_2 \cdot n_3                                     \\
-		B                      & < n_1 \cdot n_2 \cdot n_3 + n_1 \cdot n_2 \cdot n_3          \\
-		                       & = 2T
-	\end{align*}
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
 
-	\textbf{Total time complexity: $< 3T$}
+
+	\end{figure}
+
 \end{frame}
 
-\begin{frame}{Time Complexity: General Case}
-	\textbf{For $k$ faces where each has at least 3 vertices:}
+\begin{frame}{Root Triangulation of Face 2}
 
-	\begin{align*}
-		B & = n_1 + n_1 \cdot n_2 + \cdots + n_1 \cdot n_2 \cdots n_k \\
-		T & = n_1 \cdot n_2 \cdots n_k
-	\end{align*}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Pattern holds by induction:}
-	\begin{align*}
-		n_1 + n_1 \cdot n_2 + \cdots + n_1 \cdot n_2 \cdots n_{k-1} & < 2 \cdot n_1 \cdot n_2 \cdots n_{k-1}
-	\end{align*}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v1) -- (f2v4);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 2}}}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{Face 3}
+		\end{subfigure}
 
-	\vspace{0.2cm}
-	\textbf{Since $n_k \geq 3$:}
-	\begin{align*}
-		2 \cdot n_1 \cdot n_2 \cdots n_{k-1} & < n_1 \cdot n_2 \cdots n_k \\
-		B                                     & < 2T
-	\end{align*}
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-	\vspace{0.2cm}
-	\textbf{Total time complexity: $< 3T$}
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
 
-	\vspace{0.3cm}
-	\begin{block}{Corollary}
-		For any biconnected planar graph, algorithm takes total time $< 3 \times$ (number of triangulations). Therefore, amortized linear time complexity.
-	\end{block}
+
+	\end{figure}
+
 \end{frame}
 
-\subsection{Space Complexity Analysis}
+\begin{frame}{Now we move to Face 3}
 
-\begin{frame}{Space Complexity}
-	\textbf{Theorem (Linear Space Complexity):}
-	\begin{block}{}
-		The algorithm has $O(n)$ space complexity, where $n$ is the total number of vertices.
-	\end{block}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\vspace{0.3cm}
-	\textbf{Proof:}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v1) -- (f2v4);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
 
-	When processing face $i$, must store information for faces $1, \ldots, i$:
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-	\begin{itemize}
-		\item \textbf{Vertex information:} $n_1 + n_2 + \cdots + n_i$ vertices
-		\item \textbf{Chord information:} For planar graph, $n-3$ chords total
-		\item \textbf{Hashset for chord lookup:} Current chord information
-	\end{itemize}
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
 
-	\vspace{0.3cm}
-	\textbf{Analysis:}
-	\begin{itemize}
-		\item Total vertices across all faces: $O(n)$
-		\item Number of chords in planar graph: $O(n)$
-		\item Hashset for current chord information: $O(n)$
-	\end{itemize}
 
-	\vspace{0.3cm}
-	\textbf{Therefore: entire algorithm uses $O(n)$ space complexity.}
+	\end{figure}
+
 \end{frame}
 
-\section{Conclusion}
+\begin{frame}{Find safe root of Face 3}
 
-\begin{frame}{Conclusion}
-	\textbf{We have rigorously proven our algorithm:}
+	\centering
+	\begin{figure}[h]
+		\centering
 
-	\begin{enumerate}
-		\item \textbf{Is Complete:}
-		      \begin{itemize}
-			      \item Finds all valid planar triangulations
-			      \item Proper pruning of invalid branches
-		      \end{itemize}
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v1) -- (f2v4);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
 
-		      \vspace{0.2cm}
-		\item \textbf{Always Has a Starting Point:}
-		      \begin{itemize}
-			      \item At least two safe root vertices exist in every face
-			      \item Independent of calculation order
-		      \end{itemize}
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
 
-		      \vspace{0.2cm}
-		\item \textbf{Is Efficient in Time:}
-		      \begin{itemize}
-			      \item Amortized $O(1)$ time per triangulation
-			      \item Amortized linear time overall
-		      \end{itemize}
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5), (1,4)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
 
-		      \vspace{0.2cm}
-		\item \textbf{Is Efficient in Space:}
-		      \begin{itemize}
-			      \item $O(n)$ space complexity
-		      \end{itemize}
-	\end{enumerate}
 
-	\vspace{0.3cm}
-	\begin{block}{}
-		These properties make the algorithm both theoretically sound and practically efficient for enumerating all planar triangulations of biconnected planar graphs.
-	\end{block}
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Root Triangulation of Face 3}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v1) -- (f2v4);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v3) -- (f3v6);
+				\draw (f3v3) -- (f3v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5), (1,4), (3,6), (1,3)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{There is no more faces, so its a complete triangulation}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v1) -- (f2v4);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v3) -- (f3v6);
+				\draw (f3v3) -- (f3v1);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5), (1,4), (3,6), (1,3)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{We can flip the (1,3) edge to (2,6) to get a different triangulation}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v1) -- (f2v4);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v3) -- (f3v6);
+				\draw (f3v2) -- (f3v6);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5), (1,4), (3,6), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{There is no more faces, so it's a complete triangulation}
+
+	\centering
+	\begin{figure}[h]
+		\centering
+
+		% ---------------- Face 1 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f1v1) at (0,0) {1};
+				\node (f1v2) at (2,0) {2};
+				\node (f1v3) at (2,2) {3};
+				\node (f1v4) at (0,2) {4};
+				\node (f1v5) at (-1,1) {5};
+				\draw (f1v1) -- (f1v2) -- (f1v3) -- (f1v4) -- (f1v5) -- (f1v1);
+				\draw (f1v2) -- (f1v4);
+				\draw (f1v2) -- (f1v5);
+			\end{tikzpicture}
+			\caption{Face 1}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 2 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node[fill=red] (f2v1) at (0,0) {1};
+				\node (f2v6) at (2,0) {6};
+				\node (f2v4) at (2,2) {4};
+				\node (f2v5) at (0,2) {5};
+				\draw (f2v1) -- (f2v6) -- (f2v4) -- (f2v5) -- (f2v1);
+				\draw (f2v1) -- (f2v4);
+			\end{tikzpicture}
+			\caption{Face 2}
+		\end{subfigure}%
+		\hspace{0.5cm}%
+		% ---------------- Face 3 ----------------
+		\begin{subfigure}[t]{0.3\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.7, every node/.style={circle, draw, fill=white, inner sep=1pt}]
+				\node (f3v1) at (0,0) {1};
+				\node (f3v2) at (2,0) {2};
+				\node[fill=red] (f3v3) at (3,2) {3};
+				\node (f3v4) at (1,3) {4};
+				\node (f3v6) at (-1,2) {6};
+				\draw (f3v1) -- (f3v2) -- (f3v3) -- (f3v4) -- (f3v6) -- (f3v1);
+				\draw (f3v3) -- (f3v6);
+				\draw (f3v2) -- (f3v6);
+			\end{tikzpicture}
+			\caption{\textbf{\textcolor{red}{Face 3}}}
+		\end{subfigure}
+
+		% ---------------- Global Edge Set Box ----------------
+		\vspace{0.5cm}
+
+		\begin{tikzpicture}
+			\node[draw, thick, minimum width=10cm, minimum height=2cm, fill=blue!5] (box) {
+				\scriptsize % <-- smaller font
+				\begin{tabular}{l}
+					Global Edge Set: \\
+					(1,2), (2,3), (3,4), (4,5), (1,5), (1,6), (4,6), \textbf{(2,4), (2,5), (1,4), (3,6), (2,6)}
+				\end{tabular}
+			};
+		\end{tikzpicture}
+
+
+	\end{figure}
+
+\end{frame}
+
+\begin{frame}{Continue....}
+	We will be continueing this process until all faces are triangulated.
 \end{frame}
 
 \end{document}
