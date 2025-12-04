@@ -1,6 +1,9 @@
 \documentclass{beamer}
 \usepackage{tikz}
 \usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
 \usetikzlibrary{arrows.meta, positioning}
 
 \usetheme{Madrid}
@@ -15,9 +18,85 @@
 
 \frame{\titlepage}
 
+\begin{frame}[fragile]{StartTriangulation}
+	\begin{algorithm}[H]
+		\caption{StartTriangulation}
+		\begin{algorithmic}[1]
+			\Procedure{StartTriangulation}{$G, k$}
+			\State Label faces as $F_1, F_2, \ldots, F_k$ arbitrarily
+			\State Initialize global chord set $S$
+			\State $T \gets \emptyset$ \Comment{Empty partial triangulation}
+			\State \Call{FindAllTriangulationsCycle}{$F, T, 0$}
+			\EndProcedure
+		\end{algorithmic}
+	\end{algorithm}
+\end{frame}
+
 % -----------------------------
-% Slide: Step-by-step graph
+\begin{frame}[fragile]{FindSafeRootTriangulation}
+	\begin{algorithm}[H]
+		\caption{FindSafeRootTriangulation}
+		\begin{algorithmic}[1]
+			\Procedure{FindSafeRootTriangulation}{$F, \text{index}$}
+			\State $\text{startIndex} \gets n - 1$
+			\State $\text{endIndex} \gets 0$
+			\While{$\text{startIndex} > \text{endIndex} + 1$}
+			\If{chord $(v_{\text{startIndex}}, v_{\text{endIndex}})$ exists in $S$}
+			\State $\text{startIndex} \gets \text{startIndex} - 1$
+			\Else
+			\State $\text{endIndex} \gets \text{endIndex} + 1$
+			\EndIf
+			\EndWhile
+			\State $v_r \gets v_{\text{endIndex}}$ \Comment{Root vertex for safe triangulation}
+			\State Build fan triangulation $T_r$ from $v_r$ as root vertex
+			\State \Return $T_r$
+			\EndProcedure
+		\end{algorithmic}
+	\end{algorithm}
+\end{frame}
+
 % -----------------------------
+\begin{frame}[fragile]{FindAllTriangulationsCycle}
+	\begin{algorithm}[H]
+		\caption{FindAllTriangulationsCycle}
+		\begin{algorithmic}[1]
+			\Procedure{FindAllTriangulationsCycle}{$F, T, i$}
+			\State $T_{i} \gets$ \Call{FindSafeRootTriangulation}{$F, i$} \Comment{$\mathcal{O}(n)$}
+			\If{$F_i$ is the last face} \Comment{All faces triangulated}
+			\State \textbf{output} $(T \cup T_i)$
+			\Else
+			\State \Call{FindAllTriangulationsCycle}{$F, T \cup T_i, i + 1$}
+			\EndIf
+			\For{$j = n-1$ \textbf{down to} $3$}
+			\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_r, v_j), T, i$}
+			\EndFor
+			\EndProcedure
+		\end{algorithmic}
+	\end{algorithm}
+\end{frame}
+
+% -----------------------------
+\begin{frame}[fragile]{FindAllChildTriangulationsCycle}
+	\begin{algorithm}[H]
+		\caption{FindAllChildTriangulationsCycle}
+		\begin{algorithmic}[1]
+			\Procedure{FindAllChildTriangulationsCycle}{$T_i, T, i$}
+			\If{$F_i$ is the last face} \Comment{All faces triangulated}
+			\State \textbf{output} $(T \cup T_i)$
+			\Else
+			\State \Call{FindAllTriangulationsCycle}{$F, T \cup T_i, i + 1$}
+			\EndIf
+			\State Let $(v_b, v_{b'})$ be the leftmost generating chord of $T_i$
+			\For{$j$ from $b$ to $n-1$}
+			\If{$(v_r, v_j)$ is a chord of $T_i$ \textbf{or} $oppositePair(v_r, v_j) \notin S$}
+			\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_r, v_j), T, i$}
+			\EndIf
+			\EndFor
+			\EndProcedure
+		\end{algorithmic}
+	\end{algorithm}
+\end{frame}
+
 \begin{frame}{A biconnected plane graph with three faces}
 
 	\centering

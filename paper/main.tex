@@ -45,7 +45,7 @@ Dhaka-1000, Bangladesh}
 \maketitle
 
 \begin{abstract}
-	We present an algorithm for generating all triangulations of a biconnected plane graph $G$ with $n$ vertices in $O(1)$ amortized time per triangulation and $O(n)$ space. Our algorithm establishes a double-layer tree structure, consisting of a recursive tree structure for each face, and generates triangulations of each face through a genealogical tree structure. The key innovation is a novel ``safe root vertex'' selection strategy that prevents the multi-edge problem inherent in biconnected graphs, extending the optimal complexity previously achievable only for triconnected graphs. To the best of our knowledge, this is the first algorithm for generating all triangulations of a biconnected plane graph with $O(1)$ amortized time complexity per triangulation. We present experimental validation on 48 diverse test cases, demonstrating the effectiveness of our approach.
+	We present an algorithm for generating all triangulations of a biconnected plane graph $G$ with $n$ vertices in $O(1)$ amortized time per triangulation and $O(n)$ space. Our algorithm establishes a double-layer tree structure, consisting of a recursive tree structure for each face, and generates triangulations of each face through a genealogical tree structure. The key innovation is a novel ``safe root vertex'' selection strategy that prevents the multi-edge problem inherent in biconnected graphs, extending the optimal complexity previously achievable only for triconnected graphs. To the best of our knowledge, this is the first algorithm for generating all triangulations of a biconnected plane graph with $O(1)$ amortized time complexity per triangulation. We present experimental validation on 35 diverse test cases, demonstrating the effectiveness of our approach.
 \end{abstract}
 
 \section{Introduction}
@@ -815,7 +815,7 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 	\begin{algorithmic}[1]
 		\Procedure{StartTriangulation}{$G, k$}
 		\State Label faces as $F_1, F_2, \ldots, F_k$ arbitrarily
-		\State Initialize global chord set $S \gets \emptyset$
+		\State Initialize global chord set $S$
 		\State $T \gets \emptyset$ \Comment{Empty partial triangulation}
 		\State \Call{FindAllTriangulationsCycle}{$F, T, 0$}
 		\EndProcedure
@@ -829,13 +829,11 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\State $r \gets$ \Call{FindSafeRootVertex}{$F, \text{index}$}
 		\State $T_r \gets \emptyset$
 		\State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$ with $v_r =$ safe root vertex
-		\State
 		\For{each vertex $v_j$ in $F$}
 		\If{$v_j$ is not adjacent to $v_r$ on cycle boundary}
 		\State Add chord $(v_r, v_j)$ to $T_r$
 		\EndIf
 		\EndFor
-		\State
 		\State \Return $T_r$
 		\EndProcedure
 	\end{algorithmic}
@@ -848,8 +846,6 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$
 		\State $\text{startIndex} \gets n - 1$
 		\State $\text{endIndex} \gets 0$
-		\State
-		\State \Comment{Two-pointer approach: narrow the search window by avoiding vertices in blocking chords}
 		\While{$\text{startIndex} > \text{endIndex} + 1$}
 		\If{chord $(v_{\text{startIndex}}, v_{\text{endIndex}})$ exists in $S$}
 		\State $\text{startIndex} \gets \text{startIndex} - 1$
@@ -857,13 +853,12 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\State $\text{endIndex} \gets \text{endIndex} + 1$
 		\EndIf
 		\EndWhile
-		\State
 		\State \Return $v_{\text{startIndex}}$ \Comment{Safe root vertex found}
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
-\textbf{Time Complexity}: $\mathcal{O}(n)$ where $n$ is the number of vertices in the face.
+\textbf{Time Complexity:} $\mathcal{O}(n)$ where $n$ is the number of vertices in the face.
 
 \begin{algorithm}[H]
 	\caption{FindAllTriangulationsCycle}
@@ -871,70 +866,48 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\Procedure{FindAllTriangulationsCycle}{$F, T, i$}
 		\State $n \gets$ number of vertices of face $F_i$
 		\State $T_{ir} \gets$ \Call{ConstructRootTriangulation}{$F, i$} \Comment{$\mathcal{O}(n)$}
-		\State
 		\State Add all chords of $T_{ir}$ to $S$ \Comment{$\mathcal{O}(n)$}
-		\State \Call{OutputTriangulation}{$T, T_{ir}, i$}
-		\State $T_i \gets T_{ir}$
-		\State
-		\State \Comment{Loop bounds: $v_n$ adjacent to $v_1$ (edge), $v_2$ adjacent to $v_1$ (edge), so consider $j \in \{3, \ldots, n-1\}$}
-		\For{$j = n-1$ \textbf{down to} $3$}
-		\State Add chord $(v_1, v_j)$ to $S$
-		\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
-		\State Remove chord $(v_1, v_j)$ from $S$
-		\EndFor
-		\State
-		\State Remove all chords of $T_{ir}$ from $S$ \Comment{$\mathcal{O}(n)$}
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-
-\textbf{Understanding the Critical Condition}: The algorithm explores a child triangulation whenever \textit{at least one} of these conditions holds:
-
-\begin{itemize}
-	\item \textbf{Case 1}: $(v_1, v_j)$ is already a chord in $T_i$ $\rightarrow$ We can perform an edge flip without conflicts
-	\item \textbf{Case 2}: $(v_1, v_j) \notin S$ $\rightarrow$ Adding this chord will not create a multi-edge
-	\item \textbf{Pruning case}: If neither holds (chord not in $T_i$ \textbf{and} chord in $S$), we skip this branch to avoid multi-edges
-\end{itemize}
-
-\begin{algorithm}[H]
-	\caption{FindAllChildTriangulationsCycle}
-	\begin{algorithmic}[1]
-		\Procedure{FindAllChildTriangulationsCycle}{$T_i, T, i$}
-		\State \Call{OutputTriangulation}{$T, T_i, i$}
-		\State
-		\If{$T_i$ has no generating chord}
-		\State \Return \Comment{Leaf node reached}
-		\EndIf
-		\State
-		\State Let $(v_b, v_{b'})$ be the leftmost generating chord of $T_i$
-		\State
-		\For{$j$ from $b$ to $n-1$} \Comment{Iterate over all vertices that could form chords with $v_1$}
-		\State \Comment{Safe to explore: existing chord OR no conflict}
-		\If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $(v_1, v_j) \notin S$}
-		\State Add chord $(v_1, v_j)$ to $S$
-		\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
-		\State Remove chord $(v_1, v_j)$ from $S$
-		\EndIf
-		\EndFor
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-
-\textbf{Key Property}: The algorithm explores \textit{all} valid branches (every $j$ satisfying the condition), ensuring completeness.
-
-
-\begin{algorithm}[H]
-	\caption{OutputTriangulation}
-	\begin{algorithmic}[1]
-		\Procedure{OutputTriangulation}{$T, T_i, i$}
 		\If{$i = k$} \Comment{All faces triangulated}
 		\State \textbf{output} $(T \cup T_i)$
 		\Else
 		\State \Call{FindAllTriangulationsCycle}{$F, T \cup T_i, i + 1$}
 		\EndIf
+		\State $T_i \gets T_{ir}$
+		\For{$j = n-1$ \textbf{down to} $3$}
+		\State Add chord $(v_1, v_j)$ to $S$
+		\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
+		\State Remove chord $(v_1, v_j)$ from $S$
+		\EndFor
+		\State Remove all chords of $T_{ir}$ from $S$ \Comment{$\mathcal{O}(n)$}
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
+
+\begin{algorithm}[H]
+	\caption{FindAllChildTriangulationsCycle}
+	\begin{algorithmic}[1]
+		\Procedure{FindAllChildTriangulationsCycle}{$T_i, T, i$}
+		\If{$i = k$} \Comment{All faces triangulated}
+		\State \textbf{output} $(T \cup T_i)$
+		\Else
+		\State \Call{FindAllTriangulationsCycle}{$F, T \cup T_i, i + 1$}
+		\EndIf
+		\If{$T_i$ has no generating chord}
+		\State \Return \Comment{Leaf node reached}
+		\EndIf
+		\State Let $(v_b, v_{b'})$ be the leftmost generating chord of $T_i$
+		\For{$j$ from $b$ to $n-1$}
+		\If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $oppositePair(v_1, v_j) \notin S$}
+		\State Add chord $(v_1, v_j)$ to $S$
+		\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
+		\State Remove chord $(v_1, v_j)$ from $S$
+		\EndIf
+		\EndFor
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+
 
 
 \noindent\rule{\textwidth}{0.4pt}
@@ -1844,7 +1817,6 @@ We implemented the algorithm in C++ and conducted comprehensive benchmarking on 
 \textbf{System Configuration:} AMD Ryzen 5 5600G (2 cores, 3.9 GHz, 8GB RAM), Linux Mint 22.2, GCC 13.3.0 with optimization flags. Implementation uses C++ STL containers including \texttt{unordered\_set} for $O(1)$ expected-time chord lookup operations.
 
 \textbf{Test Cases:} The 35 test instances include simple cycles ($C_4$--$C_{12}$), grid structures (4$\times$4, 5$\times$5), complex graphs with 11--15 vertices, quadrilaterals, and various general plane graphs. The test suite spans 6 orders of magnitude in output size, from 2 triangulations (C4 square) to over 89 million triangulations (graph V15F5).
-
 \subsection{Performance Results}
 
 Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present detailed performance metrics. Key observations:
