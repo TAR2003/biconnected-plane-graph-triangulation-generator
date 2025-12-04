@@ -810,10 +810,11 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 
 \subsection{Algorithm Specification}
 
+\subsection*{FindAllTriangulations}
 \begin{algorithm}[H]
-	\caption{StartTriangulation}
+	\caption{FindAllTriangulations}
 	\begin{algorithmic}[1]
-		\Procedure{StartTriangulation}{$G, k$}
+		\Procedure{FindAllTriangulations}{$G, k$}
 		\State Label faces as $F_1, F_2, \ldots, F_k$ arbitrarily
 		\State Initialize global chord set $S$
 		\State $T \gets \emptyset$ \Comment{Empty partial triangulation}
@@ -822,28 +823,11 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 	\end{algorithmic}
 \end{algorithm}
 
+\subsection*{FindSafeRootTriangulation}
 \begin{algorithm}[H]
-	\caption{ConstructRootTriangulation}
+	\caption{FindSafeRootTriangulation}
 	\begin{algorithmic}[1]
-		\Procedure{ConstructRootTriangulation}{$F, \text{index}$}
-		\State $r \gets$ \Call{FindSafeRootVertex}{$F, \text{index}$}
-		\State $T_r \gets \emptyset$
-		\State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$ with $v_r =$ safe root vertex
-		\For{each vertex $v_j$ in $F$}
-		\If{$v_j$ is not adjacent to $v_r$ on cycle boundary}
-		\State Add chord $(v_r, v_j)$ to $T_r$
-		\EndIf
-		\EndFor
-		\State \Return $T_r$
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}[H]
-	\caption{FindSafeRootVertex}
-	\begin{algorithmic}[1]
-		\Procedure{FindSafeRootVertex}{$F, \text{index}$}
-		\State Let $F = \langle v_1, v_2, \ldots, v_n \rangle$
+		\Procedure{FindSafeRootTriangulation}{$F, \text{index}$}
 		\State $\text{startIndex} \gets n - 1$
 		\State $\text{endIndex} \gets 0$
 		\While{$\text{startIndex} > \text{endIndex} + 1$}
@@ -853,59 +837,53 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\State $\text{endIndex} \gets \text{endIndex} + 1$
 		\EndIf
 		\EndWhile
-		\State \Return $v_{\text{startIndex}}$ \Comment{Safe root vertex found}
+        \State $v_r \gets v_{\text{endIndex}}$ \Comment{Root vertex for safe triangulation}
+		\State Build fan triangulation $T_r$ from $v_r$ as root vertex
+		\State \Return $T_r$
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
 \textbf{Time Complexity:} $\mathcal{O}(n)$ where $n$ is the number of vertices in the face.
 
+\subsection*{FindAllTriangulationsCycle}
 \begin{algorithm}[H]
 	\caption{FindAllTriangulationsCycle}
 	\begin{algorithmic}[1]
 		\Procedure{FindAllTriangulationsCycle}{$F, T, i$}
-		\State $n \gets$ number of vertices of face $F_i$
-		\State $T_{ir} \gets$ \Call{ConstructRootTriangulation}{$F, i$} \Comment{$\mathcal{O}(n)$}
-		\State Add all chords of $T_{ir}$ to $S$ \Comment{$\mathcal{O}(n)$}
-		\If{$i = k$} \Comment{All faces triangulated}
+		\State $T_{i} \gets$ \Call{FindSafeRootTriangulation}{$F, i$} \Comment{$\mathcal{O}(n)$}
+		\If{$F_i$ is the last face} \Comment{All faces triangulated}
 		\State \textbf{output} $(T \cup T_i)$
 		\Else
 		\State \Call{FindAllTriangulationsCycle}{$F, T \cup T_i, i + 1$}
 		\EndIf
-		\State $T_i \gets T_{ir}$
 		\For{$j = n-1$ \textbf{down to} $3$}
-		\State Add chord $(v_1, v_j)$ to $S$
-		\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
-		\State Remove chord $(v_1, v_j)$ from $S$
+		\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_r, v_j), T, i$}
 		\EndFor
-		\State Remove all chords of $T_{ir}$ from $S$ \Comment{$\mathcal{O}(n)$}
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
+\subsection*{FindAllChildTriangulationsCycle}
 \begin{algorithm}[H]
 	\caption{FindAllChildTriangulationsCycle}
 	\begin{algorithmic}[1]
 		\Procedure{FindAllChildTriangulationsCycle}{$T_i, T, i$}
-		\If{$i = k$} \Comment{All faces triangulated}
+		\If{$F_i$ is the last face} \Comment{All faces triangulated}
 		\State \textbf{output} $(T \cup T_i)$
 		\Else
 		\State \Call{FindAllTriangulationsCycle}{$F, T \cup T_i, i + 1$}
 		\EndIf
-		\If{$T_i$ has no generating chord}
-		\State \Return \Comment{Leaf node reached}
-		\EndIf
 		\State Let $(v_b, v_{b'})$ be the leftmost generating chord of $T_i$
 		\For{$j$ from $b$ to $n-1$}
-		\If{$(v_1, v_j)$ is a chord of $T_i$ \textbf{or} $oppositePair(v_1, v_j) \notin S$}
-		\State Add chord $(v_1, v_j)$ to $S$
-		\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_1, v_j), T, i$}
-		\State Remove chord $(v_1, v_j)$ from $S$
+		\If{$(v_r, v_j)$ is a chord of $T_i$ \textbf{or} $oppositePair(v_r, v_j) \notin S$}
+		\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_r, v_j), T, i$}
 		\EndIf
 		\EndFor
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
+
 
 
 
@@ -1317,26 +1295,6 @@ Therefore, in both cases, there is at least one safe root vertex in the $T_k$ st
 Now we already know there are at least two T structures in any biconnected plane graph. Therefore, there are at least two safe root vertices in any biconnected plane graph.
 \end{proof}
 
-\subsection{Order-Independence of Face Processing}
-
-Our algorithm processes faces in arbitrary order (Algorithm~1, line~2). We prove this does not affect completeness.
-
-\begin{theorem}[Order-Independence]
-	\label{thm:order_independence}
-	For any biconnected plane graph $G$ with faces $F_1, F_2, \ldots, F_k$ and any valid triangulation $T^*$, if the algorithm generates $T^*$ under processing order $\pi$, it generates $T^*$ under any other order $\sigma$.
-\end{theorem}
-
-\begin{proof}[Proof Sketch]
-	Any valid triangulation $T^* = (T^*_1, T^*_2, \ldots, T^*_k)$ satisfies pairwise chord compatibility: $\text{Chords}(T^*_i) \cap \text{Chords}(T^*_j) = \emptyset$ for all $i \neq j$. This property is symmetric and order-independent.
-
-	Under any processing order, when face $F_i$ is processed with global constraint set $S$ (chords from previously processed faces), the local genealogical tree rooted at safe vertex $r_i$ (Theorem~\ref{thm:safe_root_exists}) contains all triangulations compatible with $S$. Since $T^*$ is valid, $T^*_i$ contains no chord conflicting with any $T^*_j$ ($j \neq i$), so $T^*_i$ appears in the genealogical tree regardless of which faces were processed before $F_i$. The DFS explores all combinations, ensuring $T^*$ is generated under any ordering.
-\end{proof}
-
-\begin{remark}
-	Implementations may use any face ordering: canonical (by vertex count), BFS/DFS from outer face, or optimized (fewest expected triangulations first).
-\end{remark}
-
-
 \section{Complexity Analysis}
 \label{sec:complexity}
 
@@ -1402,7 +1360,7 @@ Before proceeding to the complexity analysis, we establish a fundamental lower b
 				\draw[draw=red, line width=2pt] (a3) -- (a5);
 				\draw[draw=red, line width=2pt] (a6) -- (a3);
 			\end{tikzpicture}
-			\caption{Child Triangulation }
+			\caption{Triangulation with vertex 3 as root}
 			\label{fig:hex1}
 		\end{subfigure}
 		\hfill
@@ -1424,7 +1382,7 @@ Before proceeding to the complexity analysis, we establish a fundamental lower b
 				\draw[draw=red, line width=2pt] (b1) -- (b4);
 				\draw[draw=red, line width=2pt] (b1) -- (b5);
 			\end{tikzpicture}
-			\caption{Parent Triangulation}
+			\caption{Triangulation with vertex 1 as root}
 			\label{fig:hex2}
 		\end{subfigure}
 		\caption{The path difference from one root configurationq to another}
@@ -1448,7 +1406,7 @@ Before proceeding to the complexity analysis, we establish a fundamental lower b
 	\begin{itemize}
 		\item $n_i = 3$ (triangle): Already triangulated, $d_i = 1 \geq 0$ \checkmark
 		\item $n_i = 4$ (quadrilateral): Two diagonals, $d_i \geq 1$ (often $d_i = 2$)
-		\item $n_i = 5$ (pentagon): $d_i \geq 2$ (often $d_i \geq 5$ in practice)
+		\item $n_i = 5$ (pentagon): $d_i \geq 2$ (often $d_i \geq 2$ in practice)
 		\item $n_i = 6$ (hexagon): $d_i \geq 3$ (often $d_i \geq 4$ in practice)
 	\end{itemize}
 

@@ -18,11 +18,17 @@
 
 \frame{\titlepage}
 
-\begin{frame}[fragile]{StartTriangulation}
+\begin{frame}
+	\begin{abstract}
+		First we will show the higher level pseudocode of our algorithm for enumerating all possible triangulations of a biconnected plane graph. Then we will illustrate the steps of the algorithm with an example graph.
+	\end{abstract}
+\end{frame}
+
+\begin{frame}[fragile]{FindAllTriangulations}
 	\begin{algorithm}[H]
-		\caption{StartTriangulation}
+		\caption{FindAllTriangulations}
 		\begin{algorithmic}[1]
-			\Procedure{StartTriangulation}{$G, k$}
+			\Procedure{FindAllTriangulations}{$G, k$}
 			\State Label faces as $F_1, F_2, \ldots, F_k$ arbitrarily
 			\State Initialize global chord set $S$
 			\State $T \gets \emptyset$ \Comment{Empty partial triangulation}
@@ -2970,7 +2976,7 @@
 \end{frame}
 
 \begin{frame}{Continue....}
-	We will be continuing this process until all faces are triangulated.
+	We will be continuing this process until all possible triangulations are found.
 \end{frame}
 
 \end{document}
