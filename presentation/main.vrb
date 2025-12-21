@@ -10,7 +10,7 @@
 			\EndIf
 			\State Let $(v_b, v_{b'})$ be the leftmost generating chord of $T_i$
 			\For{$j$ from $b$ to $n-1$}
-			\If{$(v_r, v_j)$ is a chord of $T_i$ \textbf{or} $oppositePair(v_r, v_j) \notin S$}
+			\If{$(v_r, v_j)$ is a chord of $T_i$ \textbf{and} $oppositePair(v_r, v_j) \notin S$}
 			\State \Call{FindAllChildTriangulationsCycle}{$T_i(v_r, v_j), T, i$}
 			\EndIf
 			\EndFor
