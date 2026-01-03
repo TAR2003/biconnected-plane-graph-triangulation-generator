@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.12.23)  3 JAN 2026 14:21
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2025.12.23)  3 JAN 2026 15:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -798,12 +798,12 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 LaTeX Warning: Reference `def:elementary_ops' on page 16 undefined on input line 1494.
 
-[16] [17] [18] [19] [20] [21]
-Overfull \hbox (15.64922pt too wide) in paragraph at lines 1796--1797
+[16] [17] [18] [19] [20]
+Overfull \hbox (15.64922pt too wide) in paragraph at lines 1778--1779
 \OT1/cmr/m/n/12 verse bi-con-nected plane graphs. Ex-e-cu-tion time was mea-sured us-ing \OT1/cmtt/m/n/12 std::chrono::steady[]clock
  []
 
-[22] [23] [24] (./main.bbl [25]) [26] (./main.aux)
+[21] [22] [23] (./main.bbl) [24] (./main.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -813,21 +813,21 @@ L3 programming layer <2024-01-22>
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 0F792A18BEB2728108A6190A73FCF057;5321.
+(rerunfilecheck)             Checksum: 592CAEA55562B08449CDE782C0379BD7;5237.
  ) 
 Here is how much of TeX's memory you used:
- 36547 strings out of 474222
- 853604 string characters out of 5748732
- 1955975 words of memory out of 5000000
- 58071 multiletter control sequences out of 15000+600000
+ 36479 strings out of 474222
+ 852533 string characters out of 5748732
+ 1957975 words of memory out of 5000000
+ 58007 multiletter control sequences out of 15000+600000
  573068 words of font info for 92 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,15n,93p,950b,1080s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb>
-Output written on main.pdf (26 pages, 400719 bytes).
+Output written on main.pdf (24 pages, 393418 bytes).
 PDF statistics:
- 599 PDF objects out of 1000 (max. 8388607)
- 506 compressed objects within 6 object streams
- 140 named destinations out of 1000 (max. 500000)
+ 586 PDF objects out of 1000 (max. 8388607)
+ 496 compressed objects within 5 object streams
+ 136 named destinations out of 1000 (max. 500000)
  268 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1645,51 +1645,51 @@ The lower bound $d_i \geq n_i - 3$ (Lemma~\ref{lem:min_triangulations}) has been
 %% FIGURE 14: Space Complexity Illustration
 %% Section 5.2 - Space Complexity
 %% ============================================================
-\begin{figure}[htbp]
-	\centering
-	\begin{tikzpicture}[scale=1.1]
+% \begin{figure}[htbp]
+% 	\centering
+% 	\begin{tikzpicture}[scale=1.1]
 
-		% Memory layout visualization
-		\node[draw=none, font=\small, align=left] at (-2, 5) {\textbf{Memory Usage:}};
+% 		% Memory layout visualization
+% 		\node[draw=none, font=\small, align=left] at (-2, 5) {\textbf{Memory Usage:}};
 
-		% Component 1: Vertex/Face data
-		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=blue!15, font=\small]
-		(comp1) at (3, 4) {Vertex \& Face Information: $O(n)$};
+% 		% Component 1: Vertex/Face data
+% 		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=blue!15, font=\small]
+% 		(comp1) at (3, 4) {Vertex \& Face Information: $O(n)$};
 
-		% Component 2: Global chord set
-		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=green!15, font=\small]
-		(comp2) at (3, 2.5) {Global Chord Set $S$: $O(n)$ (at most $3n-6$ chords)};
+% 		% Component 2: Global chord set
+% 		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=green!15, font=\small]
+% 		(comp2) at (3, 2.5) {Global Chord Set $S$: $O(n)$ (at most $3n-6$ chords)};
 
-		% Component 3: Recursion stack
-		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=orange!15, font=\small]
-		(comp3) at (3, 1) {Recursion Stack: $O(k) = O(n)$ ($k \leq 2n-4$ faces)};
+% 		% Component 3: Recursion stack
+% 		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=orange!15, font=\small]
+% 		(comp3) at (3, 1) {Recursion Stack: $O(k) = O(n)$ ($k \leq 2n-4$ faces)};
 
-		% Component 4: Current triangulation
-		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=yellow!15, font=\small]
-		(comp4) at (3, -0.5) {Current Triangulation: $O(n)$};
+% 		% Component 4: Current triangulation
+% 		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=yellow!15, font=\small]
+% 		(comp4) at (3, -0.5) {Current Triangulation: $O(n)$};
 
-		% Total
-		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=red!20, font=\bfseries]
-		(total) at (3, -2.5) {Total Space: $O(n)$};
+% 		% Total
+% 		\node[draw, rectangle, minimum width=8cm, minimum height=1cm, fill=red!20, font=\bfseries]
+% 		(total) at (3, -2.5) {Total Space: $O(n)$};
 
-		% Arrow annotations
-		\draw[-latex, thick] (comp1.south) -- (comp2.north);
-		\draw[-latex, thick] (comp2.south) -- (comp3.north);
-		\draw[-latex, thick] (comp3.south) -- (comp4.north);
-		\draw[-latex, thick, red] (comp4.south) -- (total.north);
+% 		% Arrow annotations
+% 		\draw[-latex, thick] (comp1.south) -- (comp2.north);
+% 		\draw[-latex, thick] (comp2.south) -- (comp3.north);
+% 		\draw[-latex, thick] (comp3.south) -- (comp4.north);
+% 		\draw[-latex, thick, red] (comp4.south) -- (total.north);
 
-		% Side annotation
-		\node[draw=none, font=\small, align=left] at (9, 1.5)
-		{All components\\linear in $n$\\
-			\\
-			Space independent\\of output size $T$\\
-			\\
-			No explicit storage\\of triangulations};
+% 		% Side annotation
+% 		\node[draw=none, font=\small, align=left] at (9, 1.5)
+% 		{All components\\linear in $n$\\
+% 			\\
+% 			Space independent\\of output size $T$\\
+% 			\\
+% 			No explicit storage\\of triangulations};
 
-	\end{tikzpicture}
-	\caption{Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them.}
-	\label{fig:space_complexity}
-\end{figure}
+% 	\end{tikzpicture}
+% 	\caption{Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them.}
+% 	\label{fig:space_complexity}
+% \end{figure}
 
 \subsection{Complexity Summary}
 
@@ -1758,34 +1758,16 @@ Table~\ref{tab:complexity_summary} provides a comprehensive summary of all time 
 
 	\item The $O(n)$ space complexity is optimal since we must store the input graph itself, which requires $\Theta(n)$ space. Importantly, space usage is independent of the number of triangulations $T$, which can be exponential in $n$.
 
-
-	\item For graphs with $k$ faces where each face has $\Omega(n/k)$ vertices, the total number of triangulations grows exponentially: $T = \prod_{i=1}^{k} d_i \geq \prod_{i=1}^{k} (n_i - 3) = \exp(\Omega(k \log(n/k)))$. The building cost $B = O(T)$ shows perfect amortization---preprocessing work grows linearly with the exponential output size.
 \end{itemize}
 
 \begin{remark}[Comparison with Related Work]
 	Our result improves upon the reverse search approach~\cite{avis1996}, which typically requires $O(n^2)$ time per solution for triangulation enumeration problems. While the Parvez-Rahman-Nakano algorithm~\cite{parvez2011} achieves $O(1)$ amortized time for triconnected plane graphs, our extension to biconnected plane graphs---a strictly more general class---maintains the same optimal complexity through the novel techniques of safe root selection, local genealogical trees, and dynamic global chord tracking.
 \end{remark}
 
-\begin{remark}[Optimality of $O(1)$ Amortized Time]
-	We conjecture that $O(1)$ amortized time per triangulation is optimal for this problem. The lower bound argument proceeds as follows: Since each triangulation requires $\Omega(n)$ bits to represent (specifying which of the potential $O(n^2)$ chords are present), and we must output $T$ triangulations, any algorithm requires $\Omega(nT)$ total time. This gives an $\Omega(n)$ lower bound per triangulation in the worst case.
 
-	However, amortized complexity allows preprocessing and sharing work across outputs. Our algorithm achieves $O(1)$ amortized time by:
-	\begin{itemize}
-		\item Generating triangulations in a tree structure where each child differs from its parent by a single $O(1)$ edge flip
-		\item Amortizing the $O(n)$ cost of building the initial root triangulation across the $\Omega(n)$ descendants
-		\item Using $O(1)$ hash table operations for chord conflict detection
-	\end{itemize}
-
-	Achieving $o(1)$ amortized time appears impossible without exploiting special structure beyond biconnectivity. For instance, sublinear amortized time would require generating multiple triangulations with a single operation, which contradicts the tree structure of the solution space where each triangulation has a unique parent (except the root).
-\end{remark}
 
 \begin{remark}[Practical Considerations]
-	While our theoretical analysis uses hash sets with expected $O(1)$ operations, the practical performance can vary based on implementation details:
-	\begin{itemize}
-		\item \textbf{Hash function choice:} For edge/chord hashing, a simple function like $h((u,v)) = (p_1 \cdot \min(u,v) + p_2 \cdot \max(u,v)) \bmod M$ with appropriate primes $p_1, p_2$ and table size $M$ works well in practice.
-		\item \textbf{Load factor:} Maintaining a load factor below 0.75 ensures good expected performance with reasonable space overhead.
-		\item \textbf{Collision resolution:} Chaining with linked lists or open addressing with linear probing both perform well for the typical workload of our algorithm.
-	\end{itemize}
+	While our theoretical analysis uses hash sets with expected $O(1)$ operations, the practical performance can vary based on implementation details.
 	Our experimental implementation (Section~\ref{sec:experiments}) uses Java's built-in \texttt{HashSet} with default settings, achieving practical performance that closely matches the theoretical predictions.
 \end{remark}
 \section{Experimental Validation}
@@ -1892,7 +1874,7 @@ These experimental results confirm both theoretical complexity bounds in practic
 
 The implementation efficiently handles graphs ranging from simple 4-vertex cycles to complex 25-vertex grids generating tens of millions of triangulations, validating the practical efficiency of our approach.
 
-\section{Conclusion and Future Work}
+\section{Conclusions}
 \label{sec:conclusion}
 
 We have presented the first algorithm for generating all triangulations of biconnected plane graphs with constant amortized time complexity. Our algorithm extends the elegant tree-of-triangulations framework of Parvez, Rahman, and Nakano~\cite{parvez2011} from triconnected to biconnected graphs by introducing safe root selection and local genealogical trees.
