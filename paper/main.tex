@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿\documentclass[12pt,a4paper]{article}
+﻿﻿﻿﻿﻿﻿﻿﻿\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -1226,27 +1226,58 @@ To find a safe root, we use a two-pointer technique. We start with two pointers:
 	Now in the case for $T_1$ with figure \ref{fig:T1_24}, vertex 3 becomes a safe root vertex. In the case for $T_1$ with figure \ref{fig:T1_13}, vertex 2 becomes a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_1$ structure.
 
 	Now we proceed with induction. We assume that for all $T_i$ structures where $i < k$, there is at least one safe root vertex. Now we prove it for the $T_k$ structure.
-
 	\begin{figure}[h]
 		\centering
-		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-			% Vertices
-			\node (v1) at (0,0) {$v_i$};
-			\node (v2) at (2,0) {$v_{i+1}$};
-			\node (v3) at (4,0) {$v_{i+2}$};
-			\node (vall) at (6,0) {...};
-			\node (v4) at (8,0) {$v_{j-1}$};
-			\node (v5) at (10,0) {$v_j$};
+		% First Subfigure (Left)
+		\begin{subfigure}[b]{0.4\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.8, every node/.style={circle, draw, fill=white, inner sep=1.5pt}]
+				% Vertices
+				\node (v1) at (0,0) {$v_i$};
+				\node (v2) at (1.5,0) {$v_{i+1}$};
+				\node (v3) at (3,0) {$v_{i+2}$};
+				\node (vall) at (4.5,0) {...};
+				\node (v4) at (6,0) {$v_{j-1}$};
+				\node (v5) at (7.5,0) {$v_j$};
 
-			% Path edges
-			\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
+				% Path edges
+				\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
 
-			% Curved edge from v1 to v4 (above the path)
-			\draw[thick, bend left=60] (v1) to (v5);
-		\end{tikzpicture}
+				% Curved edges
+				\draw[thick, bend left=60] (v1) to (v5);
+				\draw[red, thick, dotted, bend left=60] (v2) to (vall);
+				\draw[red, thick, dotted, bend left=60] (v2) to (v4);
+				\draw[red, thick, dotted, bend left=60] (v2) to (v5);
+			\end{tikzpicture}
+			\caption{new $T_m$ ($m < k$)}
+			\label{fig:firstcase}
+		\end{subfigure}
+		\hfill
+		% Second Subfigure (Right)
+		\begin{subfigure}[b]{0.4\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=0.8, every node/.style={circle, draw, fill=white, inner sep=1.5pt}]
+				% Vertices
+				\node (v1) at (0,0) {$v_i$};
+				\node (v2) at (1.5,0) {$v_{i+1}$};
+				\node (v3) at (3,0) {$v_{i+2}$};
+				\node (vall) at (4.5,0) {...};
+				\node (v4) at (6,0) {$v_{j-1}$};
+				\node (v5) at (7.5,0) {$v_j$};
 
-		\caption{$T_k$ structure}
-		\label{fig:Tk_structure}
+				% Path edges
+				\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
+
+				% Curved edge
+				\draw[thick, bend left=60] (v1) to (v5);
+			\end{tikzpicture}
+			\caption{$T_k$ structure}
+			\label{fig:Tk_structure}
+		\end{subfigure}
+		
+
+		\caption{Comparison of $T_k$ and $T_m$ structures.}
+		\label{fig:merged_structures}
 	\end{figure}
 
 	Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chord with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, as all other vertices are its neighbors. There are two possibilities:
@@ -1254,34 +1285,10 @@ To find a safe root, we use a two-pointer technique. We start with two pointers:
 		\item Vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$.
 		\item Vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$.
 	\end{enumerate}
-	\begin{figure}[h]
-		\centering
-		\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-			% Vertices
-			\node (v1) at (0,0) {$v_i$};
-			\node (v2) at (2,0) {$v_{i+1}$};
-			\node (v3) at (4,0) {$v_{i+2}$};
-			\node (vall) at (6,0) {...};
-			\node (v4) at (8,0) {$v_{j-1}$};
-			\node (v5) at (10,0) {$v_j$};
 
-			% Path edges
-			\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
+	In the case shown in Figure~\ref{fig:firstcase}, if vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, then it creates a new $T_m$ structure where $m < k$, as at least one vertex is removed from the original $T_k$ structure. By our induction hypothesis, this new $T_m$ structure has at least one safe root vertex.
 
-			% Curved edge from v1 to v4 (above the path)
-			\draw[thick, bend left=60] (v1) to (v5);
-			\draw[red, thick, dotted, bend left=60] (v2) to (vall);
-			\draw[red, thick, dotted, bend left=60] (v2) to (v4);
-			\draw[red, thick, dotted, bend left=60] (v2) to (v5);
-
-		\end{tikzpicture}
-
-		\caption{new $T_m$ structure, where $m < k$}
-		\label{fig:firstcase}
-	\end{figure}
-	In the first case shown in Figure~\ref{fig:firstcase}, if vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, then it creates a new $T_m$ structure where $m < k$, as at least one vertex is removed from the original $T_k$ structure. By our induction hypothesis, this new $T_m$ structure has at least one safe root vertex.
-
-	In the second case shown in Figure~\ref{fig:Tk_structure}, if vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, then vertex $v_{i+1}$ itself is a safe root vertex, as it does not have any chords with any of its non-neighboring vertices.
+	In the case shown in Figure~\ref{fig:Tk_structure}, if vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, then vertex $v_{i+1}$ itself is a safe root vertex, as it does not have any chords with any of its non-neighboring vertices.
 
 	Therefore, in both cases, there is at least one safe root vertex in the $T_k$ structure. By the principle of mathematical induction, we conclude that for all $T_n$ structures, there is always at least one safe root vertex.
 
@@ -1491,7 +1498,7 @@ We analyze the time complexity by counting two types of elementary operations:
 	\item \textbf{Flipping operations ($F$):} Edge flips when generating child triangulations in local genealogical trees
 \end{enumerate}
 
-We prove $B = O(T)$ and $F = O(T)$ by induction on the number of faces. Since each operation takes $O(1)$ time (Definition~\ref{def:elementary_ops}), this establishes $O(T)$ total time and $O(1)$ amortized time per triangulation.
+We prove $B = O(T)$ and $F = O(T)$ by induction on the number of faces. Since each operation takes $O(1)$ time, this establishes $O(T)$ total time and $O(1)$ amortized time per triangulation.
 
 \begin{theorem}[Amortized Constant Time]
 	\label{thm:time_complexity}
