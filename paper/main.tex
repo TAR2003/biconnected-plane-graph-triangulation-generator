@@ -1,4 +1,4 @@
-﻿﻿\documentclass[12pt,a4paper]{article}
+﻿﻿﻿﻿﻿﻿\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -18,7 +18,6 @@
 \usepackage{float}
 \usepackage{asymptote}
 \usetikzlibrary{arrows.meta}
-
 
 
 \geometry{margin=0.8in}
@@ -59,20 +58,20 @@ There has been substantial research on algorithms for generating triangulations~
 Table~\ref{tab:comparison} summarizes the key differences between existing algorithms and our contribution. The reverse search approach~\cite{avis1996} typically requires $O(n^2)$ or higher time per solution due to parent identification overhead. While Parvez et al.~\cite{parvez2011} achieved optimal complexity for triconnected graphs, their approach fails for biconnected graphs due to separation pairs. Our algorithm extends their optimal complexity to the strictly more general class of biconnected plane graphs.
 
 \begin{table}[h]
-\centering
-\caption{Comparison of triangulation enumeration algorithms}
-\label{tab:comparison}
-\begin{tabular}{|l|l|c|c|}
-\hline
-\textbf{Algorithm} & \textbf{Graph Class} & \textbf{Time/Triang.} & \textbf{Space} \\
-\hline
-Reverse Search~\cite{avis1996} & General & $O(n^2)$ or worse & $O(n)$ \\
-Li-Nakano~\cite{li2001} & Biconnected & $O(r^2 n)$ & --- \\
-Nakano (improved) & Biconnected & $O(rn)$ & --- \\
-Parvez et al.~\cite{parvez2011} & Triconnected & $O(1)$ amortized & $O(n)$ \\
-\textbf{This work} & \textbf{Biconnected} & $\mathbf{O(1)}$ \textbf{amortized} & $\mathbf{O(n)}$ \\
-\hline
-\end{tabular}
+	\centering
+	\caption{Comparison of triangulation enumeration algorithms}
+	\label{tab:comparison}
+	\begin{tabular}{|l|l|c|c|}
+		\hline
+		\textbf{Algorithm}              & \textbf{Graph Class} & \textbf{Time/Triang.}              & \textbf{Space}  \\
+		\hline
+		Reverse Search~\cite{avis1996}  & General              & $O(n^2)$ or worse                  & $O(n)$          \\
+		Li-Nakano~\cite{li2001}         & Biconnected          & $O(r^2 n)$                         & ---             \\
+		Nakano (improved)               & Biconnected          & $O(rn)$                            & ---             \\
+		Parvez et al.~\cite{parvez2011} & Triconnected         & $O(1)$ amortized                   & $O(n)$          \\
+		\textbf{This work}              & \textbf{Biconnected} & $\mathbf{O(1)}$ \textbf{amortized} & $\mathbf{O(n)}$ \\
+		\hline
+	\end{tabular}
 \end{table}
 
 The algorithm for generating all triangulations of a triconnected plane graph can be applied to biconnected plane graphs as well, but a major problem arises: the ``multi-edge'' problem. In triconnected graphs~\cite{hopcroft1974}, there cannot be any separation pairs, meaning there do not exist two vertices whose removal can disconnect the remaining graph.
@@ -82,74 +81,74 @@ Biconnected graphs arise naturally in many practical applications, including VLS
 
 
 \begin{figure}[h!]
-    \centering
-    \begin{asy}
-    size(300);
+	\centering
+	\begin{asy}
+		size(300);
 
-    // ---------------- Settings ----------------
-    real nodeRadius = 0.25;
-    pen nodePen = black+1;
-    pen redNodePen = red+1;
-    pair offset = (6,0); // horizontal shift for right graph
+		// ---------------- Settings ----------------
+		real nodeRadius = 0.25;
+		pen nodePen = black+1;
+		pen redNodePen = red+1;
+		pair offset = (6,0); // horizontal shift for right graph
 
-    // Function to draw a node
-    void drawNode(pair pos, string label, pen p = nodePen) {
-        draw(circle(pos, nodeRadius), p);
-        label(label, pos);
-    }
+		// Function to draw a node
+		void drawNode(pair pos, string label, pen p = nodePen) {
+				draw(circle(pos, nodeRadius), p);
+				label(label, pos);
+			}
 
-    // Function to draw an edge stopping at node borders
-    void drawEdge(pair A, pair B, real r = nodeRadius) {
-        pair dir = (B - A)/abs(B - A); // unit vector
-        draw(A + r*dir -- B - r*dir);
-    }
+		// Function to draw an edge stopping at node borders
+		void drawEdge(pair A, pair B, real r = nodeRadius) {
+				pair dir = (B - A)/abs(B - A); // unit vector
+				draw(A + r*dir -- B - r*dir);
+			}
 
-    // ---------------- Left Graph ----------------
-    pair[] leftNodes = {
-        (0,2),  // 1
-        (0,6),  // 2
-        (2,6),  // 3
-        (4,6),  // 4
-        (4,4),  // 5
-        (4,2),  // 6
-        (2,2),  // 7
-        (2,4)   // 8
-    };
+		// ---------------- Left Graph ----------------
+		pair[] leftNodes = {
+		(0,2),  // 1
+		(0,6),  // 2
+		(2,6),  // 3
+		(4,6),  // 4
+		(4,4),  // 5
+		(4,2),  // 6
+		(2,2),  // 7
+		(2,4)   // 8
+		};
 
-    int[][] leftEdges = {
-        {0,1}, {1,2}, {2,3}, {3,4}, {4,5}, {5,6}, {6,7}, {0,6}, {2,7}
-    };
+		int[][] leftEdges = {
+		{0,1}, {1,2}, {2,3}, {3,4}, {4,5}, {5,6}, {6,7}, {0,6}, {2,7}
+		};
 
-    // Draw edges
-    for(int i=0; i<leftEdges.length; ++i)
-        drawEdge(leftNodes[leftEdges[i][0]], leftNodes[leftEdges[i][1]]);
+		// Draw edges
+		for(int i=0; i<leftEdges.length; ++i)
+		drawEdge(leftNodes[leftEdges[i][0]], leftNodes[leftEdges[i][1]]);
 
-    // Draw nodes
-    for(int i=0; i<leftNodes.length; ++i)
-        drawNode(leftNodes[i], string(i+1));
+		// Draw nodes
+		for(int i=0; i<leftNodes.length; ++i)
+		drawNode(leftNodes[i], string(i+1));
 
-    // ---------------- Right Graph ----------------
-    pair[] rightNodes = new pair[8];
-    for(int i=0;i<8;++i) rightNodes[i] = leftNodes[i] + offset;
+		// ---------------- Right Graph ----------------
+		pair[] rightNodes = new pair[8];
+		for(int i=0;i<8;++i) rightNodes[i] = leftNodes[i] + offset;
 
-    int[][] rightEdges = {
-        {0,1}, {3,4}, {4,5}
-    };
+		int[][] rightEdges = {
+		{0,1}, {3,4}, {4,5}
+		};
 
-    // Draw edges
-    for(int i=0; i<rightEdges.length; ++i)
-        drawEdge(rightNodes[rightEdges[i][0]], rightNodes[rightEdges[i][1]]);
+		// Draw edges
+		for(int i=0; i<rightEdges.length; ++i)
+		drawEdge(rightNodes[rightEdges[i][0]], rightNodes[rightEdges[i][1]]);
 
-    // Draw nodes with red highlights for 3 and 7
-    for(int i=0; i<rightNodes.length; ++i) {
-        if(i==2 || i==6)
-            drawNode(rightNodes[i], string(i+1), redNodePen);
-        else
-            drawNode(rightNodes[i], string(i+1));
-    }
-    \end{asy}
-    \caption{Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}.}
-    \label{fig:separationpair}
+		// Draw nodes with red highlights for 3 and 7
+		for(int i=0; i<rightNodes.length; ++i) {
+				if(i==2 || i==6)
+				drawNode(rightNodes[i], string(i+1), redNodePen);
+				else
+				drawNode(rightNodes[i], string(i+1));
+			}
+	\end{asy}
+	\caption{Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}.}
+	\label{fig:separationpair}
 \end{figure}
 
 
@@ -160,68 +159,68 @@ In the biconnected graph shown in Figure~\ref{fig:separationpair}, removing vert
 In the graph, the $(3,7)$ separation pair can have a chord between them in more than one way.
 
 \begin{figure}[h]
-    \centering
-    \begin{asy}
-    size(150);
+	\centering
+	\begin{asy}
+		size(150);
 
-    // ---------------- Settings ----------------
-    real nodeRadius = 0.25;
-    pen nodePen = black+1;
-    pen redEdgePen = red + 1.5bp + dotted;
+		// ---------------- Settings ----------------
+		real nodeRadius = 0.25;
+		pen nodePen = black+1;
+		pen redEdgePen = red + 1.5bp + dotted;
 
-    // Function to draw a node
-    void drawNode(pair pos, string label, pen p = nodePen) {
-        draw(circle(pos, nodeRadius), p);
-        label(label, pos);
-    }
+		// Function to draw a node
+		void drawNode(pair pos, string label, pen p = nodePen) {
+				draw(circle(pos, nodeRadius), p);
+				label(label, pos);
+			}
 
-    // Function to draw edges stopping at node borders
-    void drawEdge(pair A, pair B, real r = nodeRadius, pen p = black) {
-        pair dir = (B - A)/abs(B - A);
-        draw(A + r*dir -- B - r*dir, p);
-    }
+		// Function to draw edges stopping at node borders
+		void drawEdge(pair A, pair B, real r = nodeRadius, pen p = black) {
+				pair dir = (B - A)/abs(B - A);
+				draw(A + r*dir -- B - r*dir, p);
+			}
 
-    // ---------------- Nodes ----------------
-    pair[] nodes = {
-        (0,2),  // 1
-        (0,6),  // 2
-        (2,6),  // 3
-        (4,6),  // 4
-        (4,4),  // 5
-        (4,2),  // 6
-        (2,2),  // 7
-        (2,4)   // 8
-    };
+		// ---------------- Nodes ----------------
+		pair[] nodes = {
+		(0,2),  // 1
+		(0,6),  // 2
+		(2,6),  // 3
+		(4,6),  // 4
+		(4,4),  // 5
+		(4,2),  // 6
+		(2,2),  // 7
+		(2,4)   // 8
+		};
 
-    // Draw nodes
-    for(int i=0; i<nodes.length; ++i)
-        drawNode(nodes[i], string(i+1));
+		// Draw nodes
+		for(int i=0; i<nodes.length; ++i)
+		drawNode(nodes[i], string(i+1));
 
-    // Text labels F1 and F2
-    label("$F_1$", (1,4));
-    label("$F_2$", (3,4));
+		// Text labels F1 and F2
+		label("$F_1$", (1,4));
+		label("$F_2$", (3,4));
 
-    // ---------------- Edges ----------------
-    int[][] edges = {
-        {0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{6,7},{0,6},{2,7}
-    };
+		// ---------------- Edges ----------------
+		int[][] edges = {
+		{0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{6,7},{0,6},{2,7}
+		};
 
-    for(int i=0;i<edges.length;++i)
-        drawEdge(nodes[edges[i][0]], nodes[edges[i][1]]);
+		for(int i=0;i<edges.length;++i)
+		drawEdge(nodes[edges[i][0]], nodes[edges[i][1]]);
 
-    // ---------------- Curved red dotted edges (left/right bends) ----------------
-    pair mid = (nodes[2] + nodes[6])/2; // midpoint between nodes 3 and 7
-    real bendOffset = 0.7; // horizontal bend amount
+		// ---------------- Curved red dotted edges (left/right bends) ----------------
+		pair mid = (nodes[2] + nodes[6])/2; // midpoint between nodes 3 and 7
+		real bendOffset = 0.7; // horizontal bend amount
 
-    // Bend left (control point slightly to the left of midpoint)
-    draw(nodes[2] .. controls (mid - (bendOffset,0)) .. nodes[6], redEdgePen);
+		// Bend left (control point slightly to the left of midpoint)
+		draw(nodes[2] .. controls (mid - (bendOffset,0)) .. nodes[6], redEdgePen);
 
-    // Bend right (control point slightly to the right of midpoint)
-    draw(nodes[2] .. controls (mid + (bendOffset,0)) .. nodes[6], redEdgePen);
+		// Bend right (control point slightly to the right of midpoint)
+		draw(nodes[2] .. controls (mid + (bendOffset,0)) .. nodes[6], redEdgePen);
 
-    \end{asy}
-    \caption{The $(3,7)$ separation pair can have a chord between the vertices in more than one way.}
-    \label{fig:multiedgeinseparationpair}
+	\end{asy}
+	\caption{The $(3,7)$ separation pair can have a chord between the vertices in more than one way.}
+	\label{fig:multiedgeinseparationpair}
 \end{figure}
 
 
@@ -230,85 +229,85 @@ In Figure~\ref{fig:multiedgeinseparationpair}, within this biconnected graph, th
 In the Parvez, Rahman, and Nakano algorithm~\cite{parvez2011}, we are assured that there will not be any multi-edge problem because multi-edges are not possible in triconnected plane graphs. However, if we want to extend that algorithm to biconnected graphs, there is a significant possibility of multi-edges.
 
 \begin{figure}[h]
-    \centering
-    \begin{asy}
-    size(400);
+	\centering
+	\begin{asy}
+		size(400);
 
-    real nodeRadius = 0.2;
-    pen nodePen = black+1;
-    pen redEdgePen = red + 1.5bp + dotted;
+		real nodeRadius = 0.2;
+		pen nodePen = black+1;
+		pen redEdgePen = red + 1.5bp + dotted;
 
-    // Function to draw a node
-    void drawNode(pair pos, string label, pen p = nodePen) {
-        draw(circle(pos, nodeRadius), p);
-        label(label, pos);
-    }
+		// Function to draw a node
+		void drawNode(pair pos, string label, pen p = nodePen) {
+				draw(circle(pos, nodeRadius), p);
+				label(label, pos);
+			}
 
-    // Function to draw edges stopping at node borders
-    void drawEdge(pair A, pair B, real r = nodeRadius, pen p = black) {
-        pair dir = (B - A)/abs(B - A);
-        draw(A + r*dir -- B - r*dir, p);
-    }
+		// Function to draw edges stopping at node borders
+		void drawEdge(pair A, pair B, real r = nodeRadius, pen p = black) {
+				pair dir = (B - A)/abs(B - A);
+				draw(A + r*dir -- B - r*dir, p);
+			}
 
-    // ---------------- Left Graph ----------------
-    pair[] leftNodes = {
-        (0,2),  //1
-        (0,6),  //2
-        (2,6),  //3
-        (4,6),  //4
-        (4,4),  //5
-        (4,2),  //6
-        (2,2),  //7
-        (2,4)   //8
-    };
+		// ---------------- Left Graph ----------------
+		pair[] leftNodes = {
+		(0,2),  //1
+		(0,6),  //2
+		(2,6),  //3
+		(4,6),  //4
+		(4,4),  //5
+		(4,2),  //6
+		(2,2),  //7
+		(2,4)   //8
+		};
 
-    int[][] leftEdges = {
-        {0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{6,7},{0,6},{2,7}
-    };
+		int[][] leftEdges = {
+		{0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{6,7},{0,6},{2,7}
+		};
 
-    // Draw left edges
-    for(int i=0;i<leftEdges.length;++i)
-        drawEdge(leftNodes[leftEdges[i][0]], leftNodes[leftEdges[i][1]]);
+		// Draw left edges
+		for(int i=0;i<leftEdges.length;++i)
+		drawEdge(leftNodes[leftEdges[i][0]], leftNodes[leftEdges[i][1]]);
 
-    // Draw left nodes
-    for(int i=0;i<leftNodes.length;++i)
-        drawNode(leftNodes[i], string(i+1));
+		// Draw left nodes
+		for(int i=0;i<leftNodes.length;++i)
+		drawNode(leftNodes[i], string(i+1));
 
-    // Labels F1, F2
-    label("$F_1$", (1,4));
-    label("$F_2$", (3,4));
+		// Labels F1, F2
+		label("$F_1$", (1,4));
+		label("$F_2$", (3,4));
 
-    // Optional multi-edge example (red dotted) for left graph
-    draw(leftNodes[2] .. controls ((leftNodes[2]+leftNodes[6])/2 - (0.7,0)) .. leftNodes[6], redEdgePen);
-    draw(leftNodes[2] .. controls ((leftNodes[2]+leftNodes[6])/2 + (0.7,0)) .. leftNodes[6], redEdgePen);
+		// Optional multi-edge example (red dotted) for left graph
+		draw(leftNodes[2] .. controls ((leftNodes[2]+leftNodes[6])/2 - (0.7,0)) .. leftNodes[6], redEdgePen);
+		draw(leftNodes[2] .. controls ((leftNodes[2]+leftNodes[6])/2 + (0.7,0)) .. leftNodes[6], redEdgePen);
 
-    // ---------------- Right Graph ----------------
-    pair offset = (7,0); // shift right
-    pair[] rightNodes = {
-        (0,2), (0,6), (2,6), (6,6), (6,4), (6,2), (2,2), (4,4)
-    };
-    for(int i=0;i<rightNodes.length;++i)
-        rightNodes[i] += offset;
+		// ---------------- Right Graph ----------------
+		pair offset = (7,0); // shift right
+		pair[] rightNodes = {
+		(0,2), (0,6), (2,6), (6,6), (6,4), (6,2), (2,2), (4,4)
+		};
+		for(int i=0;i<rightNodes.length;++i)
+		rightNodes[i] += offset;
 
-    int[][] rightEdges = {
-        {0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{2,6},{0,6},{2,7},{6,7}
-    };
+		int[][] rightEdges = {
+		{0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{2,6},{0,6},{2,7},{6,7}
+		};
 
-    // Draw right edges
-    for(int i=0;i<rightEdges.length;++i)
-        drawEdge(rightNodes[rightEdges[i][0]], rightNodes[rightEdges[i][1]]);
+		// Draw right edges
+		for(int i=0;i<rightEdges.length;++i)
+		drawEdge(rightNodes[rightEdges[i][0]], rightNodes[rightEdges[i][1]]);
 
-    // Draw right nodes
-    for(int i=0;i<rightNodes.length;++i)
-        drawNode(rightNodes[i], string(i+1));
+		// Draw right nodes
+		for(int i=0;i<rightNodes.length;++i)
+		drawNode(rightNodes[i], string(i+1));
 
-    // Labels F1, F2 for right graph
-    label("$F_1$", (1,4)+offset);
-    label("$F_2$", (5,4)+offset);
+		// Labels F1, F2 for right graph
+		label("$F_1$", (1,4)+offset);
+		label("$F_2$", (5,4)+offset);
 
-    \end{asy}
-    \caption{The left graph is biconnected, where $(3,7)$ has the possibility of becoming a multi-edge, but in the right graph, $(3,7)$ cannot be a multi-edge because it is a triconnected graph.}
-    \label{fig:occurranceofmultiedge}
+	\end{asy}
+	\caption{The left graph is biconnected, where $(3,7)$ has the possibility of becoming a multi-edge, but in the right graph, $(3,7)$ cannot be a multi-edge because it is a triconnected graph.}
+	\label{fig:occurranceofmultiedge}
 \end{figure}
 
 
@@ -350,7 +349,6 @@ Let $C$ be a cycle and $v_1, v_2, \ldots, v_k$ be its vertices in counterclockwi
 			\draw (a1) -- (a2) -- (a3) -- (a4) -- (a5) -- (a6) -- (a1);
 			\draw (a2) -- (a4) -- (a6) -- (a2);
 		\end{tikzpicture}
-		\caption{First hexagon}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}{0.45\textwidth}
@@ -365,7 +363,6 @@ Let $C$ be a cycle and $v_1, v_2, \ldots, v_k$ be its vertices in counterclockwi
 			\draw (b1) -- (b2) -- (b3) -- (b4) -- (b5) -- (b6) -- (b1);
 			\draw (b1) -- (b3) -- (b5) -- (b1);
 		\end{tikzpicture}
-		\caption{Second hexagon}
 	\end{subfigure}
 	\caption{Two distinct triangulations of a cycle}
 	\label{fig:disticttriangulationsofacycle}
@@ -376,10 +373,6 @@ We also define visibility by chords: if there is a $(1,3)$ chord, we say that ve
 
 In this paper, we will generate triangulations for labeled biconnected graphs, meaning each vertex in the graph is distinctly labeled, and we will assume that no two edges share the same two endpoints.
 
-\begin{definition}[Elementary Operation]
-\label{def:elementary_ops}
-An \textit{elementary operation} is one of the following actions executed on the RAM model in constant time: (i) inserting or deleting a chord, (ii) performing a single edge flip within a face (replacing one diagonal of a convex quadrilateral by the other), or (iii) a hash-set operation on the global chord set $S$ (insertion, deletion, or membership test). We assume each elementary operation takes $O(1)$ time in our cost model.
-\end{definition}
 
 
 \section{The Algorithm}
@@ -837,7 +830,7 @@ For each face, the local genealogical tree is defined by parent-child relationsh
 		\State $\text{endIndex} \gets \text{endIndex} + 1$
 		\EndIf
 		\EndWhile
-        \State $v_r \gets v_{\text{endIndex}}$ \Comment{Root vertex for safe triangulation}
+		\State $v_r \gets v_{\text{endIndex}}$ \Comment{Root vertex for safe triangulation}
 		\State Build fan triangulation $T_r$ from $v_r$ as root vertex
 		\State \Return $T_r$
 		\EndProcedure
@@ -908,31 +901,31 @@ In this section, we establish the theoretical foundation of our algorithm by pro
 Before proving completeness, we establish a critical property about blocking chords that justifies our pruning strategy.
 
 \begin{lemma}[Blocking Chord Persistence]
-\label{lem:blocking_persistence}
-Let $T$ be a triangulation of face $F$ with a blocking chord $e \in S$ (where $S$ is the global chord set from previously processed faces). For any descendant triangulation $T'$ of $T$ in the local genealogical tree, $e \in T'$.
+	\label{lem:blocking_persistence}
+	Let $T$ be a triangulation of face $F$ with a blocking chord $e \in S$ (where $S$ is the global chord set from previously processed faces). For any descendant triangulation $T'$ of $T$ in the local genealogical tree, $e \in T'$.
 \end{lemma}
 
 \begin{proof}
-Recall that in the local genealogical tree for face $F$ with root vertex $v_r$, we construct the initial triangulation $T_r$ by connecting $v_r$ to all non-adjacent vertices. All chords in $T_r$ have $v_r$ as an endpoint. Descendant triangulations are obtained by edge flips, where we flip a chord $(v_r, v_j)$ that is part of a quadrilateral $(v_r, v_a, v_j, v_b)$, replacing it with the opposite diagonal $(v_a, v_b)$.
+	Recall that in the local genealogical tree for face $F$ with root vertex $v_r$, we construct the initial triangulation $T_r$ by connecting $v_r$ to all non-adjacent vertices. All chords in $T_r$ have $v_r$ as an endpoint. Descendant triangulations are obtained by edge flips, where we flip a chord $(v_r, v_j)$ that is part of a quadrilateral $(v_r, v_a, v_j, v_b)$, replacing it with the opposite diagonal $(v_a, v_b)$.
 
-A chord $e = (v_i, v_j)$ is called a \textit{blocking chord} if $e \in S$, meaning it was created by triangulating a previously processed face. By our safe root selection (Algorithm~3), the root vertex $v_r$ satisfies: for all chords $(v_i, v_j) \in S$, at least one of $v_i$ or $v_j$ is not equal to $v_r$.
+	A chord $e = (v_i, v_j)$ is called a \textit{blocking chord} if $e \in S$, meaning it was created by triangulating a previously processed face. By our safe root selection (Algorithm~3), the root vertex $v_r$ satisfies: for all chords $(v_i, v_j) \in S$, at least one of $v_i$ or $v_j$ is not equal to $v_r$.
 
-Now consider two cases:
+	Now consider two cases:
 
-\textbf{Case 1:} Both endpoints of $e$ are not $v_r$, i.e., $e = (v_i, v_j)$ where $v_i \neq v_r$ and $v_j \neq v_r$.
+	\textbf{Case 1:} Both endpoints of $e$ are not $v_r$, i.e., $e = (v_i, v_j)$ where $v_i \neq v_r$ and $v_j \neq v_r$.
 
-Such a chord cannot be in the initial triangulation $T_r$ (since all chords in $T_r$ have $v_r$ as an endpoint). Therefore, $e$ must be added during the generation process by flipping some chord $(v_r, v_k)$ in a quadrilateral. Once added, $e$ can only be removed by flipping it in a quadrilateral where $e$ is a diagonal. However, our algorithm only flips chords of the form $(v_r, v_k)$---chords with $v_r$ as an endpoint, which we call \textit{generating chords}. Since $e$ does not have $v_r$ as an endpoint, it is never flipped. Therefore, once $e$ appears in any triangulation, it persists in all descendants.
+	Such a chord cannot be in the initial triangulation $T_r$ (since all chords in $T_r$ have $v_r$ as an endpoint). Therefore, $e$ must be added during the generation process by flipping some chord $(v_r, v_k)$ in a quadrilateral. Once added, $e$ can only be removed by flipping it in a quadrilateral where $e$ is a diagonal. However, our algorithm only flips chords of the form $(v_r, v_k)$---chords with $v_r$ as an endpoint, which we call \textit{generating chords}. Since $e$ does not have $v_r$ as an endpoint, it is never flipped. Therefore, once $e$ appears in any triangulation, it persists in all descendants.
 
-\textbf{Case 2:} Exactly one endpoint of $e$ is $v_r$, i.e., $e = (v_r, v_j)$ for some $v_j \neq v_r$.
+	\textbf{Case 2:} Exactly one endpoint of $e$ is $v_r$, i.e., $e = (v_r, v_j)$ for some $v_j \neq v_r$.
 
-By the definition of safe root vertex, if $(v_r, v_j) \in S$, then $v_r$ is not a safe root for this face. This contradicts our construction in Algorithm~3, which guarantees that the selected root vertex $v_r$ does not participate in any blocking chord. Therefore, this case cannot occur.
+	By the definition of safe root vertex, if $(v_r, v_j) \in S$, then $v_r$ is not a safe root for this face. This contradicts our construction in Algorithm~3, which guarantees that the selected root vertex $v_r$ does not participate in any blocking chord. Therefore, this case cannot occur.
 
-Since all blocking chords fall into Case 1, they persist in all descendant triangulations.
+	Since all blocking chords fall into Case 1, they persist in all descendant triangulations.
 \end{proof}
 
 \begin{theorem}[Completeness]
-\label{thm:completeness}
-The algorithm generates all valid triangulations of a biconnected plane graph without duplicates.
+	\label{thm:completeness}
+	The algorithm generates all valid triangulations of a biconnected plane graph without duplicates.
 \end{theorem}
 
 Now our algorithm uses a double-tree structure. We can think of it as follows: For a triangulation $T_1$ of face $F_1$, we search for all other possible triangulations that are compatible with $T_1$ in the second face $F_2$. For each compatible triangulation $T_2$ of face $F_2$, we then search for all other possible triangulations that are compatible with both $T_1$ and $T_2$ in the third face $F_3$, and so on. This way, we explore every possible combination of triangulations across all faces while ensuring compatibility at each step.
@@ -1022,8 +1015,8 @@ If a prior face triangulation configuration $\{T_{f_1}, T_{f_2}, \ldots, T_{f_{i
 \label{proof:saferoot}
 
 \begin{theorem}[Existence of Safe Root Vertices]
-\label{thm:safe_root_exists}
-For any face $F_i$ with $k \geq 3$ vertices in a biconnected plane graph, given any set $S$ of chords from previously triangulated faces, there exist at least two safe root vertices in $F_i$.
+	\label{thm:safe_root_exists}
+	For any face $F_i$ with $k \geq 3$ vertices in a biconnected plane graph, given any set $S$ of chords from previously triangulated faces, there exist at least two safe root vertices in $F_i$.
 \end{theorem}
 
 Now the key challenge is finding the safe root configuration. To find a safe root vertex, our algorithm uses a safe root finding procedure. This method provides us with a safe root vertex that guarantees all chords from the safe root to non-neighbors can be added without conflicts with any chords from prior face triangulations.
@@ -1031,70 +1024,142 @@ Now the key challenge is finding the safe root configuration. To find a safe roo
 To find a safe root, we use a two-pointer technique. We start with two pointers: one at the end of the vertex list (startIndex) and one at the beginning (endIndex). We then move these pointers toward each other based on the presence of chords in the global set $S$. If the chord between the vertices at these pointers exists in $S$, we move the startIndex pointer leftward; otherwise, we move the endIndex pointer rightward. This process continues until the two pointers converge. At this point, the vertex at the startIndex pointer is guaranteed to be a safe root vertex, because all chords from this vertex to non-neighbors do not exist in $S$, ensuring no conflicts with prior triangulations.
 
 \begin{proof}
-Consider a biconnected plane graph $G$ with faces $F_1, F_2, \ldots, F_k$. Each face $F_i$ is a simple cycle with at least three vertices. Now, we consider an arbitrary face with $k$ vertices. The outer region of the face can have many edges and chords, some or all of which may have one or both endpoints among the $k$ vertices of our current face.
-\begin{figure}[h]
-	\centering
-	\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-		% Vertices using exact x,y coordinates
-		\node (1) at (2.0, 0.0) {1};
-		\node (2) at (1.0, 1.732) {2};
-		\node (3) at (-1.0, 1.732) {..};
-		\node (4) at (-2.0, 0.0) {..};
-		\node (5) at (-1.0, -1.732) {k-1};
-		\node (6) at (1.0, -1.732) {k};
+	Consider a biconnected plane graph $G$ with faces $F_1, F_2, \ldots, F_k$. Each face $F_i$ is a simple cycle with at least three vertices. Now, we consider an arbitrary face with $k$ vertices. The outer region of the face can have many edges and chords, some or all of which may have one or both endpoints among the $k$ vertices of our current face.
+	\begin{figure}[h]
+		\centering
+		\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Vertices using exact x,y coordinates
+			\node (1) at (2.0, 0.0) {1};
+			\node (2) at (1.0, 1.732) {2};
+			\node (3) at (-1.0, 1.732) {..};
+			\node (4) at (-2.0, 0.0) {..};
+			\node (5) at (-1.0, -1.732) {k-1};
+			\node (6) at (1.0, -1.732) {k};
 
-		% Edges using -- syntax
-		\draw (1) -- (2) -- (3) -- (4) -- (5) -- (6) -- (1);
-	\end{tikzpicture}
-	\caption{A face with $k$ vertices}
-	\label{fig:face_k_vertices}
-\end{figure}
+			% Edges using -- syntax
+			\draw (1) -- (2) -- (3) -- (4) -- (5) -- (6) -- (1);
+		\end{tikzpicture}
+		\caption{A face with $k$ vertices}
+		\label{fig:face_k_vertices}
+	\end{figure}
 
-There are two possibilities:
-\begin{enumerate}
-	\item There are no chords in the prior face triangulation configuration that have both endpoints among the $k$ vertices of our current face. In this case, all vertices are safe root vertices, and we can choose any of them as the safe root.
-	\item There is at least one chord in the prior face triangulation configuration that has both endpoints among the vertices $1, 2, \ldots, k$ of our current face.
-\end{enumerate}
+	There are two possibilities:
+	\begin{enumerate}
+		\item There are no chords in the prior face triangulation configuration that have both endpoints among the $k$ vertices of our current face. In this case, all vertices are safe root vertices, and we can choose any of them as the safe root.
+		\item There is at least one chord in the prior face triangulation configuration that has both endpoints among the vertices $1, 2, \ldots, k$ of our current face.
+	\end{enumerate}
 
-In the first case, all $k$ vertices of the face are safe root vertices, as there is no possibility of creating a multi-edge when adding chords between them.
-In the second case, there can be at least one chord between two vertices of the face in the outer region of the current face.
+	In the first case, all $k$ vertices of the face are safe root vertices, as there is no possibility of creating a multi-edge when adding chords between them.
+	In the second case, there can be at least one chord between two vertices of the face in the outer region of the current face.
 
-\begin{figure}[h]
-	\centering
-	\begin{tikzpicture}[scale=1.2, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-		% Hexagon vertices
-		\node (v1) at (2.0, 0.0) {$v_{j+1}$};
-		\node (v2) at (1.0, 1.732) {$v_j$};
-		\node (v3) at (-1.0, 1.732) {$v_{j-1}$};
-		\node (v4) at (-2.0, 0.0) {$v_{i+1}$};
-		\node (v5) at (-1.0, -1.732) {$v_i$};
-		\node (v6) at (1.0, -1.732) {$v_{i-1}$};
+	\begin{figure}[h]
+		\centering
+		\begin{tikzpicture}[scale=1.2, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Hexagon vertices
+			\node (v1) at (2.0, 0.0) {$v_{j+1}$};
+			\node (v2) at (1.0, 1.732) {$v_j$};
+			\node (v3) at (-1.0, 1.732) {$v_{j-1}$};
+			\node (v4) at (-2.0, 0.0) {$v_{i+1}$};
+			\node (v5) at (-1.0, -1.732) {$v_i$};
+			\node (v6) at (1.0, -1.732) {$v_{i-1}$};
 
-		% Hexagon edges
-		\draw (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
+			% Hexagon edges
+			\draw (v1) -- (v2) -- (v3) -- (v4) -- (v5) -- (v6) -- (v1);
 
-		% Edge completely outside using Bezier curve
-		\draw[red, thick]
-		(v5) .. controls (4,-5) and (4,1) .. (v2);
-	\end{tikzpicture}
-	\caption{Hexagon with $v_i$-$v_j$ edge completely outside}
-	\label{fig:hexagon_outer_edge}
-\end{figure}
+			% Edge completely outside using Bezier curve
+			\draw[red, thick]
+			(v5) .. controls (4,-5) and (4,1) .. (v2);
+		\end{tikzpicture}
+		\caption{Hexagon with $v_i$-$v_j$ edge completely outside}
+		\label{fig:hexagon_outer_edge}
+	\end{figure}
 
-In Figure~\ref{fig:hexagon_outer_edge}, observe that the chord $(v_i, v_j)$ lies completely outside the face formed by vertices $v_{j+1}, v_j, \ldots, v_{i-1}, v_i$. This chord is an element of the global set $S$ from prior face triangulations, adding a constraint on possible multi-edges in the outside region. The vertices $\{v_{i+1}, \ldots, v_{j-1}\}$ and $\{v_{j+1}, \ldots, v_{i-1}\}$ are separated by the chord $(v_i, v_j)$. Therefore, any chord connecting a vertex from the first set to a vertex from the second set would cross the chord $(v_i, v_j)$, which is not allowed in a planar graph. As a result, multi-edges in the prior face triangulations can occur only where both endpoints belong to $\{v_{i+1}, \ldots, v_{j-1}\}$ or both endpoints belong to $\{v_{j+1}, \ldots, v_{i-1}\}$. Notice that this creates two separate structures.
+	In Figure~\ref{fig:hexagon_outer_edge}, observe that the chord $(v_i, v_j)$ lies completely outside the face formed by vertices $v_{j+1}, v_j, \ldots, v_{i-1}, v_i$. This chord is an element of the global set $S$ from prior face triangulations, adding a constraint on possible multi-edges in the outside region. The vertices $\{v_{i+1}, \ldots, v_{j-1}\}$ and $\{v_{j+1}, \ldots, v_{i-1}\}$ are separated by the chord $(v_i, v_j)$. Therefore, any chord connecting a vertex from the first set to a vertex from the second set would cross the chord $(v_i, v_j)$, which is not allowed in a planar graph. As a result, multi-edges in the prior face triangulations can occur only where both endpoints belong to $\{v_{i+1}, \ldots, v_{j-1}\}$ or both endpoints belong to $\{v_{j+1}, \ldots, v_{i-1}\}$. Notice that this creates two separate structures.
 
-\begin{figure}[h]
-	\centering
+	\begin{figure}[h]
+		\centering
 
-	% First subfigure
-	\begin{subfigure}[b]{0.45\textwidth}
+		% First subfigure
+		\begin{subfigure}[b]{0.45\textwidth}
+			\centering
+			\begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
+				% Vertices
+				\node (v1) at (0,0) {1};
+				\node (v2) at (2,0) {2};
+				\node (v3) at (4,0) {3};
+				\node (v4) at (6,0) {4};
+
+				% Path edges
+				\draw (v1) -- (v2) -- (v3) -- (v4);
+
+				% Curved edge from v1 to v4 (above the path)
+				\draw[thick, bend left=45] (v1) to (v4);
+			\end{tikzpicture}
+			\caption{Partial structure }
+			\label{fig:path4_above}
+		\end{subfigure}
+		\hfill
+		% Second subfigure
+		\begin{subfigure}[b]{0.45\textwidth}
+			\centering
+			\begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
+				% Vertices
+				\node (v1) at (0,0) {1};
+				\node (v2) at (2,0) {2};
+				\node (v3) at (4,0) {3};
+				\node (v4) at (6,0) {4};
+
+				% Path edges
+				\draw (v1) -- (v2) -- (v3) -- (v4);
+
+				% Curved edge from v1 to v4 (below the path)
+				\draw[thick, bend left=45] (v1) to (v4);
+			\end{tikzpicture}
+			\caption{Partial structure }
+			\label{fig:path4_below}
+		\end{subfigure}
+
+		\caption{(a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots, v_{j-1}\}$ and $\{v_{j+1}, \ldots, v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}
+		\label{fig:path4_both}
+	\end{figure}
+
+	In both structures shown in Figure~\ref{fig:path4_both}, multi-edges can occur where both endpoints belong to the same structure, as there cannot be any chords between the two structures. We call them $T_n$ structures, where $n$ is the number of vertices contained within them. In Figure~\ref{fig:path4_both}, we can see two $T_2$ structures. Now, since chords must connect two non-neighboring vertices, any $T$ structure will always be at least $T_1$, as there must be at least one vertex between the two endpoints of a chord. Also, there must be at least two $T$ structures, as the chord $(v_i, v_j)$ separates them.
+	The minimum value of $n$ in $T_n$ structures is 1, and the maximum is $k - 3$, where $k$ is the total number of vertices in the current face.
+	Now, we must prove that in any $T_n$ structure, there is always at least one safe root vertex that does not have a chord with any non-neighboring vertices of the $T_n$ structure.
+	We prove this by induction on $n$.
+
+	\textbf{Base Case ($n=1$):} Consider the $T_1$ structure shown in Figure~\ref{fig:T1_structure}:
+
+	\begin{figure}[h]
 		\centering
 		\begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
 			% Vertices
 			\node (v1) at (0,0) {1};
 			\node (v2) at (2,0) {2};
 			\node (v3) at (4,0) {3};
-			\node (v4) at (6,0) {4};
+
+			% Path edges
+			\draw (v1) -- (v2) -- (v3);
+
+			% Curved edge from v1 to v4 (above the path)
+			\draw[thick, bend left=45] (v1) to (v3);
+		\end{tikzpicture}
+
+		\caption{$T_1$ structure}
+		\label{fig:T1_structure}
+	\end{figure}
+
+	Here both vertices 1 and 3 are neighbors of vertex 2, which means that vertex 2 cannot have any chords with either of them. Thus, vertex 2 is a safe vertex.
+
+	Now for $T_2$ structures.
+	\begin{figure}[h]
+		\centering
+		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+			% Vertices
+			\node (v1) at (1,0) {1};
+			\node (v2) at (2,0) {2};
+			\node (v3) at (3,0) {3};
+			\node (v4) at (4,0) {4};
 
 			% Path edges
 			\draw (v1) -- (v2) -- (v3) -- (v4);
@@ -1102,197 +1167,125 @@ In Figure~\ref{fig:hexagon_outer_edge}, observe that the chord $(v_i, v_j)$ lies
 			% Curved edge from v1 to v4 (above the path)
 			\draw[thick, bend left=45] (v1) to (v4);
 		\end{tikzpicture}
-		\caption{Partial structure }
-		\label{fig:path4_above}
-	\end{subfigure}
-	\hfill
-	% Second subfigure
-	\begin{subfigure}[b]{0.45\textwidth}
+
+		\caption{$T_2$ structure}
+		\label{fig:T2_structure}
+	\end{figure}
+
+	In this case, vertex 2 can only have a chord with vertex 4, as vertex 1 is its neighbor. Similarly, vertex 3 can only have a chord with vertex 1. Therefore, if vertex 2 has a chord with vertex 4, then it creates a new $T_1$ structure with vertex 3, making vertex 3 a safe root vertex. On the other hand, if vertex 3 has a chord with vertex 1, then it creates a new $T_1$ structure with vertex 2, making vertex 2 a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_2$ structure.
+
+	\begin{figure}[h]
 		\centering
-		\begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
-			% Vertices
-			\node (v1) at (0,0) {1};
-			\node (v2) at (2,0) {2};
-			\node (v3) at (4,0) {3};
-			\node (v4) at (6,0) {4};
 
-			% Path edges
-			\draw (v1) -- (v2) -- (v3) -- (v4);
+		% First subfigure - Original with 2-4 chord
+		\begin{subfigure}[b]{0.45\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+				% Vertices
+				\node (v1) at (1,0) {1};
+				\node (v2) at (2,0) {2};
+				\node (v3) at (3,0) {3};
+				\node (v4) at (4,0) {4};
 
-			% Curved edge from v1 to v4 (below the path)
-			\draw[thick, bend left=45] (v1) to (v4);
-		\end{tikzpicture}
-		\caption{Partial structure }
-		\label{fig:path4_below}
-	\end{subfigure}
+				% Path edges
+				\draw (v1) -- (v2) -- (v3) -- (v4);
 
-	\caption{(a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots, v_{j-1}\}$ and $\{v_{j+1}, \ldots, v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}
-	\label{fig:path4_both}
-\end{figure}
+				% Curved edges
+				\draw[thick, bend left=45] (v1) to (v4);
+				\draw[red, thick, bend left=45] (v2) to (v4);
+			\end{tikzpicture}
+			\caption{$T_1$ with chord 2--4}
+			\label{fig:T1_24}
+		\end{subfigure}
+		\hfill
+		% Second subfigure - Modified with 1-3 chord
+		\begin{subfigure}[b]{0.45\textwidth}
+			\centering
+			\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+				% Vertices
+				\node (v1) at (1,0) {1};
+				\node (v2) at (2,0) {2};
+				\node (v3) at (3,0) {3};
+				\node (v4) at (4,0) {4};
 
-In both structures shown in Figure~\ref{fig:path4_both}, multi-edges can occur where both endpoints belong to the same structure, as there cannot be any chords between the two structures. We call them $T_n$ structures, where $n$ is the number of vertices contained within them. In Figure~\ref{fig:path4_both}, we can see two $T_2$ structures. Now, since chords must connect two non-neighboring vertices, any $T$ structure will always be at least $T_1$, as there must be at least one vertex between the two endpoints of a chord. Also, there must be at least two $T$ structures, as the chord $(v_i, v_j)$ separates them.
-The minimum value of $n$ in $T_n$ structures is 1, and the maximum is $k - 3$, where $k$ is the total number of vertices in the current face.
-Now, we must prove that in any $T_n$ structure, there is always at least one safe root vertex that does not have a chord with any non-neighboring vertices of the $T_n$ structure.
-We prove this by induction on $n$.
+				% Path edges
+				\draw (v1) -- (v2) -- (v3) -- (v4);
 
-\textbf{Base Case ($n=1$):} Consider the $T_1$ structure shown in Figure~\ref{fig:T1_structure}:
+				% Curved edges
+				\draw[thick, bend left=45] (v1) to (v4);
+				\draw[red, thick, bend left=45] (v1) to (v3);
+			\end{tikzpicture}
+			\caption{$T_1$ with chord 1--3}
+			\label{fig:T1_13}
+		\end{subfigure}
 
-\begin{figure}[h]
-	\centering
-	\begin{tikzpicture}[every node/.style={circle, draw, fill=white, inner sep=2pt}]
-		% Vertices
-		\node (v1) at (0,0) {1};
-		\node (v2) at (2,0) {2};
-		\node (v3) at (4,0) {3};
+		\caption{$T_1$ structures with different chords}
+		\label{fig:T1_structures}
+	\end{figure}
 
-		% Path edges
-		\draw (v1) -- (v2) -- (v3);
+	Now in the case for $T_1$ with figure \ref{fig:T1_24}, vertex 3 becomes a safe root vertex. In the case for $T_1$ with figure \ref{fig:T1_13}, vertex 2 becomes a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_1$ structure.
 
-		% Curved edge from v1 to v4 (above the path)
-		\draw[thick, bend left=45] (v1) to (v3);
-	\end{tikzpicture}
+	Now we proceed with induction. We assume that for all $T_i$ structures where $i < k$, there is at least one safe root vertex. Now we prove it for the $T_k$ structure.
 
-	\caption{$T_1$ structure}
-	\label{fig:T1_structure}
-\end{figure}
-
-Here both vertices 1 and 3 are neighbors of vertex 2, which means that vertex 2 cannot have any chords with either of them. Thus, vertex 2 is a safe vertex.
-
-Now for $T_2$ structures.
-\begin{figure}[h]
-	\centering
-	\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-		% Vertices
-		\node (v1) at (1,0) {1};
-		\node (v2) at (2,0) {2};
-		\node (v3) at (3,0) {3};
-		\node (v4) at (4,0) {4};
-
-		% Path edges
-		\draw (v1) -- (v2) -- (v3) -- (v4);
-
-		% Curved edge from v1 to v4 (above the path)
-		\draw[thick, bend left=45] (v1) to (v4);
-	\end{tikzpicture}
-
-	\caption{$T_2$ structure}
-	\label{fig:T2_structure}
-\end{figure}
-
-In this case, vertex 2 can only have a chord with vertex 4, as vertex 1 is its neighbor. Similarly, vertex 3 can only have a chord with vertex 1. Therefore, if vertex 2 has a chord with vertex 4, then it creates a new $T_1$ structure with vertex 3, making vertex 3 a safe root vertex. On the other hand, if vertex 3 has a chord with vertex 1, then it creates a new $T_1$ structure with vertex 2, making vertex 2 a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_2$ structure.
-
-\begin{figure}[h]
-	\centering
-
-	% First subfigure - Original with 2-4 chord
-	\begin{subfigure}[b]{0.45\textwidth}
+	\begin{figure}[h]
 		\centering
 		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
 			% Vertices
-			\node (v1) at (1,0) {1};
-			\node (v2) at (2,0) {2};
-			\node (v3) at (3,0) {3};
-			\node (v4) at (4,0) {4};
+			\node (v1) at (0,0) {$v_i$};
+			\node (v2) at (2,0) {$v_{i+1}$};
+			\node (v3) at (4,0) {$v_{i+2}$};
+			\node (vall) at (6,0) {...};
+			\node (v4) at (8,0) {$v_{j-1}$};
+			\node (v5) at (10,0) {$v_j$};
 
 			% Path edges
-			\draw (v1) -- (v2) -- (v3) -- (v4);
+			\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
 
-			% Curved edges
-			\draw[thick, bend left=45] (v1) to (v4);
-			\draw[red, thick, bend left=45] (v2) to (v4);
+			% Curved edge from v1 to v4 (above the path)
+			\draw[thick, bend left=60] (v1) to (v5);
 		\end{tikzpicture}
-		\caption{$T_1$ with chord 2--4}
-		\label{fig:T1_24}
-	\end{subfigure}
-	\hfill
-	% Second subfigure - Modified with 1-3 chord
-	\begin{subfigure}[b]{0.45\textwidth}
+
+		\caption{$T_k$ structure}
+		\label{fig:Tk_structure}
+	\end{figure}
+
+	Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chord with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, as all other vertices are its neighbors. There are two possibilities:
+	\begin{enumerate}
+		\item Vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$.
+		\item Vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$.
+	\end{enumerate}
+	\begin{figure}[h]
 		\centering
-		\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
+		\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
 			% Vertices
-			\node (v1) at (1,0) {1};
-			\node (v2) at (2,0) {2};
-			\node (v3) at (3,0) {3};
-			\node (v4) at (4,0) {4};
+			\node (v1) at (0,0) {$v_i$};
+			\node (v2) at (2,0) {$v_{i+1}$};
+			\node (v3) at (4,0) {$v_{i+2}$};
+			\node (vall) at (6,0) {...};
+			\node (v4) at (8,0) {$v_{j-1}$};
+			\node (v5) at (10,0) {$v_j$};
 
 			% Path edges
-			\draw (v1) -- (v2) -- (v3) -- (v4);
+			\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
 
-			% Curved edges
-			\draw[thick, bend left=45] (v1) to (v4);
-			\draw[red, thick, bend left=45] (v1) to (v3);
+			% Curved edge from v1 to v4 (above the path)
+			\draw[thick, bend left=60] (v1) to (v5);
+			\draw[red, thick, dotted, bend left=60] (v2) to (vall);
+			\draw[red, thick, dotted, bend left=60] (v2) to (v4);
+			\draw[red, thick, dotted, bend left=60] (v2) to (v5);
+
 		\end{tikzpicture}
-		\caption{$T_1$ with chord 1--3}
-		\label{fig:T1_13}
-	\end{subfigure}
 
-	\caption{$T_1$ structures with different chords}
-	\label{fig:T1_structures}
-\end{figure}
+		\caption{new $T_m$ structure, where $m < k$}
+		\label{fig:firstcase}
+	\end{figure}
+	In the first case shown in Figure~\ref{fig:firstcase}, if vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, then it creates a new $T_m$ structure where $m < k$, as at least one vertex is removed from the original $T_k$ structure. By our induction hypothesis, this new $T_m$ structure has at least one safe root vertex.
 
-Now in the case for $T_1$ with figure \ref{fig:T1_24}, vertex 3 becomes a safe root vertex. In the case for $T_1$ with figure \ref{fig:T1_13}, vertex 2 becomes a safe root vertex. Therefore, in both cases, there is at least one safe root vertex in the $T_1$ structure.
+	In the second case shown in Figure~\ref{fig:Tk_structure}, if vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, then vertex $v_{i+1}$ itself is a safe root vertex, as it does not have any chords with any of its non-neighboring vertices.
 
-Now we proceed with induction. We assume that for all $T_i$ structures where $i < k$, there is at least one safe root vertex. Now we prove it for the $T_k$ structure.
+	Therefore, in both cases, there is at least one safe root vertex in the $T_k$ structure. By the principle of mathematical induction, we conclude that for all $T_n$ structures, there is always at least one safe root vertex.
 
-\begin{figure}[h]
-	\centering
-	\begin{tikzpicture}[scale=1.5, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-		% Vertices
-		\node (v1) at (0,0) {$v_i$};
-		\node (v2) at (2,0) {$v_{i+1}$};
-		\node (v3) at (4,0) {$v_{i+2}$};
-		\node (vall) at (6,0) {...};
-		\node (v4) at (8,0) {$v_{j-1}$};
-		\node (v5) at (10,0) {$v_j$};
-
-		% Path edges
-		\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
-
-		% Curved edge from v1 to v4 (above the path)
-		\draw[thick, bend left=60] (v1) to (v5);
-	\end{tikzpicture}
-
-	\caption{$T_k$ structure}
-	\label{fig:Tk_structure}
-\end{figure}
-
-Now in this case, we start with $v_{i+1}$. Vertex $v_{i+1}$ can only have a chord with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, as all other vertices are its neighbors. There are two possibilities:
-\begin{enumerate}
-	\item Vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$.
-	\item Vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$.
-\end{enumerate}
-\begin{figure}[h]
-	\centering
-	\begin{tikzpicture}[scale=1, every node/.style={circle, draw, fill=white, inner sep=2pt}]
-		% Vertices
-		\node (v1) at (0,0) {$v_i$};
-		\node (v2) at (2,0) {$v_{i+1}$};
-		\node (v3) at (4,0) {$v_{i+2}$};
-		\node (vall) at (6,0) {...};
-		\node (v4) at (8,0) {$v_{j-1}$};
-		\node (v5) at (10,0) {$v_j$};
-
-		% Path edges
-		\draw (v1) -- (v2) -- (v3) -- (vall) -- (v4) -- (v5);
-
-		% Curved edge from v1 to v4 (above the path)
-		\draw[thick, bend left=60] (v1) to (v5);
-		\draw[red, thick, dotted, bend left=60] (v2) to (vall);
-		\draw[red, thick, dotted, bend left=60] (v2) to (v4);
-		\draw[red, thick, dotted, bend left=60] (v2) to (v5);
-
-	\end{tikzpicture}
-
-	\caption{new $T_m$ structure, where $m < k$}
-	\label{fig:firstcase}
-\end{figure}
-In the first case shown in Figure~\ref{fig:firstcase}, if vertex $v_{i+1}$ has a chord with any of the vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}, v_j$, then it creates a new $T_m$ structure where $m < k$, as at least one vertex is removed from the original $T_k$ structure. By our induction hypothesis, this new $T_m$ structure has at least one safe root vertex.
-
-In the second case shown in Figure~\ref{fig:Tk_structure}, if vertex $v_{i+1}$ does not have any chords with vertices $v_{i+3}, v_{i+4}, \ldots, v_{j-1}$, then vertex $v_{i+1}$ itself is a safe root vertex, as it does not have any chords with any of its non-neighboring vertices.
-
-Therefore, in both cases, there is at least one safe root vertex in the $T_k$ structure. By the principle of mathematical induction, we conclude that for all $T_n$ structures, there is always at least one safe root vertex.
-
-Now we already know there are at least two T structures in any biconnected plane graph. Therefore, there are at least two safe root vertices in any biconnected plane graph.
+	Now we already know there are at least two T structures in any biconnected plane graph. Therefore, there are at least two safe root vertices in any biconnected plane graph.
 \end{proof}
 
 \section{Complexity Analysis}
@@ -1508,55 +1501,85 @@ We prove $B = O(T)$ and $F = O(T)$ by induction on the number of faces. Since ea
 \begin{proof}
 	Let $B$ denote the total building operations (chord insertions when constructing root triangulations) and $F$ denote the total flipping operations (edge flips generating child triangulations).
 
-	We prove $B = O(T)$ and $F = O(T)$ by induction on $k$, the number of faces. Since each operation takes $O(1)$ time (Definition~\ref{def:elementary_ops}), this establishes total runtime $O(B + F) = O(T)$, giving $O(1)$ amortized time per triangulation.
+	We prove $B = O(T)$ and $F = O(T)$ by induction on $k$, the number of faces. Since each operation takes $O(1)$ time , this establishes total runtime $O(B + F) = O(T)$, giving $O(1)$ amortized time per triangulation.
 
 	\noindent\textbf{Base Case: Two Faces ($k = 2$)}
 
-	For a graph with two faces having $n_1, n_2$ vertices and $d_1, d_2$ triangulations:
+	Consider a graph with two faces $F_1$ and $F_2$ having $n_1, n_2$ vertices and generating $d_1, d_2$ triangulations respectively. The total number of complete triangulations is $T = d_1 \times d_2$.
 
-	\textit{Building Operations:}
+	\textit{Building Operations Analysis:}
+
+	We construct root triangulations for each face. For face $F_1$, we build one root triangulation requiring $O(n_1)$ time. For face $F_2$, we must build a root triangulation for \textit{each} of the $d_1$ triangulations of $F_1$ (since we recursively process $F_2$ within every triangulation of $F_1$). Each such root triangulation requires $O(n_2)$ time.
+
 	\begin{align*}
-		B & = n_1 + d_1 \cdot n_2                                                                       \\
-		  & = O(d_1) + d_1 \cdot O(d_2) \quad \text{(by Lemma~\ref{lem:min_triangulations_simplified})} \\
+		B & = \underbrace{n_1}_{\text{root for } F_1} + \underbrace{d_1 \cdot n_2}_{\text{roots for } F_2 \text{ across all } d_1 \text{ contexts}} \\
+		  & = O(n_1) + d_1 \cdot O(n_2)
+	\end{align*}
+
+	By Lemma~\ref{lem:min_triangulations_simplified}, we have $d_i \geq n_i - 3$, which gives us $n_i \leq d_i + 3 = O(d_i)$. Therefore $O(n_i) \subseteq O(d_i)$. Substituting:
+
+	\begin{align*}
+		B & = O(d_1) + d_1 \cdot O(d_2) \\
 		  & = O(d_1 \cdot d_2) = O(T)
 	\end{align*}
 
-	\textit{Flipping Operations:}
+	The key insight is that although building a root triangulation costs $O(n_i)$ time, this is always bounded by $O(d_i)$ since $n_i = O(d_i)$. Thus the initial building cost is absorbed by the total output size.
+
+	\textit{Flipping Operations Analysis:}
+
+	Edge flips generate child triangulations in the local genealogical tree. For face $F_1$, we perform $O(d_1)$ flips to explore its genealogical tree. For face $F_2$, within each of the $d_1$ triangulations of $F_1$, we perform $O(d_2)$ flips to explore $F_2$'s genealogical tree.
+
 	\begin{align*}
-		F & = d_1 + d_1 \cdot d_2     \\
+		F & = \underbrace{O(d_1)}_{\text{flips in } F_1} + \underbrace{d_1 \cdot O(d_2)}_{\text{flips in } F_2 \text{ across all } d_1 \text{ contexts}} \\
 		  & = O(d_1 \cdot d_2) = O(T)
 	\end{align*}
 
-	Therefore $B + F = O(T)$ for $k = 2$.
+	\textit{Conclusion for $k=2$:} $B + F = O(T) + O(T) = O(T)$.
 
-	\vspace{0.3cm}
-	\noindent\textbf{Inductive Step: $k$ Faces}
+	\vspace{0.5cm}
+	\noindent\textbf{Inductive Step: From $k-1$ to $k$ Faces}
 
-	\textit{Inductive Hypothesis:} Assume $B_{k-1} = O(T_{k-1})$ and $F_{k-1} = O(T_{k-1})$ for $k-1$ faces, where $T_{k-1} = d_1 \times d_2 \times \cdots \times d_{k-1}$.
+	\textit{Inductive Hypothesis:} Assume that for any graph with $k-1$ faces generating $T_{k-1} = d_1 \times d_2 \times \cdots \times d_{k-1}$ triangulations, the total operations satisfy:
+	$$B_{k-1} + F_{k-1} = O(T_{k-1})$$
 
-	\textit{Adding Face $k$:}
+	\textit{Adding Face $k$:} Consider a graph with $k$ faces $F_1, F_2, \ldots, F_k$ generating $d_1, d_2, \ldots, d_k$ triangulations per face. The total output is $T = T_{k-1} \times d_k$.
 
-	Building operations for $k$ faces:
+	\textbf{Building Operations for $k$ Faces:}
+
+	By the recursive structure of our algorithm, for each complete triangulation of the first $k-1$ faces (of which there are $T_{k-1}$), we must build one root triangulation for face $F_k$. Each root construction takes $O(n_k)$ time.
+
 	\begin{align*}
-		B_k & = B_{k-1} + d_1 \cdot d_2 \cdots d_{k-1} \cdot n_k                                                  \\
-		    & = O(T_{k-1}) + T_{k-1} \cdot O(d_k) \quad \text{(by Lemma~\ref{lem:min_triangulations_simplified})} \\
-		    & = O(T_{k-1} \cdot d_k) \quad \text{(since $d_k \geq 1$)}                                            \\
-		    & = O(T)
+		B_k & = \underbrace{B_{k-1}}_{\text{building first } k-1 \text{ faces}} + \underbrace{T_{k-1} \cdot n_k}_{\text{building } F_k \text{ for each prior triangulation}} \\
+		    & = O(T_{k-1}) + T_{k-1} \cdot O(n_k) \quad \text{(by inductive hypothesis)}
 	\end{align*}
 
-	Flipping operations for $k$ faces:
+	By Lemma~\ref{lem:min_triangulations_simplified}, $d_k \geq n_k - 3$, so $n_k \leq d_k + 3 = O(d_k)$. Therefore:
+
 	\begin{align*}
-		F_k & = F_{k-1} + d_1 \cdot d_2 \cdots d_k                    \\
-		    & = O(T_{k-1}) + T \quad \text{(by inductive hypothesis)} \\
-		    & = O(T) \quad \text{(absorbing smaller term)}
+		B_k & = O(T_{k-1}) + T_{k-1} \cdot O(d_k)                                                              \\
+		    & = T_{k-1} \cdot O(d_k) \quad \text{(absorbing the smaller $O(T_{k-1})$ term since $d_k \geq 1$)} \\
+		    & = O(T_{k-1} \cdot d_k) = O(T)
 	\end{align*}
 
-	Therefore $B_k + F_k = O(T)$ for $k$ faces.
+	The critical observation is that the $O(n_k)$ building cost per context is bounded by $O(d_k)$, and this cost is amortized over the $d_k$ triangulations of $F_k$ generated within each context, yielding constant amortized time.
+
+	\textbf{Flipping Operations for $k$ Faces:}
+
+	Similarly, for each of the $T_{k-1}$ triangulations of the first $k-1$ faces, we explore the genealogical tree of face $F_k$, performing $O(d_k)$ edge flips.
+
+	\begin{align*}
+		F_k & = \underbrace{F_{k-1}}_{\text{flips in first } k-1 \text{ faces}} + \underbrace{T_{k-1} \cdot O(d_k)}_{\text{flips in } F_k \text{ across all contexts}} \\
+		    & = O(T_{k-1}) + T_{k-1} \cdot O(d_k) \quad \text{(by inductive hypothesis)}                                                                               \\
+		    & = T_{k-1} \cdot O(d_k) \quad \text{(absorbing the smaller term)}                                                                                         \\
+		    & = O(T_{k-1} \cdot d_k) = O(T)
+	\end{align*}
+
+	\textit{Conclusion for $k$ faces:} $B_k + F_k = O(T) + O(T) = O(T)$.
 
 	\vspace{0.3cm}
-	\noindent\textbf{Conclusion:}
+	\noindent\textbf{Summary:} By mathematical induction, for any $k \geq 2$ faces, the total number of building and flipping operations is $B + F = O(T)$, where $T$ is the total number of triangulations generated. Since each operation takes $O(1)$ time, the total runtime is $O(T)$, achieving $O(1)$ amortized time per triangulation. \qed
 
-	By induction, $B + F = O(T)$ for any $k \geq 2$. Since each elementary operation takes $O(1)$ time (Definition~\ref{def:elementary_ops}), the total runtime is $O(B + F) = O(T)$, giving $O(1)$ amortized time per triangulation. \qed
+
 \end{proof}
 
 \begin{corollary}[Amortized Linear Time]
@@ -1790,37 +1813,37 @@ Tables~\ref{tab:timing_results_part1} and~\ref{tab:timing_results_part2} present
 	\label{tab:timing_results_part1}
 	\begin{tabular}{|l|r|r|r|r|r|}
 		\hline
-		\textbf{Test Case}     & \textbf{V} & \textbf{Triangulations} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
+		\textbf{Test Case} & \textbf{V} & \textbf{Triangulations} & \textbf{Time (s)} & \textbf{ns/Triang} & \textbf{Mem/Vertex} \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Simple Cycles}}                                                                                   \\
+		\multicolumn{6}{|c|}{\textit{Simple Cycles}}                                                                             \\
 		\hline
-		C4 (square)            & 4          & 2                       & 0.000005          & 2,432              & ---                 \\
-		C5 (pentagon)          & 5          & 10                      & 0.000023          & 2,324              & 819 B               \\
-		C6 (hexagon)           & 6          & 68                      & 0.000143          & 2,099              & 682 B               \\
-		C7 (heptagon)          & 7          & 546                     & 0.001034          & 1,894              & 585 B               \\
-		C8 (octagon)           & 8          & 4,872                   & 0.008137          & 1,670              & 1.00 KB             \\
-		C9 (nonagon)           & 9          & 46,782                  & 0.068060          & 1,455              & 455 B               \\
-		C10 (decagon)          & 10         & 474,180                 & 0.683944          & 1,442              & 409 B               \\
-		C11                    & 11         & 5,010,456               & 7.233983          & 1,444              & 372 B               \\
-		C12                    & 12         & 54,721,224              & 76.344777         & \textbf{1,395}     & 341 B               \\
+		C4 (square)        & 4          & 2                       & 0.000005          & 2,432              & ---                 \\
+		C5 (pentagon)      & 5          & 10                      & 0.000023          & 2,324              & 819 B               \\
+		C6 (hexagon)       & 6          & 68                      & 0.000143          & 2,099              & 682 B               \\
+		C7 (heptagon)      & 7          & 546                     & 0.001034          & 1,894              & 585 B               \\
+		C8 (octagon)       & 8          & 4,872                   & 0.008137          & 1,670              & 1.00 KB             \\
+		C9 (nonagon)       & 9          & 46,782                  & 0.068060          & 1,455              & 455 B               \\
+		C10 (decagon)      & 10         & 474,180                 & 0.683944          & 1,442              & 409 B               \\
+		C11                & 11         & 5,010,456               & 7.233983          & 1,444              & 372 B               \\
+		C12                & 12         & 54,721,224              & 76.344777         & \textbf{1,395}     & 341 B               \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Large-Scale Grid Structures}}                                                                     \\
+		\multicolumn{6}{|c|}{\textit{Large-Scale Grid Structures}}                                                               \\
 		\hline
-		grid 4$\times$4        & 16         & 4,613,504               & 5.981606          & \textbf{1,297}     & 512 B               \\
-		grid 5$\times$5        & 25         & 81,920,000              & 171.683820        & \textbf{2,096}     & 655 B               \\
+		grid 4$\times$4    & 16         & 4,613,504               & 5.981606          & \textbf{1,297}     & 512 B               \\
+		grid 5$\times$5    & 25         & 81,920,000              & 171.683820        & \textbf{2,096}     & 655 B               \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Complex Graphs}}                                                                                  \\
+		\multicolumn{6}{|c|}{\textit{Complex Graphs}}                                                                            \\
 		\hline
-		complex                & 13         & 1,282,136               & 2.130338          & 1,662              & 315 B               \\
-		graph V13F4            & 13         & 4,236,574               & 6.324251          & 1,493              & 315 B               \\
-		graph V13F4 v2         & 13         & 10,225,274              & 16.541969         & 1,618              & 630 B               \\
-		graph V15F5            & 15         & 89,897,864              & 146.879791        & 1,634              & 546 B               \\
+		complex            & 13         & 1,282,136               & 2.130338          & 1,662              & 315 B               \\
+		graph V13F4        & 13         & 4,236,574               & 6.324251          & 1,493              & 315 B               \\
+		graph V13F4 v2     & 13         & 10,225,274              & 16.541969         & 1,618              & 630 B               \\
+		graph V15F5        & 15         & 89,897,864              & 146.879791        & 1,634              & 546 B               \\
 		\hline
-		\multicolumn{6}{|c|}{\textit{Medium Graphs}}                                                                                   \\
+		\multicolumn{6}{|c|}{\textit{Medium Graphs}}                                                                             \\
 		\hline
-		graph V11F3            & 11         & 672,902                 & 1.025228          & 1,524              & 372 B               \\
-		graph V9E10F3          & 9          & 13,880                  & 0.026242          & 1,891              & 455 B               \\
-		graph V12E25F12        & 12         & 62                      & 0.000080          & 1,297              & 682 B               \\
+		graph V11F3        & 11         & 672,902                 & 1.025228          & 1,524              & 372 B               \\
+		graph V9E10F3      & 9          & 13,880                  & 0.026242          & 1,891              & 455 B               \\
+		graph V12E25F12    & 12         & 62                      & 0.000080          & 1,297              & 682 B               \\
 		\hline
 	\end{tabular}
 \end{table}

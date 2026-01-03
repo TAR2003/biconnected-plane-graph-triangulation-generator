@@ -36,7 +36,6 @@
 \newlabel{sec:preliminaries}{{2}{3}{Preliminaries}{section.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Two distinct triangulations of a cycle}}{4}{figure.caption.5}\protected@file@percent }
 \newlabel{fig:disticttriangulationsofacycle}{{4}{4}{Two distinct triangulations of a cycle}{figure.caption.5}{}}
-\newlabel{def:elementary_ops}{{1}{4}{Elementary Operation}{definition.1}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}The Algorithm}{4}{section.3}\protected@file@percent }
 \newlabel{sec:algorithm}{{3}{4}{The Algorithm}{section.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Algorithm Overview}{4}{subsection.3.1}\protected@file@percent }
@@ -48,8 +47,8 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Root Triangulation}{6}{subsubsection.3.3.1}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Root triangulation with safe root vertex 1. Chords from vertex 1 to all non-neighboring vertices (3, 4, 5) form a fan structure, ensuring no multi-edge conflicts with previously added chords.}}{6}{figure.caption.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Local Genealogical Tree Structure}{6}{subsubsection.3.3.2}\protected@file@percent }
-\newlabel{def:generating_chord}{{2}{6}{Generating Chord}{definition.2}{}}
-\newlabel{def:parent_child}{{3}{6}{Parent-Child Relationship}{definition.3}{}}
+\newlabel{def:generating_chord}{{1}{6}{Generating Chord}{definition.1}{}}
+\newlabel{def:parent_child}{{2}{6}{Parent-Child Relationship}{definition.2}{}}
 \newlabel{fig:lower_bound_hex1}{{6a}{6}{Child Triangulation}{figure.caption.7}{}}
 \newlabel{sub@fig:lower_bound_hex1}{{a}{6}{Child Triangulation}{figure.caption.7}{}}
 \newlabel{fig:lower_bound_hex2}{{6b}{6}{Parent Triangulation}{figure.caption.7}{}}
@@ -115,28 +114,28 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.3}Main Time Complexity Theorem}{16}{subsubsection.5.2.3}\protected@file@percent }
 \newlabel{thm:time_complexity}{{6}{17}{Amortized Constant Time}{theorem.6}{}}
 \newlabel{cor:linear_time}{{7}{18}{Amortized Linear Time}{theorem.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Space Complexity}{18}{subsection.5.3}\protected@file@percent }
-\newlabel{thm:space_complexity}{{8}{18}{Linear Space Complexity}{theorem.8}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them.}}{19}{figure.caption.23}\protected@file@percent }
-\newlabel{fig:space_complexity}{{17}{19}{Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them}{figure.caption.23}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Complexity Summary}{19}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Space Complexity}{19}{subsection.5.3}\protected@file@percent }
+\newlabel{thm:space_complexity}{{8}{19}{Linear Space Complexity}{theorem.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them.}}{20}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:space_complexity}{{17}{20}{Space complexity breakdown. All data structures use $O(n)$ space: vertex/face information, global chord set $S$ (bounded by planarity), recursion stack (bounded by Euler's formula), and current triangulation storage. Critically, space usage is independent of the number of triangulations $T$, which can be exponential in $n$. The algorithm generates triangulations on-the-fly without storing all of them}{figure.caption.23}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Complexity Summary}{20}{subsection.5.4}\protected@file@percent }
 \citation{avis1996}
 \citation{parvez2011}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Complexity Summary}}{20}{table.caption.24}\protected@file@percent }
-\newlabel{tab:complexity_summary}{{3}{20}{Complexity Summary}{table.caption.24}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Experimental Validation}{21}{section.6}\protected@file@percent }
-\newlabel{sec:experiments}{{6}{21}{Experimental Validation}{section.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Experimental Setup}{21}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Performance Results}{22}{subsection.6.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Representative Performance Results (Table 4: Time \& Space Analysis)}}{22}{table.caption.25}\protected@file@percent }
-\newlabel{tab:timing_results_part1}{{4}{22}{Representative Performance Results (Table 4: Time \& Space Analysis)}{table.caption.25}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Summary}{22}{subsection.6.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Complexity Summary}}{21}{table.caption.24}\protected@file@percent }
+\newlabel{tab:complexity_summary}{{3}{21}{Complexity Summary}{table.caption.24}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Experimental Validation}{22}{section.6}\protected@file@percent }
+\newlabel{sec:experiments}{{6}{22}{Experimental Validation}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Experimental Setup}{22}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Performance Results}{23}{subsection.6.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Representative Performance Results (Table 4: Time \& Space Analysis)}}{23}{table.caption.25}\protected@file@percent }
+\newlabel{tab:timing_results_part1}{{4}{23}{Representative Performance Results (Table 4: Time \& Space Analysis)}{table.caption.25}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Summary}{23}{subsection.6.3}\protected@file@percent }
 \citation{parvez2011}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Additional Test Cases (Table 5)}}{23}{table.caption.26}\protected@file@percent }
-\newlabel{tab:timing_results_part2}{{5}{23}{Additional Test Cases (Table 5)}{table.caption.26}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion and Future Work}{23}{section.7}\protected@file@percent }
-\newlabel{sec:conclusion}{{7}{23}{Conclusion and Future Work}{section.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Key Achievements}{23}{subsection.7.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Additional Test Cases (Table 5)}}{24}{table.caption.26}\protected@file@percent }
+\newlabel{tab:timing_results_part2}{{5}{24}{Additional Test Cases (Table 5)}{table.caption.26}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion and Future Work}{24}{section.7}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{24}{Conclusion and Future Work}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Key Achievements}{24}{subsection.7.1}\protected@file@percent }
 \citation{parvez2011}
 \bibstyle{plain}
 \bibdata{references}
@@ -149,9 +148,9 @@
 \bibcite{hurtado1999}{7}
 \bibcite{kozminski1985}{8}
 \bibcite{li2001}{9}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Theoretical Significance}{24}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Theoretical Significance}{25}{subsection.7.2}\protected@file@percent }
 \bibcite{nishizeki2004}{10}
 \bibcite{parvez2011}{11}
 \bibcite{read1978}{12}
 \bibcite{sleator1988}{13}
-\gdef \@abspage@last{25}
+\gdef \@abspage@last{26}
