@@ -34,114 +34,117 @@
 \newlabel{fig:occurranceofmultiedge}{{3}{3}{The left graph is biconnected, where $(3,7)$ has the possibility of becoming a multi-edge, but in the right graph, $(3,7)$ cannot be a multi-edge because it is a triconnected graph}{figure.caption.4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Preliminaries}{3}{section.2}\protected@file@percent }
 \newlabel{sec:preliminaries}{{2}{3}{Preliminaries}{section.2}{}}
+\citation{parvez2011}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Two distinct triangulations of a cycle}}{4}{figure.caption.5}\protected@file@percent }
 \newlabel{fig:disticttriangulationsofacycle}{{4}{4}{Two distinct triangulations of a cycle}{figure.caption.5}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}The Algorithm}{4}{section.3}\protected@file@percent }
 \newlabel{sec:algorithm}{{3}{4}{The Algorithm}{section.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Algorithm Overview}{4}{subsection.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Four hexagons showing transformation paths in the genealogical tree. Top: Root triangulation with chords $(1,3)$, $(1,4)$, $(1,5)$. Middle: After flipping $(1,4)$, we obtain chord $(3,5)$. Bottom-left: From middle, flipping $(1,5)$ yields $(3,6)$. Bottom-right: From middle, flipping $(1,3)$ yields $(2,5)$. Each transformation involves flipping exactly one generating chord (red), demonstrating the parent-child relationships in the local genealogical tree.}}{5}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:four_hexagons_arrows}{{5}{5}{Four hexagons showing transformation paths in the genealogical tree. Top: Root triangulation with chords $(1,3)$, $(1,4)$, $(1,5)$. Middle: After flipping $(1,4)$, we obtain chord $(3,5)$. Bottom-left: From middle, flipping $(1,5)$ yields $(3,6)$. Bottom-right: From middle, flipping $(1,3)$ yields $(2,5)$. Each transformation involves flipping exactly one generating chord (red), demonstrating the parent-child relationships in the local genealogical tree}{figure.caption.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Key Innovations}{5}{subsection.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Innovation 1: Local Genealogical Trees}{5}{subsubsection.3.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Innovation 2: Safe Root Vertex Selection}{5}{subsubsection.3.2.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Innovation 3: Dynamic Global Chord Management}{5}{subsubsection.3.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Innovation 2: Safe Root Vertex Selection}{6}{subsubsection.3.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Innovation 3: Dynamic Global Chord Management}{6}{subsubsection.3.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Core Concepts}{6}{subsection.3.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Root Triangulation}{6}{subsubsection.3.3.1}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Root triangulation with safe root vertex 1. Chords from vertex 1 to all non-neighboring vertices (3, 4, 5) form a fan structure, ensuring no multi-edge conflicts with previously added chords.}}{6}{figure.caption.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Local Genealogical Tree Structure}{6}{subsubsection.3.3.2}\protected@file@percent }
-\newlabel{def:generating_chord}{{1}{6}{Generating Chord}{definition.1}{}}
-\newlabel{def:parent_child}{{2}{6}{Parent-Child Relationship}{definition.2}{}}
-\newlabel{fig:lower_bound_hex1}{{6a}{6}{Child Triangulation}{figure.caption.7}{}}
-\newlabel{sub@fig:lower_bound_hex1}{{a}{6}{Child Triangulation}{figure.caption.7}{}}
-\newlabel{fig:lower_bound_hex2}{{6b}{6}{Parent Triangulation}{figure.caption.7}{}}
-\newlabel{sub@fig:lower_bound_hex2}{{b}{6}{Parent Triangulation}{figure.caption.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Get the child triangulation from parent triangulation from flipping a generating set}}{6}{figure.caption.7}\protected@file@percent }
-\newlabel{fig:hexagons}{{6}{6}{Get the child triangulation from parent triangulation from flipping a generating set}{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Root triangulation with safe root vertex 1. Chords from vertex 1 to all non-neighboring vertices (3, 4, 5) form a fan structure, ensuring no multi-edge conflicts with previously added chords.}}{7}{figure.caption.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Local Genealogical Tree Structure}{7}{subsubsection.3.3.2}\protected@file@percent }
+\newlabel{def:generating_chord}{{1}{7}{Generating Chord}{definition.1}{}}
+\newlabel{def:parent_child}{{2}{7}{Parent-Child Relationship}{definition.2}{}}
+\newlabel{fig:lower_bound_hex1}{{7a}{7}{Child Triangulation}{figure.caption.8}{}}
+\newlabel{sub@fig:lower_bound_hex1}{{a}{7}{Child Triangulation}{figure.caption.8}{}}
+\newlabel{fig:lower_bound_hex2}{{7b}{7}{Parent Triangulation}{figure.caption.8}{}}
+\newlabel{sub@fig:lower_bound_hex2}{{b}{7}{Parent Triangulation}{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Get the child triangulation from parent triangulation from flipping a generating set}}{7}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:hexagons}{{7}{7}{Get the child triangulation from parent triangulation from flipping a generating set}{figure.caption.8}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Algorithm Specification}{7}{subsection.3.4}\protected@file@percent }
 \@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces FindAllTriangulations}}{7}{algorithm.1}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces FindSafeRootTriangulation}}{7}{algorithm.2}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces FindAllTriangulationsCycle}}{7}{algorithm.3}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces FindAllChildTriangulationsCycle}}{8}{algorithm.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Correctness and Completeness}{8}{section.4}\protected@file@percent }
-\newlabel{sec:correctness}{{4}{8}{Correctness and Completeness}{section.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Completeness via Strategic Pruning}{8}{subsection.4.1}\protected@file@percent }
-\newlabel{proof:pruning}{{4.1}{8}{Completeness via Strategic Pruning}{subsection.4.1}{}}
-\newlabel{lem:blocking_persistence}{{1}{8}{Blocking Chord Persistence}{theorem.1}{}}
-\newlabel{thm:completeness}{{2}{9}{Completeness}{theorem.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Existence of Safe Root Vertices}{9}{subsection.4.2}\protected@file@percent }
-\newlabel{proof:saferoot}{{4.2}{9}{Existence of Safe Root Vertices}{subsection.4.2}{}}
-\newlabel{thm:safe_root_exists}{{3}{9}{Existence of Safe Root Vertices}{theorem.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Four hexagons showing transformation paths in the genealogical tree. Top: Root triangulation with chords $(1,3)$, $(1,4)$, $(1,5)$. Middle: After flipping $(1,4)$, we obtain chord $(3,5)$. Bottom-left: From middle, flipping $(1,5)$ yields $(3,6)$. Bottom-right: From middle, flipping $(1,3)$ yields $(2,5)$. Each transformation involves flipping exactly one generating chord (red), demonstrating the parent-child relationships in the local genealogical tree.}}{10}{figure.caption.12}\protected@file@percent }
-\newlabel{fig:four_hexagons_arrows}{{7}{10}{Four hexagons showing transformation paths in the genealogical tree. Top: Root triangulation with chords $(1,3)$, $(1,4)$, $(1,5)$. Middle: After flipping $(1,4)$, we obtain chord $(3,5)$. Bottom-left: From middle, flipping $(1,5)$ yields $(3,6)$. Bottom-right: From middle, flipping $(1,3)$ yields $(2,5)$. Each transformation involves flipping exactly one generating chord (red), demonstrating the parent-child relationships in the local genealogical tree}{figure.caption.12}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces A face with $k$ vertices}}{11}{figure.caption.13}\protected@file@percent }
-\newlabel{fig:face_k_vertices}{{8}{11}{A face with $k$ vertices}{figure.caption.13}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Hexagon with $v_i$-$v_j$ edge completely outside}}{11}{figure.caption.14}\protected@file@percent }
-\newlabel{fig:hexagon_outer_edge}{{9}{11}{Hexagon with $v_i$-$v_j$ edge completely outside}{figure.caption.14}{}}
-\newlabel{fig:path4_above}{{10a}{12}{Partial structure}{figure.caption.15}{}}
-\newlabel{sub@fig:path4_above}{{a}{12}{Partial structure}{figure.caption.15}{}}
-\newlabel{fig:path4_below}{{10b}{12}{Partial structure}{figure.caption.15}{}}
-\newlabel{sub@fig:path4_below}{{b}{12}{Partial structure}{figure.caption.15}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces (a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots  , v_{j-1}\}$ and $\{v_{j+1}, \ldots  , v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}}{12}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:path4_both}{{10}{12}{(a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots , v_{j-1}\}$ and $\{v_{j+1}, \ldots , v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex}{figure.caption.15}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces $T_1$ structure}}{12}{figure.caption.16}\protected@file@percent }
-\newlabel{fig:T1_structure}{{11}{12}{$T_1$ structure}{figure.caption.16}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces $T_2$ structure}}{12}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:T2_structure}{{12}{12}{$T_2$ structure}{figure.caption.17}{}}
-\newlabel{fig:T1_24}{{13a}{13}{$T_1$ with chord 2--4}{figure.caption.18}{}}
-\newlabel{sub@fig:T1_24}{{a}{13}{$T_1$ with chord 2--4}{figure.caption.18}{}}
-\newlabel{fig:T1_13}{{13b}{13}{$T_1$ with chord 1--3}{figure.caption.18}{}}
-\newlabel{sub@fig:T1_13}{{b}{13}{$T_1$ with chord 1--3}{figure.caption.18}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces $T_1$ structures with different chords}}{13}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:T1_structures}{{13}{13}{$T_1$ structures with different chords}{figure.caption.18}{}}
-\newlabel{fig:firstcase}{{14a}{13}{new $T_m$ ($m < k$)}{figure.caption.19}{}}
-\newlabel{sub@fig:firstcase}{{a}{13}{new $T_m$ ($m < k$)}{figure.caption.19}{}}
-\newlabel{fig:Tk_structure}{{14b}{13}{$T_k$ structure}{figure.caption.19}{}}
-\newlabel{sub@fig:Tk_structure}{{b}{13}{$T_k$ structure}{figure.caption.19}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Comparison of $T_k$ and $T_m$ structures.}}{13}{figure.caption.19}\protected@file@percent }
-\newlabel{fig:merged_structures}{{14}{13}{Comparison of $T_k$ and $T_m$ structures}{figure.caption.19}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Complexity Analysis}{13}{section.5}\protected@file@percent }
-\newlabel{sec:complexity}{{5}{13}{Complexity Analysis}{section.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Lower Bound on the Number of Triangulations}{13}{subsection.5.1}\protected@file@percent }
-\newlabel{lem:min_triangulations}{{4}{13}{Minimum Triangulations per Face}{theorem.4}{}}
-\newlabel{fig:hex1}{{15a}{14}{Triangulation with vertex 3 as root}{figure.caption.20}{}}
-\newlabel{sub@fig:hex1}{{a}{14}{Triangulation with vertex 3 as root}{figure.caption.20}{}}
-\newlabel{fig:hex2}{{15b}{14}{Triangulation with vertex 1 as root}{figure.caption.20}{}}
-\newlabel{sub@fig:hex2}{{b}{14}{Triangulation with vertex 1 as root}{figure.caption.20}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces The path difference from one root configurationq to another}}{14}{figure.caption.20}\protected@file@percent }
-\newlabel{fig:thepathdifference}{{15}{14}{The path difference from one root configurationq to another}{figure.caption.20}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Time Complexity}{15}{subsection.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Cost Model}{15}{subsubsection.5.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Minimum Triangulations Guarantee}{15}{subsubsection.5.2.2}\protected@file@percent }
-\newlabel{lem:min_triangulations_simplified}{{5}{15}{Minimum Triangulations}{theorem.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Empirical Triangulation Counts for Simple Polygons}}{16}{table.caption.21}\protected@file@percent }
-\newlabel{tab:triangulation_counts}{{2}{16}{Empirical Triangulation Counts for Simple Polygons}{table.caption.21}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.3}Main Time Complexity Theorem}{16}{subsubsection.5.2.3}\protected@file@percent }
-\newlabel{thm:time_complexity}{{6}{16}{Amortized Constant Time}{theorem.6}{}}
-\newlabel{cor:linear_time}{{7}{18}{Amortized Linear Time}{theorem.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Space Complexity}{18}{subsection.5.3}\protected@file@percent }
-\newlabel{thm:space_complexity}{{8}{18}{Linear Space Complexity}{theorem.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Complexity Summary}{19}{subsection.5.4}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces FindSafeRootTriangulation}}{8}{algorithm.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces FindAllTriangulationsCycle}}{8}{algorithm.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces FindAllChildTriangulationsCycle}}{9}{algorithm.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Correctness and Completeness}{9}{section.4}\protected@file@percent }
+\newlabel{sec:correctness}{{4}{9}{Correctness and Completeness}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Completeness via Strategic Pruning}{9}{subsection.4.1}\protected@file@percent }
+\newlabel{proof:pruning}{{4.1}{9}{Completeness via Strategic Pruning}{subsection.4.1}{}}
+\newlabel{lem:blocking_persistence}{{1}{9}{Blocking Chord Persistence}{theorem.1}{}}
+\newlabel{thm:completeness}{{2}{10}{Completeness}{theorem.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Existence of Safe Root Vertices}{10}{subsection.4.2}\protected@file@percent }
+\newlabel{proof:saferoot}{{4.2}{10}{Existence of Safe Root Vertices}{subsection.4.2}{}}
+\newlabel{thm:safe_root_exists}{{3}{10}{Existence of Safe Root Vertices}{theorem.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Four hexagons showing transformation paths in the genealogical tree. Top: Root triangulation with chords $(1,3)$, $(1,4)$, $(1,5)$. Middle: After flipping $(1,4)$, we obtain chord $(3,5)$. Bottom-left: From middle, flipping $(1,5)$ yields $(3,6)$. Bottom-right: From middle, flipping $(1,3)$ yields $(2,5)$. Each transformation involves flipping exactly one generating chord (red), demonstrating the parent-child relationships in the local genealogical tree.}}{11}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:four_hexagons_arrows}{{8}{11}{Four hexagons showing transformation paths in the genealogical tree. Top: Root triangulation with chords $(1,3)$, $(1,4)$, $(1,5)$. Middle: After flipping $(1,4)$, we obtain chord $(3,5)$. Bottom-left: From middle, flipping $(1,5)$ yields $(3,6)$. Bottom-right: From middle, flipping $(1,3)$ yields $(2,5)$. Each transformation involves flipping exactly one generating chord (red), demonstrating the parent-child relationships in the local genealogical tree}{figure.caption.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces A face with $k$ vertices}}{12}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:face_k_vertices}{{9}{12}{A face with $k$ vertices}{figure.caption.14}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Hexagon with $v_i$-$v_j$ edge completely outside}}{12}{figure.caption.15}\protected@file@percent }
+\newlabel{fig:hexagon_outer_edge}{{10}{12}{Hexagon with $v_i$-$v_j$ edge completely outside}{figure.caption.15}{}}
+\newlabel{fig:path4_above}{{11a}{13}{Partial structure}{figure.caption.16}{}}
+\newlabel{sub@fig:path4_above}{{a}{13}{Partial structure}{figure.caption.16}{}}
+\newlabel{fig:path4_below}{{11b}{13}{Partial structure}{figure.caption.16}{}}
+\newlabel{sub@fig:path4_below}{{b}{13}{Partial structure}{figure.caption.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces (a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots  , v_{j-1}\}$ and $\{v_{j+1}, \ldots  , v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex.}}{13}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:path4_both}{{11}{13}{(a) and (b) show two separate structures formed by vertices $\{v_{i+1}, \ldots , v_{j-1}\}$ and $\{v_{j+1}, \ldots , v_{i-1}\}$, respectively. Each structure is a simple path, ensuring that at least one endpoint in each structure can serve as a safe root vertex}{figure.caption.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces $T_1$ structure}}{13}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:T1_structure}{{12}{13}{$T_1$ structure}{figure.caption.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces $T_2$ structure}}{13}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:T2_structure}{{13}{13}{$T_2$ structure}{figure.caption.18}{}}
+\newlabel{fig:T1_24}{{14a}{14}{$T_1$ with chord 2--4}{figure.caption.19}{}}
+\newlabel{sub@fig:T1_24}{{a}{14}{$T_1$ with chord 2--4}{figure.caption.19}{}}
+\newlabel{fig:T1_13}{{14b}{14}{$T_1$ with chord 1--3}{figure.caption.19}{}}
+\newlabel{sub@fig:T1_13}{{b}{14}{$T_1$ with chord 1--3}{figure.caption.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces $T_1$ structures with different chords}}{14}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:T1_structures}{{14}{14}{$T_1$ structures with different chords}{figure.caption.19}{}}
+\newlabel{fig:firstcase}{{15a}{14}{new $T_m$ ($m < k$)}{figure.caption.20}{}}
+\newlabel{sub@fig:firstcase}{{a}{14}{new $T_m$ ($m < k$)}{figure.caption.20}{}}
+\newlabel{fig:Tk_structure}{{15b}{14}{$T_k$ structure}{figure.caption.20}{}}
+\newlabel{sub@fig:Tk_structure}{{b}{14}{$T_k$ structure}{figure.caption.20}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Comparison of $T_k$ and $T_m$ structures.}}{14}{figure.caption.20}\protected@file@percent }
+\newlabel{fig:merged_structures}{{15}{14}{Comparison of $T_k$ and $T_m$ structures}{figure.caption.20}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Complexity Analysis}{14}{section.5}\protected@file@percent }
+\newlabel{sec:complexity}{{5}{14}{Complexity Analysis}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Lower Bound on the Number of Triangulations}{14}{subsection.5.1}\protected@file@percent }
+\newlabel{lem:min_triangulations}{{4}{14}{Minimum Triangulations per Face}{theorem.4}{}}
+\newlabel{fig:hex1}{{16a}{15}{Triangulation with vertex 3 as root}{figure.caption.21}{}}
+\newlabel{sub@fig:hex1}{{a}{15}{Triangulation with vertex 3 as root}{figure.caption.21}{}}
+\newlabel{fig:hex2}{{16b}{15}{Triangulation with vertex 1 as root}{figure.caption.21}{}}
+\newlabel{sub@fig:hex2}{{b}{15}{Triangulation with vertex 1 as root}{figure.caption.21}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces The path difference from one root configurationq to another}}{15}{figure.caption.21}\protected@file@percent }
+\newlabel{fig:thepathdifference}{{16}{15}{The path difference from one root configurationq to another}{figure.caption.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Time Complexity}{16}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Cost Model}{16}{subsubsection.5.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}Minimum Triangulations Guarantee}{16}{subsubsection.5.2.2}\protected@file@percent }
+\newlabel{lem:min_triangulations_simplified}{{5}{16}{Minimum Triangulations}{theorem.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Empirical Triangulation Counts for Simple Polygons}}{17}{table.caption.22}\protected@file@percent }
+\newlabel{tab:triangulation_counts}{{2}{17}{Empirical Triangulation Counts for Simple Polygons}{table.caption.22}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.3}Main Time Complexity Theorem}{17}{subsubsection.5.2.3}\protected@file@percent }
+\newlabel{thm:time_complexity}{{6}{17}{Amortized Constant Time}{theorem.6}{}}
+\newlabel{cor:linear_time}{{7}{19}{Amortized Linear Time}{theorem.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Space Complexity}{19}{subsection.5.3}\protected@file@percent }
+\newlabel{thm:space_complexity}{{8}{19}{Linear Space Complexity}{theorem.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Complexity Summary}{20}{subsection.5.4}\protected@file@percent }
 \citation{avis1996}
 \citation{parvez2011}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Complexity Summary}}{20}{table.caption.22}\protected@file@percent }
-\newlabel{tab:complexity_summary}{{3}{20}{Complexity Summary}{table.caption.22}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Complexity Summary}}{21}{table.caption.23}\protected@file@percent }
+\newlabel{tab:complexity_summary}{{3}{21}{Complexity Summary}{table.caption.23}{}}
 \citation{parvez2011}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Experimental Validation}{21}{section.6}\protected@file@percent }
-\newlabel{sec:experiments}{{6}{21}{Experimental Validation}{section.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Experimental Setup}{21}{subsection.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Performance Results}{21}{subsection.6.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Summary}{21}{subsection.6.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Representative Performance Results (Table 4: Time \& Space Analysis)}}{22}{table.caption.23}\protected@file@percent }
-\newlabel{tab:timing_results_part1}{{4}{22}{Representative Performance Results (Table 4: Time \& Space Analysis)}{table.caption.23}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Additional Test Cases (Table 5)}}{22}{table.caption.24}\protected@file@percent }
-\newlabel{tab:timing_results_part2}{{5}{22}{Additional Test Cases (Table 5)}{table.caption.24}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Experimental Validation}{22}{section.6}\protected@file@percent }
+\newlabel{sec:experiments}{{6}{22}{Experimental Validation}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Experimental Setup}{22}{subsection.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Performance Results}{22}{subsection.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Summary}{22}{subsection.6.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Representative Performance Results (Table 4: Time \& Space Analysis)}}{23}{table.caption.24}\protected@file@percent }
+\newlabel{tab:timing_results_part1}{{4}{23}{Representative Performance Results (Table 4: Time \& Space Analysis)}{table.caption.24}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Additional Test Cases (Table 5)}}{23}{table.caption.25}\protected@file@percent }
+\newlabel{tab:timing_results_part2}{{5}{23}{Additional Test Cases (Table 5)}{table.caption.25}{}}
 \citation{parvez2011}
 \bibstyle{plain}
 \bibdata{references}
 \bibcite{avis1996}{1}
 \bibcite{chazelle1991}{2}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusions}{23}{section.7}\protected@file@percent }
-\newlabel{sec:conclusion}{{7}{23}{Conclusions}{section.7}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Key Achievements}{23}{subsection.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Theoretical Significance}{23}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusions}{24}{section.7}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{24}{Conclusions}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Key Achievements}{24}{subsection.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Theoretical Significance}{24}{subsection.7.2}\protected@file@percent }
 \bibcite{berg2008}{3}
 \bibcite{diestel2017}{4}
 \bibcite{hanke1996}{5}
@@ -153,4 +156,4 @@
 \bibcite{parvez2011}{11}
 \bibcite{read1978}{12}
 \bibcite{sleator1988}{13}
-\gdef \@abspage@last{24}
+\gdef \@abspage@last{25}
