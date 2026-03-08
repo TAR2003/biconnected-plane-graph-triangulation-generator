@@ -154,12 +154,12 @@ public:
         {
             GS.push_back(c);
             itr = prev(GS.end());
-            c->chordItr = itr; // Update the iterator of the chord
+            c->chordItrGS = itr; // Update the iterator of the chord
         }
         else
         { // If there are more edges in the generating set
-            itr = GS.insert(next_chord->chordItr, c);
-            c->chordItr = itr; // Update the iterator of the chord
+            itr = GS.insert(next_chord->chordItrGS, c);
+            c->chordItrGS = itr; // Update the iterator of the chord
         }
         flip(itr); // Flip back the edge to restore the original state
     }

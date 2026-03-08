@@ -14,6 +14,8 @@ public:
     list<Edge *> chords;
     /// @brief the generating set of the cycle
     list<Edge *> GS;
+    /// @brief the list of all edges in the cycle (for memory management)
+    list<Edge *> VGS;
     /// @brief the vertex number of the cycle
     int n;
     /// @brief set of all present chords in the original graph (reference to shared set)
@@ -36,7 +38,6 @@ public:
     {
         findSafeRoot();
     }
-
 
     /// @brief the destructor of the class
     ~FaceTriangulation()
@@ -130,25 +131,61 @@ public:
     }
 
     /// @brief Flips the edge pointed to by the iterator in the generating set
-    /// @param itr Iterator pointing to the edge to be flipped
-    void flip(list<Edge *>::iterator itr)
+    /// @param itrVGS Iterator pointing to the edge to be flipped
+    void flip(list<Edge *>::iterator itrVGS)
     {
-        Edge *e = *itr; // Edge to be flipped
+        cout << "flip started" << endl;
+        Edge *e = *itrVGS; // Edge to be flipped
 
         // Store the values BEFORE flipping
         pair<int, int> newChord = make_pair(e->opposite_first, e->opposite_second); // New chord after flip
         pair<int, int> oldChord = make_pair(e->first, e->second);                   // Old chord before flip
-
+        auto itr = e->chordItrGS; // Corresponding iterator in the generating set
         // Update neighbors with the stored values
         if (next(itr) != GS.end())
+        {
             flipit(itr, next(itr), newChord, oldChord); // if it is not the last edge, update the next edge
-        if (itr != GS.begin())
-            flipit(itr, prev(itr), newChord, oldChord); // if it is not the first edge, update the previous edge
+            auto nextItrGSChord = *(next(itr));
+            if(present.find(getPair(nextItrGSChord)) == present.end() && present.find(getOppositePair(nextItrGSChord)) != present.end())
+            {
+                cout << "Need to erase some chord " << endl;
+                VGS.erase(nextItrGSChord->chordItrVGS); // if the next edge becomes invalid, remove it from the list of all edges
+            }
 
+            if (present.find(getPair(nextItrGSChord)) != present.end() && present.find(getOppositePair(nextItrGSChord)) == present.end())
+            {
+                cout << "insetion operation" << endl;
+                auto insertpos = next(e->chordItrVGS);
+                VGS.insert(insertpos, nextItrGSChord); // if the next edge becomes valid, add it to the list of all edges
+                cout << "inserrtion finished" << endl;
+                nextItrGSChord->chordItrVGS = prev(insertpos); // update the iterator of the chord
+            }
+        }
+        if (itr != GS.begin())
+        {
+            flipit(itr, prev(itr), newChord, oldChord); // if it is not the first edge, update the previous edge
+            auto prevItrGSChord = *(prev(itr));
+            if(present.find(getPair(prevItrGSChord)) == present.end() && present.find(getOppositePair(prevItrGSChord)) != present.end())
+            {
+                cout << "Need to erase VGS chord " << endl;
+                VGS.erase(prevItrGSChord->chordItrVGS); // if the previous edge becomes invalid, remove it from the list of all edges
+                cout << "successfully erased" << endl;
+            }
+            if(present.find(getPair(prevItrGSChord)) != present.end() && present.find(getOppositePair(prevItrGSChord)) == present.end())
+            {
+                cout << "insertion operation" << endl;
+                auto insertpos = e->chordItrVGS;
+                VGS.insert(insertpos, prevItrGSChord); // if the previous edge becomes valid, add it to the list of all edges
+                cout << "Insertion finished" << endl;
+                prevItrGSChord->chordItrVGS = prev(insertpos); // update the iterator of the chord
+            }
+        }
         // Now flip the edge
+        cout << "internal operation done in dflip" << endl;
         present.erase(getPair(e));
         e->flip();
         present.insert(getPair(e));
+        cout << "flip finished" << endl;
     }
 
     /// @brief adds the current triangulation to the list of all triangulations
@@ -167,62 +204,90 @@ public:
 
     /// @brief Generates child triangulations by flipping the edge pointed to by the iterator
     /// @param itr Iterator pointing to the edge to be flipped
-    void generateChildTriangulations(list<Edge *>::iterator &itr)
+    void generateChildTriangulations(list<Edge *>::iterator &itrVGS)
     {
-        flip(itr);              // Flip the edge at the current iterator, and update neighbors accordingly
-        bool lastChord = false; // Flag to check if the current edge is the last in the generating set
-        Edge *next_chord;       // Pointer to the next chord in the generating set
-        if (next(itr) == GS.end())
+        flip(itrVGS);                       // Flip the edge at the current iterator, and update neighbors accordingly
+        bool lastChordGS = false;           // Flag to check if the current edge is the last in the generating set
+        bool lastChordVGS = false;          // Flag to check if the current edge is the last in the list of all edges
+        Edge *next_chord_gs;                // Pointer to the next chord in the generating set
+        Edge *next_chord_vgs;               // Pointer to the next chord in the list of all valid generating set
+        auto itrGS = (*itrVGS)->chordItrGS; // Get the corresponding iterator in the generating set
+        if (next(itrGS) == GS.end())
         {
-            lastChord = true; // If it is the last edge, set the flag to true
+            lastChordGS = true; // If it is the last edge, set the flag to true
         }
         else
         {
-            next_chord = *next(itr); // Get the next chord
+            next_chord_gs = *next(itrGS); // Get the next chord
         }
-        Edge *c = *itr;                 // Current chord to be processed
+
+        if (next(itrVGS) == VGS.end())
+        {
+            lastChordVGS = true; // If it is the last edge, set the flag to true
+        }
+        else
+        {
+            next_chord_vgs = *next(itrVGS); // Get the next valid chord
+        }
+
+        Edge *c = *itrVGS;              // Current chord to be processed
         list<Edge *>::iterator itrloop; // Iterator for looping through the generating set
-        if (itr == GS.begin())
+        if (itrVGS == VGS.begin())
         {
-            itrloop = next(itr); // if it is the first edge, start from the next edge
+            itrloop = next(itrVGS); // if it is the first edge, start from the next edge
         }
         else
         {
-            itrloop = prev(itr); // else start from the previous edge
-        }
-
-        GS.erase(itr); // Remove the current edge from the generating set
-        auto itr_begin = GS.begin();
-
-        // Determine the leftmost blocking endpoint
-        int leftmost_blocking_b = min(c->first, c->second);
-
-        // addTriangulation(); 
-        output();
-
-        for (; itrloop != GS.end(); itrloop++)
-        {
-            // Recursively generate child triangulations for edges that can block the current edge
-            if (present.find(getOppositePair(*itrloop)) == present.end())
+            auto prevItrVGS = prev(itrVGS);
+            if ((*prevItrVGS)->second == min(c->first, c->second))
             {
-
-                generateChildTriangulations(itrloop);
+                itrloop = prevItrVGS; // if the immidiate previous edge has the same second vertex, start from the previous edge
+            }
+            else
+            {
+                itrloop = next(itrVGS); // else start from the next edge
             }
         }
-        if (lastChord) // If the current edge was the last in the generating set
+
+        GS.erase(itrGS);   // Remove the current edge from the generating set
+        VGS.erase(itrVGS); // Remove the current edge from the list of all edges
+
+        output();
+
+        for (; itrloop != VGS.end(); itrloop++)
+        {
+            // Recursively generate child triangulations for edges that can block the current edge
+            generateChildTriangulations(itrloop);
+        }
+        if (lastChordGS) // If the current edge was the last in the generating set
         {
             // cout << "last chord" << endl;
             GS.push_back(c);
-            itr = prev(GS.end());
-            c->chordItr = itr; // Update the iterator of the chord
+            itrGS = prev(GS.end());
+            c->chordItrGS = itrGS; // Update the iterator of the chord
         }
         else
-        { 
+        {
             // If there are more edges in the generating set
-            itr = GS.insert(next_chord->chordItr, c);
-            c->chordItr = itr; // Update the iterator of the chord
+            itrGS = GS.insert(next_chord_gs->chordItrGS, c);
+            c->chordItrGS = itrGS; // Update the iterator of the chord
         }
-        flip(itr); // Flip back the edge to restore the original state
+
+        if (lastChordVGS) // If the current edge was the last in the list of all edges
+        {
+            // cout << "last chord" << endl;
+            VGS.push_back(c);
+            itrVGS = prev(VGS.end());
+            c->chordItrVGS = itrVGS; // Update the iterator of the chord
+        }
+        else
+        {
+            // If there are more edges in the generating set
+            itrVGS = VGS.insert(next_chord_vgs->chordItrVGS, c);
+            c->chordItrVGS = itrVGS; // Update the iterator of the chord
+        }
+
+        flip(itrVGS); // Flip back the edge to restore the original state
     }
 
     /// @brief generates all triangulations of the cycle
@@ -234,17 +299,26 @@ public:
             GS.push_back(e);                              // adding the edge to the generating set
             chords.push_back(e);                          // adding the edge to the list of all chords
             present.insert(getPair(e));                   // marking the edge as present in the original graph
-            auto itr = prev(GS.end());
-            e->chordItr = itr;                            // setting the iterator of the chord
+            auto itrGS = prev(GS.end());
+            e->chordItrGS = itrGS; // setting the iterator of the chord
+            if (present.find(getOppositePair(e)) == present.end())
+            {
+                e->isValid = true;
+                VGS.push_back(e); // adding the edge to the list of all edges for memory management
+                auto itrVGS = prev(VGS.end());
+                e->chordItrVGS = itrVGS; // setting the iterator of the chord
+            }
+            else
+            {
+                e->isValid = false;
+            }
+            
         }
         // addTriangulation(); // adding the initial root triangulation
         output();
-        for (auto itr = GS.begin(); itr != GS.end(); itr++)
+        for (auto itr = VGS.begin(); itr != VGS.end(); itr++)
         {
-            if (present.find(getOppositePair(*itr)) == present.end())
-            {
-                generateChildTriangulations(itr); // generating child triangulations recursively
-            }
+            generateChildTriangulations(itr); // generating child triangulations recursively
         }
 
         for (auto &chord : chords)
