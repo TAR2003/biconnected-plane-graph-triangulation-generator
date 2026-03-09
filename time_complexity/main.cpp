@@ -255,7 +255,8 @@ int main()
         double memoryPerVertex = (distinctVertices > 0) ? (double)peakMemory / distinctVertices : 0.0;
 
         results.push_back({filename, distinctVertices, totalTriang, avgTime, perTriangNs, peakMemory, memoryPerVertex});
-        out << "✓\n";
+        // print completion with timing and triangulation count
+        out << "✓ (" << totalTriang << " triang, " << fixed << setprecision(6) << avgTime << " s)\n";
     }
 
     // ========================================================================
