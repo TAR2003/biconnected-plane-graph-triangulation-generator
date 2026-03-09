@@ -48,6 +48,41 @@ public:
         }
     }
 
+
+    void printSet(list<Edge *> &s)
+    {
+        cout << "=============================================" << endl;
+        cout << "First the position list" << endl;
+        for (auto &edge : s)
+        {
+            cout << "(" << edge->first << ", " << edge->second << ") , ";
+        }
+        cout << endl;
+
+        cout << "Now the original list" << endl;
+        for (auto &edge : s)
+        {
+            cout << "(" << positions[edge->first] << ", " << positions[edge->second] << ") , ";
+        }
+        cout << endl;
+        cout << "=============================================" << endl;
+    }
+
+    void printPresent()
+    {
+        cout << "Printing the present set" << endl;
+        for (auto &edge : present)
+        {
+            cout << "(" << edge.first << ", " << edge.second << ") , ";
+        }
+        cout << endl;
+    }
+
+    void printPair(pair<int, int> p)
+    {
+        cout << " (" << p.first << ", " << p.second << ") ";
+    }
+
     pair<int, int> getPair(Edge *e)
     {
         return {min(positions[e->first], positions[e->second]), max(positions[e->first], positions[e->second])};
@@ -144,15 +179,27 @@ public:
         // Update neighbors with the stored values
         if (next(itr) != GS.end())
         {
+
+            auto oldPair = getOppositePair(*next(itr));
             flipit(itr, next(itr), newChord, oldChord); // if it is not the last edge, update the next edge
+            auto newPair = getOppositePair(*next(itr));
             auto nextItrGSChord = *(next(itr));
-            if (present.find(getPair(nextItrGSChord)) == present.end() && present.find(getOppositePair(nextItrGSChord)) != present.end())
+
+            printPresent();
+            cout << "before pair: ";
+            printPair(getPair(nextItrGSChord));
+            cout << " before opposite pair: ";
+            printPair(getOppositePair(nextItrGSChord));
+            cout << endl;
+
+            if (present.find(oldPair) == present.end() && present.find(newPair) != present.end())
             {
+
                 cout << "Need to erase some chord " << endl;
                 VGS.erase(nextItrGSChord->chordItrVGS); // if the next edge becomes invalid, remove it from the list of all edges
             }
 
-            if (present.find(getPair(nextItrGSChord)) != present.end() && present.find(getOppositePair(nextItrGSChord)) == present.end())
+            if (present.find(oldPair) != present.end() && present.find(newPair) == present.end())
             {
                 cout << "insetion operation" << endl;
                 auto insertpos = next(e->chordItrVGS);
@@ -163,15 +210,25 @@ public:
         }
         if (itr != GS.begin())
         {
+            auto oldPair = getOppositePair(*prev(itr));
             flipit(itr, prev(itr), newChord, oldChord); // if it is not the first edge, update the previous edge
+            auto newPair = getOppositePair(*prev(itr));
             auto prevItrGSChord = *(prev(itr));
-            if (present.find(getPair(prevItrGSChord)) == present.end() && present.find(getOppositePair(prevItrGSChord)) != present.end())
+
+            printPresent();
+            cout << "before pair: ";
+            printPair(getPair(prevItrGSChord));
+            cout << " before opposite pair: ";
+            printPair(getOppositePair(prevItrGSChord));
+            cout << endl;
+
+            if (present.find(oldPair) == present.end() && present.find(newPair) != present.end())
             {
                 cout << "Need to erase VGS chord " << endl;
                 VGS.erase(prevItrGSChord->chordItrVGS); // if the previous edge becomes invalid, remove it from the list of all edges
                 cout << "successfully erased" << endl;
             }
-            if (present.find(getPair(prevItrGSChord)) != present.end() && present.find(getOppositePair(prevItrGSChord)) == present.end())
+            if (present.find(oldPair) != present.end() && present.find(newPair) == present.end())
             {
                 cout << "insertion operation" << endl;
                 auto insertpos = e->chordItrVGS;
@@ -206,7 +263,18 @@ public:
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &itrVGS)
     {
+        cout << "Printing the set before the 1st flipping" << endl;
+        printSet(GS);
+        printSet(VGS);
+
+        cout << "now fipping the chord L " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
         flip(itrVGS);                       // Flip the edge at the current iterator, and update neighbors accordingly
+
+        cout << "printing the generating set after flip" << endl;
+        printSet(GS);
+        cout << "printing the valid generating set after the flip" << endl;
+        printSet(VGS);
+
         bool lastChordGS = false;           // Flag to check if the current edge is the last in the generating set
         bool lastChordVGS = false;          // Flag to check if the current edge is the last in the list of all edges
         Edge *next_chord_gs;                // Pointer to the next chord in the generating set
@@ -252,6 +320,11 @@ public:
         GS.erase(itrGS);   // Remove the current edge from the generating set
         VGS.erase(itrVGS); // Remove the current edge from the list of all edges
 
+        cout << "After removing the set" << endl;
+        printSet(GS);
+        cout << "After removing the valid set" << endl;
+        printSet(VGS);
+
         output();
 
         for (; itrloop != VGS.end(); itrloop++)
@@ -287,7 +360,17 @@ public:
             c->chordItrVGS = itrVGS; // Update the iterator of the chord
         }
 
+        cout << "printing the generating set after restoring" << endl;
+        printSet(GS);
+        cout << "printing the valid generating set after the operation" << endl;
+        printSet(VGS);
+
+
         flip(itrVGS); // Flip back the edge to restore the original state
+
+        cout << "flip back finished, after the flip 2nd" << endl;
+        printSet(GS);
+        printSet(VGS);
     }
 
     /// @brief generates all triangulations of the cycle
@@ -313,6 +396,17 @@ public:
                 e->isValid = false;
             }
         }
+
+        cout << "Print positions" << endl;
+        for (int i = 0; i < n; i++)
+        {
+            cout << positions[i] << " ";
+        }
+        cout << endl;
+        cout << "printing the initial GS" << endl;
+        printSet(GS);
+        cout << "printing the initial VGS" << endl;
+        printSet(VGS);
         // addTriangulation(); // adding the initial root triangulation
         output();
         for (auto itr = VGS.begin(); itr != VGS.end(); itr++)
