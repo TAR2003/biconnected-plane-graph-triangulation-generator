@@ -156,6 +156,39 @@ int main()
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
+    // open output file for results
+    std::ofstream resFile("results.txt");
+    if (!resFile.is_open())
+    {
+        cerr << "Error: could not create results.txt\n";
+        return 1;
+    }
+
+    // create a streambuf that duplicates writes to both cout and the file
+    struct tee_buf : std::streambuf
+    {
+        std::streambuf *sb1, *sb2;
+        tee_buf(std::streambuf *s1, std::streambuf *s2) : sb1(s1), sb2(s2) {}
+        int overflow(int c) override
+        {
+            if (c == EOF)
+                return !EOF;
+            // write to both streams; ignore file errors
+            int r1 = sb1->sputc(c);
+            sb2->sputc(c);
+            return (r1 == EOF) ? EOF : c;
+        }
+        int sync() override
+        {
+            int r1 = sb1->pubsync();
+            int r2 = sb2->pubsync();
+            return (r1 == 0 && r2 == 0) ? 0 : -1;
+        }
+    } tbuf(cout.rdbuf(), resFile.rdbuf());
+
+    // use a separate ostream so we don't disturb std::cout's buffer
+    std::ostream out(&tbuf);
+
     string folder = "input";
     const int testRuns = 1;
     vector<BenchmarkResult> results;
@@ -166,12 +199,12 @@ int main()
         return 1;
     }
 
-    cout << "\n";
-    cout << "╔════════════════════════════════════════════════════════════════════════════╗\n";
-    cout << "║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║\n";
-    cout << "╚════════════════════════════════════════════════════════════════════════════╝\n";
-    cout << "\nScanning folder: " << folder << "\n";
-    cout << "Test runs per file: " << testRuns << "\n\n";
+    out << "\n";
+    out << "╔════════════════════════════════════════════════════════════════════════════╗\n";
+    out << "║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║\n";
+    out << "╚════════════════════════════════════════════════════════════════════════════╝\n";
+    out << "\nScanning folder: " << folder << "\n";
+    out << "Test runs per file: " << testRuns << "\n\n";
 
     for (const auto &entry : fs::directory_iterator(folder))
     {
@@ -179,7 +212,7 @@ int main()
             continue;
 
         string filename = entry.path().filename().string();
-        cout << "⏳ Processing: " << filename << " ... " << flush;
+        out << "⏳ Processing: " << filename << " ... " << flush;
 
         int distinctVertices = 0;
         vector<vector<int>> faces = input(entry.path().string(), distinctVertices);
@@ -222,17 +255,17 @@ int main()
         double memoryPerVertex = (distinctVertices > 0) ? (double)peakMemory / distinctVertices : 0.0;
 
         results.push_back({filename, distinctVertices, totalTriang, avgTime, perTriangNs, peakMemory, memoryPerVertex});
-        cout << "✓\n";
+        out << "✓\n";
     }
 
     // ========================================================================
     // PRINT RESULTS TABLE
     // ========================================================================
-    cout << "\n";
-    cout << "╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n";
-    cout << "║                                                    BENCHMARK RESULTS                                                               ║\n";
-    cout << "╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣\n";
-    cout << "║ " << "\033[1m" << left << setw(25) << "File"
+    out << "\n";
+    out << "╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n";
+    out << "║                                                    BENCHMARK RESULTS                                                               ║\n";
+    out << "╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣\n";
+    out << "║ " << "\033[1m" << left << setw(25) << "File"
          << "\033[0m║ " << "\033[1m" << right << setw(10) << "Vertices"
          << "\033[0m║ " << "\033[1m" << right << setw(15) << "Triangulations"
          << "\033[0m║ " << "\033[1m" << right << setw(12) << "Time (s)"
@@ -240,7 +273,7 @@ int main()
          << "\033[0m║ " << "\033[1m" << right << setw(15) << "Peak Memory"
          << "\033[0m║ " << "\033[1m" << right << setw(22) << "Memory/Vertex"
          << "\033[0m║\n";
-    cout << "╠═══════════════════════════╬════════════╬═════════════════╬══════════════╬═══════════════╬═════════════════╬════════════════════════╣\n";
+    out << "╠═══════════════════════════╬════════════╬═════════════════╬══════════════╬═══════════════╬═════════════════╬════════════════════════╣\n";
 
     for (size_t i = 0; i < results.size(); i++)
     {
@@ -255,7 +288,7 @@ int main()
                                                         : // < 10KB/vertex
                               "\033[31m";                 // >= 10KB/vertex
 
-        cout << "║ " << left << setw(25) << r.filename.substr(0, 25)
+        out << "║ " << left << setw(25) << r.filename.substr(0, 25)
              << "║ " << right << setw(10) << r.distinctVertices
              << "║ " << right << setw(15) << r.totalTriang
              << "║ " << timeColor << right << setw(12) << fixed << setprecision(6) << r.avgTime << "\033[0m"
@@ -265,26 +298,70 @@ int main()
              << "║\n";
     }
 
-    cout << "╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝\n";
+    out << "╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝\n";
 
     // ========================================================================
     // COMPLEXITY ANALYSIS
     // ========================================================================
-    cout << "\n";
-    cout << "╔════════════════════════════════════════════════════════════════════════════╗\n";
-    cout << "║                         COMPLEXITY ANALYSIS                                ║\n";
-    cout << "╠════════════════════════════════════════════════════════════════════════════╣\n";
-    cout << "║  Time Complexity:  Varies with triangulation count (see ns/Triang)        ║\n";
-    cout << "║  Space Complexity: O(n) where n = number of vertices                      ║\n";
-    cout << "║                    (measured precisely via RSS at byte-level)             ║\n";
-    cout << "╠════════════════════════════════════════════════════════════════════════════╣\n";
-    cout << "║  Color Legend:                                                             ║\n";
-    cout << "║    \033[32m● Green\033[0m  = Excellent performance                                         ║\n";
-    cout << "║    \033[33m● Yellow\033[0m = Moderate performance                                          ║\n";
-    cout << "║    \033[31m● Red\033[0m    = High resource usage                                           ║\n";
-    cout << "╚════════════════════════════════════════════════════════════════════════════╝\n";
-    cout << "\nNote: Results averaged over " << testRuns << " runs per file.\n";
-    cout << "      Memory measured at byte precision (using /proc/self/smaps_rollup where available).\n";
+    out << "\n";
+    out << "╔════════════════════════════════════════════════════════════════════════════╗\n";
+    out << "║                         COMPLEXITY ANALYSIS                                ║\n";
+    out << "╠════════════════════════════════════════════════════════════════════════════╣\n";
+    out << "║  Time Complexity:  Varies with triangulation count (see ns/Triang)        ║\n";
+    out << "║  Space Complexity: O(n) where n = number of vertices                      ║\n";
+    out << "║                    (measured precisely via RSS at byte-level)             ║\n";
+    out << "╠════════════════════════════════════════════════════════════════════════════╣\n";
+    out << "║  Color Legend:                                                             ║\n";
+    out << "║    \033[32m● Green\033[0m  = Excellent performance                                         ║\n";
+    out << "║    \033[33m● Yellow\033[0m = Moderate performance                                          ║\n";
+    out << "║    \033[31m● Red\033[0m    = High resource usage                                           ║\n";
+    out << "╚════════════════════════════════════════════════════════════════════════════╝\n";
+    out << "\nNote: Results averaged over " << testRuns << " runs per file.\n";
+    out << "      Memory measured at byte precision (using /proc/self/smaps_rollup where available).\n";
+
+    // Close the file stream associated with out, then clean ANSI codes from results.txt
+    resFile.close();
+    {
+        std::ifstream in("results.txt");
+        std::string content((std::istreambuf_iterator<char>(in)), {});
+        in.close();
+
+        std::string cleaned;
+        cleaned.reserve(content.size());
+        bool esc = false;
+        for (char ch : content)
+        {
+            if (!esc)
+            {
+                if (ch == '\033')
+                {
+                    esc = true;
+                }
+                else
+                {
+                    cleaned.push_back(ch);
+                }
+            }
+            else
+            {
+                // already in escape; skip until we hit a terminating byte
+                // CSI sequences begin with '['; treat it as part of the escape,
+                // not as a terminator.
+                if (ch == '[')
+                {
+                    // stay in escape
+                }
+                else if (ch >= '@' && ch <= '~')
+                {
+                    // final byte reached, end escape state
+                    esc = false;
+                }
+                // otherwise keep skipping characters inside escape
+            }
+        }
+        std::ofstream out("results.txt");
+        out << cleaned;
+    }
 
     return 0;
 }

@@ -1,0 +1,79 @@
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Scanning folder: input
+Test runs per file: 1
+
+⏳ Processing: C04_square_cycle.txt ... ✓
+⏳ Processing: graph_V6E7F3_4.txt ... ✓
+⏳ Processing: graph_V8E15F8.txt ... ✓
+⏳ Processing: W5_wheel_2.txt ... ✓
+⏳ Processing: simple3.txt ... ✓
+⏳ Processing: square7.txt ... ✓
+⏳ Processing: C07_heptagon_cycle.txt ... ✓
+⏳ Processing: C10_decagon_cycle.txt ... ✓
+⏳ Processing: quadrilateral_7quad.txt ... ✓
+⏳ Processing: square8.txt ... ✓
+⏳ Processing: C05_pentagon_cycle.txt ... ✓
+⏳ Processing: graph_V7E11F5.txt ... ✓
+⏳ Processing: trople_rectangle.txt ... ✓
+⏳ Processing: C06_hexagon_cycle_1.txt ... ✓
+⏳ Processing: graph_V6E7F3_3.txt ... ✓
+⏳ Processing: C08_octagon_cycle.txt ... ✓
+⏳ Processing: graph_V6E7F3_1.txt ... ✓
+⏳ Processing: graph_V6E7F3_2.txt ... ✓
+⏳ Processing: C09_nonagon_cycle.txt ... ✓
+⏳ Processing: graph_V8E10F4.txt ... ✓
+⏳ Processing: graph_V7E9F3.txt ... ✓
+⏳ Processing: quadrilateral_4quad.txt ... ✓
+⏳ Processing: graph_V9E10F3.txt ... ✓
+⏳ Processing: square_with_pentagon.txt ... ✓
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                    BENCHMARK RESULTS                                                               ║
+╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣
+║ File                     ║   Vertices║  Triangulations║     Time (s)║     ns/Triang║     Peak Memory║          Memory/Vertex║
+╠═══════════════════════════╬════════════╬═════════════════╬══════════════╬═══════════════╬═════════════════╬════════════════════════╣
+║ C04_square_cycle.txt     ║          4║               2║     0.000009║       4671.50║         4.00 KB║                1.00 KB║
+║ graph_V6E7F3_4.txt       ║          6║              20║     0.000064║       3189.90║         4.00 KB║               682.00 B║
+║ graph_V8E15F8.txt        ║          8║               5║     0.000020║       4087.80║          0.00 B║                 0.00 B║
+║ W5_wheel_2.txt           ║          6║               5║     0.000012║       2455.40║          0.00 B║                 0.00 B║
+║ simple3.txt              ║          5║               4║     0.000019║       4865.25║         4.00 KB║               819.00 B║
+║ square7.txt              ║          9║              36║     0.000108║       3008.75║          0.00 B║                 0.00 B║
+║ C07_heptagon_cycle.txt   ║          7║             546║     0.001286║       2355.60║          0.00 B║                 0.00 B║
+║ C10_decagon_cycle.txt    ║         10║          474180║     1.283334║       2706.43║         8.00 KB║               819.00 B║
+║ quadrilateral_7quad.txt  ║          9║              72║     0.000235║       3257.93║         4.00 KB║               455.00 B║
+║ square8.txt              ║         10║              48║     0.000292║       6089.04║          0.00 B║                 0.00 B║
+║ C05_pentagon_cycle.txt   ║          5║              10║     0.000036║       3634.20║          0.00 B║                 0.00 B║
+║ graph_V7E11F5.txt        ║          7║               7║     0.000022║       3170.86║          0.00 B║                 0.00 B║
+║ trople_rectangle.txt     ║          5║               4║     0.000015║       3748.50║         4.00 KB║               819.00 B║
+║ C06_hexagon_cycle_1.txt  ║          6║              68║     0.000204║       2994.53║         4.00 KB║               682.00 B║
+║ graph_V6E7F3_3.txt       ║          6║              20║     0.000060║       2995.75║          0.00 B║                 0.00 B║
+║ C08_octagon_cycle.txt    ║          8║            4872║     0.013353║       2740.84║          0.00 B║                 0.00 B║
+║ graph_V6E7F3_1.txt       ║          6║              20║     0.000142║       7121.20║          0.00 B║                 0.00 B║
+║ graph_V6E7F3_2.txt       ║          6║              24║     0.000125║       5209.42║          0.00 B║                 0.00 B║
+║ C09_nonagon_cycle.txt    ║          9║           46782║     0.136952║       2927.45║          0.00 B║                 0.00 B║
+║ graph_V8E10F4.txt        ║          8║              40║     0.000142║       3551.60║         4.00 KB║               512.00 B║
+║ graph_V7E9F3.txt         ║          7║               9║     0.000029║       3195.33║          0.00 B║                 0.00 B║
+║ quadrilateral_4quad.txt  ║          9║              16║     0.000044║       2748.88║          0.00 B║                 0.00 B║
+║ graph_V9E10F3.txt        ║          9║           13880║     0.049446║       3562.39║          0.00 B║                 0.00 B║
+║ square_with_pentagon.txt ║          5║               4║     0.000018║       4423.50║          0.00 B║                 0.00 B║
+╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                         COMPLEXITY ANALYSIS                                ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║  Time Complexity:  Varies with triangulation count (see ns/Triang)        ║
+║  Space Complexity: O(n) where n = number of vertices                      ║
+║                    (measured precisely via RSS at byte-level)             ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║  Color Legend:                                                             ║
+║    ● Green  = Excellent performance                                         ║
+║    ● Yellow = Moderate performance                                          ║
+║    ● Red    = High resource usage                                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Note: Results averaged over 1 runs per file.
+      Memory measured at byte precision (using /proc/self/smaps_rollup where available).
