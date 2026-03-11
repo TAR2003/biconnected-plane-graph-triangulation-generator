@@ -430,63 +430,71 @@ int main()
     // use a separate ostream so we don't disturb std::cout's buffer
     std::ostream out(&tbuf);
 
-    string folder = "input";
-    const int testRuns = 10; // run count for robust statistics (plus one warm-up)
+
+    // Define the folders and run counts
+    struct FolderGroup {
+        string folder;
+        int runs;
+        string label;
+    };
+    vector<FolderGroup> groups = {
+        {"graphs/small", 10, "small"},
+        {"graphs/medium", 3, "medium"},
+        {"graphs/big", 1, "big"}
+    };
+
     vector<BenchmarkResult> results;
-    unordered_set<string> processed; // filenames already benchmarked
-
-    // try to read previous CSV results; any entries will be included in `results`
+    unordered_set<string> processed;
     readPreviousResults("results.csv", results, processed);
-
-    if (!fs::exists(folder) || !fs::is_directory(folder))
-    {
-        cerr << "Folder '" << folder << "' does not exist or is not a directory.\n";
-        return 1;
-    }
 
     out << "\n";
     out << "╔════════════════════════════════════════════════════════════════════════════╗\n";
     out << "║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║\n";
     out << "╚════════════════════════════════════════════════════════════════════════════╝\n";
-    out << "\nScanning folder: " << folder << "\n";
-    out << "Test runs per file: " << testRuns << "\n\n";
 
-    // collect and sort filenames in directory
-    vector<string> fileList;
-    for (const auto &entry : fs::directory_iterator(folder))
-    {
-        if (!entry.is_regular_file())
-            continue;
-        fileList.push_back(entry.path().filename().string());
-    }
-    sort(fileList.begin(), fileList.end());
+    for (const auto& group : groups) {
+        string folder = group.folder;
+        int testRuns = group.runs;
+        out << "\nScanning folder: " << folder << "\n";
+        out << "Test runs per file: " << testRuns << "\n\n";
 
-    for (const auto &filename : fileList)
-    {
-        string fullpath = folder + "/" + filename;
-
-        // already have a result? skip computation and just keep existing data
-        if (processed.find(filename) != processed.end())
-        {
-            out << "⇢ Skipping already-processed file: " << filename << "\n";
+        if (!fs::exists(folder) || !fs::is_directory(folder)) {
+            cerr << "Folder '" << folder << "' does not exist or is not a directory.\n";
             continue;
         }
 
-        out << "⏳ Processing: " << filename << " ... " << flush;
-
-        int distinctVertices = 0;
-        vector<vector<int>> faces = input(fullpath, distinctVertices);
-
-        if (faces.empty())
-        {
-            cerr << "\n⚠️  Warning: Skipping empty or invalid file: " << filename << endl;
-            continue;
+        vector<string> fileList;
+        for (const auto &entry : fs::directory_iterator(folder)) {
+            if (!entry.is_regular_file())
+                continue;
+            fileList.push_back(entry.path().filename().string());
         }
+        sort(fileList.begin(), fileList.end());
 
-        u128 totalTriang = 0;
-        long double totalTimeSum = 0.0L;
-        size_t peakMemory = 0;
-        vector<double> times;
+        for (const auto &filename : fileList) {
+            string fullpath = folder + "/" + filename;
+
+            if (processed.find(filename) != processed.end()) {
+                out << "⇢ Skipping already-processed file: " << filename << "\n";
+                continue;
+            }
+
+            out << "⏳ Processing: " << filename << " ... " << flush;
+
+            int distinctVertices = 0;
+            vector<vector<int>> faces = input(fullpath, distinctVertices);
+
+            if (faces.empty()) {
+                cerr << "\n⚠️  Warning: Skipping empty or invalid file: " << filename << endl;
+                continue;
+            }
+
+            u128 totalTriang = 0;
+            long double totalTimeSum = 0.0L;
+            size_t peakMemory = 0;
+            vector<double> times;
+            // ...existing code...
+            // (The rest of the benchmarking loop remains unchanged)
 
         // warm-up run (populate caches, discard result)
         {
