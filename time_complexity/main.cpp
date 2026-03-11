@@ -7,6 +7,24 @@ using namespace std;
 #include <filesystem>
 #include <chrono>
 
+using u128 = unsigned __int128;
+
+// helper to convert 128-bit numbers to string (decimal)
+static string u128_to_string(u128 x)
+{
+    if (x == 0)
+        return "0";
+    string s;
+    while (x > 0)
+    {
+        int digit = (int)(x % 10);
+        s.push_back('0' + digit);
+        x /= 10;
+    }
+    reverse(s.begin(), s.end());
+    return s;
+}
+
 namespace fs = std::filesystem;
 
 // ============================================================================
@@ -141,9 +159,9 @@ struct BenchmarkResult
 {
     string filename;
     int distinctVertices;
-    uint64_t totalTriang;
+    u128 totalTriang;                 // may exceed 64 bits
     double avgTime;
-    double perTriangNs;
+    long double perTriangNs;          // higher precision for tiny values
     size_t peakMemory;
     double memoryPerVertex;
 };
@@ -223,7 +241,7 @@ int main()
             continue;
         }
 
-        uint64_t totalTriang = 0;
+        u128 totalTriang = 0;
         long double totalTimeSum = 0.0L;
         size_t peakMemory = 0;
 
@@ -250,13 +268,13 @@ int main()
         }
 
         double avgTime = (double)(totalTimeSum / testRuns);
-        double avgTimeNs = avgTime * 1'000'000'000.0;
-        double perTriangNs = (totalTriang > 0) ? avgTimeNs / totalTriang : 0.0;
+        long double avgTimeNs = (long double)avgTime * 1'000'000'000.0L;
+        long double perTriangNs = (totalTriang > 0) ? avgTimeNs / (long double)totalTriang : 0.0L;
         double memoryPerVertex = (distinctVertices > 0) ? (double)peakMemory / distinctVertices : 0.0;
 
         results.push_back({filename, distinctVertices, totalTriang, avgTime, perTriangNs, peakMemory, memoryPerVertex});
         // print completion with timing and triangulation count
-        out << "✓ (" << totalTriang << " triang, " << fixed << setprecision(6) << avgTime << " s)\n";
+        out << "✓ (" << u128_to_string(totalTriang) << " triang, " << fixed << setprecision(6) << avgTime << " s)\n";
     }
 
     // ========================================================================
@@ -268,9 +286,9 @@ int main()
     out << "╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣\n";
     out << "║ " << "\033[1m" << left << setw(25) << "File"
          << "\033[0m║ " << "\033[1m" << right << setw(10) << "Vertices"
-         << "\033[0m║ " << "\033[1m" << right << setw(15) << "Triangulations"
+         << "\033[0m║ " << "\033[1m" << right << setw(20) << "Triangulations"
          << "\033[0m║ " << "\033[1m" << right << setw(12) << "Time (s)"
-         << "\033[0m║ " << "\033[1m" << right << setw(13) << "ns/Triang"
+         << "\033[0m║ " << "\033[1m" << right << setw(16) << "ns/Triang"
          << "\033[0m║ " << "\033[1m" << right << setw(15) << "Peak Memory"
          << "\033[0m║ " << "\033[1m" << right << setw(22) << "Memory/Vertex"
          << "\033[0m║\n";
@@ -289,11 +307,12 @@ int main()
                                                         : // < 10KB/vertex
                               "\033[31m";                 // >= 10KB/vertex
 
+        string triStr = u128_to_string(r.totalTriang);
         out << "║ " << left << setw(25) << r.filename.substr(0, 25)
              << "║ " << right << setw(10) << r.distinctVertices
-             << "║ " << right << setw(15) << r.totalTriang
+             << "║ " << right << setw(20) << triStr
              << "║ " << timeColor << right << setw(12) << fixed << setprecision(6) << r.avgTime << "\033[0m"
-             << "║ " << right << setw(13) << fixed << setprecision(2) << r.perTriangNs
+             << "║ " << right << setw(16) << scientific << setprecision(4) << (double)r.perTriangNs << "\033[0m"
              << "║ " << memColor << right << setw(15) << formatBytes(r.peakMemory) << "\033[0m"
              << "║ " << memColor << right << setw(22) << formatBytes((size_t)r.memoryPerVertex) << "\033[0m"
              << "║\n";
