@@ -726,5 +726,8 @@ int main()
         out << cleaned;
     }
 
+    // end of outer group loop
+    }
+
     return 0;
 }

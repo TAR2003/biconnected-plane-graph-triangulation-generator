@@ -3,7 +3,7 @@
 ║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 
-Scanning folder: input
+Scanning folder: graphs/small
 Test runs per file: 10
 
 ⇢ Skipping already-processed file: C04_square_cycle.txt
@@ -11,10 +11,7 @@ Test runs per file: 10
 ⇢ Skipping already-processed file: C06_hexagon_cycle_1.txt
 ⇢ Skipping already-processed file: C07_heptagon_cycle.txt
 ⇢ Skipping already-processed file: C08_octagon_cycle.txt
-⇢ Skipping already-processed file: C09_nonagon_cycle.txt
-⇢ Skipping already-processed file: C10_decagon_cycle.txt
 ⇢ Skipping already-processed file: W5_wheel_2.txt
-⇢ Skipping already-processed file: graph_V11F3.txt
 ⇢ Skipping already-processed file: graph_V12E25F12.txt
 ⇢ Skipping already-processed file: graph_V6E7F3_1.txt
 ⇢ Skipping already-processed file: graph_V6E7F3_2.txt
@@ -24,15 +21,7 @@ Test runs per file: 10
 ⇢ Skipping already-processed file: graph_V7E9F3.txt
 ⇢ Skipping already-processed file: graph_V8E10F4.txt
 ⇢ Skipping already-processed file: graph_V8E15F8.txt
-⇢ Skipping already-processed file: graph_V9E10F3.txt
-⇢ Skipping already-processed file: quadrilateral_14quad.txt
 ⇢ Skipping already-processed file: quadrilateral_4quad.txt
-⇢ Skipping already-processed file: quadrilateral_7quad.txt
-⇢ Skipping already-processed file: simple3.txt
-⇢ Skipping already-processed file: square7.txt
-⇢ Skipping already-processed file: square8.txt
-⇢ Skipping already-processed file: square_with_pentagon.txt
-⇢ Skipping already-processed file: trople_rectangle.txt
 
 ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║                                                    BENCHMARK RESULTS                                                               ║
@@ -87,4 +76,4 @@ Note: Results averaged over 10 runs per file.
 (see results.html for charts)
 Data has been recorded in results.csv and an interactive report is available in results.html
 Attempting to create PNG plots (requires Python with pandas/matplotlib)...
-  Saved plots: avg_per_triangulation_mean.png, avg_per_triangulation_median.png, avg_per_triangulation_min.png, total_time_vs_triangulations_mean_error.png, graphs/total_time_vs_triangulations_global_range.png, graphs/total_time_vs_triangulations_smoothed.p  ng, total_time_vs_triangulations_median.png, total_time_vs_triangulations_min.png, total_time_vs_triangulations_max.png
+  Saved plots in 'graphs': avg_per_triangulation_mean.png, avg_per_triangulation_median.png, avg_per_triangulation_min.png, total_time_vs_triangulations_mean_error.png, total_time_vs_triangulations_global_range.png, total_time_vs_triangulations_smoothed.png  , total_time_vs_triangulations_median.png, total_time_vs_triangulations_min.png, total_time_vs_triangulations_max.png
