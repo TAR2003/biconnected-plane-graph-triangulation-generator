@@ -152,6 +152,22 @@ string formatBytes(size_t bytes)
     return oss.str();
 }
 
+// helper: format current system time as HH:MM:SS
+static string currentTimeString()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t t = std::chrono::system_clock::to_time_t(now);
+    std::tm tm;
+#ifdef _WIN32
+    localtime_s(&tm, &t);
+#else
+    localtime_r(&t, &tm);
+#endif
+    char buf[16];
+    std::strftime(buf, sizeof(buf), "%H:%M:%S", &tm);
+    return string(buf);
+}
+
 // ============================================================================
 // Struct to Hold Benchmark Result
 // ============================================================================
@@ -387,6 +403,8 @@ int main()
 
         for (int run = 1; run <= testRuns; run++)
         {
+            string startStr = currentTimeString();
+            out << "    run " << run << " start: " << startStr << "\n" << flush;
             size_t memBefore = getCurrentMemoryUsage();
 
             biconnected *bc = new biconnected(faces);
@@ -395,6 +413,9 @@ int main()
             auto start = clock::now();
             bc->getAllTriangulations();
             auto end = clock::now();
+
+            string endStr = currentTimeString();
+            out << "    run " << run << " end:   " << endStr << "\n" << flush;
 
             size_t memAfter = getCurrentMemoryUsage();
             size_t memUsed = (memAfter > memBefore) ? (memAfter - memBefore) : 0;
