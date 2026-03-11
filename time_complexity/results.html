@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Triangulation Benchmark</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head><body>
+<h1>Benchmark Charts</h1>
+<canvas id="timeChart" width="800" height="400"></canvas>
+<canvas id="memChart" width="800" height="400"></canvas>
+<canvas id="vertChart" width="800" height="400"></canvas>
+<script>
+const labels = ["graph_V18F6.txt","C04_square_cycle.txt","graph_V6E7F3_4.txt","graph_V8E15F8.txt","W5_wheel_2.txt","simple3.txt","square7.txt","C07_heptagon_cycle.txt","C10_decagon_cycle.txt","quadrilateral_7quad.txt","graph_V11F3.txt","graph_V12E25F12.txt","square8.txt","C05_pentagon_cycle.txt","graph_V7E11F5.txt","trople_rectangle.txt","C06_hexagon_cycle_1.txt","graph_V6E7F3_3.txt","C08_octagon_cycle.txt","graph_V6E7F3_1.txt","graph_V6E7F3_2.txt","C09_nonagon_cycle.txt","graph_V8E10F4.txt","C11_cycle.txt","graph_V7E9F3.txt","grid_4x4.txt","quadrilateral_4quad.txt","graph_V13F4_version_2.txt","graph_V9E10F3.txt","graph_V13F4.txt","square_with_pentagon.txt","quadrilateral_14quad.txt"];
+const timeData = {labels: labels, datasets:[{label:'avg time (s)',data:[0.123000,0.000026,0.000163,0.000042,0.000046,0.000040,0.000305,0.004868,2.580525,0.000563,3.806536,0.000443,0.000691,0.000113,0.000082,0.000040,0.000583,0.000142,0.032128,0.000148,0.000177,0.288590,0.000264,26.427236,0.000112,20.305840,0.000097,57.692241,0.118647,51.112828,0.000036,0.312828],borderColor:'blue',fill:false}]};
+const memData = {labels: labels, datasets:[{label:'mem/vertex (bytes)',data:[500.000000,0.000000,0.000000,0.000000,1365.333333,0.000000,0.000000,0.000000,0.000000,0.000000,372.363636,0.000000,819.200000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,682.666667,0.000000,0.000000,0.000000,1170.285714,256.000000,0.000000,0.000000,455.111111,315.076923,0.000000,512.000000],borderColor:'red',fill:false}]};
+const vertData = {labels: labels, datasets:[{label:'vertices',data:[10,4,6,8,6,5,9,7,10,9,11,12,10,5,7,5,6,6,8,6,6,9,8,11,7,16,9,13,9,13,5,16],borderColor:'green',fill:false}]};
+new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:timeData,options:{responsive:true,plugins:{title:{display:true,text:'Time per file'}}}});
+new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:memData,options:{responsive:true,plugins:{title:{display:true,text:'Memory/vertex per file'}}}});
+new Chart(document.getElementById('vertChart').getContext('2d'),{type:'line',data:vertData,options:{responsive:true,plugins:{title:{display:true,text:'Vertices per file'}}}});
+</script>
+</body></html>

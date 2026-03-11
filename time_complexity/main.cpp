@@ -160,11 +160,139 @@ struct BenchmarkResult
     string filename;
     int distinctVertices;
     u128 totalTriang;                 // may exceed 64 bits
+    string triangStr;                 // decimal representation (for CSV/HTML)
     double avgTime;
     long double perTriangNs;          // higher precision for tiny values
     size_t peakMemory;
     double memoryPerVertex;
 };
+
+// ---------------------------------------------------------------------------
+// CSV & HTML support helpers
+// ---------------------------------------------------------------------------
+
+// convert decimal string to u128
+static u128 parseU128(const string &s)
+{
+    u128 result = 0;
+    for (char c : s)
+    {
+        if (c >= '0' && c <= '9')
+            result = result * 10 + (u128)(c - '0');
+    }
+    return result;
+}
+
+// read existing results from CSV into results vector and processed set
+static void readPreviousResults(const string &csvName,
+                                vector<BenchmarkResult> &results,
+                                unordered_set<string> &processed)
+{
+    ifstream in(csvName);
+    if (!in.is_open())
+        return;
+    string line;
+    // skip header
+    if (!getline(in, line))
+        return;
+    while (getline(in, line))
+    {
+        if (line.empty())
+            continue;
+        // expected format:
+        // filename,vertices,triangulations,avgTime,perTriangNs,peakMemory,memoryPerVertex
+        stringstream ss(line);
+        BenchmarkResult r;
+        string field;
+        if (!getline(ss, r.filename, ','))
+            continue;
+        if (!getline(ss, field, ','))
+            continue;
+        r.distinctVertices = stoi(field);
+        if (!getline(ss, r.triangStr, ','))
+            continue;
+        r.totalTriang = parseU128(r.triangStr);
+        if (!getline(ss, field, ','))
+            continue;
+        r.avgTime = stod(field);
+        if (!getline(ss, field, ','))
+            continue;
+        r.perTriangNs = stold(field);
+        if (!getline(ss, field, ','))
+            continue;
+        r.peakMemory = stoull(field);
+        if (!getline(ss, field, ','))
+            continue;
+        r.memoryPerVertex = stod(field);
+        results.push_back(r);
+        processed.insert(r.filename);
+    }
+}
+
+// append a single result to CSV (creates file + header if missing)
+static void appendResultCSV(const string &csvName, const BenchmarkResult &r)
+{
+    bool needHeader = !fs::exists(csvName);
+    ofstream out(csvName, ios::app);
+    if (!out.is_open())
+        return;
+    if (needHeader)
+    {
+        out << "filename,vertices,triangulations,avgTime,perTriangNs,peakMemory,memoryPerVertex\n";
+    }
+    out << r.filename << ',' << r.distinctVertices << ',' << r.triangStr << ','
+        << fixed << setprecision(9) << r.avgTime << ','
+        << fixed << setprecision(0) << (double)r.perTriangNs << ','
+        << r.peakMemory << ',' << fixed << setprecision(6) << r.memoryPerVertex << '\n';
+}
+
+// generate a simple HTML report with charts using Chart.js
+static void generateHtml(const string &htmlName, const vector<BenchmarkResult> &results)
+{
+    ofstream out(htmlName);
+    if (!out.is_open())
+        return;
+    // build comma-separated arrays for JavaScript
+    string labels, verts, times, mems;
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+        // escape quotes in filename
+        string fn = results[i].filename;
+        for (char &c : fn)
+            if (c == '"')
+                c = '\'';
+        labels += '"' + fn + '"';
+        verts += to_string(results[i].distinctVertices);
+        times += to_string(results[i].avgTime);
+        mems += to_string(results[i].memoryPerVertex);
+        if (i + 1 < results.size())
+        {
+            labels += ',';
+            verts += ',';
+            times += ',';
+            mems += ',';
+        }
+    }
+    out << "<!DOCTYPE html>\n<html><head><meta charset=\"utf-8\">\n";
+    out << "<title>Triangulation Benchmark</title>\n";
+    out << "<script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>\n";
+    out << "</head><body>\n";
+    out << "<h1>Benchmark Charts</h1>\n";
+    out << "<canvas id=\"timeChart\" width=\"800\" height=\"400\"></canvas>\n";
+    out << "<canvas id=\"memChart\" width=\"800\" height=\"400\"></canvas>\n";
+    out << "<canvas id=\"vertChart\" width=\"800\" height=\"400\"></canvas>\n";
+    out << "<script>\n";
+    out << "const labels = [" << labels << "];\n";
+    out << "const timeData = {labels: labels, datasets:[{label:'avg time (s)',data:[" << times << "],borderColor:'blue',fill:false}]};\n";
+    out << "const memData = {labels: labels, datasets:[{label:'mem/vertex (bytes)',data:[" << mems << "],borderColor:'red',fill:false}]};\n";
+    out << "const vertData = {labels: labels, datasets:[{label:'vertices',data:[" << verts << "],borderColor:'green',fill:false}]};\n";
+    out << "new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:timeData,options:{responsive:true,plugins:{title:{display:true,text:'Time per file'}}}});\n";
+    out << "new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:memData,options:{responsive:true,plugins:{title:{display:true,text:'Memory/vertex per file'}}}});\n";
+    out << "new Chart(document.getElementById('vertChart').getContext('2d'),{type:'line',data:vertData,options:{responsive:true,plugins:{title:{display:true,text:'Vertices per file'}}}});\n";
+    out << "</script>\n";
+    out << "</body></html>\n";
+}
+
 
 // ============================================================================
 // Main Benchmark Function
@@ -210,6 +338,10 @@ int main()
     string folder = "input";
     const int testRuns = 1;
     vector<BenchmarkResult> results;
+    unordered_set<string> processed; // filenames already benchmarked
+
+    // try to read previous CSV results; any entries will be included in `results`
+    readPreviousResults("results.csv", results, processed);
 
     if (!fs::exists(folder) || !fs::is_directory(folder))
     {
@@ -230,6 +362,14 @@ int main()
             continue;
 
         string filename = entry.path().filename().string();
+
+        // already have a result? skip computation and just keep existing data
+        if (processed.find(filename) != processed.end())
+        {
+            out << "⇢ Skipping already-processed file: " << filename << "\n";
+            continue;
+        }
+
         out << "⏳ Processing: " << filename << " ... " << flush;
 
         int distinctVertices = 0;
@@ -272,9 +412,22 @@ int main()
         long double perTriangNs = (totalTriang > 0) ? avgTimeNs / (long double)totalTriang : 0.0L;
         double memoryPerVertex = (distinctVertices > 0) ? (double)peakMemory / distinctVertices : 0.0;
 
-        results.push_back({filename, distinctVertices, totalTriang, avgTime, perTriangNs, peakMemory, memoryPerVertex});
+        BenchmarkResult br;
+        br.filename = filename;
+        br.distinctVertices = distinctVertices;
+        br.totalTriang = totalTriang;
+        br.triangStr = u128_to_string(totalTriang);
+        br.avgTime = avgTime;
+        br.perTriangNs = perTriangNs;
+        br.peakMemory = peakMemory;
+        br.memoryPerVertex = memoryPerVertex;
+
+        results.push_back(br);
+        processed.insert(filename);
+        appendResultCSV("results.csv", br);
+
         // print completion with timing and triangulation count
-        out << "✓ (" << u128_to_string(totalTriang) << " triang, " << fixed << setprecision(6) << avgTime << " s)\n";
+        out << "✓ (" << br.triangStr << " triang, " << fixed << setprecision(6) << avgTime << " s)\n";
     }
 
     // ========================================================================
@@ -338,6 +491,37 @@ int main()
     out << "╚════════════════════════════════════════════════════════════════════════════╝\n";
     out << "\nNote: Results averaged over " << testRuns << " runs per file.\n";
     out << "      Memory measured at byte precision (using /proc/self/smaps_rollup where available).\n";
+
+    // generate interactive HTML summary
+    generateHtml("results.html", results);
+    out << "\n(see results.html for charts)\n";
+    out << "Data has been recorded in results.csv and an interactive report is available in results.html\n";
+    out << "Attempting to create PNG plots (requires Python with pandas/matplotlib)...\n";
+    // run external Python script if present
+    if (fs::exists("plot_results.py"))
+    {
+        // run python script and capture its stdout
+        FILE *pipe = popen("python3 plot_results.py results.csv 2>&1", "r");
+        if (!pipe)
+        {
+            out << "  (failed to launch plotting script)\n";
+        }
+        else
+        {
+            char buf[256];
+            while (fgets(buf, sizeof(buf), pipe))
+            {
+                out << "  " << buf; // indent output
+            }
+            int status = pclose(pipe);
+            if (status != 0)
+                out << "  (plotting script exited with code " << status << ")\n";
+        }
+    }
+    else
+    {
+        out << "  (plot_results.py not found; no PNGs created)\n";
+    }
 
     // Close the file stream associated with out, then clean ANSI codes from results.txt
     resFile.close();
