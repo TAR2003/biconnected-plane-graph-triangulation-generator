@@ -87,4 +87,4 @@ Note: Results averaged over 10 runs per file.
 (see results.html for charts)
 Data has been recorded in results.csv and an interactive report is available in results.html
 Attempting to create PNG plots (requires Python with pandas/matplotlib)...
-  Saved plots: avg_per_triangulation_mean.png, avg_per_triangulation_median.png, avg_per_triangulation_min.png, total_time_vs_triangulations_mean_error.png, total_time_vs_triangulations_median.png, total_time_vs_triangulations_min.png, total_time_vs_triangu  lations_max.png
+  Saved plots: avg_per_triangulation_mean.png, avg_per_triangulation_median.png, avg_per_triangulation_min.png, total_time_vs_triangulations_mean_error.png, graphs/total_time_vs_triangulations_global_range.png, graphs/total_time_vs_triangulations_smoothed.p  ng, total_time_vs_triangulations_median.png, total_time_vs_triangulations_min.png, total_time_vs_triangulations_max.png
