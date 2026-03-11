@@ -438,9 +438,9 @@ int main()
         string label;
     };
     vector<FolderGroup> groups = {
-        {"graphs/small", 10, "small"},
-        {"graphs/medium", 3, "medium"},
-        {"graphs/big", 1, "big"}
+        {"input/small", 10, "small"},
+        {"input/medium", 3, "medium"},
+        {"input/big", 1, "big"}
     };
 
     vector<BenchmarkResult> results;

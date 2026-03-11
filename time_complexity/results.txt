@@ -3,58 +3,879 @@
 ║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 
-Scanning folder: graphs/small
+Scanning folder: input/small
 Test runs per file: 10
 
-⇢ Skipping already-processed file: C04_square_cycle.txt
-⇢ Skipping already-processed file: C05_pentagon_cycle.txt
-⇢ Skipping already-processed file: C06_hexagon_cycle_1.txt
-⇢ Skipping already-processed file: C07_heptagon_cycle.txt
-⇢ Skipping already-processed file: C08_octagon_cycle.txt
-⇢ Skipping already-processed file: W5_wheel_2.txt
-⇢ Skipping already-processed file: graph_V12E25F12.txt
-⇢ Skipping already-processed file: graph_V6E7F3_1.txt
-⇢ Skipping already-processed file: graph_V6E7F3_2.txt
-⇢ Skipping already-processed file: graph_V6E7F3_3.txt
-⇢ Skipping already-processed file: graph_V6E7F3_4.txt
-⇢ Skipping already-processed file: graph_V7E11F5.txt
-⇢ Skipping already-processed file: graph_V7E9F3.txt
-⇢ Skipping already-processed file: graph_V8E10F4.txt
-⇢ Skipping already-processed file: graph_V8E15F8.txt
-⇢ Skipping already-processed file: quadrilateral_4quad.txt
+⏳ Processing: C04_square_cycle.txt ...     run 1 start: 21:46:51
+    run 1 end:   21:46:51
+    run 1 dur:   0.000022 s
+    run 2 start: 21:46:51
+    run 2 end:   21:46:51
+    run 2 dur:   0.000029 s
+    run 3 start: 21:46:51
+    run 3 end:   21:46:51
+    run 3 dur:   0.000021 s
+    run 4 start: 21:46:51
+    run 4 end:   21:46:51
+    run 4 dur:   0.000020 s
+    run 5 start: 21:46:51
+    run 5 end:   21:46:51
+    run 5 dur:   0.000020 s
+    run 6 start: 21:46:51
+    run 6 end:   21:46:51
+    run 6 dur:   0.000018 s
+    run 7 start: 21:46:51
+    run 7 end:   21:46:51
+    run 7 dur:   0.000020 s
+    run 8 start: 21:46:51
+    run 8 end:   21:46:51
+    run 8 dur:   0.000021 s
+    run 9 start: 21:46:51
+    run 9 end:   21:46:51
+    run 9 dur:   0.000021 s
+    run 10 start: 21:46:51
+    run 10 end:   21:46:51
+    run 10 dur:   0.000019 s
+✓ (2 triang, 0.000021 s)
+⏳ Processing: C05_pentagon_cycle.txt ...     run 1 start: 21:46:51
+    run 1 end:   21:46:51
+    run 1 dur:   0.000141 s
+    run 2 start: 21:46:51
+    run 2 end:   21:46:51
+    run 2 dur:   0.000135 s
+    run 3 start: 21:46:51
+    run 3 end:   21:46:51
+    run 3 dur:   0.000149 s
+    run 4 start: 21:46:51
+    run 4 end:   21:46:51
+    run 4 dur:   0.000136 s
+    run 5 start: 21:46:51
+    run 5 end:   21:46:51
+    run 5 dur:   0.000142 s
+    run 6 start: 21:46:51
+    run 6 end:   21:46:51
+    run 6 dur:   0.000135 s
+    run 7 start: 21:46:51
+    run 7 end:   21:46:51
+    run 7 dur:   0.000150 s
+    run 8 start: 21:46:51
+    run 8 end:   21:46:51
+    run 8 dur:   0.000157 s
+    run 9 start: 21:46:51
+    run 9 end:   21:46:51
+    run 9 dur:   0.000140 s
+    run 10 start: 21:46:51
+    run 10 end:   21:46:51
+    run 10 dur:   0.000146 s
+✓ (10 triang, 0.000143 s)
+⏳ Processing: C06_hexagon_cycle_1.txt ...     run 1 start: 21:46:51
+    run 1 end:   21:46:51
+    run 1 dur:   0.000902 s
+    run 2 start: 21:46:51
+    run 2 end:   21:46:51
+    run 2 dur:   0.000878 s
+    run 3 start: 21:46:51
+    run 3 end:   21:46:51
+    run 3 dur:   0.000959 s
+    run 4 start: 21:46:51
+    run 4 end:   21:46:51
+    run 4 dur:   0.000977 s
+    run 5 start: 21:46:51
+    run 5 end:   21:46:51
+    run 5 dur:   0.000958 s
+    run 6 start: 21:46:51
+    run 6 end:   21:46:51
+    run 6 dur:   0.001028 s
+    run 7 start: 21:46:51
+    run 7 end:   21:46:51
+    run 7 dur:   0.000956 s
+    run 8 start: 21:46:51
+    run 8 end:   21:46:51
+    run 8 dur:   0.001005 s
+    run 9 start: 21:46:51
+    run 9 end:   21:46:51
+    run 9 dur:   0.000992 s
+    run 10 start: 21:46:51
+    run 10 end:   21:46:51
+    run 10 dur:   0.000967 s
+✓ (68 triang, 0.000962 s)
+⏳ Processing: C07_heptagon_cycle.txt ...     run 1 start: 21:46:51
+    run 1 end:   21:46:51
+    run 1 dur:   0.006508 s
+    run 2 start: 21:46:51
+    run 2 end:   21:46:51
+    run 2 dur:   0.006647 s
+    run 3 start: 21:46:51
+    run 3 end:   21:46:51
+    run 3 dur:   0.006755 s
+    run 4 start: 21:46:51
+    run 4 end:   21:46:51
+    run 4 dur:   0.006602 s
+    run 5 start: 21:46:51
+    run 5 end:   21:46:51
+    run 5 dur:   0.006639 s
+    run 6 start: 21:46:51
+    run 6 end:   21:46:51
+    run 6 dur:   0.006121 s
+    run 7 start: 21:46:51
+    run 7 end:   21:46:51
+    run 7 dur:   0.006550 s
+    run 8 start: 21:46:51
+    run 8 end:   21:46:51
+    run 8 dur:   0.004041 s
+    run 9 start: 21:46:51
+    run 9 end:   21:46:51
+    run 9 dur:   0.003852 s
+    run 10 start: 21:46:51
+    run 10 end:   21:46:51
+    run 10 dur:   0.004357 s
+✓ (546 triang, 0.005807 s)
+⏳ Processing: C08_octagon_cycle.txt ...     run 1 start: 21:46:51
+    run 1 end:   21:46:51
+    run 1 dur:   0.036343 s
+    run 2 start: 21:46:51
+    run 2 end:   21:46:51
+    run 2 dur:   0.033767 s
+    run 3 start: 21:46:51
+    run 3 end:   21:46:51
+    run 3 dur:   0.033315 s
+    run 4 start: 21:46:51
+    run 4 end:   21:46:51
+    run 4 dur:   0.036845 s
+    run 5 start: 21:46:51
+    run 5 end:   21:46:51
+    run 5 dur:   0.038171 s
+    run 6 start: 21:46:51
+    run 6 end:   21:46:51
+    run 6 dur:   0.032991 s
+    run 7 start: 21:46:51
+    run 7 end:   21:46:51
+    run 7 dur:   0.034409 s
+    run 8 start: 21:46:51
+    run 8 end:   21:46:51
+    run 8 dur:   0.034882 s
+    run 9 start: 21:46:51
+    run 9 end:   21:46:51
+    run 9 dur:   0.035989 s
+    run 10 start: 21:46:51
+    run 10 end:   21:46:51
+    run 10 dur:   0.044134 s
+✓ (4872 triang, 0.036085 s)
+⏳ Processing: C09_nonagon_cycle.txt ...     run 1 start: 21:46:51
+    run 1 end:   21:46:52
+    run 1 dur:   0.245576 s
+    run 2 start: 21:46:52
+    run 2 end:   21:46:52
+    run 2 dur:   0.240572 s
+    run 3 start: 21:46:52
+    run 3 end:   21:46:52
+    run 3 dur:   0.247201 s
+    run 4 start: 21:46:52
+    run 4 end:   21:46:52
+    run 4 dur:   0.249751 s
+    run 5 start: 21:46:52
+    run 5 end:   21:46:53
+    run 5 dur:   0.342095 s
+    run 6 start: 21:46:53
+    run 6 end:   21:46:53
+    run 6 dur:   0.291867 s
+    run 7 start: 21:46:53
+    run 7 end:   21:46:53
+    run 7 dur:   0.241627 s
+    run 8 start: 21:46:53
+    run 8 end:   21:46:54
+    run 8 dur:   0.260657 s
+    run 9 start: 21:46:54
+    run 9 end:   21:46:54
+    run 9 dur:   0.242715 s
+    run 10 start: 21:46:54
+    run 10 end:   21:46:54
+    run 10 dur:   0.241183 s
+✓ (46782 triang, 0.260324 s)
+⏳ Processing: C10_decagon_cycle.txt ...     run 1 start: 21:46:56
+    run 1 end:   21:46:59
+    run 1 dur:   2.332867 s
+    run 2 start: 21:46:59
+    run 2 end:   21:47:01
+    run 2 dur:   2.347785 s
+    run 3 start: 21:47:01
+    run 3 end:   21:47:04
+    run 3 dur:   2.380995 s
+    run 4 start: 21:47:04
+    run 4 end:   21:47:06
+    run 4 dur:   2.318107 s
+    run 5 start: 21:47:06
+    run 5 end:   21:47:08
+    run 5 dur:   2.320892 s
+    run 6 start: 21:47:08
+    run 6 end:   21:47:11
+    run 6 dur:   2.534005 s
+    run 7 start: 21:47:11
+    run 7 end:   21:47:13
+    run 7 dur:   2.367853 s
+    run 8 start: 21:47:13
+    run 8 end:   21:47:15
+    run 8 dur:   2.355287 s
+    run 9 start: 21:47:15
+    run 9 end:   21:47:18
+    run 9 dur:   2.305054 s
+    run 10 start: 21:47:18
+    run 10 end:   21:47:20
+    run 10 dur:   2.273499 s
+✓ (474180 triang, 2.353635 s)
+⏳ Processing: W5_wheel_2.txt ...     run 1 start: 21:47:20
+    run 1 end:   21:47:20
+    run 1 dur:   0.000027 s
+    run 2 start: 21:47:20
+    run 2 end:   21:47:20
+    run 2 dur:   0.000042 s
+    run 3 start: 21:47:20
+    run 3 end:   21:47:20
+    run 3 dur:   0.000048 s
+    run 4 start: 21:47:20
+    run 4 end:   21:47:20
+    run 4 dur:   0.000059 s
+    run 5 start: 21:47:20
+    run 5 end:   21:47:20
+    run 5 dur:   0.000052 s
+    run 6 start: 21:47:20
+    run 6 end:   21:47:20
+    run 6 dur:   0.000075 s
+    run 7 start: 21:47:20
+    run 7 end:   21:47:20
+    run 7 dur:   0.000051 s
+    run 8 start: 21:47:20
+    run 8 end:   21:47:20
+    run 8 dur:   0.000051 s
+    run 9 start: 21:47:20
+    run 9 end:   21:47:20
+    run 9 dur:   0.000047 s
+    run 10 start: 21:47:20
+    run 10 end:   21:47:20
+    run 10 dur:   0.000060 s
+✓ (5 triang, 0.000051 s)
+⏳ Processing: complex.txt ...     run 1 start: 21:47:27
+    run 1 end:   21:47:34
+    run 1 dur:   7.050880 s
+    run 2 start: 21:47:34
+    run 2 end:   21:47:40
+    run 2 dur:   5.737005 s
+    run 3 start: 21:47:40
+    run 3 end:   21:47:45
+    run 3 dur:   5.727464 s
+    run 4 start: 21:47:45
+    run 4 end:   21:47:51
+    run 4 dur:   5.676398 s
+    run 5 start: 21:47:51
+    run 5 end:   21:47:57
+    run 5 dur:   5.721498 s
+    run 6 start: 21:47:57
+    run 6 end:   21:48:02
+    run 6 dur:   5.655567 s
+    run 7 start: 21:48:02
+    run 7 end:   21:48:08
+    run 7 dur:   5.625573 s
+    run 8 start: 21:48:08
+    run 8 end:   21:48:14
+    run 8 dur:   5.640659 s
+    run 9 start: 21:48:14
+    run 9 end:   21:48:19
+    run 9 dur:   5.634916 s
+    run 10 start: 21:48:19
+    run 10 end:   21:48:25
+    run 10 dur:   5.749513 s
+✓ (1282136 triang, 5.821947 s)
+⏳ Processing: graph_V12E25F12.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000254 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000272 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000278 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000300 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000268 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000424 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000511 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000504 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000468 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000466 s
+✓ (62 triang, 0.000375 s)
+⏳ Processing: graph_V6E7F3_1.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000231 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000241 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000216 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000216 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000209 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000221 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000207 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000216 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000225 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000214 s
+✓ (20 triang, 0.000220 s)
+⏳ Processing: graph_V6E7F3_2.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000285 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000279 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000285 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000286 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000289 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000281 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000290 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000293 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000277 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000275 s
+✓ (24 triang, 0.000284 s)
+⏳ Processing: graph_V6E7F3_3.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000248 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000256 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000219 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000249 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000232 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000226 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000216 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000236 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000234 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000256 s
+✓ (20 triang, 0.000237 s)
+⏳ Processing: graph_V6E7F3_4.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000225 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000236 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000236 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000214 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000227 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000252 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000247 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000279 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000227 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000245 s
+✓ (20 triang, 0.000239 s)
+⏳ Processing: graph_V7E11F5.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000083 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000081 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000097 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000076 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000079 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000081 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000077 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000085 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000085 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000080 s
+✓ (7 triang, 0.000082 s)
+⏳ Processing: graph_V7E9F3.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000101 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000098 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000095 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000096 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000116 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000087 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000084 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000073 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000068 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000097 s
+✓ (9 triang, 0.000092 s)
+⏳ Processing: graph_V8E10F4.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000287 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000459 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000288 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000310 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000291 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000314 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000506 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000356 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000413 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000379 s
+✓ (40 triang, 0.000360 s)
+⏳ Processing: graph_V8E15F8.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.000054 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:25
+    run 2 dur:   0.000046 s
+    run 3 start: 21:48:25
+    run 3 end:   21:48:25
+    run 3 dur:   0.000060 s
+    run 4 start: 21:48:25
+    run 4 end:   21:48:25
+    run 4 dur:   0.000047 s
+    run 5 start: 21:48:25
+    run 5 end:   21:48:25
+    run 5 dur:   0.000038 s
+    run 6 start: 21:48:25
+    run 6 end:   21:48:25
+    run 6 dur:   0.000039 s
+    run 7 start: 21:48:25
+    run 7 end:   21:48:25
+    run 7 dur:   0.000059 s
+    run 8 start: 21:48:25
+    run 8 end:   21:48:25
+    run 8 dur:   0.000041 s
+    run 9 start: 21:48:25
+    run 9 end:   21:48:25
+    run 9 dur:   0.000042 s
+    run 10 start: 21:48:25
+    run 10 end:   21:48:25
+    run 10 dur:   0.000053 s
+✓ (5 triang, 0.000048 s)
+⏳ Processing: graph_V9E10F3.txt ...     run 1 start: 21:48:25
+    run 1 end:   21:48:25
+    run 1 dur:   0.125029 s
+    run 2 start: 21:48:25
+    run 2 end:   21:48:26
+    run 2 dur:   0.146134 s
+    run 3 start: 21:48:26
+    run 3 end:   21:48:26
+    run 3 dur:   0.122267 s
+    run 4 start: 21:48:26
+    run 4 end:   21:48:26
+    run 4 dur:   0.109074 s
+    run 5 start: 21:48:26
+    run 5 end:   21:48:26
+    run 5 dur:   0.107957 s
+    run 6 start: 21:48:26
+    run 6 end:   21:48:26
+    run 6 dur:   0.112965 s
+    run 7 start: 21:48:26
+    run 7 end:   21:48:26
+    run 7 dur:   0.161028 s
+    run 8 start: 21:48:26
+    run 8 end:   21:48:26
+    run 8 dur:   0.159535 s
+    run 9 start: 21:48:26
+    run 9 end:   21:48:26
+    run 9 dur:   0.101859 s
+    run 10 start: 21:48:26
+    run 10 end:   21:48:27
+    run 10 dur:   0.118704 s
+✓ (13880 triang, 0.126455 s)
+⏳ Processing: quadrilateral_14quad.txt ...     run 1 start: 21:48:27
+    run 1 end:   21:48:27
+    run 1 dur:   0.109057 s
+    run 2 start: 21:48:27
+    run 2 end:   21:48:27
+    run 2 dur:   0.119022 s
+    run 3 start: 21:48:27
+    run 3 end:   21:48:27
+    run 3 dur:   0.122876 s
+    run 4 start: 21:48:27
+    run 4 end:   21:48:27
+    run 4 dur:   0.113979 s
+    run 5 start: 21:48:27
+    run 5 end:   21:48:27
+    run 5 dur:   0.109336 s
+    run 6 start: 21:48:27
+    run 6 end:   21:48:27
+    run 6 dur:   0.114269 s
+    run 7 start: 21:48:27
+    run 7 end:   21:48:27
+    run 7 dur:   0.121225 s
+    run 8 start: 21:48:27
+    run 8 end:   21:48:28
+    run 8 dur:   0.109867 s
+    run 9 start: 21:48:28
+    run 9 end:   21:48:28
+    run 9 dur:   0.113588 s
+    run 10 start: 21:48:28
+    run 10 end:   21:48:28
+    run 10 dur:   0.110563 s
+✓ (16384 triang, 0.114378 s)
+⏳ Processing: quadrilateral_4quad.txt ...     run 1 start: 21:48:28
+    run 1 end:   21:48:28
+    run 1 dur:   0.000097 s
+    run 2 start: 21:48:28
+    run 2 end:   21:48:28
+    run 2 dur:   0.000095 s
+    run 3 start: 21:48:28
+    run 3 end:   21:48:28
+    run 3 dur:   0.000117 s
+    run 4 start: 21:48:28
+    run 4 end:   21:48:28
+    run 4 dur:   0.000094 s
+    run 5 start: 21:48:28
+    run 5 end:   21:48:28
+    run 5 dur:   0.000092 s
+    run 6 start: 21:48:28
+    run 6 end:   21:48:28
+    run 6 dur:   0.000116 s
+    run 7 start: 21:48:28
+    run 7 end:   21:48:28
+    run 7 dur:   0.000104 s
+    run 8 start: 21:48:28
+    run 8 end:   21:48:28
+    run 8 dur:   0.000097 s
+    run 9 start: 21:48:28
+    run 9 end:   21:48:28
+    run 9 dur:   0.000093 s
+    run 10 start: 21:48:28
+    run 10 end:   21:48:28
+    run 10 dur:   0.000113 s
+✓ (16 triang, 0.000102 s)
+⏳ Processing: quadrilateral_7quad.txt ...     run 1 start: 21:48:28
+    run 1 end:   21:48:28
+    run 1 dur:   0.000522 s
+    run 2 start: 21:48:28
+    run 2 end:   21:48:28
+    run 2 dur:   0.000549 s
+    run 3 start: 21:48:28
+    run 3 end:   21:48:28
+    run 3 dur:   0.000552 s
+    run 4 start: 21:48:28
+    run 4 end:   21:48:28
+    run 4 dur:   0.000550 s
+    run 5 start: 21:48:28
+    run 5 end:   21:48:28
+    run 5 dur:   0.000547 s
+    run 6 start: 21:48:28
+    run 6 end:   21:48:28
+    run 6 dur:   0.000631 s
+    run 7 start: 21:48:28
+    run 7 end:   21:48:28
+    run 7 dur:   0.000514 s
+    run 8 start: 21:48:28
+    run 8 end:   21:48:28
+    run 8 dur:   0.000576 s
+    run 9 start: 21:48:28
+    run 9 end:   21:48:28
+    run 9 dur:   0.000568 s
+    run 10 start: 21:48:28
+    run 10 end:   21:48:28
+    run 10 dur:   0.000521 s
+✓ (72 triang, 0.000553 s)
+⏳ Processing: simple3.txt ...     run 1 start: 21:48:28
+    run 1 end:   21:48:28
+    run 1 dur:   0.000037 s
+    run 2 start: 21:48:28
+    run 2 end:   21:48:28
+    run 2 dur:   0.000037 s
+    run 3 start: 21:48:28
+    run 3 end:   21:48:28
+    run 3 dur:   0.000045 s
+    run 4 start: 21:48:28
+    run 4 end:   21:48:28
+    run 4 dur:   0.000059 s
+    run 5 start: 21:48:28
+    run 5 end:   21:48:28
+    run 5 dur:   0.000049 s
+    run 6 start: 21:48:28
+    run 6 end:   21:48:28
+    run 6 dur:   0.000034 s
+    run 7 start: 21:48:28
+    run 7 end:   21:48:28
+    run 7 dur:   0.000035 s
+    run 8 start: 21:48:28
+    run 8 end:   21:48:28
+    run 8 dur:   0.000035 s
+    run 9 start: 21:48:28
+    run 9 end:   21:48:28
+    run 9 dur:   0.000034 s
+    run 10 start: 21:48:28
+    run 10 end:   21:48:28
+    run 10 dur:   0.000034 s
+✓ (4 triang, 0.000040 s)
+⏳ Processing: square7.txt ...     run 1 start: 21:48:28
+    run 1 end:   21:48:28
+    run 1 dur:   0.000317 s
+    run 2 start: 21:48:28
+    run 2 end:   21:48:28
+    run 2 dur:   0.000328 s
+    run 3 start: 21:48:28
+    run 3 end:   21:48:28
+    run 3 dur:   0.000307 s
+    run 4 start: 21:48:28
+    run 4 end:   21:48:28
+    run 4 dur:   0.000290 s
+    run 5 start: 21:48:28
+    run 5 end:   21:48:28
+    run 5 dur:   0.000288 s
+    run 6 start: 21:48:28
+    run 6 end:   21:48:28
+    run 6 dur:   0.000306 s
+    run 7 start: 21:48:28
+    run 7 end:   21:48:28
+    run 7 dur:   0.000301 s
+    run 8 start: 21:48:28
+    run 8 end:   21:48:28
+    run 8 dur:   0.000470 s
+    run 9 start: 21:48:28
+    run 9 end:   21:48:28
+    run 9 dur:   0.000357 s
+    run 10 start: 21:48:28
+    run 10 end:   21:48:28
+    run 10 dur:   0.000295 s
+✓ (36 triang, 0.000326 s)
+⏳ Processing: square8.txt ...     run 1 start: 21:48:28
+    run 1 end:   21:48:28
+    run 1 dur:   0.000496 s
+    run 2 start: 21:48:28
+    run 2 end:   21:48:28
+    run 2 dur:   0.000472 s
+    run 3 start: 21:48:28
+    run 3 end:   21:48:28
+    run 3 dur:   0.000549 s
+    run 4 start: 21:48:28
+    run 4 end:   21:48:28
+    run 4 dur:   0.000492 s
+    run 5 start: 21:48:28
+    run 5 end:   21:48:28
+    run 5 dur:   0.000457 s
+    run 6 start: 21:48:28
+    run 6 end:   21:48:28
+    run 6 dur:   0.000503 s
+    run 7 start: 21:48:28
+    run 7 end:   21:48:28
+    run 7 dur:   0.000478 s
+    run 8 start: 21:48:28
+    run 8 end:   21:48:28
+    run 8 dur:   0.000477 s
+    run 9 start: 21:48:28
+    run 9 end:   21:48:28
+    run 9 dur:   0.000576 s
+    run 10 start: 21:48:28
+    run 10 end:   21:48:28
+    run 10 dur:   0.000581 s
+✓ (48 triang, 0.000508 s)
+⏳ Processing: square_with_pentagon.txt ...     run 1 start: 21:48:28
+    run 1 end:   21:48:28
+    run 1 dur:   0.000039 s
+    run 2 start: 21:48:28
+    run 2 end:   21:48:28
+    run 2 dur:   0.000039 s
+    run 3 start: 21:48:28
+    run 3 end:   21:48:28
+    run 3 dur:   0.000036 s
+    run 4 start: 21:48:28
+    run 4 end:   21:48:28
+    run 4 dur:   0.000036 s
+    run 5 start: 21:48:28
+    run 5 end:   21:48:28
+    run 5 dur:   0.000033 s
+    run 6 start: 21:48:28
+    run 6 end:   21:48:28
+    run 6 dur:   0.000048 s
+    run 7 start: 21:48:28
+    run 7 end:   21:48:28
+    run 7 dur:   0.000038 s
+    run 8 start: 21:48:28
+    run 8 end:   21:48:28
+    run 8 dur:   0.000043 s
+    run 9 start: 21:48:28
+    run 9 end:   21:48:28
+    run 9 dur:   0.000058 s
+    run 10 start: 21:48:28
+    run 10 end:   21:48:28
+    run 10 dur:   0.000034 s
+✓ (4 triang, 0.000040 s)
+⏳ Processing: trople_rectangle.txt ...     run 1 start: 21:48:28
+    run 1 end:   21:48:28
+    run 1 dur:   0.000039 s
+    run 2 start: 21:48:28
+    run 2 end:   21:48:28
+    run 2 dur:   0.000037 s
+    run 3 start: 21:48:28
+    run 3 end:   21:48:28
+    run 3 dur:   0.000039 s
+    run 4 start: 21:48:28
+    run 4 end:   21:48:28
+    run 4 dur:   0.000038 s
+    run 5 start: 21:48:28
+    run 5 end:   21:48:28
+    run 5 dur:   0.000049 s
+    run 6 start: 21:48:28
+    run 6 end:   21:48:28
+    run 6 dur:   0.000036 s
+    run 7 start: 21:48:28
+    run 7 end:   21:48:28
+    run 7 dur:   0.000043 s
+    run 8 start: 21:48:28
+    run 8 end:   21:48:28
+    run 8 dur:   0.000046 s
+    run 9 start: 21:48:28
+    run 9 end:   21:48:28
+    run 9 dur:   0.000038 s
+    run 10 start: 21:48:28
+    run 10 end:   21:48:28
+    run 10 dur:   0.000037 s
+✓ (4 triang, 0.000040 s)
 
 ╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 ║                                                    BENCHMARK RESULTS                                                               ║
 ╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣
 ║ File                     ║   Vertices║       Triangulations║     Time (s)║        ns/Triang║     Peak Memory║          Memory/Vertex║
 ╠═══════════════════════════╬════════════╬═════════════════╬══════════════╬═══════════════╬═════════════════╬════════════════════════╣
-║ C04_square_cycle.txt     ║          4║                    2║     0.000027║       1.3660e+04║          0.00 B║                 0.00 B║
-║ C05_pentagon_cycle.txt   ║          5║                   10║     0.000152║       1.5250e+04║         4.00 KB║               819.00 B║
-║ C06_hexagon_cycle_1.txt  ║          6║                   68║     0.000869║       1.2773e+04║         8.00 KB║                1.33 KB║
-║ C07_heptagon_cycle.txt   ║          7║                  546║     0.004807║       8.8040e+03║         4.00 KB║               585.00 B║
-║ C08_octagon_cycle.txt    ║          8║                 4872║     0.036128║       7.4150e+03║         8.00 KB║                1.00 KB║
-║ C09_nonagon_cycle.txt    ║          9║                46782║     0.248178║       5.3050e+03║         4.00 KB║               455.00 B║
-║ C10_decagon_cycle.txt    ║         10║               474180║     2.337557║       4.9300e+03║         8.00 KB║               819.00 B║
-║ W5_wheel_2.txt           ║          6║                    5║     0.000033║       6.6730e+03║         8.00 KB║                1.33 KB║
-║ graph_V11F3.txt          ║         11║               672902║     3.264297║       4.8510e+03║         8.00 KB║               744.00 B║
-║ graph_V12E25F12.txt      ║         12║                   62║     0.000290║       4.6770e+03║         8.00 KB║               682.00 B║
-║ graph_V6E7F3_1.txt       ║          6║                   20║     0.000184║       9.2130e+03║         4.00 KB║               682.00 B║
-║ graph_V6E7F3_2.txt       ║          6║                   24║     0.000237║       9.8950e+03║         4.00 KB║               682.00 B║
-║ graph_V6E7F3_3.txt       ║          6║                   20║     0.000191║       9.5330e+03║         4.00 KB║               682.00 B║
-║ graph_V6E7F3_4.txt       ║          6║                   20║     0.000228║       1.1399e+04║         4.00 KB║               682.00 B║
-║ graph_V7E11F5.txt        ║          7║                    7║     0.000077║       1.0974e+04║         4.00 KB║               585.00 B║
-║ graph_V7E9F3.txt         ║          7║                    9║     0.000097║       1.0787e+04║         8.00 KB║                1.14 KB║
-║ graph_V8E10F4.txt        ║          8║                   40║     0.000374║       9.3500e+03║         8.00 KB║                1.00 KB║
-║ graph_V8E15F8.txt        ║          8║                    5║     0.000055║       1.1016e+04║         8.00 KB║                1.00 KB║
-║ graph_V9E10F3.txt        ║          9║                13880║     0.117090║       8.4360e+03║         8.00 KB║               910.00 B║
-║ quadrilateral_14quad.txt ║         16║                16384║     0.132201║       8.0690e+03║         8.00 KB║               512.00 B║
-║ quadrilateral_4quad.txt  ║          9║                   16║     0.000127║       7.9120e+03║         8.00 KB║               910.00 B║
-║ quadrilateral_7quad.txt  ║          9║                   72║     0.000592║       8.2280e+03║         8.00 KB║               910.00 B║
-║ simple3.txt              ║          5║                    4║     0.000059║       1.4634e+04║         4.00 KB║               819.00 B║
-║ square7.txt              ║          9║                   36║     0.000443║       1.2309e+04║         4.00 KB║               455.00 B║
-║ square8.txt              ║         10║                   48║     0.000623║       1.2984e+04║         8.00 KB║               819.00 B║
-║ square_with_pentagon.txt ║          5║                    4║     0.000075║       1.8733e+04║         4.00 KB║               819.00 B║
-║ trople_rectangle.txt     ║          5║                    4║     0.000057║       1.4229e+04║         4.00 KB║               819.00 B║
+║ C04_square_cycle.txt     ║          4║                    2║     0.000021║       1.0568e+04║         4.00 KB║                1.00 KB║
+║ C05_pentagon_cycle.txt   ║          5║                   10║     0.000143║       1.4317e+04║         8.00 KB║                1.60 KB║
+║ C06_hexagon_cycle_1.txt  ║          6║                   68║     0.000962║       1.4148e+04║         8.00 KB║                1.33 KB║
+║ C07_heptagon_cycle.txt   ║          7║                  546║     0.005807║       1.0636e+04║         8.00 KB║                1.14 KB║
+║ C08_octagon_cycle.txt    ║          8║                 4872║     0.036085║       7.4065e+03║         8.00 KB║                1.00 KB║
+║ C09_nonagon_cycle.txt    ║          9║                46782║     0.260324║       5.5646e+03║         8.00 KB║               910.00 B║
+║ C10_decagon_cycle.txt    ║         10║               474180║     2.353635║       4.9636e+03║         8.00 KB║               819.00 B║
+║ W5_wheel_2.txt           ║          6║                    5║     0.000051║       1.0219e+04║         8.00 KB║                1.33 KB║
+║ complex.txt              ║         13║              1282136║     5.821947║       4.5408e+03║         8.00 KB║               630.00 B║
+║ graph_V12E25F12.txt      ║         12║                   62║     0.000375║       6.0411e+03║         8.00 KB║               682.00 B║
+║ graph_V6E7F3_1.txt       ║          6║                   20║     0.000220║       1.0977e+04║         4.00 KB║               682.00 B║
+║ graph_V6E7F3_2.txt       ║          6║                   24║     0.000284║       1.1836e+04║         4.00 KB║               682.00 B║
+║ graph_V6E7F3_3.txt       ║          6║                   20║     0.000237║       1.1850e+04║         8.00 KB║                1.33 KB║
+║ graph_V6E7F3_4.txt       ║          6║                   20║     0.000239║       1.1936e+04║         8.00 KB║                1.33 KB║
+║ graph_V7E11F5.txt        ║          7║                    7║     0.000082║       1.1783e+04║         4.00 KB║               585.00 B║
+║ graph_V7E9F3.txt         ║          7║                    9║     0.000092║       1.0183e+04║         4.00 KB║               585.00 B║
+║ graph_V8E10F4.txt        ║          8║                   40║     0.000360║       9.0114e+03║         4.00 KB║               512.00 B║
+║ graph_V8E15F8.txt        ║          8║                    5║     0.000048║       9.5981e+03║         8.00 KB║                1.00 KB║
+║ graph_V9E10F3.txt        ║          9║                13880║     0.126455║       9.1106e+03║         8.00 KB║               910.00 B║
+║ quadrilateral_14quad.txt ║         16║                16384║     0.114378║       6.9811e+03║         8.00 KB║               512.00 B║
+║ quadrilateral_4quad.txt  ║          9║                   16║     0.000102║       6.3676e+03║         4.00 KB║               455.00 B║
+║ quadrilateral_7quad.txt  ║          9║                   72║     0.000553║       7.6819e+03║         8.00 KB║               910.00 B║
+║ simple3.txt              ║          5║                    4║     0.000040║       9.9521e+03║         4.00 KB║               819.00 B║
+║ square7.txt              ║          9║                   36║     0.000326║       9.0510e+03║         8.00 KB║               910.00 B║
+║ square8.txt              ║         10║                   48║     0.000508║       1.0586e+04║         8.00 KB║               819.00 B║
+║ square_with_pentagon.txt ║          5║                    4║     0.000040║       1.0077e+04║         4.00 KB║               819.00 B║
+║ trople_rectangle.txt     ║          5║                    4║     0.000040║       1.0064e+04║         4.00 KB║               819.00 B║
 ╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝
 
 ╔════════════════════════════════════════════════════════════════════════════╗
