@@ -229,6 +229,9 @@ static void readPreviousResults(const string &csvName,
         string field;
         if (!getline(ss, r.filename, ','))
             continue;
+        // avoid duplicate names in case the CSV already contained repeats
+        if (processed.find(r.filename) != processed.end())
+            continue;
         if (!getline(ss, field, ','))
             continue;
         r.distinctVertices = stoi(field);
@@ -265,7 +268,8 @@ static void readPreviousResults(const string &csvName,
 }
 
 // append a single result to CSV (creates file + header if missing)
-// Note: function retained for compatibility but benchmark now rewrites the CSV.
+// This function is now used to write each file's results immediately
+// rather than waiting to rewrite the entire CSV at the end.
 static void appendResultCSV(const string &csvName, const BenchmarkResult &r)
 {
     bool needHeader = !fs::exists(csvName);
@@ -580,7 +584,9 @@ int main()
 
         results.push_back(br);
         processed.insert(filename);
-        // defer CSV rewrite until after all files processed
+        // immediately record the new benchmark result in the CSV file
+        // so that partial progress is saved even if the program is interrupted
+        appendResultCSV("results.csv", br);
 
         // print completion with timing and triangulation count
         out << "✓ (" << br.triangStr << " triang, " << fixed << setprecision(6) << br.meanTime << " s)\n";
@@ -648,8 +654,9 @@ int main()
     out << "\nNote: Results averaged over " << testRuns << " runs per file.\n";
     out << "      Memory measured at byte precision (using /proc/self/smaps_rollup where available).\n";
 
-    // rewrite CSV (alphabetical order)
-    writeAllResultsCSV("results.csv", results);
+    // optional: rewrite entire CSV in alphabetical order
+    // (individual results have already been appended above).
+    // writeAllResultsCSV("results.csv", results);
 
     // generate interactive HTML summary
     generateHtml("results.html", results);
