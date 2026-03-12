@@ -143,21 +143,18 @@ def main():
     logx_sorted = np.log10(xs_sorted)
     y_pred = 10 ** (fit_fn(logx_sorted))
 
-    # compute envelope ratios using actual min/max times (avoids zero/negative values)
-    # we compare each observed value to the regression prediction at that x
-    ratios_upper = []
-    ratios_lower = []
-    for xi, mi, ma in zip(df['triangFloat'].values, df['minTime'].values, df['maxTime'].values):
+    # compute envelope ratios using only the mean times
+    # the upper and lower regression lines will simply enclose all mean points
+    ratios = []
+    for xi, yi in zip(df['triangFloat'].values, df['meanTime'].values):
         pred = 10 ** (fit_fn(np.log10(xi)))
         if pred > 0:
-            ratios_upper.append(ma / pred)
-            # ensure we don't include non-positive ratios which would collapse to axis
-            rlow = mi / pred
-            if rlow > 0:
-                ratios_lower.append(rlow)
-    max_ratio = max(ratios_upper) if ratios_upper else 1.0
-    # if all min ratios were non-positive fallback to 1.0 (i.e. use mean line)
-    min_ratio = min(ratios_lower) if ratios_lower else 1.0
+            ratios.append(yi / pred)
+    if ratios:
+        max_ratio = max(ratios)
+        min_ratio = min(ratios)
+    else:
+        max_ratio = min_ratio = 1.0
 
     upper_vals = y_pred * max_ratio
     lower_vals = y_pred * min_ratio
@@ -169,10 +166,8 @@ def main():
     plt.plot(xs_sorted, lower_vals, label='regression lower', color='forestgreen', linestyle='--', linewidth=1.5)
     # fill region between upper and lower with light color
     plt.fill_between(xs_sorted, lower_vals, upper_vals, color='lightgray', alpha=0.4)
-    # overlay actual mean points with error bars
-    yerr_lower = df['meanTime'] - df['minTime']
-    yerr_upper = df['maxTime'] - df['meanTime']
-    plt.errorbar(df['triangFloat'], df['meanTime'], yerr=[yerr_lower, yerr_upper], fmt='o', color='black', alpha=0.6, capsize=3, label='mean points')
+    # overlay actual mean points (no error bars)
+    plt.scatter(df['triangFloat'], df['meanTime'], color='black', alpha=0.6, label='mean points')
     plt.xscale('log'); plt.yscale('log')
     plt.xlabel('total triangulations (log scale)')
     plt.ylabel('time (s, log scale)')
