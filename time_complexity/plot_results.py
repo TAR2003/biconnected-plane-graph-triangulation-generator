@@ -143,15 +143,20 @@ def main():
     logx_sorted = np.log10(xs_sorted)
     y_pred = 10 ** (fit_fn(logx_sorted))
 
-    # compute range ratios based on error bars (mean +/- stddev)
+    # compute envelope ratios using actual min/max times (avoids zero/negative values)
+    # we compare each observed value to the regression prediction at that x
     ratios_upper = []
     ratios_lower = []
-    for xi, yi, sd in zip(df['triangFloat'].values, df['meanTime'].values, df['stddevTime'].values):
+    for xi, mi, ma in zip(df['triangFloat'].values, df['minTime'].values, df['maxTime'].values):
         pred = 10 ** (fit_fn(np.log10(xi)))
         if pred > 0:
-            ratios_upper.append((yi + sd) / pred)
-            ratios_lower.append(max((yi - sd) / pred, 0.0))
+            ratios_upper.append(ma / pred)
+            # ensure we don't include non-positive ratios which would collapse to axis
+            rlow = mi / pred
+            if rlow > 0:
+                ratios_lower.append(rlow)
     max_ratio = max(ratios_upper) if ratios_upper else 1.0
+    # if all min ratios were non-positive fallback to 1.0 (i.e. use mean line)
     min_ratio = min(ratios_lower) if ratios_lower else 1.0
 
     upper_vals = y_pred * max_ratio
