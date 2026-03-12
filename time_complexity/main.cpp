@@ -501,10 +501,14 @@ int main()
             // (The rest of the benchmarking loop remains unchanged)
 
         // warm-up run (populate caches, discard result)
-        {
+        // only do this when performing multiple test runs – for a single
+        // run the warm-up just doubles the runtime without benefit.
+        if (testRuns > 1) {
+            out << "    warm-up run start (this may take a while)" << "\n" << flush;
             biconnected *warm = new biconnected(faces);
             warm->getAllTriangulations();
             delete warm;
+            out << "    warm-up run complete" << "\n" << flush;
         }
 
         for (int run = 1; run <= testRuns; run++)
@@ -513,6 +517,8 @@ int main()
             out << "    run " << run << " start: " << startStr << "\n" << flush;
             size_t memBefore = getCurrentMemoryUsage();
 
+            // instantiate and start timing immediately so large inputs still
+            // show progress before computation begins
             biconnected *bc = new biconnected(faces);
 
             using clock = std::chrono::steady_clock;
