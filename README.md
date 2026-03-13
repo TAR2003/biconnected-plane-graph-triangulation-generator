@@ -188,7 +188,7 @@ The biconnected triangulation algorithm uses a **tree-of-triangulations** approa
 | Metric | Complexity | Notes |
 |--------|-----------|-------|
 | **Time per triangulation** | **O(1)** | Amortized constant time |
-| **Total time** | **O(n·T)** | n = vertices, T = total triangulations |
+| **Total time** | **O(T)** | n = vertices, T = total triangulations |
 | **Space complexity** | **O(n)** | Linear in vertex count |
 | **Output generation** | **O(\|triangulations\|)** | Linear in number of output triangulations |
 
@@ -516,16 +516,30 @@ Generated visualizations are located in `time_complexity/graphs/`:
 
 #### **Figure 2: Total Time vs Triangulation Count (Log-Log)**
 - **File**: `total_time_vs_triangulations_median.png`
-- **Shows**: Relationship between triangulation count and total execution time
+- **Shows**: Relationship between triangulation count and total execution time (median)
 - **Expected**: Linear relationship (log-log graph shows straight line)
 - **Slope**: Approximately 1.0 (confirming O(T) total time)
 
-#### **Figure 3: Statistical Time Distribution**
-- **Files**: `total_time_vs_triangulations_mean_error.png`
-- **Shows**: Error bars representing std dev and min/max bounds
-- **Key Insight**: Tight clustering indicates consistent performance
+#### **Figure 2b: Total Time vs Triangulation Count (Global Range + Regression)**
+
+- **File**: `total_time_vs_triangulations_global_range.png`
+- **Shows**: Total time across all runs including outliers, with a regression line overlay
+- **Key Insight**: Even across the global range, the regression line closely follows the mean datapoints, demonstrating that total runtime grows linearly with total triangulations (so time per triangulation remains constant)
+`#file:total_time_vs_triangulations_global_range.png`
+![Total time vs triangulations - global range](time_complexity/graphs/total_time_vs_triangulations_global_range.png)
+
+#### **Figure 3: Mean Time + Regression (Error Bars)**
+
+- **File**: `total_time_vs_triangulations_mean_error.png`
+- **Shows**: Mean of repeated runs plotted with min/max error bars and a linear regression line
+- **Key Insight**: The mean values align on a straight line, confirming that total time increases proportionally to the number of triangulations (and thus that time per triangulation is stable)
+
+`#file:total_time_vs_triangulations_mean_error.png`
+
+![Mean total time with regression](time_complexity/graphs/total_time_vs_triangulations_mean_error.png)
 
 #### **Figure 4: Memory Usage Patterns**
+
 - **Derived from**: `memoryPerVertex` column in results.csv
 - **Shows**: Linear scaling with vertex count
 - **Evidence**: Constant per-vertex overhead (~0.5-1.3 KB per vertex)
