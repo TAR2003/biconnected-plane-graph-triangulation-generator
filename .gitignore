@@ -27,20 +27,20 @@
 *.pdfsync
 *.backup
 *~
-*.tmp
-*.log
-*.aux
-*.bbl
-*.blg
-*.fdb_latexmk
-*.fls
-*.synctex.gz
-*.nav
+# *.tmp
+# *.log
+# *.aux
+# *.bbl
+# *.blg
+# *.fdb_latexmk
+# *.fls
+# *.synctex.gz
+# *.nav
 
 # If you want to ignore C/C++ build artifacts too, uncomment these:
 *.exe
 *.o
 *.obj
-*.out
+# *.out
 *.dll
 *.pdb

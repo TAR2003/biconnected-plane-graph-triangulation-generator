@@ -1,4 +1,4 @@
-﻿﻿\documentclass[12pt,a4paper]{article}
+﻿﻿﻿﻿\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -314,7 +314,7 @@ In this paper, we will generate triangulations for labeled biconnected graphs, m
 \subsection{Algorithm Overview}
 
 Our algorithm generates all triangulations of a biconnected plane graph $G$ with $k$ faces $F_1, F_2, \ldots, F_k$ using a recursive depth-first search strategy. The approach consists of four key steps:
-The algorithm we worked on was the algorithm for generating all triangulation for a convex cycle \cite{parvez2011}. That algorithm generates all triangulations for a cycle sequentially. 
+The algorithm we worked on was the algorithm for generating all triangulation for a convex cycle \cite{parvez2011}. That algorithm generates all triangulations for a cycle sequentially.
 The main theme of that algorithm is generating new triangulations by flipping chords. The chords and their opposite pairs are stored, so each flip takes only O(1) time. The algorithm constructs a genealogical tree of triangulations, where each node represents a triangulation and edges represent chord flips. A depth-first search (DFS) traversal of this tree generates all triangulations efficiently.
 
 The algorithm first make a fan triangulation, by choosing a vertex and connecting it to all other vertices in the cycle. This triangulation is the root of the genealogical tree. From this root, the algorithm explores all possible triangulations by performing valid chord flips, ensuring that no multi-edges are created. From the root triangulation, we will continue to flip chords one by one, if the newly generated chord the leftmost blocking chord of the root vertex. Here by the term blocking chords we are defining the chords which are stopping the root vertex to see other vertices. By flipping the leftmost blocking chord we are ensuring that we are not missing any triangulation. This process continues recursively until all triangulations are generated.
@@ -1290,7 +1290,7 @@ To find a safe root, we use a two-pointer technique. We start with two pointers:
 			\caption{$T_k$ structure}
 			\label{fig:Tk_structure}
 		\end{subfigure}
-		
+
 
 		\caption{Comparison of $T_k$ and $T_m$ structures.}
 		\label{fig:merged_structures}
