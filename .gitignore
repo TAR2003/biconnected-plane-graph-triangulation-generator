@@ -1,0 +1,38 @@
+# Ignore LaTeX build artifacts - keep only source, bibliography, and PDF output
+*.aux
+*.bbl
+*.blg
+*.brf
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.out
+*.toc
+*.nav
+*.snm
+*.vrb
+*.synctex
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.run.xml
+*.bcf
+*.xdv
+*.maf
+*.dvi
+*.ps
+*.pdfsync
+*.backup
+*~
+*.tmp
+
+# If you want to ignore C/C++ build artifacts too, uncomment these:
+# *.exe
+# *.o
+# *.obj
+# *.out
+# *.dll
+# *.pdb

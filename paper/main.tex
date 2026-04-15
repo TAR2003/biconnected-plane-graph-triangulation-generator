@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿\documentclass[12pt,a4paper]{article}
+﻿﻿\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -16,7 +16,6 @@
 \usepackage{hyperref}
 \usepackage{cite}
 \usepackage{float}
-\usepackage{asymptote}
 \usetikzlibrary{arrows.meta}
 
 
@@ -82,71 +81,55 @@ Biconnected graphs arise naturally in many practical applications, including VLS
 
 \begin{figure}[h!]
 	\centering
-	\begin{asy}
-		size(300);
+	\begin{tikzpicture}[scale=0.65, line cap=round, line join=round]
+		\tikzset{v/.style={circle,draw,inner sep=1.8pt,minimum size=14pt}}
+		% Left graph nodes
+		\coordinate (L1) at (0,2);
+		\coordinate (L2) at (0,6);
+		\coordinate (L3) at (2,6);
+		\coordinate (L4) at (4,6);
+		\coordinate (L5) at (4,4);
+		\coordinate (L6) at (4,2);
+		\coordinate (L7) at (2,2);
+		\coordinate (L8) at (2,4);
 
-		// ---------------- Settings ----------------
-		real nodeRadius = 0.25;
-		pen nodePen = black+1;
-		pen redNodePen = red+1;
-		pair offset = (6,0); // horizontal shift for right graph
+		\draw (L1)--(L2)--(L3)--(L4)--(L5)--(L6)--(L7)--(L8);
+		\draw (L1)--(L7);
+		\draw (L3)--(L8);
 
-		// Function to draw a node
-		void drawNode(pair pos, string label, pen p = nodePen) {
-				draw(circle(pos, nodeRadius), p);
-				label(label, pos);
-			}
+		\node[v] at (L1) {1};
+		\node[v] at (L2) {2};
+		\node[v] at (L3) {3};
+		\node[v] at (L4) {4};
+		\node[v] at (L5) {5};
+		\node[v] at (L6) {6};
+		\node[v] at (L7) {7};
+		\node[v] at (L8) {8};
 
-		// Function to draw an edge stopping at node borders
-		void drawEdge(pair A, pair B, real r = nodeRadius) {
-				pair dir = (B - A)/abs(B - A); // unit vector
-				draw(A + r*dir -- B - r*dir);
-			}
+		% Right graph nodes
+		\begin{scope}[xshift=6cm]
+			\coordinate (R1) at (0,2);
+			\coordinate (R2) at (0,6);
+			\coordinate (R3) at (2,6);
+			\coordinate (R4) at (4,6);
+			\coordinate (R5) at (4,4);
+			\coordinate (R6) at (4,2);
+			\coordinate (R7) at (2,2);
+			\coordinate (R8) at (2,4);
 
-		// ---------------- Left Graph ----------------
-		pair[] leftNodes = {
-		(0,2),  // 1
-		(0,6),  // 2
-		(2,6),  // 3
-		(4,6),  // 4
-		(4,4),  // 5
-		(4,2),  // 6
-		(2,2),  // 7
-		(2,4)   // 8
-		};
+			\draw (R1)--(R2);
+			\draw (R4)--(R5)--(R6);
 
-		int[][] leftEdges = {
-		{0,1}, {1,2}, {2,3}, {3,4}, {4,5}, {5,6}, {6,7}, {0,6}, {2,7}
-		};
-
-		// Draw edges
-		for(int i=0; i<leftEdges.length; ++i)
-		drawEdge(leftNodes[leftEdges[i][0]], leftNodes[leftEdges[i][1]]);
-
-		// Draw nodes
-		for(int i=0; i<leftNodes.length; ++i)
-		drawNode(leftNodes[i], string(i+1));
-
-		// ---------------- Right Graph ----------------
-		pair[] rightNodes = new pair[8];
-		for(int i=0;i<8;++i) rightNodes[i] = leftNodes[i] + offset;
-
-		int[][] rightEdges = {
-		{0,1}, {3,4}, {4,5}
-		};
-
-		// Draw edges
-		for(int i=0; i<rightEdges.length; ++i)
-		drawEdge(rightNodes[rightEdges[i][0]], rightNodes[rightEdges[i][1]]);
-
-		// Draw nodes with red highlights for 3 and 7
-		for(int i=0; i<rightNodes.length; ++i) {
-				if(i==2 || i==6)
-				drawNode(rightNodes[i], string(i+1), redNodePen);
-				else
-				drawNode(rightNodes[i], string(i+1));
-			}
-	\end{asy}
+			\node[v] at (R1) {1};
+			\node[v] at (R2) {2};
+			\node[v,draw=red,text=red] at (R3) {3};
+			\node[v] at (R4) {4};
+			\node[v] at (R5) {5};
+			\node[v] at (R6) {6};
+			\node[v,draw=red,text=red] at (R7) {7};
+			\node[v] at (R8) {8};
+		\end{scope}
+	\end{tikzpicture}
 	\caption{Disconnecting the graph by removing the separation pair (3,7). The remaining graph has three components: \{1,2\}, \{4,5,6\}, and \{8\}.}
 	\label{fig:separationpair}
 \end{figure}
@@ -160,152 +143,103 @@ In the graph, the $(3,7)$ separation pair can have a chord between them in more 
 
 \begin{figure}[h]
 	\centering
-	\begin{asy}
-		size(150);
+	\begin{tikzpicture}[scale=0.78, line cap=round, line join=round]
+		\tikzset{v/.style={circle,draw,inner sep=1.8pt,minimum size=14pt}}
+		\coordinate (N1) at (0,2);
+		\coordinate (N2) at (0,6);
+		\coordinate (N3) at (2,6);
+		\coordinate (N4) at (4,6);
+		\coordinate (N5) at (4,4);
+		\coordinate (N6) at (4,2);
+		\coordinate (N7) at (2,2);
+		\coordinate (N8) at (2,4);
 
-		// ---------------- Settings ----------------
-		real nodeRadius = 0.25;
-		pen nodePen = black+1;
-		pen redEdgePen = red + 1.5bp + dotted;
+		\draw (N1)--(N2)--(N3)--(N4)--(N5)--(N6)--(N7)--(N8);
+		\draw (N1)--(N7);
+		\draw (N3)--(N8);
+		\draw[red,dotted,thick] (N3) to[out=-100,in=100] (N7);
+		\draw[red,dotted,thick] (N3) to[out=-80,in=80] (N7);
 
-		// Function to draw a node
-		void drawNode(pair pos, string label, pen p = nodePen) {
-				draw(circle(pos, nodeRadius), p);
-				label(label, pos);
-			}
+		\node at (1,4) {$F_1$};
+		\node at (3,4) {$F_2$};
 
-		// Function to draw edges stopping at node borders
-		void drawEdge(pair A, pair B, real r = nodeRadius, pen p = black) {
-				pair dir = (B - A)/abs(B - A);
-				draw(A + r*dir -- B - r*dir, p);
-			}
-
-		// ---------------- Nodes ----------------
-		pair[] nodes = {
-		(0,2),  // 1
-		(0,6),  // 2
-		(2,6),  // 3
-		(4,6),  // 4
-		(4,4),  // 5
-		(4,2),  // 6
-		(2,2),  // 7
-		(2,4)   // 8
-		};
-
-		// Draw nodes
-		for(int i=0; i<nodes.length; ++i)
-		drawNode(nodes[i], string(i+1));
-
-		// Text labels F1 and F2
-		label("$F_1$", (1,4));
-		label("$F_2$", (3,4));
-
-		// ---------------- Edges ----------------
-		int[][] edges = {
-		{0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{6,7},{0,6},{2,7}
-		};
-
-		for(int i=0;i<edges.length;++i)
-		drawEdge(nodes[edges[i][0]], nodes[edges[i][1]]);
-
-		// ---------------- Curved red dotted edges (left/right bends) ----------------
-		pair mid = (nodes[2] + nodes[6])/2; // midpoint between nodes 3 and 7
-		real bendOffset = 0.7; // horizontal bend amount
-
-		// Bend left (control point slightly to the left of midpoint)
-		draw(nodes[2] .. controls (mid - (bendOffset,0)) .. nodes[6], redEdgePen);
-
-		// Bend right (control point slightly to the right of midpoint)
-		draw(nodes[2] .. controls (mid + (bendOffset,0)) .. nodes[6], redEdgePen);
-
-	\end{asy}
+		\node[v] at (N1) {1};
+		\node[v] at (N2) {2};
+		\node[v] at (N3) {3};
+		\node[v] at (N4) {4};
+		\node[v] at (N5) {5};
+		\node[v] at (N6) {6};
+		\node[v] at (N7) {7};
+		\node[v] at (N8) {8};
+	\end{tikzpicture}
 	\caption{The $(3,7)$ separation pair can have a chord between the vertices in more than one way.}
 	\label{fig:multiedgeinseparationpair}
 \end{figure}
-
 
 \captionsetup[figure]{font=small}
 In Figure~\ref{fig:multiedgeinseparationpair}, within this biconnected graph, the $(3,7)$ separation pair can have two chords at the same time: one in face $F_1$ and another in face $F_2$.
 In the Parvez, Rahman, and Nakano algorithm~\cite{parvez2011}, we are assured that there will not be any multi-edge problem because multi-edges are not possible in triconnected plane graphs. However, if we want to extend that algorithm to biconnected graphs, there is a significant possibility of multi-edges.
 
+
 \begin{figure}[h]
 	\centering
-	\begin{asy}
-		size(400);
+	\begin{tikzpicture}[scale=0.68, line cap=round, line join=round]
+		\tikzset{v/.style={circle,draw,inner sep=1.6pt,minimum size=12pt}}
+		% Left graph
+		\coordinate (L1) at (0,2);
+		\coordinate (L2) at (0,6);
+		\coordinate (L3) at (2,6);
+		\coordinate (L4) at (4,6);
+		\coordinate (L5) at (4,4);
+		\coordinate (L6) at (4,2);
+		\coordinate (L7) at (2,2);
+		\coordinate (L8) at (2,4);
 
-		real nodeRadius = 0.2;
-		pen nodePen = black+1;
-		pen redEdgePen = red + 1.5bp + dotted;
+		\draw (L1)--(L2)--(L3)--(L4)--(L5)--(L6)--(L7)--(L8);
+		\draw (L1)--(L7);
+		\draw (L3)--(L8);
+		\draw[red,dotted,thick] (L3) to[out=-100,in=100] (L7);
+		\draw[red,dotted,thick] (L3) to[out=-80,in=80] (L7);
 
-		// Function to draw a node
-		void drawNode(pair pos, string label, pen p = nodePen) {
-				draw(circle(pos, nodeRadius), p);
-				label(label, pos);
-			}
+		\node at (1,4) {$F_1$};
+		\node at (3,4) {$F_2$};
 
-		// Function to draw edges stopping at node borders
-		void drawEdge(pair A, pair B, real r = nodeRadius, pen p = black) {
-				pair dir = (B - A)/abs(B - A);
-				draw(A + r*dir -- B - r*dir, p);
-			}
+		\node[v] at (L1) {1};
+		\node[v] at (L2) {2};
+		\node[v] at (L3) {3};
+		\node[v] at (L4) {4};
+		\node[v] at (L5) {5};
+		\node[v] at (L6) {6};
+		\node[v] at (L7) {7};
+		\node[v] at (L8) {8};
 
-		// ---------------- Left Graph ----------------
-		pair[] leftNodes = {
-		(0,2),  //1
-		(0,6),  //2
-		(2,6),  //3
-		(4,6),  //4
-		(4,4),  //5
-		(4,2),  //6
-		(2,2),  //7
-		(2,4)   //8
-		};
+		% Right graph
+		\begin{scope}[xshift=7cm]
+			\coordinate (R1) at (0,2);
+			\coordinate (R2) at (0,6);
+			\coordinate (R3) at (2,6);
+			\coordinate (R4) at (6,6);
+			\coordinate (R5) at (6,4);
+			\coordinate (R6) at (6,2);
+			\coordinate (R7) at (2,2);
+			\coordinate (R8) at (4,4);
 
-		int[][] leftEdges = {
-		{0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{6,7},{0,6},{2,7}
-		};
+			\draw (R1)--(R2)--(R3)--(R4)--(R5)--(R6)--(R7)--cycle;
+			\draw (R3)--(R8)--(R7);
 
-		// Draw left edges
-		for(int i=0;i<leftEdges.length;++i)
-		drawEdge(leftNodes[leftEdges[i][0]], leftNodes[leftEdges[i][1]]);
+			\node at (1,4) {$F_1$};
+			\node at (5,4) {$F_2$};
 
-		// Draw left nodes
-		for(int i=0;i<leftNodes.length;++i)
-		drawNode(leftNodes[i], string(i+1));
-
-		// Labels F1, F2
-		label("$F_1$", (1,4));
-		label("$F_2$", (3,4));
-
-		// Optional multi-edge example (red dotted) for left graph
-		draw(leftNodes[2] .. controls ((leftNodes[2]+leftNodes[6])/2 - (0.7,0)) .. leftNodes[6], redEdgePen);
-		draw(leftNodes[2] .. controls ((leftNodes[2]+leftNodes[6])/2 + (0.7,0)) .. leftNodes[6], redEdgePen);
-
-		// ---------------- Right Graph ----------------
-		pair offset = (7,0); // shift right
-		pair[] rightNodes = {
-		(0,2), (0,6), (2,6), (6,6), (6,4), (6,2), (2,2), (4,4)
-		};
-		for(int i=0;i<rightNodes.length;++i)
-		rightNodes[i] += offset;
-
-		int[][] rightEdges = {
-		{0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{2,6},{0,6},{2,7},{6,7}
-		};
-
-		// Draw right edges
-		for(int i=0;i<rightEdges.length;++i)
-		drawEdge(rightNodes[rightEdges[i][0]], rightNodes[rightEdges[i][1]]);
-
-		// Draw right nodes
-		for(int i=0;i<rightNodes.length;++i)
-		drawNode(rightNodes[i], string(i+1));
-
-		// Labels F1, F2 for right graph
-		label("$F_1$", (1,4)+offset);
-		label("$F_2$", (5,4)+offset);
-
-	\end{asy}
+			\node[v] at (R1) {1};
+			\node[v] at (R2) {2};
+			\node[v] at (R3) {3};
+			\node[v] at (R4) {4};
+			\node[v] at (R5) {5};
+			\node[v] at (R6) {6};
+			\node[v] at (R7) {7};
+			\node[v] at (R8) {8};
+		\end{scope}
+	\end{tikzpicture}
 	\caption{The left graph is biconnected, where $(3,7)$ has the possibility of becoming a multi-edge, but in the right graph, $(3,7)$ cannot be a multi-edge because it is a triconnected graph.}
 	\label{fig:occurranceofmultiedge}
 \end{figure}

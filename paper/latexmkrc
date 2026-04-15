@@ -1,6 +1,0 @@
-add_cus_dep('asy', 'pdf', 0, 'asy2pdf');
-
-sub asy2pdf {
-    print "Running Asymptote on $_[0].asy\n";
-    system("asy \"$_[0].asy\"");
-}
