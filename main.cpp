@@ -5,6 +5,23 @@ using namespace std;
 #include "biconnected.hpp"
 #include "FaceTriangulation.hpp"
 
+using u128 = unsigned __int128;
+
+static string u128_to_string(u128 x)
+{
+    if (x == 0)
+        return "0";
+    string s;
+    while (x > 0)
+    {
+        int digit = (int)(x % 10);
+        s.push_back('0' + digit);
+        x /= 10;
+    }
+    reverse(s.begin(), s.end());
+    return s;
+}
+
 vector<vector<int>> input(string filename)
 {
     ifstream infile(filename);
@@ -68,8 +85,8 @@ int main()
     bc->getAllTriangulations();
 
     // bc->printAllTriangulations();
-    int totalTriangulations = bc->totalTriangulations;
-    cout << "Total triangulations in biconnected component: " << totalTriangulations << endl;
+    u128 totalTriangulations = bc->totalTriangulations;
+    cout << "Total triangulations in biconnected component: " << u128_to_string(totalTriangulations) << endl;
     output(bc->allTriangulations, "output.txt");
     delete bc;
 

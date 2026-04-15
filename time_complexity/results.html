@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Triangulation Benchmark</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head><body>
+<h1>Benchmark Charts</h1>
+<canvas id="timeChart" width="800" height="400"></canvas>
+<canvas id="memChart" width="800" height="400"></canvas>
+<canvas id="vertChart" width="800" height="400"></canvas>
+<h2>PNG summaries</h2>
+<p><img src="graphs/avg_per_triangulation_mean.png" width="600"></p>
+<p><img src="graphs/avg_per_triangulation_median.png" width="600"></p>
+<p><img src="graphs/avg_per_triangulation_min.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_mean_error.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_median.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_min.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_max.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_global_range.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_smoothed.png" width="600"></p>
+<script>
+const labels = ["C04_square_cycle.txt","C05_pentagon_cycle.txt","C06_hexagon_cycle_1.txt","C07_heptagon_cycle.txt","C08_octagon_cycle.txt","C09_nonagon_cycle.txt","C10_decagon_cycle.txt","W5_wheel_2.txt","complex.txt","graph_V11F3.txt","graph_V12E25F12.txt","graph_V6E7F3_1.txt","graph_V6E7F3_2.txt","graph_V6E7F3_3.txt","graph_V6E7F3_4.txt","graph_V7E11F5.txt","graph_V7E9F3.txt","graph_V8E10F4.txt","graph_V8E15F8.txt","graph_V9E10F3.txt","quadrilateral_14quad.txt","quadrilateral_4quad.txt","quadrilateral_7quad.txt","simple3.txt","square7.txt","square8.txt","square_with_pentagon.txt","trople_rectangle.txt","C11_cycle.txt","graph_V13F4.txt","graph_V13F4_version_2.txt","grid_4x4.txt","C12_cycle.txt"];
+const meanData = {labels: labels, datasets:[{label:'mean time (s)',data:[0.000021,0.000121,0.000797,0.006062,0.034343,0.245809,2.311695,0.000034,6.345348,3.305887,0.000258,0.000198,0.000193,0.000207,0.000193,0.000070,0.000093,0.000526,0.000065,0.111434,0.133815,0.000155,0.000746,0.000038,0.000383,0.000642,0.000049,0.000048,22.392773,48.123874,58.036679,19.981923,261.967471],borderColor:'blue',fill:false}]};
+const medData = {labels: labels, datasets:[{label:'median time (s)',data:[0.000019,0.000126,0.000797,0.006000,0.030876,0.248907,2.287195,0.000035,6.337654,3.303762,0.000252,0.000207,0.000191,0.000216,0.000178,0.000073,0.000090,0.000526,0.000061,0.110144,0.124873,0.000159,0.000734,0.000036,0.000389,0.000587,0.000047,0.000045,22.264872,48.975134,57.243069,20.332385,261.967471],borderColor:'orange',fill:false}]};
+const minData = {labels: labels, datasets:[{label:'min time (s)',data:[0.000017,0.000075,0.000729,0.005788,0.028124,0.224403,2.242838,0.000027,5.812032,3.207712,0.000244,0.000144,0.000153,0.000125,0.000156,0.000047,0.000066,0.000494,0.000055,0.098500,0.111449,0.000100,0.000554,0.000034,0.000304,0.000488,0.000036,0.000036,22.028224,43.441058,54.446655,18.103039,261.967471],borderColor:'green',fill:false}]};
+const perMeanData = {labels: labels, datasets:[{label:'mean ns/triang',data:[10302.000000,12122.000000,11717.000000,11103.000000,7049.000000,5254.000000,4875.000000,6781.000000,4949.000000,4913.000000,4154.000000,9921.000000,8047.000000,10336.000000,9626.000000,10034.000000,10288.000000,13142.000000,13069.000000,8028.000000,8167.000000,9660.000000,10363.000000,9395.000000,10652.000000,13378.000000,12136.000000,12118.000000,4469.000000,5030.000000,5676.000000,4331.000000,4787.000000],borderColor:'blue',fill:false}]};
+const perMedData = {labels: labels, datasets:[{label:'median ns/triang',data:[4663.750000,25140.600000,132912.500000,857109.142857,3859535.875000,27656366.444444,228719451.900000,5890.000000,487511856.538462,300341969.000000,21021.750000,34469.333333,31761.500000,36015.166667,29626.000000,10478.285714,12872.000000,65719.000000,7602.125000,12238196.555556,7804532.625000,17685.222222,81598.777778,7288.000000,43210.888889,58662.200000,9339.000000,9096.400000,2024079301.818182,3767317985.692308,4403312965.923077,1270774046.750000,21830622573.333332],borderColor:'orange',fill:false}]};
+const perMinData = {labels: labels, datasets:[{label:'min ns/triang',data:[4291.250000,15029.000000,121566.833333,826804.714286,3515498.875000,24933653.555556,224283757.700000,4491.500000,447079372.230769,291610142.636364,20330.500000,24022.333333,25418.333333,20844.500000,25938.833333,6666.285714,9377.142857,61804.500000,6851.375000,10944407.444444,6965591.625000,11109.888889,61564.555556,6718.000000,33755.555556,48841.500000,7123.200000,7251.000000,2002565778.909091,3341619853.538462,4188204211.230769,1131439942.312500,21830622573.333332],borderColor:'green',fill:false}]};
+const vertData = {labels: labels, datasets:[{label:'vertices',data:[4,5,6,7,8,9,10,6,13,11,12,6,6,6,6,7,7,8,8,9,16,9,9,5,9,10,5,5,11,13,13,16,12],borderColor:'gray',fill:false}]};
+new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:meanData,options:{responsive:true,plugins:{title:{display:true,text:'Mean time per file'}}}});
+new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:medData,options:{responsive:true,plugins:{title:{display:true,text:'Median time per file'}}}});
+new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:minData,options:{responsive:true,plugins:{title:{display:true,text:'Min time per file'}}}});
+new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMeanData,options:{responsive:true,plugins:{title:{display:true,text:'Mean memory/vertex per file'}}}});
+new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMedData,options:{responsive:true,plugins:{title:{display:true,text:'Median memory/vertex per file'}}}});
+new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMinData,options:{responsive:true,plugins:{title:{display:true,text:'Min memory/vertex per file'}}}});
+new Chart(document.getElementById('vertChart').getContext('2d'),{type:'line',data:vertData,options:{responsive:true,plugins:{title:{display:true,text:'Vertices per file'}}}});
+</script>
+</body></html>

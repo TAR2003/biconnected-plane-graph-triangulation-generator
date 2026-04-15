@@ -4,6 +4,8 @@ using namespace std;
 #include "Edge.hpp"
 #include "pairHash.hpp"
 
+using u128 = unsigned __int128;
+
 // Forward declaration to avoid circular dependency
 class FaceTriangulation;
 
@@ -14,7 +16,7 @@ public:
     unordered_set<pair<int, int>, PairHash> present;
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation *> faceTriangulations;
-    int totalTriangulations = 0;
+    u128 totalTriangulations = 0;
     biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
