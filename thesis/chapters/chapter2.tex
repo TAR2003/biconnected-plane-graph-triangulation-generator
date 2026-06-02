@@ -24,8 +24,8 @@ Equivalently, removing fewer than \(k\) vertices leaves the graph connected.
 
 In particular:
 \begin{itemize}
-    \item A graph is \textbf{2‑connected} (or \textbf{biconnected}) if it has no articulation vertices (cut vertices) and remains connected after the removal of any single vertex.
-    \item A graph is \textbf{3‑connected} (or \textbf{triconnected}) if it remains connected after the removal of any two vertices.
+    \item A graph is \textbf{2-connected} (or \textbf{biconnected}) if it has no articulation vertices (cut vertices) and remains connected after the removal of any single vertex.
+    \item A graph is \textbf{3-connected} (or \textbf{triconnected}) if it remains connected after the removal of any two vertices.
 \end{itemize}
 
 \begin{definition}[Separation pair]
@@ -36,7 +36,7 @@ In particular:
 
 \begin{definition}[Separation vertex]
     \label{def:separation_vertex}
-    In a 1‑connected graph, a vertex \(v\) is a \textbf{separation vertex} (or \textbf{cut vertex}) if removing \(v\) disconnects the graph. 
+    In a 1-connected graph, a vertex \(v\) is a \textbf{separation vertex} (or \textbf{cut vertex}) if removing \(v\) disconnects the graph. 
     A graph is biconnected if and only if it has no separation vertices.
 \end{definition}
 
@@ -96,7 +96,7 @@ Therefore, \((3,7)\) is a separation pair.
 
 \begin{remark}
     In a biconnected plane graph, a separation pair \((a,b)\) implies that the graph can be split into two subgraphs that share only \(a\) and \(b\). 
-    Consequently, there exist two faces (one on each side of the pair) that can potentially contain the same chord \((a,b)\), leading to a multi‑edge if both faces are triangulated independently.
+    Consequently, there exist two faces (one on each side of the pair) that can potentially contain the same chord \((a,b)\), leading to a multi-edge if both faces are triangulated independently.
 \end{remark}
 
 \section{Faces, Cycles, and Chords}
@@ -144,7 +144,7 @@ A chord \((v_i, v_j)\) divides the cycle into two smaller cycles:
 \section{Triangulation of a Cycle}
 \label{sec:triangulation_cycle}
 
-A \textbf{triangulation} of a cycle \(C\) is a maximal set of non‑intersecting chords that partition the interior of \(C\) into triangles. 
+A \textbf{triangulation} of a cycle \(C\) is a maximal set of non-intersecting chords that partition the interior of \(C\) into triangles. 
 The sides of the triangles are either chords or edges of \(C\). 
 Figure~\ref{fig:triangulations_of_cycle} shows two triangulations of a hexagon.
 
@@ -158,7 +158,7 @@ If the vertices of the cycle are numbered sequentially from \(v_1\) to \(v_n\), 
 The order of vertices matters: two triangulations that differ only by a rotation or reflection are considered distinct if the labels are different.
 
 If the vertices are not numbered, the triangulations are called \textbf{unlabeled}. 
-In this case, rotationally equivalent or mirror‑image triangulations are considered the same. 
+In this case, rotationally equivalent or mirror-image triangulations are considered the same. 
 In this thesis, we work exclusively with \textbf{labeled triangulations} unless stated otherwise.
 
 \section{Flipping Operation}
@@ -309,7 +309,7 @@ The parent–child relationship defined by flipping the leftmost blocking chord 
     The \textbf{genealogical tree} \(\mathcal{T}(C)\) of triangulations of \(C\) is defined as follows:
     \begin{itemize}
         \item The root is the fan triangulation where all chords are incident to \(v_1\).
-        \item For any non‑root triangulation \(T\), its parent \(P(T)\) is obtained by flipping the leftmost blocking chord of \(T\).
+        \item For any non-root triangulation \(T\), its parent \(P(T)\) is obtained by flipping the leftmost blocking chord of \(T\).
         \item Conversely, a triangulation \(T\) is a child of \(T'\) if \(T' = P(T)\).
     \end{itemize}
 \end{definition}
@@ -349,7 +349,7 @@ This tree structure is the basis of the algorithm for generating all triangulati
 \section{Summary}
 \label{sec:prelim_summary}
 
-We have introduced the essential graph‑theoretic concepts: connectivity, planarity, faces, cycles, chords, triangulations, and the flipping operation. 
+We have introduced the essential graph-theoretic concepts: connectivity, planarity, faces, cycles, chords, triangulations, and the flipping operation. 
 We defined blocking chords, generating chords, and the leftmost blocking chord, and proved its uniqueness. 
 The genealogical tree provides a canonical parent–child relationship among triangulations of a cycle.
 

@@ -6,14 +6,14 @@
 
 In this chapter we present the algorithm for generating all triangulations of a cycle with labeled vertices. 
 This algorithm, due to Parvez, Rahman, and Nakano~\cite{parvez2011}, forms the core building block of our method for biconnected graphs. 
-We describe it in detail, including the necessary definitions, the parent‑child relationship, the data structures, and the complexity analysis.
+We describe it in detail, including the necessary definitions, the parent-child relationship, the data structures, and the complexity analysis.
 
 \section{Problem Definition}
 \label{sec:cycle_problem}
 
 Let \(C = \langle v_1, v_2, \dots, v_n \rangle\) be a cycle with \(n\) vertices listed in counterclockwise order. 
 All vertices are labeled, and the embedding is fixed. 
-A \textbf{triangulation} of \(C\) is a maximal set of non‑crossing chords that partition the interior of \(C\) into triangles. 
+A \textbf{triangulation} of \(C\) is a maximal set of non-crossing chords that partition the interior of \(C\) into triangles. 
 Any triangulation contains exactly \(n-3\) chords.
 
 We wish to generate \emph{all} triangulations of \(C\) without duplication, using \(O(1)\) amortized time per triangulation and \(O(n)\) space.
@@ -109,7 +109,7 @@ The proof was given in Chapter~\ref{ch:preliminaries} (Lemma~\ref{lem:unique_lef
 The genealogical tree \(\mathcal{T}(C)\) is defined by the following parent function.
 
 \begin{definition}[Parent of a triangulation]
-    For a non‑root triangulation \(T\), let \((v_b, v_{b'})\) be its leftmost blocking chord. 
+    For a non-root triangulation \(T\), let \((v_b, v_{b'})\) be its leftmost blocking chord. 
     The \textbf{parent} \(P(T)\) is obtained by flipping \((v_b, v_{b'})\) in the quadrilateral that contains it.
 \end{definition}
 
@@ -191,7 +191,7 @@ All three lists require \(O(n)\) space because a triangulation of \(n\) vertices
 \label{sec:cycle_algorithm_pseudocode}
 
 We now present the algorithm in pseudocode. 
-The main procedure is a depth‑first traversal of the genealogical tree \(\mathcal{T}(C)\).
+The main procedure is a depth-first traversal of the genealogical tree \(\mathcal{T}(C)\).
 
 \begin{algorithm}[htbp]
     \caption{GenerateAllTriangulationsCycle}
@@ -222,7 +222,7 @@ The main procedure is a depth‑first traversal of the genealogical tree \(\math
 \end{algorithm}
 
 \begin{algorithm}[htbp]
-    \caption{DFS (Depth‑first traversal of \(\mathcal{T}(C)\))}
+    \caption{DFS (Depth-first traversal of \(\mathcal{T}(C)\))}
     \label{alg:dfs_cycle}
     \begin{algorithmic}[1]
         \Procedure{DFS}{$T$}
@@ -264,7 +264,7 @@ The flip operation (Algorithm~\ref{alg:flip_cycle}) creates a child triangulatio
 The algorithm correctly generates all triangulations without duplicates because:
 
 \begin{enumerate}
-    \item The parent of any non‑root triangulation is uniquely defined (by the leftmost blocking chord). 
+    \item The parent of any non-root triangulation is uniquely defined (by the leftmost blocking chord). 
     Hence each triangulation appears exactly once in the tree, and the DFS visits each node exactly once.
     \item The generating chords are exactly those whose flips produce children that are valid and have the current triangulation as parent (Lemma~\ref{lem:generating_condition} in the original paper). 
     Thus no child is missed.
@@ -282,7 +282,7 @@ removing one chord, adding another, and updating at most two opposite pairs.
 Thus each child is generated in \(O(1)\) time.
 
 Let \(T\) be the total number of triangulations of \(C\). 
-The number of edges in the genealogical tree is \(T - 1\) (one parent edge per non‑root node). 
+The number of edges in the genealogical tree is \(T - 1\) (one parent edge per non-root node). 
 Since the DFS traverses each edge once, the total number of flip operations is \(T - 1\). 
 Hence the total time is \(O(n + T) = O(T)\) (because \(n = O(T)\) when \(n \ge 4\), as Catalan numbers grow exponentially). 
 Therefore the amortised time per triangulation is \(O(1)\).
@@ -335,10 +335,10 @@ The total number of triangulations of a convex hexagon is 14, which matches the 
 We have described the Parvez–Rahman–Nakano algorithm for generating all triangulations of a labeled cycle. 
 Key properties:
 \begin{itemize}
-    \item The genealogical tree is traversed in depth‑first order.
+    \item The genealogical tree is traversed in depth-first order.
     \item Each child is generated from its parent by flipping a generating chord in \(O(1)\) time.
     \item The space complexity is \(O(n)\).
     \item The amortised time per triangulation is \(O(1)\).
 \end{itemize}
 
-This algorithm is used as a subroutine in our method for biconnected plane graphs, where we process each face independently while maintaining a global set of chords to avoid multi‑edges.
+This algorithm is used as a subroutine in our method for biconnected plane graphs, where we process each face independently while maintaining a global set of chords to avoid multi-edges.
