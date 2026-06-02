@@ -1,4 +1,4 @@
-\contentsline {algorithm}{\numberline {1}{\ignorespaces GenerateAllTriangulationsCycle}}{25}{algorithm.1}%
-\contentsline {algorithm}{\numberline {2}{\ignorespaces BuildRootTriangulation}}{25}{algorithm.2}%
-\contentsline {algorithm}{\numberline {3}{\ignorespaces DFS (Depth-first traversal of \(\mathcal {T}(C)\))}}{25}{algorithm.3}%
-\contentsline {algorithm}{\numberline {4}{\ignorespaces Flip}}{26}{algorithm.4}%
+\contentsline {algorithm}{\numberline {1}{\ignorespaces GenerateAllTriangulationsCycle}}{26}{algorithm.1}%
+\contentsline {algorithm}{\numberline {2}{\ignorespaces BuildRootTriangulation}}{26}{algorithm.2}%
+\contentsline {algorithm}{\numberline {3}{\ignorespaces DFS (Depth-first traversal of \(\mathcal {T}(C)\))}}{26}{algorithm.3}%
+\contentsline {algorithm}{\numberline {4}{\ignorespaces Flip}}{27}{algorithm.4}%

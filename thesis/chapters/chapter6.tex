@@ -100,18 +100,24 @@ Based on Lemma~\ref{lem:persistence}, we formulate a safe pruning condition.
     \centering
     \begin{tikzpicture}[level distance=1.5cm, sibling distance=2cm, scale=0.9, transform shape]
         \tikzset{every node/.style={rectangle, draw, rounded corners, minimum width=1.2cm, minimum height=0.6cm, align=center, font=\scriptsize}}
+        
         \node[fill=blue!20] {Root $T_r$}
             child { node[fill=green!15] {$T_1$ (valid)}
                 child { node[fill=yellow!15] {$T_{11}$ (valid)} }
-                child[red] { node[fill=red!30] {$T_{12}$ (invalid, $e \in S$)} 
-                    child { node[fill=gray!20] {$T_{121}$ (pruned)} }
-                    child { node[fill=gray!20] {$T_{122}$ (pruned)} }
+                % Added (T_12) name here and moved red styling inside the node
+                child { node[fill=red!30, draw=red] (T_12) {$T_{12}$ \\ (invalid, $e \in S$)} 
+                    % Added names (T_121) and (T_122) here
+                    child { node[fill=gray!20] (T_121) {$T_{121}$ (pruned)} }
+                    child { node[fill=gray!20] (T_122) {$T_{122}$ (pruned)} }
                 }
             }
             child { node[fill=green!15] {$T_2$ (valid)} };
-        \draw[red, dashed] (T12.south) to[out=-90,in=90] (T121.north);
-        \draw[red, dashed] (T12.south) to[out=-90,in=90] (T122.north);
-        \node[red] at (4, -2.5) {Pruned subtree};
+            
+        % These will work perfectly now that the nodes are named
+        \draw[red, dashed] (T_12.south) to[out=-90,in=90] (T_121.north);
+        \draw[red, dashed] (T_12.south) to[out=-90,in=90] (T_122.north);
+        
+        \node[red, draw=none] at (4, -2.5) {Pruned subtree};
     \end{tikzpicture}
     \caption{Safe pruning: node $T_{12}$ contains a chord $e$ already in $S$; its entire subtree is pruned because all descendants would also contain $e$.}
     \label{fig:pruning}
