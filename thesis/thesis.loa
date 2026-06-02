@@ -1,4 +1,8 @@
-\contentsline {algorithm}{\numberline {1}{\ignorespaces GenerateAllTriangulationsCycle}}{26}{algorithm.1}%
-\contentsline {algorithm}{\numberline {2}{\ignorespaces BuildRootTriangulation}}{26}{algorithm.2}%
-\contentsline {algorithm}{\numberline {3}{\ignorespaces DFS (Depth-first traversal of \(\mathcal {T}(C)\))}}{26}{algorithm.3}%
-\contentsline {algorithm}{\numberline {4}{\ignorespaces Flip}}{27}{algorithm.4}%
+\contentsline {algorithm}{\numberline {1}{\ignorespaces GenerateAllTriangulationsCycle}}{29}{algorithm.1}%
+\contentsline {algorithm}{\numberline {2}{\ignorespaces BuildRootTriangulation}}{29}{algorithm.2}%
+\contentsline {algorithm}{\numberline {3}{\ignorespaces DFS (Depth-first traversal of \(\mathcal {T}(C)\))}}{29}{algorithm.3}%
+\contentsline {algorithm}{\numberline {4}{\ignorespaces Flip}}{30}{algorithm.4}%
+\contentsline {algorithm}{\numberline {5}{\ignorespaces FindSafeRoot (Two-pointer method)}}{64}{algorithm.5}%
+\contentsline {algorithm}{\numberline {6}{\ignorespaces FindAllTriangulations (main)}}{77}{algorithm.6}%
+\contentsline {algorithm}{\numberline {7}{\ignorespaces ProcessFace (outer recursion)}}{78}{algorithm.7}%
+\contentsline {algorithm}{\numberline {8}{\ignorespaces DFS (inner recursion over local tree)}}{78}{algorithm.8}%
