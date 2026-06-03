@@ -1,0 +1,128 @@
+@article{parvez2011,
+  author    = {Mohammad Tanvir Parvez and Md. Saidur Rahman and Shin-ichi Nakano},
+  title     = {Generating all triangulations of plane graphs},
+  journal   = {Journal of Graph Algorithms and Applications},
+  volume    = {15},
+  number    = {3},
+  pages     = {457--482},
+  year      = {2011},
+  note      = {See Section~4 for the generating chord concept used in local genealogical trees.}
+}
+
+@book{diestel2017,
+  author    = {Reinhard Diestel},
+  title     = {Graph Theory},
+  volume    = {173},
+  series    = {Graduate Texts in Mathematics},
+  publisher = {Springer},
+  edition   = {5th},
+  year      = {2017},
+  note      = {See Theorem~2.3.1 (Maximal Outerplanar Graphs) for degree-2 vertex existence.}
+}
+
+@article{hopcroft1974,
+  author    = {John Hopcroft and Robert Tarjan},
+  title     = {Efficient planarity testing},
+  journal   = {Journal of the ACM},
+  volume    = {21},
+  number    = {4},
+  pages     = {549--568},
+  year      = {1974},
+  note      = {Classic algorithm for planarity testing and biconnected components.}
+}
+
+@article{avis1996,
+  author    = {David Avis and Komei Fukuda},
+  title     = {Reverse search for enumeration},
+  journal   = {Discrete Applied Mathematics},
+  volume    = {65},
+  number    = {1-3},
+  pages     = {21--46},
+  year      = {1996}
+}
+
+@article{chazelle1991,
+  author    = {Bernard Chazelle},
+  title     = {Triangulating a simple polygon in linear time},
+  journal   = {Discrete \& Computational Geometry},
+  volume    = {6},
+  number    = {1},
+  pages     = {485--524},
+  year      = {1991}
+}
+
+@book{deberg2008,
+  author    = {Mark de Berg and Otfried Cheong and Marc van Kreveld and Mark Overmars},
+  title     = {Computational Geometry: Algorithms and Applications},
+  publisher = {Springer},
+  edition   = {3rd},
+  year      = {2008}
+}
+
+@article{hanke1996,
+  author    = {Stefan Hanke and Thomas Ottmann and Sven Schuierer},
+  title     = {A lower bound on the length of a sequence of edge-flips transforming
+               one triangulation into another},
+  journal   = {Computational Geometry},
+  volume    = {6},
+  number    = {3},
+  pages     = {131--139},
+  year      = {1996}
+}
+
+@article{hurtado1999,
+  author    = {Ferran Hurtado and Marc Noy},
+  title     = {Graph of triangulations of a convex polygon and tree of triangulations},
+  journal   = {Computational Geometry},
+  volume    = {13},
+  number    = {3},
+  pages     = {179--188},
+  year      = {1999}
+}
+
+@article{kozminski1985,
+  author    = {Krzysztof Kozminski and Edwin Kinnen},
+  title     = {Rectangular dualization and rectangular dissections},
+  journal   = {IEEE Transactions on Circuits and Systems},
+  volume    = {32},
+  number    = {8},
+  pages     = {771--781},
+  year      = {1985}
+}
+
+@article{li2002,
+  author    = {Zheng Li and Shin-ichi Nakano},
+  title     = {Generating all triangulations of plane graphs},
+  journal   = {Theoretical Computer Science},
+  volume    = {270},
+  number    = {1-2},
+  pages     = {771--784},
+  year      = {2002}
+}
+
+@book{nishizeki2004,
+  author    = {Takao Nishizeki and Md Saidur Rahman},
+  title     = {Planar Graph Drawing},
+  publisher = {World Scientific},
+  year      = {2004}
+}
+
+@article{read1978,
+  author    = {Ronald C. Read},
+  title     = {Every one a winner or how to avoid isomorphism search when
+               cataloguing combinatorial configurations},
+  journal   = {Annals of Discrete Mathematics},
+  volume    = {2},
+  pages     = {107--120},
+  year      = {1978}
+}
+
+@article{sleator1988,
+  author    = {Daniel D. Sleator and Robert E. Tarjan and William P. Thurston},
+  title     = {Rotation distance, triangulations, and hyperbolic geometry},
+  journal   = {Journal of the American Mathematical Society},
+  volume    = {1},
+  number    = {3},
+  pages     = {647--681},
+  year      = {1988}
+}
