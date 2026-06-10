@@ -8,6 +8,9 @@
 
 ---
 
+
+You can find the kaggle notebook [here](https://www.kaggle.com/code/tawkirazizrahman/thesis-triangulation-generation)
+
 ## 📋 Table of Contents
 
 - [Project Overview](#project-overview)
