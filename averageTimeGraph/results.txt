@@ -1,97 +1,32 @@
 
-╔════════════════════════════════════════════════════════════════════════════╗
-║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║
-╚════════════════════════════════════════════════════════════════════════════╝
+================================================================
+  Per-Triangulation Timing Recorder (averageTimeGraph)
+================================================================
 
 Scanning folder: input/small
-Test runs per file: 10
 
-⇢ Skipping already-processed file: C04_square_cycle.txt
-⇢ Skipping already-processed file: C05_pentagon_cycle.txt
-⇢ Skipping already-processed file: C06_hexagon_cycle_1.txt
-⇢ Skipping already-processed file: C07_heptagon_cycle.txt
-⇢ Skipping already-processed file: C08_octagon_cycle.txt
-⇢ Skipping already-processed file: C09_nonagon_cycle.txt
-⇢ Skipping already-processed file: C10_decagon_cycle.txt
-⇢ Skipping already-processed file: W5_wheel_2.txt
-⇢ Skipping already-processed file: complex.txt
-⇢ Skipping already-processed file: graph_V11F3.txt
-⇢ Skipping already-processed file: graph_V12E25F12.txt
-⇢ Skipping already-processed file: graph_V6E7F3_1.txt
-⇢ Skipping already-processed file: graph_V6E7F3_2.txt
-⇢ Skipping already-processed file: graph_V6E7F3_3.txt
-⇢ Skipping already-processed file: graph_V6E7F3_4.txt
-⇢ Skipping already-processed file: graph_V7E11F5.txt
-⇢ Skipping already-processed file: graph_V7E9F3.txt
-⇢ Skipping already-processed file: graph_V8E10F4.txt
-⇢ Skipping already-processed file: graph_V8E15F8.txt
-⇢ Skipping already-processed file: graph_V9E10F3.txt
-⇢ Skipping already-processed file: quadrilateral_14quad.txt
-⇢ Skipping already-processed file: quadrilateral_4quad.txt
-⇢ Skipping already-processed file: quadrilateral_7quad.txt
-⇢ Skipping already-processed file: simple3.txt
-⇢ Skipping already-processed file: square7.txt
-⇢ Skipping already-processed file: square8.txt
-⇢ Skipping already-processed file: square_with_pentagon.txt
-⇢ Skipping already-processed file: trople_rectangle.txt
-
-╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-║                                                    BENCHMARK RESULTS                                                               ║
-╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣
-║ File                     ║   Vertices║       Triangulations║     Time (s)║        ns/Triang║     Peak Memory║          Memory/Vertex║
-╠═══════════════════════════╬════════════╬═════════════════╬══════════════╬═══════════════╬═════════════════╬════════════════════════╣
-║ C04_square_cycle.txt     ║          4║                    2║     0.000021║       1.0302e+04║         4.00 KB║                1.00 KB║
-║ C05_pentagon_cycle.txt   ║          5║                   10║     0.000121║       1.2122e+04║         8.00 KB║                1.60 KB║
-║ C06_hexagon_cycle_1.txt  ║          6║                   68║     0.000797║       1.1717e+04║         8.00 KB║                1.33 KB║
-║ C07_heptagon_cycle.txt   ║          7║                  546║     0.006062║       1.1103e+04║         8.00 KB║                1.14 KB║
-║ C08_octagon_cycle.txt    ║          8║                 4872║     0.034343║       7.0490e+03║         8.00 KB║                1.00 KB║
-║ C09_nonagon_cycle.txt    ║          9║                46782║     0.245809║       5.2540e+03║         8.00 KB║               910.00 B║
-║ C10_decagon_cycle.txt    ║         10║               474180║     2.311695║       4.8750e+03║         8.00 KB║               819.00 B║
-║ W5_wheel_2.txt           ║          6║                    5║     0.000034║       6.7810e+03║         8.00 KB║                1.33 KB║
-║ complex.txt              ║         13║              1282136║     6.345348║       4.9490e+03║         8.00 KB║               630.00 B║
-║ graph_V11F3.txt          ║         11║               672902║     3.305887║       4.9130e+03║         4.00 KB║               372.00 B║
-║ graph_V12E25F12.txt      ║         12║                   62║     0.000258║       4.1540e+03║         4.00 KB║               341.00 B║
-║ graph_V6E7F3_1.txt       ║          6║                   20║     0.000198║       9.9210e+03║         4.00 KB║               682.00 B║
-║ graph_V6E7F3_2.txt       ║          6║                   24║     0.000193║       8.0470e+03║         4.00 KB║               682.00 B║
-║ graph_V6E7F3_3.txt       ║          6║                   20║     0.000207║       1.0336e+04║         4.00 KB║               682.00 B║
-║ graph_V6E7F3_4.txt       ║          6║                   20║     0.000193║       9.6260e+03║         8.00 KB║                1.33 KB║
-║ graph_V7E11F5.txt        ║          7║                    7║     0.000070║       1.0034e+04║         4.00 KB║               585.00 B║
-║ graph_V7E9F3.txt         ║          7║                    9║     0.000093║       1.0288e+04║         4.00 KB║               585.00 B║
-║ graph_V8E10F4.txt        ║          8║                   40║     0.000526║       1.3142e+04║         8.00 KB║                1.00 KB║
-║ graph_V8E15F8.txt        ║          8║                    5║     0.000065║       1.3069e+04║         8.00 KB║                1.00 KB║
-║ graph_V9E10F3.txt        ║          9║                13880║     0.111434║       8.0280e+03║         4.00 KB║               455.00 B║
-║ quadrilateral_14quad.txt ║         16║                16384║     0.133815║       8.1670e+03║         8.00 KB║               512.00 B║
-║ quadrilateral_4quad.txt  ║          9║                   16║     0.000155║       9.6600e+03║         4.00 KB║               455.00 B║
-║ quadrilateral_7quad.txt  ║          9║                   72║     0.000746║       1.0363e+04║         8.00 KB║               910.00 B║
-║ simple3.txt              ║          5║                    4║     0.000038║       9.3950e+03║         4.00 KB║               819.00 B║
-║ square7.txt              ║          9║                   36║     0.000383║       1.0652e+04║         8.00 KB║               910.00 B║
-║ square8.txt              ║         10║                   48║     0.000642║       1.3378e+04║         8.00 KB║               819.00 B║
-║ square_with_pentagon.txt ║          5║                    4║     0.000049║       1.2136e+04║         4.00 KB║               819.00 B║
-║ trople_rectangle.txt     ║          5║                    4║     0.000048║       1.2118e+04║         4.00 KB║               819.00 B║
-║ C11_cycle.txt            ║         11║              5010456║    22.392773║       4.4690e+03║          0.00 B║                 0.00 B║
-║ graph_V13F4.txt          ║         13║              9568244║    48.123874║       5.0300e+03║          0.00 B║                 0.00 B║
-║ graph_V13F4_version_2.txt║         13║             10225274║    58.036679║       5.6760e+03║          0.00 B║                 0.00 B║
-║ grid_4x4.txt             ║         16║              4613504║    19.981923║       4.3310e+03║          0.00 B║                 0.00 B║
-║ C12_cycle.txt            ║         12║             54721224║   261.967471║       4.7870e+03║          0.00 B║                 0.00 B║
-╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝
-
-╔════════════════════════════════════════════════════════════════════════════╗
-║                         COMPLEXITY ANALYSIS                                ║
-╠════════════════════════════════════════════════════════════════════════════╣
-║  Time Complexity:  Varies with triangulation count (see ns/Triang)        ║
-║  Space Complexity: O(n) where n = number of vertices                      ║
-║                    (measured precisely via RSS at byte-level)             ║
-╠════════════════════════════════════════════════════════════════════════════╣
-║  Color Legend:                                                             ║
-║    ● Green  = Excellent performance                                         ║
-║    ● Yellow = Moderate performance                                          ║
-║    ● Red    = High resource usage                                           ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
-Note: Results averaged over 10 runs per file.
-      Memory measured at byte precision (using /proc/self/smaps_rollup where available).
-
-(see results.html for charts)
-Data has been recorded in results.csv and an interactive report is available in results.html
-Attempting to create PNG plots (requires Python with pandas/matplotlib)...
-  Saved plots in 'graphs': avg_per_triangulation_mean.png, avg_per_triangulation_median.png, avg_per_triangulation_min.png, total_time_vs_triangulations_mean_error.png, total_time_vs_triangulations_global_range.png, total_time_vs_triangulations_smoothed.png  , total_time_vs_triangulations_median.png, total_time_vs_triangulations_min.png, total_time_vs_triangulations_max.png
+Processing: C04_square_cycle.txt ... done (2 triangulations, 2 records -> results/C04_square_cycle.csv)
+Processing: C05_pentagon_cycle.txt ... done (10 triangulations, 10 records -> results/C05_pentagon_cycle.csv)
+Processing: C06_hexagon_cycle_1.txt ... done (68 triangulations, 68 records -> results/C06_hexagon_cycle_1.csv)
+Processing: C07_heptagon_cycle.txt ... done (546 triangulations, 546 records -> results/C07_heptagon_cycle.csv)
+Processing: C08_octagon_cycle.txt ... done (4872 triangulations, 4872 records -> results/C08_octagon_cycle.csv)
+Processing: C09_nonagon_cycle.txt ... done (46782 triangulations, 46782 records -> results/C09_nonagon_cycle.csv)
+Processing: C10_decagon_cycle.txt ... done (474180 triangulations, 474180 records -> results/C10_decagon_cycle.csv)
+Processing: W5_wheel_2.txt ... done (5 triangulations, 5 records -> results/W5_wheel_2.csv)
+Processing: complex.txt ... done (1282136 triangulations, 1282136 records -> results/complex.csv)
+Processing: graph_V11F3.txt ... done (672902 triangulations, 672902 records -> results/graph_V11F3.csv)
+Processing: graph_V12E25F12.txt ... done (62 triangulations, 62 records -> results/graph_V12E25F12.csv)
+Processing: graph_V6E7F3_1.txt ... done (20 triangulations, 20 records -> results/graph_V6E7F3_1.csv)
+Processing: graph_V6E7F3_2.txt ... done (24 triangulations, 24 records -> results/graph_V6E7F3_2.csv)
+Processing: graph_V6E7F3_3.txt ... done (20 triangulations, 20 records -> results/graph_V6E7F3_3.csv)
+Processing: graph_V6E7F3_4.txt ... done (20 triangulations, 20 records -> results/graph_V6E7F3_4.csv)
+Processing: graph_V7E11F5.txt ... done (7 triangulations, 7 records -> results/graph_V7E11F5.csv)
+Processing: graph_V7E9F3.txt ... done (9 triangulations, 9 records -> results/graph_V7E9F3.csv)
+Processing: graph_V7F3_theta_a1_b1_c3_T392_v1.txt ... done (150 triangulations, 150 records -> results/graph_V7F3_theta_a1_b1_c3_T392_v1.csv)
+Processing: graph_V7F3_theta_a1_b1_c3_T392_v2.txt ... done (150 triangulations, 150 records -> results/graph_V7F3_theta_a1_b1_c3_T392_v2.csv)
+Processing: graph_V7F3_theta_a1_b1_c3_T392_v3.txt ... done (150 triangulations, 150 records -> results/graph_V7F3_theta_a1_b1_c3_T392_v3.csv)
+Processing: graph_V7F3_theta_a1_b2_c2_T350_v1.txt ... done (142 triangulations, 142 records -> results/graph_V7F3_theta_a1_b2_c2_T350_v1.csv)
+Processing: graph_V7F3_theta_a1_b2_c2_T350_v2.txt ... done (142 triangulations, 142 records -> results/graph_V7F3_theta_a1_b2_c2_T350_v2.csv)
+Processing: graph_V7F3_theta_a1_b2_c2_T350_v3.txt ... done (142 triangulations, 142 records -> results/graph_V7F3_theta_a1_b2_c2_T350_v3.csv)
+Processing: graph_V7F3_theta_a1_b3_c1_T392_v1.txt ... done (150 triangulations, 150 records -> results/graph_V7F3_theta_a1_b3_c1_T392_v1.csv)
+Processing: graph_V7F3_theta_a1_b3_c1_T392_v2.txt ... 
