@@ -17,6 +17,7 @@ public:
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation *> faceTriangulations;
     u128 totalTriangulations = 0;
+    std::function<void()> onTriangulationGenerated;
     biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
@@ -74,6 +75,8 @@ inline void biconnected::output(int serial)
     {
         // addTriangulation();
         totalTriangulations++;
+        if (onTriangulationGenerated)
+            onTriangulationGenerated();
     }
     else
     {
