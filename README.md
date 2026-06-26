@@ -306,14 +306,19 @@ After a brief initialization spike, cumulative average time **converges to a fla
 Individual cycle graphs demonstrate stabilization even at millions of triangulations:
 
 <p align="center">
-  <img src="averageTimeGraph/graphs/C6_hexagon_cycle.png" alt="C6 hexagon cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/C06_hexagon_cycle.png" alt="C6 hexagon cycle cumulative average time" width="48%"/>
   &nbsp;
-  <img src="averageTimeGraph/graphs/C7_cycle.png" alt="C7 cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/C07_heptagon_cycle.png" alt="C7 cycle cumulative average time" width="48%"/>
   <br/>
 
-  <img src="averageTimeGraph/graphs/C8_decagon_cycle.png" alt="C8 decagon cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/C08_octagon_cycle.png" alt="C8 decagon cycle cumulative average time" width="48%"/>
   &nbsp;
-  <img src="averageTimeGraph/graphs/C9_cycle.png" alt="C9 cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/C09_nonagon_cycle.png" alt="C9 cycle cumulative average time" width="48%"/>
+  <br/>
+
+  <img src="averageTimeGraph/graphs/square7.png" alt="Square 7 cumulative average time" width="48%"/>
+  &nbsp;
+  <img src="averageTimeGraph/graphs/square8.png" alt="Square 8 cumulative average time" width="48%"/>
   <br/>
   <!-- <em>Figure 4 — Cumulative average time: 6-cycle (474K triangulations) and 7-cycle (5M triangulations)</em> -->
 </p>
