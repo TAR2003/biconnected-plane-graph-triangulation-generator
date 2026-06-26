@@ -306,11 +306,16 @@ After a brief initialization spike, cumulative average time **converges to a fla
 Individual cycle graphs demonstrate stabilization even at millions of triangulations:
 
 <p align="center">
-  <img src="averageTimeGraph/graphs/C10_decagon_cycle.png" alt="C10 decagon cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/C6_hexagon_cycle.png" alt="C6 hexagon cycle cumulative average time" width="48%"/>
   &nbsp;
-  <img src="averageTimeGraph/graphs/C11_cycle.png" alt="C11 cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/C7_cycle.png" alt="C7 cycle cumulative average time" width="48%"/>
   <br/>
-  <em>Figure 4 — Cumulative average time: 10-cycle (474K triangulations) and 11-cycle (5M triangulations)</em>
+
+  <img src="averageTimeGraph/graphs/C8_decagon_cycle.png" alt="C8 decagon cycle cumulative average time" width="48%"/>
+  &nbsp;
+  <img src="averageTimeGraph/graphs/C9_cycle.png" alt="C9 cycle cumulative average time" width="48%"/>
+  <br/>
+  <!-- <em>Figure 4 — Cumulative average time: 6-cycle (474K triangulations) and 7-cycle (5M triangulations)</em> -->
 </p>
 
 > **Observation:** On the 11-cycle with 5,010,456 triangulations, average time per triangulation stabilizes at ~0.0006 ms (0.6 µs) after the first ~100,000 outputs — consistent with the ~500 ns aggregate measurements from `time_complexity/`.
