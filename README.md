@@ -306,7 +306,7 @@ After a brief initialization spike, cumulative average time **converges to a fla
 Individual cycle graphs demonstrate stabilization even at millions of triangulations:
 
 <p align="center">
-  <img src="averageTimeGraph/graphs/C06_hexagon_cycle.png" alt="C6 hexagon cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/C06_hexagon_cycle_1.png" alt="C6 hexagon cycle cumulative average time" width="48%"/>
   &nbsp;
   <img src="averageTimeGraph/graphs/C07_heptagon_cycle.png" alt="C7 cycle cumulative average time" width="48%"/>
   <br/>
