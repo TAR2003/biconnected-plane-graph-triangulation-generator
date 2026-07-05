@@ -117,14 +117,16 @@ Thesis/
 │
 ├── 📂 averageTimeGraph/                # Per-triangulation timing profiler
 │   ├── main.cpp                        # Records timestamp at every triangulation
-│   ├── plot_results.py                 # Cumulative average time plots
+│   ├── plot_results.py                 # Full-run cumulative average plots
+│   ├── plot_nth_results.py             # First-N triangulation zoom plots
 │   ├── biconnected.hpp                 # Extended with onTriangulationGenerated hook
 │   ├── input/
 │   │   ├── small/                      # 76 test graphs
 │   │   ├── medium/                     # 8 medium-scale graphs
 │   │   └── test_single/                # Single-graph smoke test
 │   ├── results/                        # Per-input CSV timing traces
-│   └── graphs/                         # 80+ cumulative-average plots
+│   ├── graphs/                         # Full-run cumulative-average plots
+│   └── nthGraphs/                      # First-N zoom plots with stabilization guide
 │
 ├── 📂 paper/                           # LaTeX thesis source
 │   ├── main.tex
@@ -282,48 +284,110 @@ python3 plot_results.py results.csv
 
 While `time_complexity/` measures **aggregate** performance, [`averageTimeGraph/`](averageTimeGraph/) records a timestamp at **every single triangulation** during generation. This produces fine-grained cumulative-average curves that reveal whether per-triangulation cost truly stabilizes over long runs.
 
-### How It Works
+### How the Three Modules Differ
 
-```
-For each triangulation generated:
-  1. Record elapsed nanoseconds since run start
-  2. Write CSV: triangulation_n, incremental_ns, cumulative_avg_ns
-  3. Plot cumulative average time vs. nth triangulation
-```
+| Aspect | `correctness/` | `time_complexity/` | `averageTimeGraph/` |
+|--------|----------------|--------------------|---------------------|
+| **Goal** | Verify output matches PRN reference | Benchmark total time & memory | Track per-triangulation cost over time |
+| **Algorithms run** | Biconnected + triconnected (PRN) | Biconnected only | Biconnected only |
+| **Timing** | None | One clock around the full run | One clock tick per triangulation |
+| **Repeats** | Once per graph | 10× small, 3× medium, 1× big | Once per graph |
+| **Output metric** | Match / mismatch | `perTriangNs = meanTime / T` (one scalar) | Running cumulative average at each *n* |
+| **What it proves** | Correctness | O(1) amortized across instances | O(1) amortized *throughout* a single run |
 
-The `biconnected` class is extended with an `onTriangulationGenerated` callback hook that fires after each triangulation is produced.
+`correctness/` does not measure time at all — it only checks that both algorithms produce identical triangulation sets. `time_complexity/` wraps the entire enumeration in a single timer and divides total elapsed time by the triangulation count *T*, optionally averaging over multiple runs. That gives one number per graph (e.g. ~500 ns/triangulation), but cannot show whether cost spikes early and settles later.
 
-### Key Results
+`averageTimeGraph/` answers that question by instrumenting the generator with an `onTriangulationGenerated` callback that fires after each output.
+
+### How the Calculation Works
+
+For each triangulation *n* = 1, 2, …, *T*:
+
+1. **Record** elapsed nanoseconds since run start: `elapsed_since_start_ns[n]`
+2. **Incremental time** (cost of the *n*-th triangulation alone):
+
+   `incremental_ns[n] = elapsed_since_start_ns[n] − elapsed_since_start_ns[n−1]`
+
+3. **Cumulative average** (running mean up to *n*):
+
+   `cumulative_avg_ns[n] = (Σᵢ₌₁ⁿ incremental_ns[i]) / n`
+
+The y-axis of every plot is `cumulative_avg_ns` converted to milliseconds. This is **not** the instantaneous cost of triangulation *n*; it is the average cost of all triangulations produced so far. Early triangulations pay a higher initialization/setup cost, so the curve starts high and drops as *n* grows. If the algorithm is truly O(1) amortized, the curve should flatten to a stable plateau.
+
+Each run writes a CSV with columns `triangulation_n`, `wall_clock`, `elapsed_since_start_ns`, `incremental_ns`, `cumulative_avg_ns`.
+
+### Two Plot Modes
+
+| Script | Output folder | What it shows |
+|--------|---------------|---------------|
+| `plot_results.py` | `graphs/` | Full enumeration — every triangulation |
+| `plot_nth_results.py` | `nthGraphs/` | First *N* triangulations only (default *N* = 100) |
+
+The **nth graphs** zoom into the early part of each run where initialization cost dominates. They also draw a red dashed horizontal guide at the **final** cumulative average (computed from the full run), so you can see how quickly the curve converges toward its asymptotic value.
+
+### Key Results — Full Run (`graphs/`)
 
 After a brief initialization spike, cumulative average time **converges to a flat plateau** — confirming O(1) amortized behavior holds throughout the entire enumeration, not just on average across runs.
 
+Cycle graphs from C₄ through C₁₁:
+
 <p align="center">
-  <img src="averageTimeGraph/graphs/combined.png" alt="Cumulative average generation time across all inputs" width="90%"/>
+  <img src="averageTimeGraph/graphs/C04_square_cycle.png" alt="C4 square cycle cumulative average time" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/graphs/C05_pentagon_cycle.png" alt="C5 pentagon cycle cumulative average time" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/graphs/C06_hexagon_cycle_1.png" alt="C6 hexagon cycle cumulative average time" width="32%"/>
   <br/>
-  <em>Figure 3 — Cumulative average time per triangulation across all test inputs</em>
+  <img src="averageTimeGraph/graphs/C07_heptagon_cycle.png" alt="C7 heptagon cycle cumulative average time" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/graphs/C08_octagon_cycle.png" alt="C8 octagon cycle cumulative average time" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/graphs/C09_nonagon_cycle.png" alt="C9 nonagon cycle cumulative average time" width="32%"/>
+  <br/>
+  <img src="averageTimeGraph/graphs/C10_decagon_cycle.png" alt="C10 decagon cycle cumulative average time" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/graphs/C11_cycle.png" alt="C11 cycle cumulative average time" width="32%"/>
+  <br/>
+  <em>Figure 3 — Full-run cumulative average time per triangulation: cycle graphs C₄–C₁₁</em>
 </p>
 
-Individual cycle graphs demonstrate stabilization even at millions of triangulations:
+Other representative inputs:
 
 <p align="center">
-  <img src="averageTimeGraph/graphs/C06_hexagon_cycle_1.png" alt="C6 hexagon cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/W5_wheel_2.png" alt="W5 wheel cumulative average time" width="48%"/>
   &nbsp;
-  <img src="averageTimeGraph/graphs/C07_heptagon_cycle.png" alt="C7 cycle cumulative average time" width="48%"/>
+  <img src="averageTimeGraph/graphs/grid_4x4.png" alt="4x4 grid cumulative average time" width="48%"/>
   <br/>
-
-  <img src="averageTimeGraph/graphs/C08_octagon_cycle.png" alt="C8 decagon cycle cumulative average time" width="48%"/>
-  &nbsp;
-  <img src="averageTimeGraph/graphs/C09_nonagon_cycle.png" alt="C9 cycle cumulative average time" width="48%"/>
-  <br/>
-
   <img src="averageTimeGraph/graphs/square7.png" alt="Square 7 cumulative average time" width="48%"/>
   &nbsp;
   <img src="averageTimeGraph/graphs/square8.png" alt="Square 8 cumulative average time" width="48%"/>
   <br/>
-  <!-- <em>Figure 4 — Cumulative average time: 6-cycle (474K triangulations) and 7-cycle (5M triangulations)</em> -->
+  <em>Figure 4 — Full-run cumulative average time: wheel, grid, and composite graphs</em>
 </p>
 
 > **Observation:** On the 11-cycle with 5,010,456 triangulations, average time per triangulation stabilizes at ~0.0006 ms (0.6 µs) after the first ~100,000 outputs — consistent with the ~500 ns aggregate measurements from `time_complexity/`.
+
+### Key Results — First-N Zoom (`nthGraphs/`)
+
+These plots show only the first 100 triangulations (configurable via `--n`) and annotate the final cumulative average from the complete run:
+
+<p align="center">
+  <img src="averageTimeGraph/nthGraphs/C04_square_cycle.png" alt="C4 square cycle first-100 cumulative average" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/nthGraphs/C06_hexagon_cycle_1.png" alt="C6 hexagon cycle first-100 cumulative average" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/nthGraphs/C08_octagon_cycle.png" alt="C8 octagon cycle first-100 cumulative average" width="32%"/>
+  <br/>
+  <img src="averageTimeGraph/nthGraphs/C10_decagon_cycle.png" alt="C10 decagon cycle first-100 cumulative average" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/nthGraphs/C11_cycle.png" alt="C11 cycle first-100 cumulative average" width="32%"/>
+  &nbsp;
+  <img src="averageTimeGraph/nthGraphs/grid_4x4.png" alt="4x4 grid first-100 cumulative average" width="32%"/>
+  <br/>
+  <em>Figure 5 — First-100 triangulation zoom with final-average stabilization guide (red dashed line)</em>
+</p>
+
+A compiled PDF of all nth-graph figures is available at [`averageTimeGraph/nthGraphs/averageTimeGraphUpTo200th.pdf`](averageTimeGraph/nthGraphs/averageTimeGraphUpTo200th.pdf).
 
 ### Build & Run
 
@@ -332,9 +396,15 @@ cd averageTimeGraph
 g++ -std=c++17 -O3 -o timer main.cpp
 ./timer
 
-# Plots are auto-generated; or run manually:
+# Full-run plots (auto-generated by timer, or run manually):
 python3 plot_results.py results
-# → graphs/<input_name>.png, graphs/combined.png
+# → graphs/<input_name>.png
+
+# First-N zoom plots:
+python3 plot_nth_results.py results
+# → nthGraphs/<input_name>.png
+python3 plot_nth_results.py results --n 200
+# → nthGraphs/ with N=200 cutoff
 ```
 
 ---
