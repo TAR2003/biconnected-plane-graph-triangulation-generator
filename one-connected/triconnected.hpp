@@ -32,6 +32,8 @@ public:
             present.insert(make_pair(min(face[0], face[face.size() - 1]), max(face[0], face[face.size() - 1])));
         }
     }
+
+    /// @brief Generates all triangulations for each face and stores them in triangulation_per_face
     void getAllTriangulations()
     {
         ParvezRahmanNakano *ft;
@@ -46,16 +48,19 @@ public:
                 vector<pair<int, int>> mappedTriangulation;
                 for (auto &chord : triangulation)
                 {
+                    // cout << "Chord in triangulation: (" << chord.first << ", " << chord.second << ")" << endl;
                     mappedTriangulation.push_back({min(face[chord.first], face[chord.second]), max(face[chord.first], face[chord.second])});
                 }
                 sort(mappedTriangulation.begin(), mappedTriangulation.end());
                 triangulation_per_face[pos].push_back(mappedTriangulation);
             }
+            // cout << "Face " << pos << " has " << triangulation_per_face[pos].size() << " triangulations." << endl;
             delete ft;
             pos++;
         }
     }
 
+    /// @brief Combines triangulations from different faces
     void combineTriangulations(
         const vector<vector<vector<pair<int, int>>>> &triangulation_per_face,
         int index,
@@ -86,6 +91,7 @@ public:
         }
     }
 
+    /// @brief Sorts triangulations for each face
     void sortTriangulations()
     {
         for (auto &triangulations : triangulation_per_face)
@@ -94,30 +100,36 @@ public:
         }
     }
 
+    /// @brief Removes duplicated triangulations
     void removeDuplicated()
     {
         vector<vector<pair<int, int>>> uniqueTriangulations;
         int totalLength = allTriangulations[0].size();
         for (auto &triangulation : allTriangulations)
         {
-            set<pair<int,int>> allPairsInsideThisTriangulation;
+            set<pair<int, int>> allPairsInsideThisTriangulation;
             bool arm = false;
-            for(auto &p:triangulation) {
+            for (auto &p : triangulation)
+            {
                 int a = min(p.first, p.second);
                 int b = max(p.first, p.second);
-                allPairsInsideThisTriangulation.insert({a,b});
-                if(present.find({a,b}) != present.end()) {
+                allPairsInsideThisTriangulation.insert({a, b});
+                if (present.find({a, b}) != present.end())
+                {
                     arm = true;
                     break;
                 }
             }
-            if(allPairsInsideThisTriangulation.size() != totalLength) {
+            if (allPairsInsideThisTriangulation.size() != totalLength)
+            {
                 continue; // skip invalid triangulations
             }
-            if(arm) {
+            if (arm)
+            {
                 continue; // skip triangulations having edges not in present
             }
-            else {
+            else
+            {
                 uniqueTriangulations.push_back(triangulation);
             }
         }
@@ -134,7 +146,7 @@ public:
         vector<pair<int, int>> current;
         combineTriangulations(triangulation_per_face, 0, current, allTriangulations);
 
-        removeDuplicated();
+        // removeDuplicated();
     }
 
     void printTriangulationsPerFace()

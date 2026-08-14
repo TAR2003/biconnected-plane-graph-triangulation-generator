@@ -55,10 +55,21 @@ bool matchTwoAlgorithms(string filename)
     vector<vector<int>> faces = solve(filename);
     biconnected *bc = new biconnected(faces);
     bc->getAllTriangulations();
+    cout << "Printing triangulations from biconnected algorithm..." << endl;
+    bc->printAllTriangulations();
     bc->sortTriangulations();
     triconnected *tc = new triconnected(faces);
     tc->getAllTriangulations();
     tc->refineTriangulations();
+    cout << "Triconnected Algorithm Triangulations:" << endl;
+    tc->printAllTriangulations();
+    tc->removeDuplicated();
+    cout << "Printing triangulations from both algorithms for comparison..." << endl;
+    cout << "Biconnected Algorithm Triangulations:" << endl;
+    bc->printAllTriangulations();
+    cout << "Triconnected Algorithm Triangulations:" << endl;
+    tc->printAllTriangulations();
+    
     auto newalgo = bc->allTriangulations;
     auto oldalgo = tc->allTriangulations;
     cout << "Comparing results from both algorithms..." << endl;
