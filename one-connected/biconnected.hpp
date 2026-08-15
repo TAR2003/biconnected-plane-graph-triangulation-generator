@@ -11,13 +11,13 @@ class biconnected
 {
 public:
     vector<vector<int>> faces;
-    unordered_set<pair<int, int>, PairHash> present;
+    unordered_multiset<pair<int, int>, PairHash> present;
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation*> faceTriangulations;
     biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
-        present = unordered_set<pair<int, int>, PairHash>();
+        present = unordered_multiset<pair<int, int>, PairHash>();
         initiatePresent();
         faceTriangulations = vector<FaceTriangulation*>(faces.size());
     }

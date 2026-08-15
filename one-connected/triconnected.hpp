@@ -12,12 +12,12 @@ public:
     vector<vector<int>> faces;
     vector<vector<pair<int, int>>> allTriangulations;
     vector<vector<vector<pair<int, int>>>> triangulation_per_face;
-    unordered_set<pair<int, int>, PairHash> present;
+    unordered_multiset<pair<int, int>, PairHash> present;
     triconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
 
-        present = unordered_set<pair<int, int>, PairHash>();
+        present = unordered_multiset<pair<int, int>, PairHash>();
         initiatePresent();
         triangulation_per_face = vector<vector<vector<pair<int, int>>>>(faces.size());
     }

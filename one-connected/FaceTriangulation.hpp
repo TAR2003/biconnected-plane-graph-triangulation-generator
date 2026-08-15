@@ -19,7 +19,7 @@ public:
     /// @brief the vertex number of the cycle
     int n;
     /// @brief set of all present chords in the original graph (reference to shared set)
-    unordered_set<pair<int, int>, PairHash> &present;
+    unordered_multiset<pair<int, int>, PairHash> &present;
     /// @brief all the triangulations generated
     vector<vector<pair<int, int>>> allTriangulations;
     vector<int> positions; // vector to store the positions of the vertices in the cycle
@@ -35,7 +35,7 @@ public:
     /// @param present the set of present chords
     /// @param serial the serial number of the face
     /// @param bc pointer to the biconnected class
-    FaceTriangulation(int n, vector<int> &elements, unordered_set<pair<int, int>, PairHash> &present, int serial, biconnected *bc)
+    FaceTriangulation(int n, vector<int> &elements, unordered_multiset<pair<int, int>, PairHash> &present, int serial, biconnected *bc)
         : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1), invalidTriangulations(0), invalidEdges(0)
     {
         findSafeRoot();
@@ -91,7 +91,12 @@ public:
 
     pair<int, int> getOppositePair(Edge *e)
     {
-        return {min(positions[e->opposite_first], positions[e->opposite_second]), max(positions[e->opposite_first], positions[e->opposite_second])};
+        cout << "jere" << endl;
+        cout << positions[e->opposite_first] << " " << positions[e->opposite_second] << endl;
+        pair<int,int> p = {min(positions[e->opposite_first], positions[e->opposite_second]), max(positions[e->opposite_first], positions[e->opposite_second])};
+        cout << p.first << " " << p.second << endl;
+        cout << "here after p" << endl;
+        return p;
     }
 
     /// @brief finds a safe root for the cycle and updates the positions vector accordingly
@@ -181,24 +186,32 @@ public:
         if (next(itr) != GS.end())
         {
 
-            auto oldPair = getOppositePair(*next(itr));
+            auto nextitr = *next(itr);
+            auto oldPair = getOppositePair(nextitr);
             flipit(itr, next(itr), newChord, oldChord); // if it is not the last edge, update the next edge
-            auto newPair = getOppositePair(*next(itr));
-            auto nextItrGSChord = *(next(itr));
+            cout << "After flipit" << endl;
+            pair<int,int> newPair = getOppositePair(nextitr);
+            cout << "here";
+            auto nextItrGSChord = nextitr;
 
-        
-
-            if (present.find(oldPair) == present.end() && (present.find(newPair) != present.end() || newPair.first == newPair.second))
+            if (present.find(oldPair) == present.end() && present.find(newPair) != present.end())
             {
+                cout << "CHeck";
+                auto itr = nextItrGSChord->chordItrVGS;
 
-                VGS.erase(nextItrGSChord->chordItrVGS); // if the next edge becomes invalid, remove it from the list of all edges
+                // Ensure it is not end()
+                if (itr != VGS.end())
+                {
+                    VGS.erase(itr);
+                } // if the next edge becomes invalid, remove it from the list of all edges
             }
+            
 
-            if ((present.find(oldPair) != present.end() || oldPair.first == oldPair.second) && present.find(newPair) == present.end())
+            if (present.find(oldPair) != present.end() && present.find(newPair) == present.end())
             {
                 auto insertpos = next(e->chordItrVGS);
                 VGS.insert(insertpos, nextItrGSChord); // if the next edge becomes valid, add it to the list of all edges
-             
+
                 nextItrGSChord->chordItrVGS = prev(insertpos); // update the iterator of the chord
             }
         }
@@ -212,18 +225,19 @@ public:
             if (present.find(oldPair) == present.end() && present.find(newPair) != present.end())
             {
                 VGS.erase(prevItrGSChord->chordItrVGS); // if the previous edge becomes invalid, remove it from the list of all edges
-               
             }
             if (present.find(oldPair) != present.end() && present.find(newPair) == present.end())
             {
                 auto insertpos = e->chordItrVGS;
                 VGS.insert(insertpos, prevItrGSChord); // if the previous edge becomes valid, add it to the list of all edges
-                
+
                 prevItrGSChord->chordItrVGS = prev(insertpos); // update the iterator of the chord
             }
         }
         // Now flip the edge
-        present.erase(getPair(e));
+        auto it = present.find(getPair(e));
+        if (it != present.end())
+            present.erase(it);
         e->flip();
         present.insert(getPair(e));
         cout << "Flipped edge: " << e->first << " " << e->second << endl;
@@ -247,7 +261,7 @@ public:
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &itrVGS)
     {
-    
+
         cout << "before flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
         flip(itrVGS); // Flip the edge at the current iterator, and update neighbors accordingly
         cout << "after flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
@@ -258,8 +272,6 @@ public:
         // {
         //     cout << "Opposite pair for edge: (" << edge->first << ", " << edge->second << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
         // }
-
-        
 
         bool lastChordGS = false;           // Flag to check if the current edge is the last in the generating set
         bool lastChordVGS = false;          // Flag to check if the current edge is the last in the list of all edges
@@ -343,9 +355,7 @@ public:
             c->chordItrVGS = itrVGS; // Update the iterator of the chord
         }
 
-
         flip(itrVGS); // Flip back the edge to restore the original state
-
     }
 
     /// @brief generates all triangulations of the cycle
@@ -353,12 +363,11 @@ public:
     {
         cout << "Started at generate all triangulation method" << endl;
         cout << "A positions elements" << endl;
-        for(auto a : positions)
+        for (auto a : positions)
         {
             cout << a << " ";
         }
         cout << endl;
-        
 
         for (int i = 2; i < n - 1; i++)
         {
@@ -372,7 +381,7 @@ public:
             cout << "position for edge and opopsite pair: (" << positions[e->first] << ", " << positions[e->second] << ") and (" << positions[e->opposite_first] << ", " << positions[e->opposite_second] << ")" << endl;
             if (present.find(getOppositePair(e)) == present.end() && positions[e->opposite_first] != positions[e->opposite_second])
             {
-               
+
                 e->isValid = true;
                 VGS.push_back(e); // adding the edge to the list of all edges for memory management
                 auto itrVGS = prev(VGS.end());
@@ -402,11 +411,12 @@ public:
         for (auto &chord : chords)
         {
             // cout << "erasing the chords" << endl;
-            present.erase(getPair(chord)); // unmarking the edges after finishing
+            auto it = present.find(getPair(chord));
+            if (it != present.end())
+                present.erase(it); // unmarking the edges after finishing
             // cout << "we are done erasing the chords" << endl;
         }
     }
-
 };
 
 // Include biconnected.hpp after class declaration to resolve circular dependency
