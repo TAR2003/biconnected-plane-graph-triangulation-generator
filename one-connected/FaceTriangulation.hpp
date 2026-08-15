@@ -22,10 +22,12 @@ public:
     unordered_set<pair<int, int>, PairHash> &present;
     /// @brief all the triangulations generated
     vector<vector<pair<int, int>>> allTriangulations;
-    vector<int> positions;
-    vector<int> elements;
+    vector<int> positions; // vector to store the positions of the vertices in the cycle
+    vector<int> elements;  // vector to store the elements of the cycle
     biconnected *bc;
     int serial;
+    int invalidTriangulations;
+    int invalidEdges;
 
     /// @brief the constructor of the class
     /// @param n the number of vertices in the cycle
@@ -34,7 +36,7 @@ public:
     /// @param serial the serial number of the face
     /// @param bc pointer to the biconnected class
     FaceTriangulation(int n, vector<int> &elements, unordered_set<pair<int, int>, PairHash> &present, int serial, biconnected *bc)
-        : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1)
+        : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1), invalidTriangulations(0), invalidEdges(0)
     {
         findSafeRoot();
     }
@@ -95,17 +97,17 @@ public:
     /// @brief finds a safe root for the cycle and updates the positions vector accordingly
     void findSafeRoot()
     {
-        int startIndex = n - 1;
-        int endIndex = 1;
-        while (startIndex > endIndex + 1)
+        int startIndex = 0;
+        int endIndex = n - 2;
+        while (startIndex < endIndex - 1)
         {
             if (present.find({elements[startIndex], elements[endIndex]}) != present.end() || present.find({elements[endIndex], elements[startIndex]}) != present.end())
             {
-                startIndex--;
+                startIndex++;
             }
             else
             {
-                endIndex++;
+                endIndex--;
             }
         }
         // start Index is the safe root
@@ -168,6 +170,7 @@ public:
     /// @param itrVGS Iterator pointing to the edge to be flipped
     void flip(list<Edge *>::iterator itrVGS)
     {
+        cout << "Flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
         Edge *e = *itrVGS; // Edge to be flipped
 
         // Store the values BEFORE flipping
@@ -185,13 +188,13 @@ public:
 
         
 
-            if (present.find(oldPair) == present.end() && present.find(newPair) != present.end())
+            if (present.find(oldPair) == present.end() && (present.find(newPair) != present.end() || newPair.first == newPair.second))
             {
 
                 VGS.erase(nextItrGSChord->chordItrVGS); // if the next edge becomes invalid, remove it from the list of all edges
             }
 
-            if (present.find(oldPair) != present.end() && present.find(newPair) == present.end())
+            if ((present.find(oldPair) != present.end() || oldPair.first == oldPair.second) && present.find(newPair) == present.end())
             {
                 auto insertpos = next(e->chordItrVGS);
                 VGS.insert(insertpos, nextItrGSChord); // if the next edge becomes valid, add it to the list of all edges
@@ -223,6 +226,7 @@ public:
         present.erase(getPair(e));
         e->flip();
         present.insert(getPair(e));
+        cout << "Flipped edge: " << e->first << " " << e->second << endl;
     }
 
     /// @brief adds the current triangulation to the list of all triangulations
@@ -244,7 +248,16 @@ public:
     void generateChildTriangulations(list<Edge *>::iterator &itrVGS)
     {
     
+        cout << "before flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
         flip(itrVGS); // Flip the edge at the current iterator, and update neighbors accordingly
+        cout << "after flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
+        cout << "Now the situation for VGS" << endl;
+        printSet(VGS);
+        cout << "Now the opposite pair for VGS" << endl;
+        // for (auto &edge : VGS)
+        // {
+        //     cout << "Opposite pair for edge: (" << edge->first << ", " << edge->second << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
+        // }
 
         
 
@@ -293,7 +306,7 @@ public:
         GS.erase(itrGS);   // Remove the current edge from the generating set
         VGS.erase(itrVGS); // Remove the current edge from the list of all edges
 
-        
+        cout << "Processing edge: " << c->first << " " << c->second << endl;
 
         output();
 
@@ -338,6 +351,15 @@ public:
     /// @brief generates all triangulations of the cycle
     void generateAllTriangulations()
     {
+        cout << "Started at generate all triangulation method" << endl;
+        cout << "A positions elements" << endl;
+        for(auto a : positions)
+        {
+            cout << a << " ";
+        }
+        cout << endl;
+        
+
         for (int i = 2; i < n - 1; i++)
         {
             Edge *e = new Edge(0, i, i - 1, (i + 1) % n); // creating a new edge object
@@ -346,8 +368,11 @@ public:
             present.insert(getPair(e));                   // marking the edge as present in the original graph
             auto itrGS = prev(GS.end());
             e->chordItrGS = itrGS; // setting the iterator of the chord
-            if (present.find(getOppositePair(e)) == present.end())
+            cout << "Opposite pair for edge: (" << e->first << ", " << e->second << ") is: (" << e->opposite_first << ", " << e->opposite_second << ")" << endl;
+            cout << "position for edge and opopsite pair: (" << positions[e->first] << ", " << positions[e->second] << ") and (" << positions[e->opposite_first] << ", " << positions[e->opposite_second] << ")" << endl;
+            if (present.find(getOppositePair(e)) == present.end() && positions[e->opposite_first] != positions[e->opposite_second])
             {
+               
                 e->isValid = true;
                 VGS.push_back(e); // adding the edge to the list of all edges for memory management
                 auto itrVGS = prev(VGS.end());
@@ -359,11 +384,18 @@ public:
             }
         }
 
-        
+        cout << "Finished initializing triangulations" << endl;
         // addTriangulation(); // adding the initial root triangulation
         output();
+
+        printSet(GS);
+        printSet(VGS);
+
         for (auto itr = VGS.begin(); itr != VGS.end(); itr++)
         {
+            cout << "Situation for VGS in the main loop" << endl;
+            printSet(VGS);
+            cout << "Generating child triangulations for edge: " << (*itr)->first << " " << (*itr)->second << endl;
             generateChildTriangulations(itr); // generating child triangulations recursively
         }
 
@@ -374,6 +406,7 @@ public:
             // cout << "we are done erasing the chords" << endl;
         }
     }
+
 };
 
 // Include biconnected.hpp after class declaration to resolve circular dependency
