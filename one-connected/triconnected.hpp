@@ -109,6 +109,7 @@ public:
         {
             set<pair<int, int>> allPairsInsideThisTriangulation;
             bool arm = false;
+            bool selfloop = false;
             for (auto &p : triangulation)
             {
                 int a = min(p.first, p.second);
@@ -119,6 +120,10 @@ public:
                     arm = true;
                     break;
                 }
+                if(a == b) {
+                    selfloop = true;
+                    break;
+                }
             }
             if (allPairsInsideThisTriangulation.size() != totalLength)
             {
@@ -127,6 +132,9 @@ public:
             if (arm)
             {
                 continue; // skip triangulations having edges not in present
+            }
+            if(selfloop) {
+                continue; // skip triangulations having self-loops
             }
             else
             {

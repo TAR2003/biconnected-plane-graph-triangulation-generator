@@ -198,7 +198,6 @@ public:
 
             if (present.find(newPair) != present.end() || newPair.first == newPair.second)
             {
-                cout << "CHeck";
                 auto itr = nextItrGSChord->chordItrVGS;
 
                 // Ensure it is not end()
@@ -327,7 +326,7 @@ public:
         GS.erase(itrGS);   // Remove the current edge from the generating set
         VGS.erase(itrVGS); // Remove the current edge from the list of all edges
 
-        cout << "Processing edge: " << c->first << " " << c->second << endl;
+        // cout << "Processing edge: " << c->first << " " << c->second << endl;
 
         output();
 
