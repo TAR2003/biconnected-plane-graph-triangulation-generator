@@ -13,9 +13,11 @@ public:
     list<Edge*>::iterator chordItrGS;
     list<Edge*>::iterator chordItrVGS;
     bool isValid;
+    bool isVGS;
     /// @brief  the constructor of the class
     Edge(int a = 0, int b = 0, int c = 0, int d = 0) : first(a), second(b), opposite_first(c), opposite_second(d) {
         isValid = true;
+        isVGS = false;
     }
     /// @brief flips the edge by swapping its endpoints with the opposite endpoints
     void flip()
