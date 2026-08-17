@@ -224,11 +224,11 @@ public:
 
         auto oldPair = getOppositePair(e);
         auto newPair = getPair(e);
-        if (presentFace.find(oldPair) != presentFace.end() || oldPair.first == oldPair.second)
+        if (presentFace.find(oldPair) != presentFace.end() || oldPair.first == oldPair.second || present.find(oldPair) != present.end())
         {
             problems--;
         }
-        if (presentFace.find(newPair) != presentFace.end() || newPair.first == newPair.second)
+        if (presentFace.find(newPair) != presentFace.end() || newPair.first == newPair.second || present.find(newPair) != present.end())
         {
             problems++;
         }
@@ -376,7 +376,7 @@ public:
             GS.push_back(e);                              // adding the edge to the generating set
             chords.push_back(e);                          // adding the edge to the list of all chords
 
-            if (presentFace.find(getPair(e)) != presentFace.end() || positions[e->first] == positions[e->second])
+            if (presentFace.find(getPair(e)) != presentFace.end() || positions[e->first] == positions[e->second] || present.find(getPair(e)) != present.end())
             {
                 problems++;
             }
