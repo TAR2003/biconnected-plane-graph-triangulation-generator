@@ -50,22 +50,94 @@ bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int
     return true;
 }
 
+void compareAndPrintTriangulations(
+    vector<vector<pair<int, int>>> &triangulationsByAlgo,
+    vector<vector<pair<int, int>>> &triangulationsByTriconnectedBruteForce)
+{
+    // ANSI color codes for terminal output
+    const string GREEN = "\033[32m";
+    const string YELLOW = "\033[33m";
+    const string RED = "\033[31m";
+    const string RESET = "\033[0m";
+
+    // Ensure the inner edge pairs are strictly sorted to allow exact equality matching
+    for (auto &t : triangulationsByAlgo)
+    {
+        sort(t.begin(), t.end());
+    }
+    for (auto &t : triangulationsByTriconnectedBruteForce)
+    {
+        sort(t.begin(), t.end());
+    }
+
+    // Sort outer vectors to display them in a clean, organized order
+    sort(triangulationsByAlgo.begin(), triangulationsByAlgo.end());
+
+    // Use a multiset to handle exact duplicate counts (multiplicities)
+    multiset<vector<pair<int, int>>> bruteForceSet(
+        triangulationsByTriconnectedBruteForce.begin(),
+        triangulationsByTriconnectedBruteForce.end());
+
+    cout << "Total triangulations in biconnected component: " << triangulationsByAlgo.size() << endl;
+
+    // 1. Print all Algo triangulations (Green for match, Yellow for extra)
+    for (const auto &triangulation : triangulationsByAlgo)
+    {
+        auto it = bruteForceSet.find(triangulation);
+        if (it != bruteForceSet.end())
+        {
+            cout << GREEN;           // Matched in brute force
+            bruteForceSet.erase(it); // Erase exactly one instance to handle duplicates properly
+        }
+        else
+        {
+            cout << YELLOW; // Extra in Algo, not in brute force
+        }
+
+        // for (const auto &chord : triangulation)
+        // {
+        //     cout << "(" << chord.first << ", " << chord.second << ") , ";
+        // }
+        cout << RESET; // Reset color at the end of the line
+    }
+
+    // 2. Print any remaining Brute Force triangulations NOT found in Algo (Red)
+    if (!bruteForceSet.empty())
+    {
+        cout << "\nMissing triangulations (In Brute Force, but NOT in Algo):" << endl;
+        for (const auto &triangulation : bruteForceSet)
+        {
+            cout << RED;
+            for (const auto &chord : triangulation)
+            {
+                cout << "(" << chord.first << ", " << chord.second << ") , ";
+            }
+            cout << RESET;
+        }
+    }
+    else
+    {
+        cout << "\nAll brute force triangulations are successfully contained in the Algorithm!" << endl;
+    }
+}
+
 bool matchTwoAlgorithms(string filename)
 {
     vector<vector<int>> faces = solve(filename);
     biconnected *bc = new biconnected(faces);
     bc->getAllTriangulations();
-   
+    bc->sortTriangulations();
     triconnected *tc = new triconnected(faces);
     tc->getAllTriangulations();
     tc->refineTriangulations();
     
     tc->removeDuplicated();
-    cout << "Printing triangulations from both algorithms for comparison..." << endl;
-    cout << "Biconnected Algorithm Triangulations:" << endl;
-    bc->printAllTriangulations();
-    cout << "Triconnected Algorithm Triangulations:" << endl;
-    tc->printAllTriangulations();
+    // cout << "Printing triangulations from both algorithms for comparison..." << endl;
+    // cout << "Biconnected Algorithm Triangulations:" << endl;
+    // bc->printAllTriangulations();
+    // cout << "Triconnected Algorithm Triangulations:" << endl;
+    // tc->printAllTriangulations();
+    compareAndPrintTriangulations(bc->allTriangulations, tc->allTriangulations);
     
     auto newalgo = bc->allTriangulations;
     auto oldalgo = tc->allTriangulations;
