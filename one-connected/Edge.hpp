@@ -24,6 +24,7 @@ public:
     {
         swap(first, opposite_first);
         swap(second, opposite_second);
+        isValid = !isValid; // Toggle the validity of the edge after flipping
     }
 
 };

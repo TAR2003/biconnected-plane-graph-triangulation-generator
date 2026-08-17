@@ -208,7 +208,7 @@ public:
                 } // if the next edge becomes invalid, remove it from the list of all edges
             }
 
-            else if (nextitr->isValid == false && present.find(newPair) == present.end())
+            else if (nextitr->isValid == false && present.find(newPair) == present.end() && newPair.first != newPair.second)
             {
                 auto insertpos = next(e->chordItrVGS);
                 VGS.insert(insertpos, nextItrGSChord); // if the next edge becomes valid, add it to the list of all edges
@@ -233,7 +233,7 @@ public:
                     prevItrGSChord->isValid = false; // Mark the edge as invalid
                 }
             }
-            else if (prevItrGSChord->isValid == false && present.find(newPair) == present.end())
+            else if (prevItrGSChord->isValid == false && present.find(newPair) == present.end() && newPair.first != newPair.second)
             {
                 prevItrGSChord->isValid = true;
                 auto insertpos = e->chordItrVGS;
@@ -270,16 +270,10 @@ public:
     void generateChildTriangulations(list<Edge *>::iterator &itrVGS)
     {
 
-        // cout << "before flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
+        cout << "before flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
         flip(itrVGS); // Flip the edge at the current iterator, and update neighbors accordingly
-        // cout << "after flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
-        // cout << "Now the situation for VGS" << endl;
-        // printSet(VGS);
-        // cout << "Now the opposite pair for VGS" << endl;
-        // for (auto &edge : VGS)
-        // {
-        //     cout << "Opposite pair for edge: (" << edge->first << ", " << edge->second << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
-        // }
+        cout << "after flipping edge: " << (*itrVGS)->first << " " << (*itrVGS)->second << endl;
+       
 
         bool lastChordGS = false;           // Flag to check if the current edge is the last in the generating set
         bool lastChordVGS = false;          // Flag to check if the current edge is the last in the list of all edges
@@ -328,6 +322,21 @@ public:
 
         // cout << "Processing edge: " << c->first << " " << c->second << endl;
 
+        cout << "Now the situation for VGS" << endl;
+        printSet(VGS);
+        cout << "Now the opposite pair for VGS" << endl;
+        for (auto &edge : VGS)
+        {
+            cout << "Opposite pair for edge: (" << positions[edge->first] << ", " << positions[edge->second] << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
+        }
+        cout << "Now the situation for GS" << endl;
+        printSet(GS);
+        cout << "Now the opposite pair for GS" << endl;
+        for (auto &edge : GS)
+        {
+            cout << "Opposite pair for edge: (" << positions[edge->first] << ", " << positions[edge->second] << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
+        }
+
         output();
 
         for (; itrloop != VGS.end(); itrloop++)
@@ -363,19 +372,36 @@ public:
             c->chordItrVGS = itrVGS; // Update the iterator of the chord
         }
 
+        cout << "Now performing the reverse flip for the edge : " << c->first << " " << c->second << endl;
         flip(itrVGS); // Flip back the edge to restore the original state
+        cout << "Reverse flip done for the edge : " << c->first << " " << c->second << endl;
+
+        cout << "Now the situation for VGS after reverse flip" << endl;
+        printSet(VGS);
+        cout << "Now the opposite pair for VGS" << endl;
+        for (auto &edge : VGS)
+        {
+            cout << "Opposite pair for edge: (" << positions[edge->first] << ", " << positions[edge->second] << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
+        }
+        cout << "Now the situation for GS after reverse flip" << endl;
+        printSet(GS);
+        cout << "Now the opposite pair for GS" << endl;
+        for (auto &edge : GS)
+        {
+            cout << "Opposite pair for edge: (" << positions[edge->first] << ", " << positions[edge->second] << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
+        }
     }
 
     /// @brief generates all triangulations of the cycle
     void generateAllTriangulations()
     {
-        // cout << "Started at generate all triangulation method" << endl;
-        // cout << "A positions elements" << endl;
-        // for (auto a : positions)
-        // {
-        //     cout << a << " ";
-        // }
-        // cout << endl;
+        cout << "Started at generate all triangulation method" << endl;
+        cout << "A positions elements" << endl;
+        for (auto a : positions)
+        {
+            cout << a << " ";
+        }
+        cout << endl;
 
         for (int i = 2; i < n - 1; i++)
         {
@@ -385,8 +411,8 @@ public:
             present.insert(getPair(e));                   // marking the edge as present in the original graph
             auto itrGS = prev(GS.end());
             e->chordItrGS = itrGS; // setting the iterator of the chord
-            // cout << "Opposite pair for edge: (" << e->first << ", " << e->second << ") is: (" << e->opposite_first << ", " << e->opposite_second << ")" << endl;
-            // cout << "position for edge and opopsite pair: (" << positions[e->first] << ", " << positions[e->second] << ") and (" << positions[e->opposite_first] << ", " << positions[e->opposite_second] << ")" << endl;
+            cout << "Opposite pair for edge: (" << e->first << ", " << e->second << ") is: (" << e->opposite_first << ", " << e->opposite_second << ")" << endl;
+            cout << "position for edge and opopsite pair: (" << positions[e->first] << ", " << positions[e->second] << ") and (" << positions[e->opposite_first] << ", " << positions[e->opposite_second] << ")" << endl;
             if (present.find(getOppositePair(e)) == present.end() && positions[e->opposite_first] != positions[e->opposite_second])
             {
 
@@ -405,14 +431,16 @@ public:
         // addTriangulation(); // adding the initial root triangulation
         output();
 
-        // printSet(GS);
-        // printSet(VGS);
+        printSet(GS);
+        printSet(VGS);
 
         for (auto itr = VGS.begin(); itr != VGS.end(); itr++)
         {
-            // cout << "Situation for VGS in the main loop" << endl;
-            // printSet(VGS);
-            // cout << "Generating child triangulations for edge: " << (*itr)->first << " " << (*itr)->second << endl;
+            cout << "Situation for VGS in the main loop" << endl;
+            printSet(VGS);
+            cout << "Situation for GS in the main loop" << endl;
+            printSet(GS);
+            cout << "Generating child triangulations for edge: " << (*itr)->first << " " << (*itr)->second << endl;
             generateChildTriangulations(itr); // generating child triangulations recursively
         }
 
