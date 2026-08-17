@@ -1,0 +1,15 @@
+File,Total Checks,Successful Checks,Failed Checks,Check Success Rate (%),Total Traversals,Successful Traversals,Invalid Traversals,Traversal Success Rate (%),Algo Total,Brute Force Total,Ratio (Algo / Brute Force),Verification Result,Matched File
+bowtie.txt,8924,5355,3569,60.01,5356,5228,128,97.61,5228,5228,1,All brute force triangulations are contained in the algorithm output.,input/bowtie.txt
+bridge.txt,90162,56449,33713,62.61,56450,54290,2160,96.17,54290,54290,1,All brute force triangulations are contained in the algorithm output.,input/bridge.txt
+complex_2_faces.txt,515,300,215,58.25,301,287,14,95.35,287,287,1,All brute force triangulations are contained in the algorithm output.,input/complex_2_faces.txt
+path3.txt,1,0,1,0,1,1,0,100,1,1,1,All brute force triangulations are contained in the algorithm output.,input/path3.txt
+path4.txt,7,3,4,42.86,4,2,2,50,2,2,1,All brute force triangulations are contained in the algorithm output.,input/path4.txt
+path4_v2.txt,7,3,4,42.86,4,2,2,50,2,2,1,All brute force triangulations are contained in the algorithm output.,input/path4_v2.txt
+path5.txt,54,32,22,59.26,33,12,21,36.36,12,12,1,All brute force triangulations are contained in the algorithm output.,input/path5.txt
+path6.txt,510,333,177,65.29,334,100,234,29.94,100,100,1,All brute force triangulations are contained in the algorithm output.,input/path6.txt
+path7.txt,5533,3765,1768,68.05,3766,972,2794,25.81,972,972,1,All brute force triangulations are contained in the algorithm output.,input/path7.txt
+path8.txt,65316,45385,19931,69.49,45386,10320,35066,22.74,10320,10320,1,All brute force triangulations are contained in the algorithm output.,input/path8.txt
+path9.txt,813540,572264,241276,70.34,572265,116004,456261,20.27,116004,116004,1,All brute force triangulations are contained in the algorithm output.,input/path9.txt
+star.txt,43,13,30,30.23,14,5,9,35.71,5,5,1,All brute force triangulations are contained in the algorithm output.,input/star.txt
+tree_simple.txt,7,4,3,57.14,5,1,4,20,1,1,1,All brute force triangulations are contained in the algorithm output.,input/tree_simple.txt
+tree_Simple_depth_2.txt,2918,2421,497,82.97,2422,278,2144,11.48,278,278,1,All brute force triangulations are contained in the algorithm output.,input/tree_Simple_depth_2.txt
