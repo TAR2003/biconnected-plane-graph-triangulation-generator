@@ -121,51 +121,179 @@ void compareAndPrintTriangulations(
     }
 }
 
-bool matchTwoAlgorithms(string filename)
+bool compareAndOutput(
+    vector<vector<pair<int, int>>> &triangulationsByAlgo,
+    vector<vector<pair<int, int>>> &triangulationsByTriconnectedBruteForce,
+    const string &filename)
 {
-    vector<vector<int>> faces = solve(filename);
-    biconnected *bc = new biconnected(faces);
-    bc->getAllTriangulations();
-    bc->sortTriangulations();
-    triconnected *tc = new triconnected(faces);
-    tc->getAllTriangulations();
-    tc->refineTriangulations();
-    
-    tc->removeDuplicated();
-    // cout << "Printing triangulations from both algorithms for comparison..." << endl;
-    // cout << "Biconnected Algorithm Triangulations:" << endl;
-    // bc->printAllTriangulations();
-    // cout << "Triconnected Algorithm Triangulations:" << endl;
-    // tc->printAllTriangulations();
-    compareAndPrintTriangulations(bc->allTriangulations, tc->allTriangulations);
-    
-    auto newalgo = bc->allTriangulations;
-    auto oldalgo = tc->allTriangulations;
-    cout << "Comparing results from both algorithms..." << endl;
-    if (newalgo.size() != oldalgo.size())
+    ofstream outFile(filename);
+    if (!outFile.is_open())
     {
-        cout << "Mismatch in number of triangulations: New Algo = " << newalgo.size() << ", Old Algo = " << oldalgo.size() << endl;
+        cerr << "Error: Could not open file " << filename << " for writing." << endl;
         return false;
+    }
+
+    // Standardize edge orientations and internal order
+    for (auto &t : triangulationsByAlgo)
+    {
+        for (auto &edge : t)
+        {
+            if (edge.first > edge.second)
+                swap(edge.first, edge.second);
+        }
+        sort(t.begin(), t.end());
+    }
+
+    for (auto &t : triangulationsByTriconnectedBruteForce)
+    {
+        for (auto &edge : t)
+        {
+            if (edge.first > edge.second)
+                swap(edge.first, edge.second);
+        }
+        sort(t.begin(), t.end());
+    }
+
+    sort(triangulationsByAlgo.begin(), triangulationsByAlgo.end());
+
+    multiset<vector<pair<int, int>>> bruteForceSet(
+        triangulationsByTriconnectedBruteForce.begin(),
+        triangulationsByTriconnectedBruteForce.end());
+
+    outFile << "Total triangulations in biconnected component: " << triangulationsByAlgo.size() << "\n\n";
+
+    // 1. Process Algorithm Triangulations
+    for (const auto &triangulation : triangulationsByAlgo)
+    {
+        auto it = bruteForceSet.find(triangulation);
+        if (it != bruteForceSet.end())
+        {
+            outFile << "[MATCH] "; // Matched in brute force
+            bruteForceSet.erase(it);
+        }
+        else
+        {
+            outFile << "[EXTRA] "; // Extra in Algo (not present in brute force)
+        }
+
+        for (const auto &chord : triangulation)
+        {
+            outFile << "(" << chord.first << ", " << chord.second << ") , ";
+        }
+        outFile << "\n";
+    }
+
+    // 2. Process Remaining Brute Force Triangulations
+    bool isFullyContained = bruteForceSet.empty();
+
+    if (!isFullyContained)
+    {
+        outFile << "\n[MISSING] Triangulations in Brute Force but NOT in Algo:\n";
+        for (const auto &triangulation : bruteForceSet)
+        {
+            outFile << "[MISSING] ";
+            for (const auto &chord : triangulation)
+            {
+                outFile << "(" << chord.first << ", " << chord.second << ") , ";
+            }
+            outFile << "\n";
+        }
     }
     else
     {
-        cout << "Matched in number: " << newalgo.size() << endl;
-        bool allMatch = true;
-        for (size_t i = 0; i < newalgo.size(); i++)
-        {
-            if (!matchTriangulations(newalgo[i], oldalgo[i]))
-            {
-                cout << "\033[1;31m Mismatch found in triangulation " << i + 1 << "\033[0m" << endl;
-                allMatch = false;
-                break;
-            }
-        }
-        if (allMatch)
-        {
-            cout << "\033[1;32m All triangulations match between both algorithms.\033[0m" << endl;
-        }
-        return allMatch;
+        outFile << "\n[STATUS] All brute force triangulations are successfully contained in the Algorithm!\n";
     }
+
+    outFile.close();
+    return isFullyContained;
+}
+
+bool matchTwoAlgorithms(string filename)
+{
+    vector<vector<int>> faces = solve(filename);
+
+    biconnected *bc = new biconnected(faces);
+    bc->getAllTriangulations();
+    bc->sortTriangulations();
+
+    triconnected *tc = new triconnected(faces);
+    tc->getAllTriangulations();
+    tc->refineTriangulations();
+    tc->removeDuplicated();
+
+    // Ensure the output directory exists
+    filesystem::create_directories("output");
+
+    // Extract bare filename (e.g., "input/actual_name.txt" -> "actual_name.txt")
+    string bareFilename = filesystem::path(filename).filename().string();
+
+    // Save directly to output/<actual_name.txt>
+    string outFilePath = "output/" + bareFilename;
+
+    // Call compareAndOutput to write results to file
+    bool isContained = compareAndOutput(bc->allTriangulations, tc->allTriangulations, outFilePath);
+
+    size_t algoCount = bc->allTriangulations.size();
+    size_t bruteForceCount = tc->allTriangulations.size();
+
+    // Calculate ratio safely
+    double ratio = (bruteForceCount > 0) ? static_cast<double>(algoCount) / bruteForceCount : 0.0;
+
+    // Traversal statistics
+    size_t successfulTraversals = algoCount; // Successful triangulations count
+    size_t totalTraversals = bc->invalidTraversals + algoCount;
+
+    // Percentage calculations (with division-by-zero protection)
+    double checkSuccessPercentage = (bc->totalChecks > 0)
+                                        ? (static_cast<double>(bc->successfulChecks) / bc->totalChecks) * 100.0
+                                        : 0.0;
+
+    double traversalSuccessPercentage = (totalTraversals > 0)
+                                            ? (static_cast<double>(successfulTraversals) / totalTraversals) * 100.0
+                                            : 0.0;
+
+    // Terminal colors
+    const string GREEN = "\033[1;32m";
+    const string RED = "\033[1;31m";
+    const string RESET = "\033[0m";
+
+    // 1. Print Checks & Traversals Metrics
+    cout << fixed << setprecision(2);
+    cout << "\n================ Search Metrics ================" << endl;
+    cout << "Total Checks: " << bc->totalChecks << endl;
+    cout << "Successful Checks: " << bc->successfulChecks << endl;
+    cout << "Failed Checks: " << (bc->totalChecks - bc->successfulChecks) << endl;
+    cout << "Check Success Rate: " << checkSuccessPercentage << "%" << endl;
+    cout << "------------------------------------------------" << endl;
+    cout << "Total Traversals: " << totalTraversals << endl;
+    cout << "Successful Traversals: " << successfulTraversals << endl;
+    cout << "Invalid Traversals: " << bc->invalidTraversals << endl;
+    cout << "Traversal Success Rate: " << traversalSuccessPercentage << "%" << endl;
+    cout << "================================================" << endl;
+
+    // 2. Print Algorithm Match/Containment Results
+    if (isContained)
+    {
+        cout << GREEN;
+        cout << "[SUCCESS] File: " << bareFilename << endl;
+        cout << "Algo Total: " << algoCount << " | Brute Force Total: " << bruteForceCount << endl;
+        cout << "Ratio (Algo / Brute Force): " << ratio << endl;
+        cout << "All brute force triangulations are contained in the algorithm output." << RESET << endl;
+    }
+    else
+    {
+        cout << RED;
+        cout << "[FAILED] File: " << bareFilename << endl;
+        cout << "Algo Total: " << algoCount << " | Brute Force Total: " << bruteForceCount << endl;
+        cout << "Ratio (Algo / Brute Force): " << ratio << endl;
+        cout << "Some brute force triangulations are MISSING from the algorithm output." << RESET << endl;
+    }
+
+    // Clean up heap allocations
+    delete bc;
+    delete tc;
+
+    return isContained;
 }
 
 #include <filesystem>

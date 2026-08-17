@@ -26,10 +26,10 @@ public:
     vector<vector<pair<int, int>>> allTriangulations;
     vector<int> positions; // vector to store the positions of the vertices in the cycle
     vector<int> elements;  // vector to store the elements of the cycle
+
+    int problems;
     biconnected *bc;
     int serial;
-    int invalidTriangulations;
-    int invalidEdges;
 
     /// @brief the constructor of the class
     /// @param n the number of vertices in the cycle
@@ -38,7 +38,7 @@ public:
     /// @param serial the serial number of the face
     /// @param bc pointer to the biconnected class
     FaceTriangulation(int n, vector<int> &elements, unordered_multiset<pair<int, int>, PairHash> &present, int serial, biconnected *bc)
-        : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1), invalidTriangulations(0), invalidEdges(0)
+        : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1),  problems(0)
     {
         findSafeRoot();
     }
@@ -199,6 +199,16 @@ public:
             auto oldPair = getOppositePair(*prev(itr));
             flipit(itr, prev(itr), newChord, oldChord); // if it is not the first edge, update the previous edge
         }
+
+        // cout << "=================================" << endl;
+        // cout << "Printing GS : " << endl;
+        // for (auto &edge : GS)
+        // {
+        //     cout << "(" << positions[edge->first] << ", " << positions[edge->second] << ") , ";
+        // }
+        // cout << endl;
+        // cout << "Problems: " << problems << endl;
+
         // Now flip the edge
         auto it = present.find(getPair(e));
         if (it != present.end())
@@ -206,10 +216,35 @@ public:
         auto it2 = presentFace.find(getPair(e));
         if (it2 != presentFace.end())
             presentFace.erase(it2);
+
+    
+      
+
         e->flip();
+
+        auto oldPair = getOppositePair(e);
+        auto newPair = getPair(e);
+        if (presentFace.find(oldPair) != presentFace.end() || oldPair.first == oldPair.second)
+        {
+            problems--;
+        }
+        if (presentFace.find(newPair) != presentFace.end() || newPair.first == newPair.second)
+        {
+            problems++;
+        }
+
         present.insert(getPair(e));
         presentFace.insert(getPair(e));
-        // cout << "Flipped edge: " << e->first << " " << e->second << endl;
+        // cout << "Flipping edge: " << getOppositePair(e).first << " " << getOppositePair(e).second << endl;
+        // cout << "Flipped edge: " << positions[e->first] << " " << positions[e->second] << endl;
+        // cout << "Printing GS : " << endl;
+        // for (auto &edge : GS)
+        // {
+        //     cout << "(" << positions[edge->first] << ", " << positions[edge->second] << ") , ";
+        // }
+        // cout << endl;
+        // cout << "Problems: " << problems << endl;
+        // cout << "=================================" << endl;
     }
 
     /// @brief adds the current triangulation to the list of all triangulations
@@ -230,18 +265,21 @@ public:
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &itrGS)
     {
+        bc->totalChecks++;
         auto oppositePair = getOppositePair(*itrGS);
         if (oppositePair.first == oppositePair.second)
         {
             return;
         }
+        // cout << "On the matter of flipping the chord: " << oppositePair.first << " " << oppositePair.second << endl;
         if (present.find(oppositePair) != present.end())
         {
-            if(presentFace.find(oppositePair) != presentFace.end()){
+            if (presentFace.find(oppositePair) == presentFace.end())
+            {
                 return;
             }
-            
         }
+        bc->successfulChecks++;
 
         // cout << "before flipping edge: " << (*itrGS)->first << " " << (*itrGS)->second << endl;
         flip(itrGS); // Flip the edge at the current iterator, and update neighbors accordingly
@@ -333,18 +371,29 @@ public:
 
         for (int i = 2; i < n - 1; i++)
         {
+            
             Edge *e = new Edge(0, i, i - 1, (i + 1) % n); // creating a new edge object
             GS.push_back(e);                              // adding the edge to the generating set
             chords.push_back(e);                          // adding the edge to the list of all chords
+
+            if (presentFace.find(getPair(e)) != presentFace.end() || positions[e->first] == positions[e->second])
+            {
+                problems++;
+            }
+
+
             present.insert(getPair(e));                   // marking the edge as present in the original graph
             presentFace.insert(getPair(e));
             auto itrGS = prev(GS.end());
             e->chordItrGS = itrGS; // setting the iterator of the chord
+            
         }
 
         // cout << "Finished initializing triangulations" << endl;
         // addTriangulation(); // adding the initial root triangulation
+        
         output();
+        
 
         // printSet(GS);
 
@@ -376,5 +425,13 @@ public:
 // Define output() method after including biconnected.hpp
 inline void FaceTriangulation::output()
 {
-    bc->output(serial);
+    // cout << "Problems: " << problems << endl;
+    if(problems == 0) 
+    {
+        bc->output(serial);
+    }
+    else {
+        bc->invalidTraversals++;
+    }
+    
 }
