@@ -23,7 +23,7 @@ public:
         this->faces = faces;
         present = unordered_multiset<pair<int, int>, PairHash>();
         initiatePresent();
-        // faceTriangulations = vector<FaceTriangulation*>(faces.size());
+        faceTriangulations = vector<FaceTriangulation*>(faces.size());
         totalChecks = 0;
         successfulChecks = 0;
         invalidTraversals = 0;
@@ -84,7 +84,7 @@ inline void biconnected::output(int serial)
     if (serial == faces.size() - 1)
     {
         // addTriangulation();
-        totalTriangulations++;
+        this->totalTriangulations++;
     }
     else
     {
@@ -95,18 +95,18 @@ inline void biconnected::output(int serial)
     }
 }
 
-inline void biconnected::addTriangulation()
-{
-    vector<pair<int, int>> currentTriangulations;
-    for (auto a : faceTriangulations)
-    {
-        vector<pair<int, int>> currentTriangulation;
-        for (auto &chord : a->chords)
-        {
-            currentTriangulation.push_back(a->getPair(chord));
-        }
-        sort(currentTriangulation.begin(), currentTriangulation.end());
-        currentTriangulations.insert(currentTriangulations.end(), currentTriangulation.begin(), currentTriangulation.end());
-    }
-    allTriangulations.push_back(currentTriangulations);
-}
+// inline void biconnected::addTriangulation()
+// {
+//     vector<pair<int, int>> currentTriangulations;
+//     for (auto a : faceTriangulations)
+//     {
+//         vector<pair<int, int>> currentTriangulation;
+//         for (auto &chord : a->chords)
+//         {
+//             currentTriangulation.push_back(a->getPair(chord));
+//         }
+//         sort(currentTriangulation.begin(), currentTriangulation.end());
+//         currentTriangulations.insert(currentTriangulations.end(), currentTriangulation.begin(), currentTriangulation.end());
+//     }
+//     allTriangulations.push_back(currentTriangulations);
+// }

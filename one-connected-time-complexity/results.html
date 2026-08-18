@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Triangulation Benchmark</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head><body>
+<h1>Benchmark Charts</h1>
+<canvas id="timeChart" width="800" height="400"></canvas>
+<canvas id="memChart" width="800" height="400"></canvas>
+<canvas id="vertChart" width="800" height="400"></canvas>
+<h2>PNG summaries</h2>
+<p><img src="graphs/avg_per_triangulation_mean.png" width="600"></p>
+<p><img src="graphs/avg_per_triangulation_median.png" width="600"></p>
+<p><img src="graphs/avg_per_triangulation_min.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_mean_error.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_median.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_min.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_max.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_global_range.png" width="600"></p>
+<p><img src="graphs/total_time_vs_triangulations_smoothed.png" width="600"></p>
+<script>
+const labels = ["bowtie.txt","bridge.txt","complex_2_faces.txt","path3.txt","path4.txt","path4_v2.txt","path5.txt","path6.txt","path7.txt","path8.txt","path9.txt","star.txt","tree_Simple_depth_2.txt","tree_simple.txt"];
+const meanData = {labels: labels, datasets:[{label:'mean time (s)',data:[0.021888,0.225081,0.001205,0.000004,0.000017,0.000014,0.000067,0.000387,0.003716,0.037288,0.410303,0.000056,0.006081,0.000020],borderColor:'blue',fill:false}]};
+const medData = {labels: labels, datasets:[{label:'median time (s)',data:[0.021769,0.223909,0.001153,0.000005,0.000017,0.000013,0.000071,0.000386,0.003632,0.037268,0.409218,0.000053,0.005874,0.000018],borderColor:'orange',fill:false}]};
+const minData = {labels: labels, datasets:[{label:'min time (s)',data:[0.021626,0.218707,0.001011,0.000004,0.000013,0.000013,0.000057,0.000382,0.003531,0.036874,0.404624,0.000051,0.005277,0.000017],borderColor:'green',fill:false}]};
+const perMeanData = {labels: labels, datasets:[{label:'mean ns/triang',data:[4186.736496,4145.893642,4198.488153,4480.100000,8254.050000,6857.700000,5615.450000,3873.611000,3822.759774,3613.151831,3536.969459,11285.320000,21872.616906,19803.300000],borderColor:'blue',fill:false}]};
+const perMedData = {labels: labels, datasets:[{label:'median ns/triang',data:[2418782.611111,22390861.400000,164767.071429,1503.000000,4159.250000,3320.125000,14205.100000,64289.500000,518884.571429,4658477.375000,45468683.888889,8915.750000,839169.785714,4527.000000],borderColor:'orange',fill:false}]};
+const perMinData = {labels: labels, datasets:[{label:'min ns/triang',data:[2402914.222222,21870737.300000,144487.000000,1410.666667,3307.500000,3156.250000,11362.600000,63589.333333,504497.000000,4609188.875000,44958196.888889,8575.833333,753902.428571,4340.000000],borderColor:'green',fill:false}]};
+const vertData = {labels: labels, datasets:[{label:'vertices',data:[9,10,7,3,4,4,5,6,7,8,9,6,7,4],borderColor:'gray',fill:false}]};
+new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:meanData,options:{responsive:true,plugins:{title:{display:true,text:'Mean time per file'}}}});
+new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:medData,options:{responsive:true,plugins:{title:{display:true,text:'Median time per file'}}}});
+new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:minData,options:{responsive:true,plugins:{title:{display:true,text:'Min time per file'}}}});
+new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMeanData,options:{responsive:true,plugins:{title:{display:true,text:'Mean memory/vertex per file'}}}});
+new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMedData,options:{responsive:true,plugins:{title:{display:true,text:'Median memory/vertex per file'}}}});
+new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMinData,options:{responsive:true,plugins:{title:{display:true,text:'Min memory/vertex per file'}}}});
+new Chart(document.getElementById('vertChart').getContext('2d'),{type:'line',data:vertData,options:{responsive:true,plugins:{title:{display:true,text:'Vertices per file'}}}});
+</script>
+</body></html>
