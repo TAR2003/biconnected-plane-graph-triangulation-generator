@@ -274,10 +274,15 @@ public:
         // cout << "On the matter of flipping the chord: " << oppositePair.first << " " << oppositePair.second << endl;
         if (present.find(oppositePair) != present.end())
         {
+            if(oppositePair.first != positions[0] && oppositePair.second != positions[0])
+            {
+                return; // that means it does not conflict with any of the root triangulation generating set
+            }
             if (presentFace.find(oppositePair) == presentFace.end())
             {
-                return;
+                return; // that means it might have a conflict with the border chord or other edges from other faces 
             }
+            
         }
         bc->successfulChecks++;
 

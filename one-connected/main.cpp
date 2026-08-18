@@ -1,10 +1,31 @@
 #include <bits/stdc++.h>
+#include <filesystem>
 using namespace std;
+namespace fs = std::filesystem;
+
 #include "Edge.hpp"
 #include "pairHash.hpp"
 #include "biconnected.hpp"
 #include "FaceTriangulation.hpp"
 #include "triconnected.hpp"
+
+// Structure to hold metrics for CSV reporting
+struct FileMetrics
+{
+    string filename;
+    size_t algoTotal;
+    size_t bruteForceTotal;
+    double ratio;
+    long long totalChecks;
+    long long successfulChecks;
+    long long failedChecks;
+    double checkSuccessRate;
+    long long totalTraversals;
+    long long successfulTraversals;
+    long long invalidTraversals;
+    double traversalSuccessRate;
+    bool isContained;
+};
 
 vector<vector<int>> solve(string filename)
 {
@@ -60,7 +81,7 @@ void compareAndPrintTriangulations(
     const string RED = "\033[31m";
     const string RESET = "\033[0m";
 
-    // Ensure the inner edge pairs are strictly sorted to allow exact equality matching
+    // Ensure inner edge pairs are sorted for accurate matching
     for (auto &t : triangulationsByAlgo)
     {
         sort(t.begin(), t.end());
@@ -70,38 +91,31 @@ void compareAndPrintTriangulations(
         sort(t.begin(), t.end());
     }
 
-    // Sort outer vectors to display them in a clean, organized order
     sort(triangulationsByAlgo.begin(), triangulationsByAlgo.end());
 
-    // Use a multiset to handle exact duplicate counts (multiplicities)
     multiset<vector<pair<int, int>>> bruteForceSet(
         triangulationsByTriconnectedBruteForce.begin(),
         triangulationsByTriconnectedBruteForce.end());
 
     cout << "Total triangulations in biconnected component: " << triangulationsByAlgo.size() << endl;
 
-    // 1. Print all Algo triangulations (Green for match, Yellow for extra)
+    // 1. Process Algo triangulations
     for (const auto &triangulation : triangulationsByAlgo)
     {
         auto it = bruteForceSet.find(triangulation);
         if (it != bruteForceSet.end())
         {
-            cout << GREEN;           // Matched in brute force
-            bruteForceSet.erase(it); // Erase exactly one instance to handle duplicates properly
+            cout << GREEN;
+            bruteForceSet.erase(it);
         }
         else
         {
-            cout << YELLOW; // Extra in Algo, not in brute force
+            cout << YELLOW;
         }
-
-        // for (const auto &chord : triangulation)
-        // {
-        //     cout << "(" << chord.first << ", " << chord.second << ") , ";
-        // }
-        cout << RESET; // Reset color at the end of the line
+        cout << RESET;
     }
 
-    // 2. Print any remaining Brute Force triangulations NOT found in Algo (Red)
+    // 2. Process Remaining Brute Force triangulations
     if (!bruteForceSet.empty())
     {
         cout << "\nMissing triangulations (In Brute Force, but NOT in Algo):" << endl;
@@ -124,15 +138,9 @@ void compareAndPrintTriangulations(
 bool compareAndOutput(
     vector<vector<pair<int, int>>> &triangulationsByAlgo,
     vector<vector<pair<int, int>>> &triangulationsByTriconnectedBruteForce,
-    const string &filename)
+    const string &filename,
+    bool enableFileOutput)
 {
-    ofstream outFile(filename);
-    if (!outFile.is_open())
-    {
-        cerr << "Error: Could not open file " << filename << " for writing." << endl;
-        return false;
-    }
-
     // Standardize edge orientations and internal order
     for (auto &t : triangulationsByAlgo)
     {
@@ -160,6 +168,31 @@ bool compareAndOutput(
         triangulationsByTriconnectedBruteForce.begin(),
         triangulationsByTriconnectedBruteForce.end());
 
+    // Evaluate containment status
+    multiset<vector<pair<int, int>>> checkSet = bruteForceSet;
+    for (const auto &triangulation : triangulationsByAlgo)
+    {
+        auto it = checkSet.find(triangulation);
+        if (it != checkSet.end())
+        {
+            checkSet.erase(it);
+        }
+    }
+    bool isFullyContained = checkSet.empty();
+
+    // If file writing is toggled OFF, return early
+    if (!enableFileOutput)
+    {
+        return isFullyContained;
+    }
+
+    ofstream outFile(filename);
+    if (!outFile.is_open())
+    {
+        cerr << "Error: Could not open file " << filename << " for writing." << endl;
+        return isFullyContained;
+    }
+
     outFile << "Total triangulations in biconnected component: " << triangulationsByAlgo.size() << "\n\n";
 
     // 1. Process Algorithm Triangulations
@@ -168,12 +201,12 @@ bool compareAndOutput(
         auto it = bruteForceSet.find(triangulation);
         if (it != bruteForceSet.end())
         {
-            outFile << "[MATCH] "; // Matched in brute force
+            outFile << "[MATCH] ";
             bruteForceSet.erase(it);
         }
         else
         {
-            outFile << "[EXTRA] "; // Extra in Algo (not present in brute force)
+            outFile << "[EXTRA] ";
         }
 
         for (const auto &chord : triangulation)
@@ -184,9 +217,7 @@ bool compareAndOutput(
     }
 
     // 2. Process Remaining Brute Force Triangulations
-    bool isFullyContained = bruteForceSet.empty();
-
-    if (!isFullyContained)
+    if (!bruteForceSet.empty())
     {
         outFile << "\n[MISSING] Triangulations in Brute Force but NOT in Algo:\n";
         for (const auto &triangulation : bruteForceSet)
@@ -208,7 +239,7 @@ bool compareAndOutput(
     return isFullyContained;
 }
 
-bool matchTwoAlgorithms(string filename)
+FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
 {
     vector<vector<int>> faces = solve(filename);
 
@@ -221,29 +252,23 @@ bool matchTwoAlgorithms(string filename)
     tc->refineTriangulations();
     tc->removeDuplicated();
 
-    // Ensure the output directory exists
-    filesystem::create_directories("output");
-
-    // Extract bare filename (e.g., "input/actual_name.txt" -> "actual_name.txt")
-    string bareFilename = filesystem::path(filename).filename().string();
-
-    // Save directly to output/<actual_name.txt>
+    string bareFilename = fs::path(filename).filename().string();
     string outFilePath = "output/" + bareFilename;
 
-    // Call compareAndOutput to write results to file
-    bool isContained = compareAndOutput(bc->allTriangulations, tc->allTriangulations, outFilePath);
+    if (enableFileOutput)
+    {
+        fs::create_directories("output");
+    }
+
+    bool isContained = compareAndOutput(bc->allTriangulations, tc->allTriangulations, outFilePath, enableFileOutput);
 
     size_t algoCount = bc->allTriangulations.size();
     size_t bruteForceCount = tc->allTriangulations.size();
-
-    // Calculate ratio safely
     double ratio = (bruteForceCount > 0) ? static_cast<double>(algoCount) / bruteForceCount : 0.0;
 
-    // Traversal statistics
-    size_t successfulTraversals = algoCount; // Successful triangulations count
+    size_t successfulTraversals = algoCount;
     size_t totalTraversals = bc->invalidTraversals + algoCount;
 
-    // Percentage calculations (with division-by-zero protection)
     double checkSuccessPercentage = (bc->totalChecks > 0)
                                         ? (static_cast<double>(bc->successfulChecks) / bc->totalChecks) * 100.0
                                         : 0.0;
@@ -257,7 +282,6 @@ bool matchTwoAlgorithms(string filename)
     const string RED = "\033[1;31m";
     const string RESET = "\033[0m";
 
-    // 1. Print Checks & Traversals Metrics
     cout << fixed << setprecision(2);
     cout << "\n================ Search Metrics ================" << endl;
     cout << "Total Checks: " << bc->totalChecks << endl;
@@ -271,7 +295,6 @@ bool matchTwoAlgorithms(string filename)
     cout << "Traversal Success Rate: " << traversalSuccessPercentage << "%" << endl;
     cout << "================================================" << endl;
 
-    // 2. Print Algorithm Match/Containment Results
     if (isContained)
     {
         cout << GREEN;
@@ -289,42 +312,106 @@ bool matchTwoAlgorithms(string filename)
         cout << "Some brute force triangulations are MISSING from the algorithm output." << RESET << endl;
     }
 
-    // Clean up heap allocations
+    FileMetrics metrics{
+        bareFilename,
+        algoCount,
+        bruteForceCount,
+        ratio,
+        bc->totalChecks,
+        bc->successfulChecks,
+        bc->totalChecks - bc->successfulChecks,
+        checkSuccessPercentage,
+        static_cast<long long>(totalTraversals),
+        static_cast<long long>(successfulTraversals),
+        static_cast<long long>(bc->invalidTraversals),
+        traversalSuccessPercentage,
+        isContained};
+
     delete bc;
     delete tc;
 
-    return isContained;
+    return metrics;
 }
 
-#include <filesystem>
-namespace fs = std::filesystem;
+void writeCSVReport(const string &reportPath, const vector<FileMetrics> &allMetrics)
+{
+    ofstream csvFile(reportPath);
+    if (!csvFile.is_open())
+    {
+        cerr << "Error: Could not create CSV report file " << reportPath << endl;
+        return;
+    }
+
+    // CSV Header
+    csvFile << "Filename,Algo Total,Brute Force Total,Ratio (Algo/BF),"
+            << "Total Checks,Successful Checks,Failed Checks,Check Success Rate (%),"
+            << "Total Traversals,Successful Traversals,Invalid Traversals,Traversal Success Rate (%),"
+            << "Status\n";
+
+    for (const auto &m : allMetrics)
+    {
+        csvFile << m.filename << ","
+                << m.algoTotal << ","
+                << m.bruteForceTotal << ","
+                << fixed << setprecision(4) << m.ratio << ","
+                << m.totalChecks << ","
+                << m.successfulChecks << ","
+                << m.failedChecks << ","
+                << fixed << setprecision(2) << m.checkSuccessRate << ","
+                << m.totalTraversals << ","
+                << m.successfulTraversals << ","
+                << m.invalidTraversals << ","
+                << fixed << setprecision(2) << m.traversalSuccessRate << ","
+                << (m.isContained ? "MATCHED" : "MISMATCHED") << "\n";
+    }
+
+    csvFile.close();
+    cout << "\n\033[1;34m[REPORT] Summary CSV report successfully written to: " << reportPath << "\033[0m" << endl;
+}
 
 int main()
 {
+    // ================= CONFIGURATION FLAGS =================
+    bool ENABLE_FILE_OUTPUT = false; // Set to false to disable per-file detailed triangulation outputs
+    string CSV_REPORT_FILENAME = "triangulation_search_report.csv";
+    // =======================================================
+
     string folder = "input";
-    vector<pair<string, bool>> files;
-    // Loop through all files in the folder
+    vector<FileMetrics> allMetrics;
+
+    if (!fs::exists(folder))
+    {
+        cerr << "Error: Folder '" << folder << "' does not exist." << endl;
+        return 1;
+    }
+
     for (const auto &entry : fs::directory_iterator(folder))
     {
         if (entry.is_regular_file())
         {
             string filename = entry.path().string();
-            cout << "Processing: " << filename << endl;
-            bool result = matchTwoAlgorithms(filename);
-            files.push_back({filename, result});
+            cout << "\nProcessing: " << filename << endl;
+            FileMetrics metrics = matchTwoAlgorithms(filename, ENABLE_FILE_OUTPUT);
+            allMetrics.push_back(metrics);
         }
     }
-    for (int i = 0; i < files.size(); i++)
+
+    // Print summary results to console
+    cout << "\n================ Final Summary ================" << endl;
+    for (const auto &m : allMetrics)
     {
-        if (files[i].second)
+        if (m.isContained)
         {
-            cout << "File: " << " => \033[1;32mMatched: " << files[i].first << " \033[0m" << endl;
+            cout << "File: " << m.filename << " => \033[1;32mMatched\033[0m" << endl;
         }
         else
         {
-            cout << "File: " << " => \033[1;31mMismatched: " << files[i].first << " \033[0m" << endl;
+            cout << "File: " << m.filename << " => \033[1;31mMismatched\033[0m" << endl;
         }
     }
+
+    // Generate CSV Report
+    writeCSVReport(CSV_REPORT_FILENAME, allMetrics);
 
     return 0;
 }
