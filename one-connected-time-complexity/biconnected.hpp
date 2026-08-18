@@ -14,6 +14,7 @@ public:
     unordered_multiset<pair<int, int>, PairHash> present;
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation*> faceTriangulations;
+    int totalTriangulations;
     int totalChecks;
     int successfulChecks;
     int invalidTraversals;
@@ -22,10 +23,11 @@ public:
         this->faces = faces;
         present = unordered_multiset<pair<int, int>, PairHash>();
         initiatePresent();
-        faceTriangulations = vector<FaceTriangulation*>(faces.size());
+        // faceTriangulations = vector<FaceTriangulation*>(faces.size());
         totalChecks = 0;
         successfulChecks = 0;
         invalidTraversals = 0;
+        totalTriangulations = 0;
     }
     void initiatePresent()
     {
@@ -81,7 +83,8 @@ inline void biconnected::output(int serial)
 {
     if (serial == faces.size() - 1)
     {
-        addTriangulation();
+        // addTriangulation();
+        totalTriangulations++;
     }
     else
     {

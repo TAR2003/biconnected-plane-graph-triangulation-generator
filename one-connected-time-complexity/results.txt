@@ -1,0 +1,9 @@
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Scanning folder: input/small
+Test runs per file: 10
+
+⏳ Processing: bowtie.txt ...     warm-up run start (this may take a while)
