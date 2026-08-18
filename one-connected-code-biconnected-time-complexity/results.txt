@@ -1,0 +1,512 @@
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Scanning folder: input/small
+Test runs per file: 10
+
+⏳ Processing: bowtie.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:00
+    run 1 end:   21:30:00
+    run 1 dur:   0.021753 s
+    run 2 start: 21:30:00
+    run 2 end:   21:30:00
+    run 2 dur:   0.021696 s
+    run 3 start: 21:30:00
+    run 3 end:   21:30:00
+    run 3 dur:   0.021785 s
+    run 4 start: 21:30:00
+    run 4 end:   21:30:00
+    run 4 dur:   0.021626 s
+    run 5 start: 21:30:00
+    run 5 end:   21:30:00
+    run 5 dur:   0.021950 s
+    run 6 start: 21:30:00
+    run 6 end:   21:30:00
+    run 6 dur:   0.022148 s
+    run 7 start: 21:30:00
+    run 7 end:   21:30:00
+    run 7 dur:   0.021740 s
+    run 8 start: 21:30:00
+    run 8 end:   21:30:00
+    run 8 dur:   0.022271 s
+    run 9 start: 21:30:00
+    run 9 end:   21:30:01
+    run 9 dur:   0.021735 s
+    run 10 start: 21:30:01
+    run 10 end:   21:30:01
+    run 10 dur:   0.022179 s
+✓ (5228 triang, 0.021888 s)
+⏳ Processing: bridge.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:01
+    run 1 end:   21:30:01
+    run 1 dur:   0.230350 s
+    run 2 start: 21:30:01
+    run 2 end:   21:30:01
+    run 2 dur:   0.239453 s
+    run 3 start: 21:30:01
+    run 3 end:   21:30:01
+    run 3 dur:   0.221449 s
+    run 4 start: 21:30:01
+    run 4 end:   21:30:02
+    run 4 dur:   0.220250 s
+    run 5 start: 21:30:02
+    run 5 end:   21:30:02
+    run 5 dur:   0.223170 s
+    run 6 start: 21:30:02
+    run 6 end:   21:30:02
+    run 6 dur:   0.224648 s
+    run 7 start: 21:30:02
+    run 7 end:   21:30:02
+    run 7 dur:   0.226746 s
+    run 8 start: 21:30:02
+    run 8 end:   21:30:03
+    run 8 dur:   0.225281 s
+    run 9 start: 21:30:03
+    run 9 end:   21:30:03
+    run 9 dur:   0.218707 s
+    run 10 start: 21:30:03
+    run 10 end:   21:30:03
+    run 10 dur:   0.220753 s
+✓ (54290 triang, 0.225081 s)
+⏳ Processing: complex_2_faces.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:03
+    run 1 end:   21:30:03
+    run 1 dur:   0.001224 s
+    run 2 start: 21:30:03
+    run 2 end:   21:30:03
+    run 2 dur:   0.001026 s
+    run 3 start: 21:30:03
+    run 3 end:   21:30:03
+    run 3 dur:   0.001011 s
+    run 4 start: 21:30:03
+    run 4 end:   21:30:03
+    run 4 dur:   0.001043 s
+    run 5 start: 21:30:03
+    run 5 end:   21:30:03
+    run 5 dur:   0.001039 s
+    run 6 start: 21:30:03
+    run 6 end:   21:30:03
+    run 6 dur:   0.001083 s
+    run 7 start: 21:30:03
+    run 7 end:   21:30:03
+    run 7 dur:   0.001354 s
+    run 8 start: 21:30:03
+    run 8 end:   21:30:03
+    run 8 dur:   0.001333 s
+    run 9 start: 21:30:03
+    run 9 end:   21:30:03
+    run 9 dur:   0.001447 s
+    run 10 start: 21:30:03
+    run 10 end:   21:30:03
+    run 10 dur:   0.001490 s
+✓ (287 triang, 0.001205 s)
+⏳ Processing: path3.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:03
+    run 1 end:   21:30:03
+    run 1 dur:   0.000004 s
+    run 2 start: 21:30:03
+    run 2 end:   21:30:03
+    run 2 dur:   0.000004 s
+    run 3 start: 21:30:03
+    run 3 end:   21:30:03
+    run 3 dur:   0.000005 s
+    run 4 start: 21:30:03
+    run 4 end:   21:30:03
+    run 4 dur:   0.000005 s
+    run 5 start: 21:30:03
+    run 5 end:   21:30:03
+    run 5 dur:   0.000005 s
+    run 6 start: 21:30:03
+    run 6 end:   21:30:03
+    run 6 dur:   0.000004 s
+    run 7 start: 21:30:03
+    run 7 end:   21:30:03
+    run 7 dur:   0.000004 s
+    run 8 start: 21:30:03
+    run 8 end:   21:30:03
+    run 8 dur:   0.000005 s
+    run 9 start: 21:30:03
+    run 9 end:   21:30:03
+    run 9 dur:   0.000005 s
+    run 10 start: 21:30:03
+    run 10 end:   21:30:03
+    run 10 dur:   0.000005 s
+✓ (1 triang, 0.000004 s)
+⏳ Processing: path4.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:03
+    run 1 end:   21:30:03
+    run 1 dur:   0.000016 s
+    run 2 start: 21:30:03
+    run 2 end:   21:30:03
+    run 2 dur:   0.000013 s
+    run 3 start: 21:30:03
+    run 3 end:   21:30:03
+    run 3 dur:   0.000017 s
+    run 4 start: 21:30:03
+    run 4 end:   21:30:03
+    run 4 dur:   0.000017 s
+    run 5 start: 21:30:03
+    run 5 end:   21:30:03
+    run 5 dur:   0.000016 s
+    run 6 start: 21:30:03
+    run 6 end:   21:30:03
+    run 6 dur:   0.000016 s
+    run 7 start: 21:30:03
+    run 7 end:   21:30:03
+    run 7 dur:   0.000018 s
+    run 8 start: 21:30:03
+    run 8 end:   21:30:03
+    run 8 dur:   0.000017 s
+    run 9 start: 21:30:03
+    run 9 end:   21:30:03
+    run 9 dur:   0.000017 s
+    run 10 start: 21:30:03
+    run 10 end:   21:30:03
+    run 10 dur:   0.000017 s
+✓ (2 triang, 0.000017 s)
+⏳ Processing: path4_v2.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:03
+    run 1 end:   21:30:03
+    run 1 dur:   0.000013 s
+    run 2 start: 21:30:03
+    run 2 end:   21:30:03
+    run 2 dur:   0.000013 s
+    run 3 start: 21:30:03
+    run 3 end:   21:30:03
+    run 3 dur:   0.000015 s
+    run 4 start: 21:30:03
+    run 4 end:   21:30:03
+    run 4 dur:   0.000014 s
+    run 5 start: 21:30:03
+    run 5 end:   21:30:03
+    run 5 dur:   0.000014 s
+    run 6 start: 21:30:03
+    run 6 end:   21:30:03
+    run 6 dur:   0.000013 s
+    run 7 start: 21:30:03
+    run 7 end:   21:30:03
+    run 7 dur:   0.000013 s
+    run 8 start: 21:30:03
+    run 8 end:   21:30:03
+    run 8 dur:   0.000013 s
+    run 9 start: 21:30:03
+    run 9 end:   21:30:03
+    run 9 dur:   0.000013 s
+    run 10 start: 21:30:03
+    run 10 end:   21:30:03
+    run 10 dur:   0.000017 s
+✓ (2 triang, 0.000014 s)
+⏳ Processing: path5.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:03
+    run 1 end:   21:30:03
+    run 1 dur:   0.000072 s
+    run 2 start: 21:30:03
+    run 2 end:   21:30:03
+    run 2 dur:   0.000070 s
+    run 3 start: 21:30:03
+    run 3 end:   21:30:03
+    run 3 dur:   0.000072 s
+    run 4 start: 21:30:03
+    run 4 end:   21:30:03
+    run 4 dur:   0.000070 s
+    run 5 start: 21:30:03
+    run 5 end:   21:30:03
+    run 5 dur:   0.000057 s
+    run 6 start: 21:30:03
+    run 6 end:   21:30:03
+    run 6 dur:   0.000073 s
+    run 7 start: 21:30:03
+    run 7 end:   21:30:03
+    run 7 dur:   0.000072 s
+    run 8 start: 21:30:03
+    run 8 end:   21:30:03
+    run 8 dur:   0.000072 s
+    run 9 start: 21:30:03
+    run 9 end:   21:30:03
+    run 9 dur:   0.000059 s
+    run 10 start: 21:30:03
+    run 10 end:   21:30:03
+    run 10 dur:   0.000057 s
+✓ (12 triang, 0.000067 s)
+⏳ Processing: path6.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:03
+    run 1 end:   21:30:03
+    run 1 dur:   0.000385 s
+    run 2 start: 21:30:03
+    run 2 end:   21:30:03
+    run 2 dur:   0.000386 s
+    run 3 start: 21:30:03
+    run 3 end:   21:30:03
+    run 3 dur:   0.000392 s
+    run 4 start: 21:30:03
+    run 4 end:   21:30:03
+    run 4 dur:   0.000388 s
+    run 5 start: 21:30:03
+    run 5 end:   21:30:03
+    run 5 dur:   0.000386 s
+    run 6 start: 21:30:03
+    run 6 end:   21:30:03
+    run 6 dur:   0.000387 s
+    run 7 start: 21:30:03
+    run 7 end:   21:30:03
+    run 7 dur:   0.000382 s
+    run 8 start: 21:30:03
+    run 8 end:   21:30:03
+    run 8 dur:   0.000385 s
+    run 9 start: 21:30:03
+    run 9 end:   21:30:03
+    run 9 dur:   0.000397 s
+    run 10 start: 21:30:03
+    run 10 end:   21:30:03
+    run 10 dur:   0.000385 s
+✓ (100 triang, 0.000387 s)
+⏳ Processing: path7.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:03
+    run 1 end:   21:30:03
+    run 1 dur:   0.003635 s
+    run 2 start: 21:30:03
+    run 2 end:   21:30:03
+    run 2 dur:   0.003616 s
+    run 3 start: 21:30:03
+    run 3 end:   21:30:03
+    run 3 dur:   0.003629 s
+    run 4 start: 21:30:03
+    run 4 end:   21:30:03
+    run 4 dur:   0.003531 s
+    run 5 start: 21:30:03
+    run 5 end:   21:30:03
+    run 5 dur:   0.003848 s
+    run 6 start: 21:30:03
+    run 6 end:   21:30:03
+    run 6 dur:   0.003630 s
+    run 7 start: 21:30:03
+    run 7 end:   21:30:03
+    run 7 dur:   0.003548 s
+    run 8 start: 21:30:03
+    run 8 end:   21:30:03
+    run 8 dur:   0.003665 s
+    run 9 start: 21:30:03
+    run 9 end:   21:30:03
+    run 9 dur:   0.004055 s
+    run 10 start: 21:30:03
+    run 10 end:   21:30:03
+    run 10 dur:   0.004001 s
+✓ (972 triang, 0.003716 s)
+⏳ Processing: path8.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:03
+    run 1 end:   21:30:03
+    run 1 dur:   0.037992 s
+    run 2 start: 21:30:03
+    run 2 end:   21:30:03
+    run 2 dur:   0.036965 s
+    run 3 start: 21:30:03
+    run 3 end:   21:30:03
+    run 3 dur:   0.037376 s
+    run 4 start: 21:30:03
+    run 4 end:   21:30:03
+    run 4 dur:   0.037160 s
+    run 5 start: 21:30:03
+    run 5 end:   21:30:03
+    run 5 dur:   0.037086 s
+    run 6 start: 21:30:03
+    run 6 end:   21:30:03
+    run 6 dur:   0.036882 s
+    run 7 start: 21:30:03
+    run 7 end:   21:30:04
+    run 7 dur:   0.037461 s
+    run 8 start: 21:30:04
+    run 8 end:   21:30:04
+    run 8 dur:   0.037604 s
+    run 9 start: 21:30:04
+    run 9 end:   21:30:04
+    run 9 dur:   0.036874 s
+    run 10 start: 21:30:04
+    run 10 end:   21:30:04
+    run 10 dur:   0.037479 s
+✓ (10320 triang, 0.037288 s)
+⏳ Processing: path9.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:04
+    run 1 end:   21:30:04
+    run 1 dur:   0.409920 s
+    run 2 start: 21:30:04
+    run 2 end:   21:30:05
+    run 2 dur:   0.405046 s
+    run 3 start: 21:30:05
+    run 3 end:   21:30:05
+    run 3 dur:   0.404624 s
+    run 4 start: 21:30:05
+    run 4 end:   21:30:06
+    run 4 dur:   0.409106 s
+    run 5 start: 21:30:06
+    run 5 end:   21:30:06
+    run 5 dur:   0.409330 s
+    run 6 start: 21:30:06
+    run 6 end:   21:30:07
+    run 6 dur:   0.424358 s
+    run 7 start: 21:30:07
+    run 7 end:   21:30:07
+    run 7 dur:   0.411567 s
+    run 8 start: 21:30:07
+    run 8 end:   21:30:07
+    run 8 dur:   0.411766 s
+    run 9 start: 21:30:07
+    run 9 end:   21:30:08
+    run 9 dur:   0.408270 s
+    run 10 start: 21:30:08
+    run 10 end:   21:30:08
+    run 10 dur:   0.409040 s
+✓ (116004 triang, 0.410303 s)
+⏳ Processing: star.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:08
+    run 1 end:   21:30:08
+    run 1 dur:   0.000066 s
+    run 2 start: 21:30:08
+    run 2 end:   21:30:08
+    run 2 dur:   0.000053 s
+    run 3 start: 21:30:08
+    run 3 end:   21:30:08
+    run 3 dur:   0.000053 s
+    run 4 start: 21:30:08
+    run 4 end:   21:30:08
+    run 4 dur:   0.000051 s
+    run 5 start: 21:30:08
+    run 5 end:   21:30:08
+    run 5 dur:   0.000054 s
+    run 6 start: 21:30:08
+    run 6 end:   21:30:08
+    run 6 dur:   0.000052 s
+    run 7 start: 21:30:08
+    run 7 end:   21:30:08
+    run 7 dur:   0.000056 s
+    run 8 start: 21:30:08
+    run 8 end:   21:30:08
+    run 8 dur:   0.000054 s
+    run 9 start: 21:30:08
+    run 9 end:   21:30:08
+    run 9 dur:   0.000053 s
+    run 10 start: 21:30:08
+    run 10 end:   21:30:08
+    run 10 dur:   0.000072 s
+✓ (5 triang, 0.000056 s)
+⏳ Processing: tree_Simple_depth_2.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:08
+    run 1 end:   21:30:08
+    run 1 dur:   0.005415 s
+    run 2 start: 21:30:08
+    run 2 end:   21:30:08
+    run 2 dur:   0.005436 s
+    run 3 start: 21:30:08
+    run 3 end:   21:30:08
+    run 3 dur:   0.005640 s
+    run 4 start: 21:30:08
+    run 4 end:   21:30:08
+    run 4 dur:   0.005277 s
+    run 5 start: 21:30:08
+    run 5 end:   21:30:08
+    run 5 dur:   0.005333 s
+    run 6 start: 21:30:08
+    run 6 end:   21:30:08
+    run 6 dur:   0.007399 s
+    run 7 start: 21:30:08
+    run 7 end:   21:30:08
+    run 7 dur:   0.006549 s
+    run 8 start: 21:30:08
+    run 8 end:   21:30:08
+    run 8 dur:   0.006703 s
+    run 9 start: 21:30:08
+    run 9 end:   21:30:08
+    run 9 dur:   0.006946 s
+    run 10 start: 21:30:08
+    run 10 end:   21:30:08
+    run 10 dur:   0.006109 s
+✓ (278 triang, 0.006081 s)
+⏳ Processing: tree_simple.txt ...     warm-up run start (this may take a while)
+    warm-up run complete
+    run 1 start: 21:30:08
+    run 1 end:   21:30:08
+    run 1 dur:   0.000022 s
+    run 2 start: 21:30:08
+    run 2 end:   21:30:08
+    run 2 dur:   0.000017 s
+    run 3 start: 21:30:08
+    run 3 end:   21:30:08
+    run 3 dur:   0.000018 s
+    run 4 start: 21:30:08
+    run 4 end:   21:30:08
+    run 4 dur:   0.000018 s
+    run 5 start: 21:30:08
+    run 5 end:   21:30:08
+    run 5 dur:   0.000018 s
+    run 6 start: 21:30:08
+    run 6 end:   21:30:08
+    run 6 dur:   0.000018 s
+    run 7 start: 21:30:08
+    run 7 end:   21:30:08
+    run 7 dur:   0.000018 s
+    run 8 start: 21:30:08
+    run 8 end:   21:30:08
+    run 8 dur:   0.000023 s
+    run 9 start: 21:30:08
+    run 9 end:   21:30:08
+    run 9 dur:   0.000022 s
+    run 10 start: 21:30:08
+    run 10 end:   21:30:08
+    run 10 dur:   0.000024 s
+✓ (1 triang, 0.000020 s)
+
+╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                    BENCHMARK RESULTS                                                               ║
+╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣
+║ File                     ║   Vertices║       Triangulations║     Time (s)║        ns/Triang║     Peak Memory║          Memory/Vertex║
+╠═══════════════════════════╬════════════╬═════════════════╬══════════════╬═══════════════╬═════════════════╬════════════════════════╣
+║ bowtie.txt               ║          9║                 5228║     0.021888║       4.1867e+03║         8.00 KB║               910.00 B║
+║ bridge.txt               ║         10║                54290║     0.225081║       4.1459e+03║         4.00 KB║               409.00 B║
+║ complex_2_faces.txt      ║          7║                  287║     0.001205║       4.1985e+03║         8.00 KB║                1.14 KB║
+║ path3.txt                ║          3║                    1║     0.000004║       4.4801e+03║         4.00 KB║                1.33 KB║
+║ path4.txt                ║          4║                    2║     0.000017║       8.2540e+03║         4.00 KB║                1.00 KB║
+║ path4_v2.txt             ║          4║                    2║     0.000014║       6.8577e+03║         4.00 KB║                1.00 KB║
+║ path5.txt                ║          5║                   12║     0.000067║       5.6154e+03║         4.00 KB║               819.00 B║
+║ path6.txt                ║          6║                  100║     0.000387║       3.8736e+03║         4.00 KB║               682.00 B║
+║ path7.txt                ║          7║                  972║     0.003716║       3.8228e+03║         4.00 KB║               585.00 B║
+║ path8.txt                ║          8║                10320║     0.037288║       3.6132e+03║         4.00 KB║               512.00 B║
+║ path9.txt                ║          9║               116004║     0.410303║       3.5370e+03║         4.00 KB║               455.00 B║
+║ star.txt                 ║          6║                    5║     0.000056║       1.1285e+04║         4.00 KB║               682.00 B║
+║ tree_Simple_depth_2.txt  ║          7║                  278║     0.006081║       2.1873e+04║         4.00 KB║               585.00 B║
+║ tree_simple.txt          ║          4║                    1║     0.000020║       1.9803e+04║         4.00 KB║                1.00 KB║
+╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                         COMPLEXITY ANALYSIS                                ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║  Time Complexity:  Varies with triangulation count (see ns/Triang)        ║
+║  Space Complexity: O(n) where n = number of vertices                      ║
+║                    (measured precisely via RSS at byte-level)             ║
+╠════════════════════════════════════════════════════════════════════════════╣
+║  Color Legend:                                                             ║
+║    ● Green  = Excellent performance                                         ║
+║    ● Yellow = Moderate performance                                          ║
+║    ● Red    = High resource usage                                           ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+Note: Results averaged over 10 runs per file.
+      Memory measured at byte precision (using /proc/self/smaps_rollup where available).
+
+(see results.html for charts)
+Data has been recorded in results.csv and an interactive report is available in results.html
+Attempting to create PNG plots (requires Python with pandas/matplotlib)...
+  (plot_results.py not found; no PNGs created)
