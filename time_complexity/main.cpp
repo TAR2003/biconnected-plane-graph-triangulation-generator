@@ -298,14 +298,14 @@ static void runCategory(const string &category)
         }
 
         // warm-up run
-        if (RUNS_PER_CASE > 1 && alreadyDone == 0)
-        {
-            cout << "    Executing warm-up run..." << flush;
-            biconnected *warm = new biconnected(faces);
-            warm->getAllTriangulations();
-            delete warm;
-            cout << " done.\n";
-        }
+        // if (RUNS_PER_CASE > 1 && alreadyDone == 0)
+        // {
+        //     cout << "    Executing warm-up run..." << flush;
+        //     biconnected *warm = new biconnected(faces);
+        //     warm->getAllTriangulations();
+        //     delete warm;
+        //     cout << " done.\n";
+        // }
 
         for (int localRun = 1; localRun <= remaining; localRun++)
         {

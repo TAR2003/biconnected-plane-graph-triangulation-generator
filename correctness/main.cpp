@@ -7,7 +7,67 @@ using namespace std;
 #include "triconnected.hpp"
 
 #include <filesystem>
+#include <thread>
+#include <atomic>
+#include <chrono>
+
 namespace fs = std::filesystem;
+
+// ============================================================================
+// CONFIGURATION
+// Max disk space allowed for binary temporary files per test case (e.g., 1 GB)
+// ============================================================================
+static const size_t MAX_DISK_BYTES = 1000ULL * 1024ULL * 1024ULL; // 1 GB limit
+
+// ============================================================================
+// Disk Monitor (Asynchronous Watchdog Thread)
+// ============================================================================
+class DiskMonitor
+{
+    atomic<bool> stopFlag{false};
+    atomic<bool> limitExceeded{false};
+    thread worker;
+
+public:
+    void start(const vector<string> &filesToWatch, size_t maxBytes)
+    {
+        stopFlag = false;
+        limitExceeded = false;
+        worker = thread([this, filesToWatch, maxBytes]()
+                        {
+            while (!stopFlag)
+            {
+                size_t totalBytes = 0;
+                for (const auto &filePath : filesToWatch)
+                {
+                    if (fs::exists(filePath))
+                    {
+                        error_code ec;
+                        totalBytes += fs::file_size(filePath, ec);
+                    }
+                }
+                if (totalBytes > maxBytes)
+                {
+                    limitExceeded = true;
+                    break;
+                }
+                this_thread::sleep_for(chrono::milliseconds(50));
+            } });
+    }
+
+    bool stop()
+    {
+        stopFlag = true;
+        if (worker.joinable())
+            worker.join();
+        return limitExceeded;
+    }
+
+    bool hasExceeded() const
+    {
+        return limitExceeded;
+    }
+};
 
 // ============================================================================
 // Input reader
@@ -40,7 +100,7 @@ vector<vector<int>> solve(const string &filename)
 }
 
 // ============================================================================
-// External Sort for binary triangulation files
+// External Sort for binary triangulation files (With Disk Limit Enforcer)
 // ============================================================================
 struct TriangulationEntry
 {
@@ -56,28 +116,41 @@ struct TriangulationEntry
     }
 };
 
-static void externalSortBinaryFile(const string &inputFile, const string &outputFile, size_t maxRAMEntries = 500000)
+static bool externalSortBinaryFile(const string &inputFile, const string &outputFile, size_t maxRAMEntries = 500000)
 {
     ifstream in(inputFile, ios::binary);
     if (!in.is_open())
-        return;
+        return false;
 
     vector<string> chunkFiles;
     vector<TriangulationEntry> buffer;
     buffer.reserve(maxRAMEntries);
 
     int chunkIdx = 0;
+    size_t cumulativeBytesWritten = 0;
 
-    auto writeChunk = [&](const vector<TriangulationEntry> &vec, const string &cFile)
+    auto writeChunk = [&](const vector<TriangulationEntry> &vec, const string &cFile) -> bool
     {
         ofstream out(cFile, ios::binary);
         for (const auto &item : vec)
         {
             uint32_t sz = static_cast<uint32_t>(item.chords.size());
+            size_t entryBytes = sizeof(sz) + (sz * sizeof(pair<int, int>));
+
+            if (cumulativeBytesWritten + entryBytes > MAX_DISK_BYTES)
+            {
+                out.close();
+                return false;
+            }
+
             out.write(reinterpret_cast<const char *>(&sz), sizeof(sz));
             out.write(reinterpret_cast<const char *>(item.chords.data()), sz * sizeof(pair<int, int>));
+            cumulativeBytesWritten += entryBytes;
         }
+        return true;
     };
+
+    bool diskExceeded = false;
 
     while (in.peek() != EOF)
     {
@@ -95,35 +168,49 @@ static void externalSortBinaryFile(const string &inputFile, const string &output
         {
             sort(buffer.begin(), buffer.end());
             string cFileName = "temp_chunk_" + to_string(chunkIdx++) + ".bin";
-            writeChunk(buffer, cFileName);
+            if (!writeChunk(buffer, cFileName))
+            {
+                diskExceeded = true;
+                break;
+            }
             chunkFiles.push_back(cFileName);
             buffer.clear();
         }
     }
 
-    if (!buffer.empty())
+    if (!diskExceeded && !buffer.empty())
     {
         sort(buffer.begin(), buffer.end());
         if (chunkFiles.empty())
         {
-            writeChunk(buffer, outputFile);
+            if (!writeChunk(buffer, outputFile))
+                diskExceeded = true;
             in.close();
-            return;
+            return !diskExceeded;
         }
         else
         {
             string cFileName = "temp_chunk_" + to_string(chunkIdx++) + ".bin";
-            writeChunk(buffer, cFileName);
-            chunkFiles.push_back(cFileName);
+            if (!writeChunk(buffer, cFileName))
+                diskExceeded = true;
+            else
+                chunkFiles.push_back(cFileName);
             buffer.clear();
         }
     }
     in.close();
 
+    if (diskExceeded)
+    {
+        for (const auto &file : chunkFiles)
+            fs::remove(file);
+        return false;
+    }
+
     if (chunkFiles.empty())
     {
         ofstream out(outputFile, ios::binary);
-        return;
+        return true;
     }
 
     // Priority Queue Min-Heap for K-Way Merge
@@ -164,8 +251,17 @@ static void externalSortBinaryFile(const string &inputFile, const string &output
         int idx = top.chunkIndex;
 
         uint32_t sz = static_cast<uint32_t>(top.entry.chords.size());
+        size_t entryBytes = sizeof(sz) + (sz * sizeof(pair<int, int>));
+
+        if (cumulativeBytesWritten + entryBytes > MAX_DISK_BYTES)
+        {
+            diskExceeded = true;
+            break;
+        }
+
         out.write(reinterpret_cast<const char *>(&sz), sizeof(sz));
         out.write(reinterpret_cast<const char *>(top.entry.chords.data()), sz * sizeof(pair<int, int>));
+        cumulativeBytesWritten += entryBytes;
 
         uint32_t nextSz = 0;
         if (streams[idx].read(reinterpret_cast<char *>(&nextSz), sizeof(nextSz)))
@@ -184,6 +280,8 @@ static void externalSortBinaryFile(const string &inputFile, const string &output
         streams[i].close();
         fs::remove(chunkFiles[i]);
     }
+
+    return !diskExceeded;
 }
 
 // Stream comparison of two binary triangulation files item-by-item
@@ -225,7 +323,7 @@ bool compareTriangulationFiles(const string &file1, const string &file2, size_t 
     return true;
 }
 
-// Returns: 1 = matched, 0 = mismatched, -1 = error
+// Returns: 1 = matched, 0 = mismatched, -1 = error, -2 = limit exceeded
 int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCount)
 {
     vector<vector<int>> faces = solve(filename);
@@ -239,23 +337,50 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
     string fileBC_sorted = "temp_bc_sorted.bin";
     string fileTC_sorted = "temp_tc_sorted.bin";
 
-    biconnected *bc = new biconnected(faces);
-    bc->getAllTriangulationsToFile(fileBC_raw);
-    newCount = bc->totalCount;
+    DiskMonitor monitor;
 
-    // External sort biconnected output in chunks to keep memory usage minimal
-    externalSortBinaryFile(fileBC_raw, fileBC_sorted);
+    // --- Phase 1: Biconnected Run ---
+    biconnected *bc = new biconnected(faces);
+    monitor.start({fileBC_raw}, MAX_DISK_BYTES);
+    bc->getAllTriangulationsToFile(fileBC_raw);
+    bool limitHit = monitor.stop();
+    newCount = bc->totalCount;
+    delete bc;
+
+    if (limitHit)
+    {
+        fs::remove(fileBC_raw);
+        return -2;
+    }
+
+    // --- Phase 2: External Sorting ---
+    if (!externalSortBinaryFile(fileBC_raw, fileBC_sorted))
+    {
+        fs::remove(fileBC_raw);
+        fs::remove(fileBC_sorted);
+        return -2;
+    }
     fs::remove(fileBC_raw);
 
+    // --- Phase 3: Triconnected Run ---
     triconnected *tc = new triconnected(faces);
     tc->getAllTriangulations();
+
+    monitor.start({fileBC_sorted, fileTC_sorted}, MAX_DISK_BYTES);
     tc->refineTriangulationsToFile(fileTC_sorted);
+    limitHit = monitor.stop();
     oldCount = tc->totalCount;
-
-    bool result = compareTriangulationFiles(fileBC_sorted, fileTC_sorted, newCount, oldCount);
-
-    delete bc;
     delete tc;
+
+    if (limitHit)
+    {
+        fs::remove(fileBC_sorted);
+        fs::remove(fileTC_sorted);
+        return -2;
+    }
+
+    // --- Phase 4: Stream Comparison ---
+    bool result = compareTriangulationFiles(fileBC_sorted, fileTC_sorted, newCount, oldCount);
 
     fs::remove(fileBC_sorted);
     fs::remove(fileTC_sorted);
@@ -328,6 +453,7 @@ struct Summary
     string category;
     int matched = 0;
     int mismatched = 0;
+    int limitExceeded = 0;
     int errors = 0;
     int skipped = 0;
 };
@@ -382,6 +508,12 @@ static Summary runCategory(const string &rootFolder, const string &category)
             resultStr = "MISMATCH";
             summ.mismatched++;
             cout << "\033[1;31mMISMATCH\033[0m (new=" << newCount << ", old=" << oldCount << ")\n";
+        }
+        else if (result == -2)
+        {
+            resultStr = "LIMIT_EXCEEDED";
+            summ.limitExceeded++;
+            cout << "\033[1;35mLIMIT_EXCEEDED\033[0m (> " << (MAX_DISK_BYTES / (1024 * 1024)) << " MB limit)\n";
         }
         else
         {
@@ -466,10 +598,11 @@ int main(int argc, char *argv[])
     for (const auto &s : summaries)
     {
         cout << "Category: " << s.category << "\n";
-        cout << "  Matched:    " << s.matched << "\n";
-        cout << "  Mismatched: " << s.mismatched << "\n";
-        cout << "  Errors:     " << s.errors << "\n";
-        cout << "  Skipped:    " << s.skipped << " (already tested previously)\n";
+        cout << "  Matched:        " << s.matched << "\n";
+        cout << "  Mismatched:     " << s.mismatched << "\n";
+        cout << "  Limit Exceeded: " << s.limitExceeded << "\n";
+        cout << "  Errors:         " << s.errors << "\n";
+        cout << "  Skipped:        " << s.skipped << " (already tested previously)\n";
     }
     cout << "=================================================\n";
 
