@@ -8,6 +8,18 @@ using namespace std;
 #include <chrono>
 
 using u128 = unsigned __int128;
+namespace fs = std::filesystem;
+
+// ============================================================================
+// CONFIG: how many timing runs every single test case should have.
+// If a case already has some runs recorded in its category CSV, only the
+// remaining runs (RUNS_PER_CASE - alreadyDone) are performed.
+// ============================================================================
+static const int RUNS_PER_CASE = 5;
+
+// The root folder containing one subfolder per category. Add more category
+// folders under this root and they'll be picked up automatically.
+static const string INPUT_ROOT = "input";
 
 // helper to convert 128-bit numbers to string (decimal)
 static string u128_to_string(u128 x)
@@ -25,12 +37,9 @@ static string u128_to_string(u128 x)
     return s;
 }
 
-namespace fs = std::filesystem;
-
 // ============================================================================
 // Cross-Platform High-Precision Memory Measurement
 // ============================================================================
-
 #ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
@@ -54,9 +63,6 @@ size_t getCurrentMemoryUsage()
 
 #else
 #include <unistd.h>
-#include <fstream>
-
-// Linux high-precision RSS measurement
 size_t getCurrentMemoryUsage()
 {
     // Try the more accurate /proc/self/smaps_rollup (available since Linux 4.14)
@@ -79,7 +85,7 @@ size_t getCurrentMemoryUsage()
         }
         smaps.close();
         if (rssBytes > 0)
-            return rssBytes; // Return precise RSS in bytes
+            return rssBytes;
     }
 
     // Fallback: statm (page-based, lower precision)
@@ -101,7 +107,7 @@ size_t getCurrentMemoryUsage()
 // ============================================================================
 // Input Reader
 // ============================================================================
-vector<vector<int>> input(const string &filename, int &distinctVertices)
+vector<vector<int>> readInput(const string &filename, int &distinctVertices)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -133,31 +139,28 @@ vector<vector<int>> input(const string &filename, int &distinctVertices)
 }
 
 // ============================================================================
-// Utility: Format Bytes Nicely
+// Utility
 // ============================================================================
 string formatBytes(size_t bytes)
 {
     const char *units[] = {"B", "KB", "MB", "GB"};
     int unitIndex = 0;
-    double size = bytes;
-
+    double size = (double)bytes;
     while (size >= 1024.0 && unitIndex < 3)
     {
         size /= 1024.0;
         unitIndex++;
     }
-
     ostringstream oss;
     oss << fixed << setprecision(2) << size << " " << units[unitIndex];
     return oss.str();
 }
 
-// helper: format current system time as HH:MM:SS
 static string currentTimeString()
 {
     auto now = std::chrono::system_clock::now();
     std::time_t t = std::chrono::system_clock::to_time_t(now);
-    std::tm tm;
+    std::tm tm{};
 #ifdef _WIN32
     localtime_s(&tm, &t);
 #else
@@ -169,578 +172,197 @@ static string currentTimeString()
 }
 
 // ============================================================================
-// Struct to Hold Benchmark Result
+// Per-run CSV record
+// One row per individual run (NOT an average), so we can resume correctly.
+// CSV columns:
+//   filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,timestamp
 // ============================================================================
-struct BenchmarkResult
+struct RunRecord
 {
     string filename;
+    int runIndex;
     int distinctVertices;
-    u128 totalTriang;                 // may exceed 64 bits
-    string triangStr;                 // decimal representation (for CSV/HTML)
-
-    // timing statistics (seconds)
-    double meanTime;
-    double medianTime;
-    double minTime;
-    double maxTime;
-    double stddevTime;
-
-    long double perTriangNs;          // mean per-triangulation
+    string triangStr;
+    double timeSeconds;
     size_t peakMemory;
     double memoryPerVertex;
 };
 
-// ---------------------------------------------------------------------------
-// CSV & HTML support helpers
-// ---------------------------------------------------------------------------
-
-// convert decimal string to u128
-static u128 parseU128(const string &s)
+static string csvPathForCategory(const string &category)
 {
-    u128 result = 0;
-    for (char c : s)
-    {
-        if (c >= '0' && c <= '9')
-            result = result * 10 + (u128)(c - '0');
-    }
-    return result;
+    return "results_" + category + ".csv";
 }
 
-// read existing results from CSV into results vector and processed set
-static void readPreviousResults(const string &csvName,
-                                vector<BenchmarkResult> &results,
-                                unordered_set<string> &processed)
+// Count how many runs are already recorded for a given filename in this
+// category's CSV. Returns 0 if the file/category CSV doesn't exist yet.
+static int countExistingRuns(const string &csvPath, const string &filename)
 {
-    ifstream in(csvName);
+    ifstream in(csvPath);
     if (!in.is_open())
-        return;
+        return 0;
+
     string line;
-    // skip header
-    if (!getline(in, line))
-        return;
+    if (!getline(in, line)) // header
+        return 0;
+
+    int count = 0;
     while (getline(in, line))
     {
         if (line.empty())
             continue;
-        // expected format:
-        // filename,vertices,triangulations,meanTime,medianTime,minTime,maxTime,stddevTime,perTriangNs,peakMemory,memoryPerVertex
         stringstream ss(line);
-        BenchmarkResult r;
         string field;
-        if (!getline(ss, r.filename, ','))
-            continue;
-        // avoid duplicate names in case the CSV already contained repeats
-        if (processed.find(r.filename) != processed.end())
-            continue;
-        if (!getline(ss, field, ','))
-            continue;
-        r.distinctVertices = stoi(field);
-        if (!getline(ss, r.triangStr, ','))
-            continue;
-        r.totalTriang = parseU128(r.triangStr);
-        if (!getline(ss, field, ','))
-            continue;
-        r.meanTime = stod(field);
-        if (!getline(ss, field, ','))
-            continue;
-        r.medianTime = stod(field);
-        if (!getline(ss, field, ','))
-            continue;
-        r.minTime = stod(field);
-        if (!getline(ss, field, ','))
-            continue;
-        r.maxTime = stod(field);
-        if (!getline(ss, field, ','))
-            continue;
-        r.stddevTime = stod(field);
-        if (!getline(ss, field, ','))
-            continue;
-        r.perTriangNs = stold(field);
-        if (!getline(ss, field, ','))
-            continue;
-        r.peakMemory = stoull(field);
-        if (!getline(ss, field, ','))
-            continue;
-        r.memoryPerVertex = stod(field);
-        results.push_back(r);
-        processed.insert(r.filename);
+        getline(ss, field, ','); // filename
+        if (field == filename)
+            count++;
     }
+    return count;
 }
 
-// append a single result to CSV (creates file + header if missing)
-// This function is now used to write each file's results immediately
-// rather than waiting to rewrite the entire CSV at the end.
-static void appendResultCSV(const string &csvName, const BenchmarkResult &r)
+static void appendRunCSV(const string &csvPath, const RunRecord &r)
 {
-    bool needHeader = !fs::exists(csvName);
-    ofstream out(csvName, ios::app);
+    bool needHeader = !fs::exists(csvPath);
+    ofstream out(csvPath, ios::app);
     if (!out.is_open())
+    {
+        cerr << "Error: could not open " << csvPath << " for writing\n";
         return;
+    }
     if (needHeader)
     {
-        out << "filename,vertices,triangulations,meanTime,medianTime,minTime,maxTime,stddevTime,perTriangNs,peakMemory,memoryPerVertex\n";
+        out << "filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,timestamp\n";
     }
-    out << r.filename << ',' << r.distinctVertices << ',' << r.triangStr << ','
-        << fixed << setprecision(9) << r.meanTime << ','
-        << fixed << setprecision(9) << r.medianTime << ','
-        << fixed << setprecision(9) << r.minTime << ','
-        << fixed << setprecision(9) << r.maxTime << ','
-        << fixed << setprecision(9) << r.stddevTime << ','
-        << fixed << setprecision(0) << (double)r.perTriangNs << ','
-        << r.peakMemory << ',' << fixed << setprecision(6) << r.memoryPerVertex << '\n';
+    out << r.filename << ',' << r.runIndex << ',' << r.distinctVertices << ','
+        << r.triangStr << ',' << fixed << setprecision(9) << r.timeSeconds << ','
+        << r.peakMemory << ',' << fixed << setprecision(6) << r.memoryPerVertex << ','
+        << currentTimeString() << '\n';
 }
-
-// rewrite CSV entirely with sorted results
-static void writeAllResultsCSV(const string &csvName, const vector<BenchmarkResult> &results)
-{
-    vector<BenchmarkResult> sorted = results;
-    sort(sorted.begin(), sorted.end(), [](const BenchmarkResult &a, const BenchmarkResult &b) {
-        return a.filename < b.filename;
-    });
-    ofstream out(csvName);
-    if (!out.is_open())
-        return;
-    out << "filename,vertices,triangulations,meanTime,medianTime,minTime,maxTime,stddevTime,perTriangNs,peakMemory,memoryPerVertex\n";
-    for (const auto &r : sorted)
-    {
-        out << r.filename << ',' << r.distinctVertices << ',' << r.triangStr << ','
-            << fixed << setprecision(9) << r.meanTime << ','
-            << fixed << setprecision(9) << r.medianTime << ','
-            << fixed << setprecision(9) << r.minTime << ','
-            << fixed << setprecision(9) << r.maxTime << ','
-            << fixed << setprecision(9) << r.stddevTime << ','
-            << fixed << setprecision(0) << (double)r.perTriangNs << ','
-            << r.peakMemory << ',' << fixed << setprecision(6) << r.memoryPerVertex << '\n';
-    }
-}
-
-// generate a simple HTML report with charts using Chart.js
-static void generateHtml(const string &htmlName, const vector<BenchmarkResult> &results)
-{
-    ofstream out(htmlName);
-    if (!out.is_open())
-        return;
-    // build comma-separated arrays for JavaScript
-    string labels, verts;
-    string meanTimes, medianTimes, minTimes;
-    string perMean, perMedian, perMin;
-    for (size_t i = 0; i < results.size(); ++i)
-    {
-        string fn = results[i].filename;
-        for (char &c : fn)
-            if (c == '"')
-                c = '\'';
-        labels += '"' + fn + '"';
-        verts += to_string(results[i].distinctVertices);
-        meanTimes += to_string(results[i].meanTime);
-        medianTimes += to_string(results[i].medianTime);
-        minTimes += to_string(results[i].minTime);
-        // per-triang values (mean used earlier)
-        long double meanNs = results[i].perTriangNs; // already mean
-        long double medNs = (results[i].medianTime / (long double)results[i].distinctVertices) * 1e9L; // approximate
-        long double minNs = (results[i].minTime / (long double)results[i].distinctVertices) * 1e9L;
-        perMean += to_string((double)meanNs);
-        perMedian += to_string((double)medNs);
-        perMin += to_string((double)minNs);
-        if (i + 1 < results.size())
-        {
-            labels += ',';
-            verts += ',';
-            meanTimes += ',';
-            medianTimes += ',';
-            minTimes += ',';
-            perMean += ',';
-            perMedian += ',';
-            perMin += ',';
-        }
-    }
-    out << "<!DOCTYPE html>\n<html><head><meta charset=\"utf-8\">\n";
-    out << "<title>Triangulation Benchmark</title>\n";
-    out << "<script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>\n";
-    out << "</head><body>\n";
-    out << "<h1>Benchmark Charts</h1>\n";
-    out << "<canvas id=\"timeChart\" width=\"800\" height=\"400\"></canvas>\n";
-    out << "<canvas id=\"memChart\" width=\"800\" height=\"400\"></canvas>\n";
-    out << "<canvas id=\"vertChart\" width=\"800\" height=\"400\"></canvas>\n";
-    out << "<h2>PNG summaries</h2>\n";
-    out << "<p><img src=\"graphs/avg_per_triangulation_mean.png\" width=\"600\"></p>\n";
-    out << "<p><img src=\"graphs/avg_per_triangulation_median.png\" width=\"600\"></p>\n";
-    out << "<p><img src=\"graphs/avg_per_triangulation_min.png\" width=\"600\"></p>\n";
-    out << "<p><img src=\"graphs/total_time_vs_triangulations_mean_error.png\" width=\"600\"></p>\n";
-    out << "<p><img src=\"graphs/total_time_vs_triangulations_median.png\" width=\"600\"></p>\n";
-    out << "<p><img src=\"graphs/total_time_vs_triangulations_min.png\" width=\"600\"></p>\n";
-    out << "<p><img src=\"graphs/total_time_vs_triangulations_max.png\" width=\"600\"></p>\n";
-    out << "<p><img src=\"graphs/total_time_vs_triangulations_global_range.png\" width=\"600\"></p>\n";
-    out << "<p><img src=\"graphs/total_time_vs_triangulations_smoothed.png\" width=\"600\"></p>\n";
-    out << "<script>\n";
-    out << "const labels = [" << labels << "];\n";
-    out << "const meanData = {labels: labels, datasets:[{label:'mean time (s)',data:[" << meanTimes << "],borderColor:'blue',fill:false}]};\n";
-    out << "const medData = {labels: labels, datasets:[{label:'median time (s)',data:[" << medianTimes << "],borderColor:'orange',fill:false}]};\n";
-    out << "const minData = {labels: labels, datasets:[{label:'min time (s)',data:[" << minTimes << "],borderColor:'green',fill:false}]};\n";
-    out << "const perMeanData = {labels: labels, datasets:[{label:'mean ns/triang',data:[" << perMean << "],borderColor:'blue',fill:false}]};\n";
-    out << "const perMedData = {labels: labels, datasets:[{label:'median ns/triang',data:[" << perMedian << "],borderColor:'orange',fill:false}]};\n";
-    out << "const perMinData = {labels: labels, datasets:[{label:'min ns/triang',data:[" << perMin << "],borderColor:'green',fill:false}]};\n";
-    out << "const vertData = {labels: labels, datasets:[{label:'vertices',data:[" << verts << "],borderColor:'gray',fill:false}]};\n";
-    out << "new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:meanData,options:{responsive:true,plugins:{title:{display:true,text:'Mean time per file'}}}});\n";
-    out << "new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:medData,options:{responsive:true,plugins:{title:{display:true,text:'Median time per file'}}}});\n";
-    out << "new Chart(document.getElementById('timeChart').getContext('2d'),{type:'line',data:minData,options:{responsive:true,plugins:{title:{display:true,text:'Min time per file'}}}});\n";
-    out << "new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMeanData,options:{responsive:true,plugins:{title:{display:true,text:'Mean memory/vertex per file'}}}});\n";
-    out << "new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMedData,options:{responsive:true,plugins:{title:{display:true,text:'Median memory/vertex per file'}}}});\n";
-    out << "new Chart(document.getElementById('memChart').getContext('2d'),{type:'line',data:perMinData,options:{responsive:true,plugins:{title:{display:true,text:'Min memory/vertex per file'}}}});\n";
-    out << "new Chart(document.getElementById('vertChart').getContext('2d'),{type:'line',data:vertData,options:{responsive:true,plugins:{title:{display:true,text:'Vertices per file'}}}});\n";
-    out << "</script>\n";
-    out << "</body></html>\n";
-}
-
 
 // ============================================================================
-// Main Benchmark Function
+// Main
 // ============================================================================
 int main()
 {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    // open output file for results
-    std::ofstream resFile("results.txt");
-    if (!resFile.is_open())
+    if (!fs::exists(INPUT_ROOT) || !fs::is_directory(INPUT_ROOT))
     {
-        cerr << "Error: could not create results.txt\n";
+        cerr << "Input folder '" << INPUT_ROOT << "' does not exist.\n";
         return 1;
     }
 
-    // create a streambuf that duplicates writes to both cout and the file
-    struct tee_buf : std::streambuf
+    // discover categories = subfolders of INPUT_ROOT
+    vector<string> categories;
+    for (const auto &entry : fs::directory_iterator(INPUT_ROOT))
     {
-        std::streambuf *sb1, *sb2;
-        tee_buf(std::streambuf *s1, std::streambuf *s2) : sb1(s1), sb2(s2) {}
-        int overflow(int c) override
-        {
-            if (c == EOF)
-                return !EOF;
-            // write to both streams; ignore file errors
-            int r1 = sb1->sputc(c);
-            sb2->sputc(c);
-            return (r1 == EOF) ? EOF : c;
-        }
-        int sync() override
-        {
-            int r1 = sb1->pubsync();
-            int r2 = sb2->pubsync();
-            return (r1 == 0 && r2 == 0) ? 0 : -1;
-        }
-    } tbuf(cout.rdbuf(), resFile.rdbuf());
+        if (entry.is_directory())
+            categories.push_back(entry.path().filename().string());
+    }
+    sort(categories.begin(), categories.end());
 
-    // use a separate ostream so we don't disturb std::cout's buffer
-    std::ostream out(&tbuf);
+    if (categories.empty())
+    {
+        cerr << "No category subfolders found under '" << INPUT_ROOT << "'.\n";
+        return 1;
+    }
 
+    cout << "\n";
+    cout << "================================================================\n";
+    cout << "   TRIANGULATION BENCHMARK - per-category, resumable per-run   \n";
+    cout << "   Target runs per case: " << RUNS_PER_CASE << "\n";
+    cout << "================================================================\n";
 
-    // Define the folders and run counts
-    struct FolderGroup {
-        string folder;
-        int runs;
-        string label;
-    };
-    vector<FolderGroup> groups = {
-        {"input/small", 10, "small"},
-        {"input/medium", 3, "medium"},
-        {"input/big", 1, "big"}
-    };
+    for (const auto &category : categories)
+    {
+        string categoryFolder = INPUT_ROOT + "/" + category;
+        string csvPath = csvPathForCategory(category);
 
-    vector<BenchmarkResult> results;
-    unordered_set<string> processed;
-    readPreviousResults("results.csv", results, processed);
-
-    out << "\n";
-    out << "╔════════════════════════════════════════════════════════════════════════════╗\n";
-    out << "║          TRIANGULATION BENCHMARK - Time & Space Complexity Analysis       ║\n";
-    out << "╚════════════════════════════════════════════════════════════════════════════╝\n";
-
-    for (const auto& group : groups) {
-        string folder = group.folder;
-        int testRuns = group.runs;
-        out << "\nScanning folder: " << folder << "\n";
-        out << "Test runs per file: " << testRuns << "\n\n";
-
-        if (!fs::exists(folder) || !fs::is_directory(folder)) {
-            cerr << "Folder '" << folder << "' does not exist or is not a directory.\n";
-            continue;
-        }
+        cout << "\n--- Category: " << category << " (CSV: " << csvPath << ") ---\n";
 
         vector<string> fileList;
-        for (const auto &entry : fs::directory_iterator(folder)) {
-            if (!entry.is_regular_file())
-                continue;
-            fileList.push_back(entry.path().filename().string());
+        for (const auto &entry : fs::directory_iterator(categoryFolder))
+        {
+            if (entry.is_regular_file())
+                fileList.push_back(entry.path().filename().string());
         }
         sort(fileList.begin(), fileList.end());
 
-        for (const auto &filename : fileList) {
-            string fullpath = folder + "/" + filename;
+        for (const auto &filename : fileList)
+        {
+            string fullPath = categoryFolder + "/" + filename;
 
-            if (processed.find(filename) != processed.end()) {
-                out << "⇢ Skipping already-processed file: " << filename << "\n";
+            int alreadyDone = countExistingRuns(csvPath, filename);
+            if (alreadyDone >= RUNS_PER_CASE)
+            {
+                cout << "  Skipping " << filename << " (already has " << alreadyDone
+                     << "/" << RUNS_PER_CASE << " runs)\n";
                 continue;
             }
 
-            out << "⏳ Processing: " << filename << " ... " << flush;
+            int remaining = RUNS_PER_CASE - alreadyDone;
+            cout << "  " << filename << ": " << alreadyDone << "/" << RUNS_PER_CASE
+                 << " runs done, performing " << remaining << " more...\n";
 
             int distinctVertices = 0;
-            vector<vector<int>> faces = input(fullpath, distinctVertices);
-
-            if (faces.empty()) {
-                cerr << "\n⚠️  Warning: Skipping empty or invalid file: " << filename << endl;
+            vector<vector<int>> faces = readInput(fullPath, distinctVertices);
+            if (faces.empty())
+            {
+                cerr << "  Warning: skipping empty/invalid file: " << filename << "\n";
                 continue;
             }
 
-            u128 totalTriang = 0;
-            long double totalTimeSum = 0.0L;
-            size_t peakMemory = 0;
-            vector<double> times;
-            // ...existing code...
-            // (The rest of the benchmarking loop remains unchanged)
-
-        // warm-up run (populate caches, discard result)
-        // only do this when performing multiple test runs – for a single
-        // run the warm-up just doubles the runtime without benefit.
-        if (testRuns > 1) {
-            out << "    warm-up run start (this may take a while)" << "\n" << flush;
-            biconnected *warm = new biconnected(faces);
-            warm->getAllTriangulations();
-            delete warm;
-            out << "    warm-up run complete" << "\n" << flush;
-        }
-
-        for (int run = 1; run <= testRuns; run++)
-        {
-            string startStr = currentTimeString();
-            out << "    run " << run << " start: " << startStr << "\n" << flush;
-            size_t memBefore = getCurrentMemoryUsage();
-
-            // instantiate and start timing immediately so large inputs still
-            // show progress before computation begins
-            biconnected *bc = new biconnected(faces);
-
-            using clock = std::chrono::steady_clock;
-            auto start = clock::now();
-            bc->getAllTriangulations();
-            auto end = clock::now();
-
-            string endStr = currentTimeString();
-            out << "    run " << run << " end:   " << endStr << "\n" << flush;
-
-            size_t memAfter = getCurrentMemoryUsage();
-            size_t memUsed = (memAfter > memBefore) ? (memAfter - memBefore) : 0;
-
-            auto dur_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            // compute and store run duration
-            double runSec = (double)dur_ns / 1'000'000'000.0;
-            times.push_back(runSec);
-            out << "    run " << run << " dur:   " << fixed << setprecision(6) << runSec << " s\n" << flush;
-            peakMemory = max(peakMemory, memUsed);
-
-            totalTimeSum += (long double)dur_ns / 1'000'000'000.0L;
-            totalTriang = bc->totalTriangulations;
-
-            delete bc;
-        }
-
-        // compute statistical metrics
-        double meanTime = (double)(totalTimeSum / testRuns);
-        double minTime = DBL_MAX, maxTime = 0.0;
-        for (double t : times)
-        {
-            if (t < minTime)
-                minTime = t;
-            if (t > maxTime)
-                maxTime = t;
-        }
-        double medianTime = 0.0;
-        if (!times.empty())
-        {
-            sort(times.begin(), times.end());
-            int mid = times.size() / 2;
-            if (times.size() % 2 == 1)
-                medianTime = times[mid];
-            else
-                medianTime = (times[mid - 1] + times[mid]) / 2.0;
-        }
-        double sumsq = 0.0;
-        for (double t : times)
-            sumsq += (t - meanTime) * (t - meanTime);
-        double stddevTime = (times.size() > 1) ? sqrt(sumsq / (times.size() - 1)) : 0.0;
-
-        long double meanTimeNs = (long double)meanTime * 1'000'000'000.0L;
-        long double perTriangNs = (totalTriang > 0) ? meanTimeNs / (long double)totalTriang : 0.0L;
-        double memoryPerVertex = (distinctVertices > 0) ? (double)peakMemory / distinctVertices : 0.0;
-
-        BenchmarkResult br;
-        br.filename = filename;
-        br.distinctVertices = distinctVertices;
-        br.totalTriang = totalTriang;
-        br.triangStr = u128_to_string(totalTriang);
-        br.meanTime = meanTime;
-        br.medianTime = medianTime;
-        br.minTime = (times.empty() ? 0.0 : minTime);
-        br.maxTime = maxTime;
-        br.stddevTime = stddevTime;
-        br.perTriangNs = perTriangNs;
-        br.peakMemory = peakMemory;
-        br.memoryPerVertex = memoryPerVertex;
-
-        results.push_back(br);
-        processed.insert(filename);
-        // immediately record the new benchmark result in the CSV file
-        // so that partial progress is saved even if the program is interrupted
-        appendResultCSV("results.csv", br);
-
-        // print completion with timing and triangulation count
-        out << "✓ (" << br.triangStr << " triang, " << fixed << setprecision(6) << br.meanTime << " s)\n";
-    }
-
-    // ========================================================================
-    // PRINT RESULTS TABLE
-    // ========================================================================
-    out << "\n";
-    out << "╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗\n";
-    out << "║                                                    BENCHMARK RESULTS                                                               ║\n";
-    out << "╠═══════════════════════════╦════════════╦═════════════════╦══════════════╦═══════════════╦═════════════════╦════════════════════════╣\n";
-    out << "║ " << "\033[1m" << left << setw(25) << "File"
-         << "\033[0m║ " << "\033[1m" << right << setw(10) << "Vertices"
-         << "\033[0m║ " << "\033[1m" << right << setw(20) << "Triangulations"
-         << "\033[0m║ " << "\033[1m" << right << setw(12) << "Time (s)"
-         << "\033[0m║ " << "\033[1m" << right << setw(16) << "ns/Triang"
-         << "\033[0m║ " << "\033[1m" << right << setw(15) << "Peak Memory"
-         << "\033[0m║ " << "\033[1m" << right << setw(22) << "Memory/Vertex"
-         << "\033[0m║\n";
-    out << "╠═══════════════════════════╬════════════╬═════════════════╬══════════════╬═══════════════╬═════════════════╬════════════════════════╣\n";
-
-    for (size_t i = 0; i < results.size(); i++)
-    {
-        const auto &r = results[i];
-
-        string timeColor = r.meanTime < 0.1 ? "\033[32m" : // Green: fast
-                               r.meanTime < 1.0 ? "\033[33m"
-                                               : "\033[31m"; // Red: slow
-
-        string memColor = r.memoryPerVertex < 1024 ? "\033[32m" : // < 1KB/vertex
-                              r.memoryPerVertex < 10240 ? "\033[33m"
-                                                        : // < 10KB/vertex
-                              "\033[31m";                 // >= 10KB/vertex
-
-        string triStr = u128_to_string(r.totalTriang);
-        out << "║ " << left << setw(25) << r.filename.substr(0, 25)
-             << "║ " << right << setw(10) << r.distinctVertices
-             << "║ " << right << setw(20) << triStr
-             << "║ " << timeColor << right << setw(12) << fixed << setprecision(6) << r.meanTime << "\033[0m"
-             << "║ " << right << setw(16) << scientific << setprecision(4) << (double)r.perTriangNs << "\033[0m"
-             << "║ " << memColor << right << setw(15) << formatBytes(r.peakMemory) << "\033[0m"
-             << "║ " << memColor << right << setw(22) << formatBytes((size_t)r.memoryPerVertex) << "\033[0m"
-             << "║\n";
-    }
-
-    out << "╚═══════════════════════════╩════════════╩═════════════════╩══════════════╩═══════════════╩═════════════════╩════════════════════════╝\n";
-
-    // ========================================================================
-    // COMPLEXITY ANALYSIS
-    // ========================================================================
-    out << "\n";
-    out << "╔════════════════════════════════════════════════════════════════════════════╗\n";
-    out << "║                         COMPLEXITY ANALYSIS                                ║\n";
-    out << "╠════════════════════════════════════════════════════════════════════════════╣\n";
-    out << "║  Time Complexity:  Varies with triangulation count (see ns/Triang)        ║\n";
-    out << "║  Space Complexity: O(n) where n = number of vertices                      ║\n";
-    out << "║                    (measured precisely via RSS at byte-level)             ║\n";
-    out << "╠════════════════════════════════════════════════════════════════════════════╣\n";
-    out << "║  Color Legend:                                                             ║\n";
-    out << "║    \033[32m● Green\033[0m  = Excellent performance                                         ║\n";
-    out << "║    \033[33m● Yellow\033[0m = Moderate performance                                          ║\n";
-    out << "║    \033[31m● Red\033[0m    = High resource usage                                           ║\n";
-    out << "╚════════════════════════════════════════════════════════════════════════════╝\n";
-    out << "\nNote: Results averaged over " << testRuns << " runs per file.\n";
-    out << "      Memory measured at byte precision (using /proc/self/smaps_rollup where available).\n";
-
-    // optional: rewrite entire CSV in alphabetical order
-    // (individual results have already been appended above).
-    // writeAllResultsCSV("results.csv", results);
-
-    // generate interactive HTML summary
-    generateHtml("results.html", results);
-    out << "\n(see results.html for charts)\n";
-    out << "Data has been recorded in results.csv and an interactive report is available in results.html\n";
-    out << "Attempting to create PNG plots (requires Python with pandas/matplotlib)...\n";
-    // run external Python script if present
-    if (fs::exists("plot_results.py"))
-    {
-        // run python script and capture its stdout
-        FILE *pipe = popen("python3 plot_results.py results.csv 2>&1", "r");
-        if (!pipe)
-        {
-            out << "  (failed to launch plotting script)\n";
-        }
-        else
-        {
-            char buf[256];
-            while (fgets(buf, sizeof(buf), pipe))
+            // warm-up run once per file if we're about to do more than one run
+            // overall (helps avoid first-run cache effects skewing results)
+            if (RUNS_PER_CASE > 1 && alreadyDone == 0)
             {
-                out << "  " << buf; // indent output
+                biconnected *warm = new biconnected(faces);
+                warm->getAllTriangulations();
+                delete warm;
             }
-            int status = pclose(pipe);
-            if (status != 0)
-                out << "  (plotting script exited with code " << status << ")\n";
-        }
-    }
-    else
-    {
-        out << "  (plot_results.py not found; no PNGs created)\n";
-    }
 
-    // Close the file stream associated with out, then clean ANSI codes from results.txt
-    resFile.close();
-    {
-        std::ifstream in("results.txt");
-        std::string content((std::istreambuf_iterator<char>(in)), {});
-        in.close();
+            for (int localRun = 1; localRun <= remaining; localRun++)
+            {
+                int globalRunIndex = alreadyDone + localRun;
 
-        std::string cleaned;
-        cleaned.reserve(content.size());
-        bool esc = false;
-        for (char ch : content)
-        {
-            if (!esc)
-            {
-                if (ch == '\033')
-                {
-                    esc = true;
-                }
-                else
-                {
-                    cleaned.push_back(ch);
-                }
-            }
-            else
-            {
-                // already in escape; skip until we hit a terminating byte
-                // CSI sequences begin with '['; treat it as part of the escape,
-                // not as a terminator.
-                if (ch == '[')
-                {
-                    // stay in escape
-                }
-                else if (ch >= '@' && ch <= '~')
-                {
-                    // final byte reached, end escape state
-                    esc = false;
-                }
-                // otherwise keep skipping characters inside escape
+                size_t memBefore = getCurrentMemoryUsage();
+
+                biconnected *bc = new biconnected(faces);
+
+                using clock = std::chrono::steady_clock;
+                auto start = clock::now();
+                bc->getAllTriangulations();
+                auto end = clock::now();
+
+                size_t memAfter = getCurrentMemoryUsage();
+                size_t memUsed = (memAfter > memBefore) ? (memAfter - memBefore) : 0;
+
+                auto dur_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+                double runSec = (double)dur_ns / 1'000'000'000.0;
+
+                u128 totalTriang = bc->totalTriangulations;
+                double memoryPerVertex = (distinctVertices > 0) ? (double)memUsed / distinctVertices : 0.0;
+
+                cout << "    run " << globalRunIndex << "/" << RUNS_PER_CASE
+                     << " -> " << fixed << setprecision(6) << runSec << " s, "
+                     << formatBytes(memUsed) << "\n";
+
+                RunRecord rec;
+                rec.filename = filename;
+                rec.runIndex = globalRunIndex;
+                rec.distinctVertices = distinctVertices;
+                rec.triangStr = u128_to_string(totalTriang);
+                rec.timeSeconds = runSec;
+                rec.peakMemory = memUsed;
+                rec.memoryPerVertex = memoryPerVertex;
+
+                appendRunCSV(csvPath, rec);
+
+                delete bc;
             }
         }
-        std::ofstream out("results.txt");
-        out << cleaned;
     }
 
-    // end of outer group loop
-    }
-
+    cout << "\nAll categories processed. Per-category CSVs contain one row per individual run.\n";
     return 0;
 }
