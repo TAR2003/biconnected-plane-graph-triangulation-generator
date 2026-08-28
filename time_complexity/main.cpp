@@ -12,16 +12,13 @@ namespace fs = std::filesystem;
 
 // ============================================================================
 // CONFIG: how many timing runs every single test case should have.
-// If a case already has some runs recorded in its category CSV, only the
-// remaining runs (RUNS_PER_CASE - alreadyDone) are performed.
 // ============================================================================
 static const int RUNS_PER_CASE = 5;
 
-// The root folder containing one subfolder per category. Add more category
-// folders under this root and they'll be picked up automatically.
+// The root folder containing one subfolder per category.
 static const string INPUT_ROOT = "input";
 
-// helper to convert 128-bit numbers to string (decimal)
+// Helper to convert 128-bit numbers to string (decimal)
 static string u128_to_string(u128 x)
 {
     if (x == 0)
@@ -35,6 +32,22 @@ static string u128_to_string(u128 x)
     }
     reverse(s.begin(), s.end());
     return s;
+}
+
+// Helper to format numbers like 1st, 2nd, 3rd, 4th, 5th, etc.
+static string getOrdinal(int n)
+{
+    int tens = (n / 10) % 10;
+    if (tens == 1)
+        return to_string(n) + "th";
+    int ones = n % 10;
+    if (ones == 1)
+        return to_string(n) + "st";
+    if (ones == 2)
+        return to_string(n) + "nd";
+    if (ones == 3)
+        return to_string(n) + "rd";
+    return to_string(n) + "th";
 }
 
 // ============================================================================
@@ -65,7 +78,6 @@ size_t getCurrentMemoryUsage()
 #include <unistd.h>
 size_t getCurrentMemoryUsage()
 {
-    // Try the more accurate /proc/self/smaps_rollup (available since Linux 4.14)
     std::ifstream smaps("/proc/self/smaps_rollup");
     if (smaps.is_open())
     {
@@ -88,7 +100,6 @@ size_t getCurrentMemoryUsage()
             return rssBytes;
     }
 
-    // Fallback: statm (page-based, lower precision)
     long rss = 0L;
     FILE *fp = fopen("/proc/self/statm", "r");
     if (fp)
@@ -173,9 +184,6 @@ static string currentTimeString()
 
 // ============================================================================
 // Per-run CSV record
-// One row per individual run (NOT an average), so we can resume correctly.
-// CSV columns:
-//   filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,timestamp
 // ============================================================================
 struct RunRecord
 {
@@ -193,8 +201,6 @@ static string csvPathForCategory(const string &category)
     return "results_" + category + ".csv";
 }
 
-// Count how many runs are already recorded for a given filename in this
-// category's CSV. Returns 0 if the file/category CSV doesn't exist yet.
 static int countExistingRuns(const string &csvPath, const string &filename)
 {
     ifstream in(csvPath);
@@ -239,10 +245,8 @@ static void appendRunCSV(const string &csvPath, const RunRecord &r)
 }
 
 // ============================================================================
-// Category indices (for the command-line argument) are assigned in
-// alphabetical order, 1-based: 1st category alphabetically = "1", etc.
+// Run Category
 // ============================================================================
-
 static void printUsage(const vector<string> &categories, const char *progName)
 {
     cerr << "Usage: " << progName << " <category-index|all>\n\n";
@@ -276,35 +280,39 @@ static void runCategory(const string &category)
         int alreadyDone = countExistingRuns(csvPath, filename);
         if (alreadyDone >= RUNS_PER_CASE)
         {
-            cout << "  Skipping " << filename << " (already has " << alreadyDone
-                 << "/" << RUNS_PER_CASE << " runs)\n";
+            cout << "  " << filename << ": Found " << alreadyDone << " run(s) in CSV. Already complete ("
+                 << RUNS_PER_CASE << "/" << RUNS_PER_CASE << "), skipping.\n";
             continue;
         }
 
         int remaining = RUNS_PER_CASE - alreadyDone;
-        cout << "  " << filename << ": " << alreadyDone << "/" << RUNS_PER_CASE
-             << " runs done, performing " << remaining << " more...\n";
+        cout << "  " << filename << ": Found " << alreadyDone << " run(s) in CSV. Need "
+             << remaining << " more run(s).\n";
 
         int distinctVertices = 0;
         vector<vector<int>> faces = readInput(fullPath, distinctVertices);
         if (faces.empty())
         {
-            cerr << "  Warning: skipping empty/invalid file: " << filename << "\n";
+            cerr << "    Warning: skipping empty/invalid file: " << filename << "\n";
             continue;
         }
 
-        // warm-up run once per file if we're about to do more than one run
-        // overall (helps avoid first-run cache effects skewing results)
+        // warm-up run
         if (RUNS_PER_CASE > 1 && alreadyDone == 0)
         {
+            cout << "    Executing warm-up run..." << flush;
             biconnected *warm = new biconnected(faces);
             warm->getAllTriangulations();
             delete warm;
+            cout << " done.\n";
         }
 
         for (int localRun = 1; localRun <= remaining; localRun++)
         {
             int globalRunIndex = alreadyDone + localRun;
+
+            // Print status BEFORE execution starts
+            cout << "    Running " << getOrdinal(globalRunIndex) << " run..." << flush;
 
             size_t memBefore = getCurrentMemoryUsage();
 
@@ -324,8 +332,8 @@ static void runCategory(const string &category)
             u128 totalTriang = bc->totalTriangulations;
             double memoryPerVertex = (distinctVertices > 0) ? (double)memUsed / distinctVertices : 0.0;
 
-            cout << "    run " << globalRunIndex << "/" << RUNS_PER_CASE
-                 << " -> " << fixed << setprecision(6) << runSec << " s, "
+            // Print timing results AFTER execution completes
+            cout << " done -> " << fixed << setprecision(6) << runSec << " s, "
                  << formatBytes(memUsed) << "\n";
 
             RunRecord rec;
@@ -358,7 +366,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // discover categories = subfolders of INPUT_ROOT, alphabetically sorted
     vector<string> categories;
     for (const auto &entry : fs::directory_iterator(INPUT_ROOT))
     {
@@ -373,9 +380,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // ------------------------------------------------------------------
-    // Parse command-line argument
-    // ------------------------------------------------------------------
     if (argc < 2)
     {
         printUsage(categories, argv[0]);
