@@ -5,6 +5,7 @@ using namespace std;
 #include "FaceTriangulation.hpp"
 #include "biconnected.hpp"
 #include "triconnected.hpp"
+#include "TaskAborted.hpp"
 
 #include <filesystem>
 #include <thread>
@@ -20,7 +21,43 @@ namespace fs = std::filesystem;
 static const size_t MAX_DISK_BYTES = 1000ULL * 1024ULL * 1024ULL; // 1 GB limit
 
 // ============================================================================
+// RAII guard: guarantees every registered temp file is removed when the
+// guard goes out of scope, regardless of how the enclosing function exits
+// (normal return, early return, or exception). Register a filename as soon
+// as it is decided, before any writing starts, so no exit path can skip
+// cleanup.
+// ============================================================================
+struct ScopedTempFiles
+{
+    vector<string> files;
+
+    void add(const string &f) { files.push_back(f); }
+
+    // Remove now (used once results have been safely captured, e.g. after a
+    // successful comparison) so the destructor has nothing left to do.
+    void removeAll()
+    {
+        for (auto &f : files)
+        {
+            error_code ec;
+            fs::remove(f, ec);
+        }
+        files.clear();
+    }
+
+    ~ScopedTempFiles()
+    {
+        removeAll();
+    }
+};
+
+// ============================================================================
 // Disk Monitor (Asynchronous Watchdog Thread)
+// Now cooperates with an external atomic<bool> abort flag: as soon as the
+// watched files exceed maxBytes, it flips the flag so that the *running*
+// triangulation write loop (inside biconnected/triconnected) notices on its
+// own next check and throws TaskAbortedException, stopping the task
+// mid-flight instead of only being detected after it finishes.
 // ============================================================================
 class DiskMonitor
 {
@@ -29,11 +66,14 @@ class DiskMonitor
     thread worker;
 
 public:
-    void start(const vector<string> &filesToWatch, size_t maxBytes)
+    // sharedAbortFlag: set to true the moment the limit is exceeded, so the
+    // producer loop (biconnected::addTriangulation / triconnected DFS leaf)
+    // can bail out promptly. Must outlive the monitor thread.
+    void start(const vector<string> &filesToWatch, size_t maxBytes, atomic<bool> *sharedAbortFlag)
     {
         stopFlag = false;
         limitExceeded = false;
-        worker = thread([this, filesToWatch, maxBytes]()
+        worker = thread([this, filesToWatch, maxBytes, sharedAbortFlag]()
                         {
             while (!stopFlag)
             {
@@ -49,6 +89,8 @@ public:
                 if (totalBytes > maxBytes)
                 {
                     limitExceeded = true;
+                    if (sharedAbortFlag)
+                        sharedAbortFlag->store(true, memory_order_relaxed);
                     break;
                 }
                 this_thread::sleep_for(chrono::milliseconds(50));
@@ -116,7 +158,8 @@ struct TriangulationEntry
     }
 };
 
-static bool externalSortBinaryFile(const string &inputFile, const string &outputFile, size_t maxRAMEntries = 500000)
+static bool externalSortBinaryFile(const string &inputFile, const string &outputFile,
+                                   ScopedTempFiles &tempGuard, size_t maxRAMEntries = 500000)
 {
     ifstream in(inputFile, ios::binary);
     if (!in.is_open())
@@ -168,6 +211,7 @@ static bool externalSortBinaryFile(const string &inputFile, const string &output
         {
             sort(buffer.begin(), buffer.end());
             string cFileName = "temp_chunk_" + to_string(chunkIdx++) + ".bin";
+            tempGuard.add(cFileName); // register immediately, before writing
             if (!writeChunk(buffer, cFileName))
             {
                 diskExceeded = true;
@@ -191,6 +235,7 @@ static bool externalSortBinaryFile(const string &inputFile, const string &output
         else
         {
             string cFileName = "temp_chunk_" + to_string(chunkIdx++) + ".bin";
+            tempGuard.add(cFileName);
             if (!writeChunk(buffer, cFileName))
                 diskExceeded = true;
             else
@@ -202,8 +247,8 @@ static bool externalSortBinaryFile(const string &inputFile, const string &output
 
     if (diskExceeded)
     {
-        for (const auto &file : chunkFiles)
-            fs::remove(file);
+        // tempGuard destructor will remove chunkFiles (and any not-yet-added
+        // ones already registered); nothing else to do here.
         return false;
     }
 
@@ -278,8 +323,9 @@ static bool externalSortBinaryFile(const string &inputFile, const string &output
     for (size_t i = 0; i < chunkFiles.size(); i++)
     {
         streams[i].close();
-        fs::remove(chunkFiles[i]);
     }
+    // chunkFiles are removed via tempGuard (registered above), whether this
+    // succeeded or diskExceeded is true.
 
     return !diskExceeded;
 }
@@ -324,68 +370,110 @@ bool compareTriangulationFiles(const string &file1, const string &file2, size_t 
 }
 
 // Returns: 1 = matched, 0 = mismatched, -1 = error, -2 = limit exceeded
+// Every temp file this function creates is registered with ScopedTempFiles
+// the moment its name is decided, BEFORE any writing begins. That guard's
+// destructor removes them unconditionally on every exit path: normal
+// return, early return, or an exception (including TaskAbortedException
+// thrown mid-write from inside biconnected/triconnected when the disk
+// monitor trips the shared abort flag).
 int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCount)
 {
+    newCount = oldCount = 0;
+
     vector<vector<int>> faces = solve(filename);
     if (faces.empty())
     {
-        newCount = oldCount = 0;
         return -1;
     }
 
-    string fileBC_raw = "temp_bc_raw.bin";
-    string fileBC_sorted = "temp_bc_sorted.bin";
-    string fileTC_sorted = "temp_tc_sorted.bin";
+    ScopedTempFiles tempGuard;
 
+    const string fileBC_raw = "temp_bc_raw.bin";
+    const string fileBC_sorted = "temp_bc_sorted.bin";
+    const string fileTC_sorted = "temp_tc_sorted.bin";
+
+    // Register all three up front — before any of them exist on disk — so
+    // that no matter where we stop below (return, break, or throw) the
+    // destructor cleans up whichever of them got created.
+    tempGuard.add(fileBC_raw);
+    tempGuard.add(fileBC_sorted);
+    tempGuard.add(fileTC_sorted);
+
+    atomic<bool> abortFlag{false};
     DiskMonitor monitor;
 
-    // --- Phase 1: Biconnected Run ---
-    biconnected *bc = new biconnected(faces);
-    monitor.start({fileBC_raw}, MAX_DISK_BYTES);
-    bc->getAllTriangulationsToFile(fileBC_raw);
-    bool limitHit = monitor.stop();
-    newCount = bc->totalCount;
-    delete bc;
-
-    if (limitHit)
+    try
     {
-        fs::remove(fileBC_raw);
-        return -2;
-    }
+        // --- Phase 1: Biconnected Run ---
+        {
+            biconnected bc(faces);
+            monitor.start({fileBC_raw}, MAX_DISK_BYTES, &abortFlag);
+            bool taskAborted = false;
+            try
+            {
+                bc.getAllTriangulationsToFile(fileBC_raw, &abortFlag);
+            }
+            catch (const TaskAbortedException &)
+            {
+                taskAborted = true;
+            }
+            monitor.stop();
+            newCount = bc.totalCount;
 
-    // --- Phase 2: External Sorting ---
-    if (!externalSortBinaryFile(fileBC_raw, fileBC_sorted))
+            if (taskAborted || monitor.hasExceeded())
+                return -2; // tempGuard cleans up fileBC_raw
+        }
+
+        // --- Phase 2: External Sorting ---
+        if (!externalSortBinaryFile(fileBC_raw, fileBC_sorted, tempGuard))
+        {
+            return -2; // tempGuard cleans up everything registered so far
+        }
+
+        // --- Phase 3: Triconnected Run ---
+        {
+            triconnected tc(faces);
+            tc.getAllTriangulations();
+
+            monitor.start({fileBC_sorted, fileTC_sorted}, MAX_DISK_BYTES, &abortFlag);
+            bool taskAborted = false;
+            try
+            {
+                tc.refineTriangulationsToFile(fileTC_sorted, &abortFlag);
+            }
+            catch (const TaskAbortedException &)
+            {
+                taskAborted = true;
+            }
+            monitor.stop();
+            oldCount = tc.totalCount;
+
+            if (taskAborted || monitor.hasExceeded())
+                return -2;
+        }
+
+        // --- Phase 4: Stream Comparison ---
+        bool result = compareTriangulationFiles(fileBC_sorted, fileTC_sorted, newCount, oldCount);
+
+        // Success or mismatch: either way we're done with the temp files.
+        tempGuard.removeAll();
+        return result ? 1 : 0;
+    }
+    catch (const std::exception &e)
     {
-        fs::remove(fileBC_raw);
-        fs::remove(fileBC_sorted);
-        return -2;
+        // Any unexpected exception (bad_alloc, filesystem error, etc.) is
+        // treated as a plain error for this single test case; tempGuard
+        // still cleans up on unwind. The batch continues with the next file.
+        cerr << "    [exception] " << e.what() << "\n";
+        return -1;
     }
-    fs::remove(fileBC_raw);
-
-    // --- Phase 3: Triconnected Run ---
-    triconnected *tc = new triconnected(faces);
-    tc->getAllTriangulations();
-
-    monitor.start({fileBC_sorted, fileTC_sorted}, MAX_DISK_BYTES);
-    tc->refineTriangulationsToFile(fileTC_sorted);
-    limitHit = monitor.stop();
-    oldCount = tc->totalCount;
-    delete tc;
-
-    if (limitHit)
+    catch (...)
     {
-        fs::remove(fileBC_sorted);
-        fs::remove(fileTC_sorted);
-        return -2;
+        cerr << "    [unknown exception]\n";
+        return -1;
     }
-
-    // --- Phase 4: Stream Comparison ---
-    bool result = compareTriangulationFiles(fileBC_sorted, fileTC_sorted, newCount, oldCount);
-
-    fs::remove(fileBC_sorted);
-    fs::remove(fileTC_sorted);
-
-    return result ? 1 : 0;
+    // tempGuard destructor runs here on any path that didn't already call
+    // removeAll(), guaranteeing no leftover temp_*.bin files.
 }
 
 // ============================================================================
@@ -494,7 +582,27 @@ static Summary runCategory(const string &rootFolder, const string &category)
         cout << "  Processing: " << filename << " ... " << flush;
 
         size_t newCount = 0, oldCount = 0;
-        int result = matchTwoAlgorithms(fullPath, newCount, oldCount);
+        int result = -1;
+
+        // Second line of defense: matchTwoAlgorithms already catches its own
+        // exceptions, but this guarantees that even a bug we didn't
+        // anticipate (e.g. thrown before entering matchTwoAlgorithms' own
+        // try block) can never abort the whole batch — just this one file
+        // gets marked ERROR and we move on to the next test case.
+        try
+        {
+            result = matchTwoAlgorithms(fullPath, newCount, oldCount);
+        }
+        catch (const std::exception &e)
+        {
+            cerr << "\n    [unexpected top-level exception] " << e.what() << "\n";
+            result = -1;
+        }
+        catch (...)
+        {
+            cerr << "\n    [unexpected top-level unknown exception]\n";
+            result = -1;
+        }
 
         string resultStr;
         if (result == 1)
@@ -513,7 +621,7 @@ static Summary runCategory(const string &rootFolder, const string &category)
         {
             resultStr = "LIMIT_EXCEEDED";
             summ.limitExceeded++;
-            cout << "\033[1;35mLIMIT_EXCEEDED\033[0m (> " << (MAX_DISK_BYTES / (1024 * 1024)) << " MB limit)\n";
+            cout << "\033[1;35mLIMIT_EXCEEDED\033[0m (> " << (MAX_DISK_BYTES / (1024 * 1024)) << " MB limit, task stopped and temp files removed)\n";
         }
         else
         {

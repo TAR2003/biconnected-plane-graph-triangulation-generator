@@ -6,6 +6,7 @@ using namespace std;
 #include "pairHash.hpp"
 #include "FaceTriangulation.hpp"
 #include "ParvezRahmanNakano.hpp"
+#include "TaskAborted.hpp"
 
 class triconnected
 {
@@ -17,6 +18,15 @@ public:
 
     size_t totalCount = 0;
     ofstream *outStream = nullptr;
+
+    // Cooperative-cancellation support.
+    // Set by the caller (main.cpp) to a shared atomic<bool>* before calling
+    // refineTriangulationsToFile(). Checked periodically (every checkInterval
+    // writes) inside the DFS leaf so a runaway task can be stopped mid-flight
+    // instead of only being detected after it finishes.
+    atomic<bool> *abortFlag = nullptr;
+    size_t checkInterval = 256; // how many writes between abortFlag checks
+    size_t writesSinceCheck = 0;
 
     triconnected(vector<vector<int>> &faces)
     {
@@ -70,6 +80,21 @@ public:
         }
     }
 
+    // Checks the shared abort flag; throws if tripped. Called right before
+    // each disk write so we bail out promptly without writing more data.
+    inline void checkAbort()
+    {
+        if (!abortFlag)
+            return;
+        if (++writesSinceCheck < checkInterval)
+            return;
+        writesSinceCheck = 0;
+        if (abortFlag->load(memory_order_relaxed))
+        {
+            throw TaskAbortedException();
+        }
+    }
+
     void combineTriangulationsDFS(
         int faceIndex,
         vector<pair<int, int>> &current,
@@ -83,6 +108,8 @@ public:
 
         if (faceIndex == (int)triangulation_per_face.size())
         {
+            checkAbort(); // may throw TaskAbortedException
+
             totalCount++;
             if (outStream && outStream->is_open())
             {
@@ -144,6 +171,10 @@ public:
                 addedChords.push_back({a, b});
             }
 
+            // combineTriangulationsDFS may throw TaskAbortedException; let it
+            // propagate up through the recursion. The catch below (or the
+            // caller in refineTriangulationsToFile) ensures the ofstream is
+            // still closed via RAII / explicit close in the caller.
             combineTriangulationsDFS(faceIndex + 1, current, usedChords);
 
             current.resize(oldSize);
@@ -154,16 +185,36 @@ public:
         }
     }
 
-    void refineTriangulationsToFile(const string &outputPath)
+    // Runs the DFS writing to outputPath. If abortFlag is set and trips
+    // mid-run, throws TaskAbortedException; the output stream is always
+    // closed (even on throw) and outStream is reset to nullptr.
+    void refineTriangulationsToFile(const string &outputPath, atomic<bool> *externalAbortFlag = nullptr)
     {
         sortTriangulations();
         totalCount = 0;
+        writesSinceCheck = 0;
+        abortFlag = externalAbortFlag;
+
         ofstream file(outputPath, ios::binary);
         outStream = &file;
 
         vector<pair<int, int>> current;
         unordered_set<pair<int, int>, PairHash> usedChords;
-        combineTriangulationsDFS(0, current, usedChords);
+
+        try
+        {
+            combineTriangulationsDFS(0, current, usedChords);
+        }
+        catch (...)
+        {
+            // Guarantee stream is closed / state reset even on abort or any
+            // other exception, then rethrow so the caller (main.cpp) can
+            // classify it and clean up temp files.
+            if (file.is_open())
+                file.close();
+            outStream = nullptr;
+            throw;
+        }
 
         file.close();
         outStream = nullptr;
@@ -175,6 +226,7 @@ public:
         allTriangulations.clear();
         totalCount = 0;
         outStream = nullptr;
+        writesSinceCheck = 0;
 
         vector<pair<int, int>> current;
         unordered_set<pair<int, int>, PairHash> usedChords;
