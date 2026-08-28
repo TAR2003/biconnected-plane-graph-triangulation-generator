@@ -2,15 +2,15 @@
 using namespace std;
 #include "Edge.hpp"
 #include "pairHash.hpp"
-#include "biconnected.hpp"
 #include "FaceTriangulation.hpp"
+#include "biconnected.hpp"
 #include "triconnected.hpp"
 
 #include <filesystem>
 namespace fs = std::filesystem;
 
 // ============================================================================
-// Input reader (same format as before: face count, then per-face vertex list)
+// Input reader
 // ============================================================================
 vector<vector<int>> solve(const string &filename)
 {
@@ -39,24 +39,193 @@ vector<vector<int>> solve(const string &filename)
     return faces;
 }
 
-bool matchPairs(const pair<int, int> &p1, const pair<int, int> &p2)
+// ============================================================================
+// External Sort for binary triangulation files
+// ============================================================================
+struct TriangulationEntry
 {
-    return (p1.first == p2.first && p1.second == p2.second);
+    vector<pair<int, int>> chords;
+
+    bool operator<(const TriangulationEntry &other) const
+    {
+        return chords < other.chords;
+    }
+    bool operator>(const TriangulationEntry &other) const
+    {
+        return chords > other.chords;
+    }
+};
+
+static void externalSortBinaryFile(const string &inputFile, const string &outputFile, size_t maxRAMEntries = 500000)
+{
+    ifstream in(inputFile, ios::binary);
+    if (!in.is_open())
+        return;
+
+    vector<string> chunkFiles;
+    vector<TriangulationEntry> buffer;
+    buffer.reserve(maxRAMEntries);
+
+    int chunkIdx = 0;
+
+    auto writeChunk = [&](const vector<TriangulationEntry> &vec, const string &cFile)
+    {
+        ofstream out(cFile, ios::binary);
+        for (const auto &item : vec)
+        {
+            uint32_t sz = static_cast<uint32_t>(item.chords.size());
+            out.write(reinterpret_cast<const char *>(&sz), sizeof(sz));
+            out.write(reinterpret_cast<const char *>(item.chords.data()), sz * sizeof(pair<int, int>));
+        }
+    };
+
+    while (in.peek() != EOF)
+    {
+        uint32_t sz = 0;
+        if (!in.read(reinterpret_cast<char *>(&sz), sizeof(sz)))
+            break;
+
+        TriangulationEntry entry;
+        entry.chords.resize(sz);
+        in.read(reinterpret_cast<char *>(entry.chords.data()), sz * sizeof(pair<int, int>));
+
+        buffer.push_back(move(entry));
+
+        if (buffer.size() >= maxRAMEntries)
+        {
+            sort(buffer.begin(), buffer.end());
+            string cFileName = "temp_chunk_" + to_string(chunkIdx++) + ".bin";
+            writeChunk(buffer, cFileName);
+            chunkFiles.push_back(cFileName);
+            buffer.clear();
+        }
+    }
+
+    if (!buffer.empty())
+    {
+        sort(buffer.begin(), buffer.end());
+        if (chunkFiles.empty())
+        {
+            writeChunk(buffer, outputFile);
+            in.close();
+            return;
+        }
+        else
+        {
+            string cFileName = "temp_chunk_" + to_string(chunkIdx++) + ".bin";
+            writeChunk(buffer, cFileName);
+            chunkFiles.push_back(cFileName);
+            buffer.clear();
+        }
+    }
+    in.close();
+
+    if (chunkFiles.empty())
+    {
+        ofstream out(outputFile, ios::binary);
+        return;
+    }
+
+    // Priority Queue Min-Heap for K-Way Merge
+    struct MergeNode
+    {
+        TriangulationEntry entry;
+        int chunkIndex;
+
+        bool operator>(const MergeNode &other) const
+        {
+            return entry > other.entry;
+        }
+    };
+
+    vector<ifstream> streams(chunkFiles.size());
+    priority_queue<MergeNode, vector<MergeNode>, greater<MergeNode>> pq;
+
+    for (size_t i = 0; i < chunkFiles.size(); i++)
+    {
+        streams[i].open(chunkFiles[i], ios::binary);
+        uint32_t sz = 0;
+        if (streams[i].read(reinterpret_cast<char *>(&sz), sizeof(sz)))
+        {
+            TriangulationEntry entry;
+            entry.chords.resize(sz);
+            streams[i].read(reinterpret_cast<char *>(entry.chords.data()), sz * sizeof(pair<int, int>));
+            pq.push({move(entry), static_cast<int>(i)});
+        }
+    }
+
+    ofstream out(outputFile, ios::binary);
+
+    while (!pq.empty())
+    {
+        MergeNode top = move(const_cast<MergeNode &>(pq.top()));
+        pq.pop();
+
+        int idx = top.chunkIndex;
+
+        uint32_t sz = static_cast<uint32_t>(top.entry.chords.size());
+        out.write(reinterpret_cast<const char *>(&sz), sizeof(sz));
+        out.write(reinterpret_cast<const char *>(top.entry.chords.data()), sz * sizeof(pair<int, int>));
+
+        uint32_t nextSz = 0;
+        if (streams[idx].read(reinterpret_cast<char *>(&nextSz), sizeof(nextSz)))
+        {
+            TriangulationEntry nextEntry;
+            nextEntry.chords.resize(nextSz);
+            streams[idx].read(reinterpret_cast<char *>(nextEntry.chords.data()), nextSz * sizeof(pair<int, int>));
+            pq.push({move(nextEntry), idx});
+        }
+    }
+
+    out.close();
+
+    for (size_t i = 0; i < chunkFiles.size(); i++)
+    {
+        streams[i].close();
+        fs::remove(chunkFiles[i]);
+    }
 }
 
-bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int, int>> &t2)
+// Stream comparison of two binary triangulation files item-by-item
+bool compareTriangulationFiles(const string &file1, const string &file2, size_t count1, size_t count2)
 {
-    if (t1.size() != t2.size())
+    if (count1 != count2)
         return false;
-    for (size_t i = 0; i < t1.size(); i++)
+
+    ifstream in1(file1, ios::binary);
+    ifstream in2(file2, ios::binary);
+
+    if (!in1.is_open() || !in2.is_open())
+        return false;
+
+    vector<pair<int, int>> t1, t2;
+
+    for (size_t i = 0; i < count1; i++)
     {
-        if (!matchPairs(t1[i], t2[i]))
+        uint32_t sz1 = 0, sz2 = 0;
+
+        if (!in1.read(reinterpret_cast<char *>(&sz1), sizeof(sz1)))
+            return false;
+        if (!in2.read(reinterpret_cast<char *>(&sz2), sizeof(sz2)))
+            return false;
+
+        if (sz1 != sz2)
+            return false;
+
+        t1.resize(sz1);
+        t2.resize(sz2);
+
+        in1.read(reinterpret_cast<char *>(t1.data()), sz1 * sizeof(pair<int, int>));
+        in2.read(reinterpret_cast<char *>(t2.data()), sz2 * sizeof(pair<int, int>));
+
+        if (t1 != t2)
             return false;
     }
+
     return true;
 }
 
-// Returns: 1 = matched, 0 = mismatched, -1 = error (couldn't read file)
+// Returns: 1 = matched, 0 = mismatched, -1 = error
 int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCount)
 {
     vector<vector<int>> faces = solve(filename);
@@ -66,57 +235,42 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
         return -1;
     }
 
+    string fileBC_raw = "temp_bc_raw.bin";
+    string fileBC_sorted = "temp_bc_sorted.bin";
+    string fileTC_sorted = "temp_tc_sorted.bin";
+
     biconnected *bc = new biconnected(faces);
-    bc->getAllTriangulations();
-    bc->sortTriangulations();
+    bc->getAllTriangulationsToFile(fileBC_raw);
+    newCount = bc->totalCount;
+
+    // External sort biconnected output in chunks to keep memory usage minimal
+    externalSortBinaryFile(fileBC_raw, fileBC_sorted);
+    fs::remove(fileBC_raw);
 
     triconnected *tc = new triconnected(faces);
     tc->getAllTriangulations();
-    tc->refineTriangulations();
+    tc->refineTriangulationsToFile(fileTC_sorted);
+    oldCount = tc->totalCount;
 
-    auto newalgo = bc->allTriangulations;
-    auto oldalgo = tc->allTriangulations;
-
-    newCount = newalgo.size();
-    oldCount = oldalgo.size();
-
-    bool result = true;
-    if (newalgo.size() != oldalgo.size())
-    {
-        result = false;
-    }
-    else
-    {
-        for (size_t i = 0; i < newalgo.size(); i++)
-        {
-            if (!matchTriangulations(newalgo[i], oldalgo[i]))
-            {
-                result = false;
-                break;
-            }
-        }
-    }
+    bool result = compareTriangulationFiles(fileBC_sorted, fileTC_sorted, newCount, oldCount);
 
     delete bc;
     delete tc;
+
+    fs::remove(fileBC_sorted);
+    fs::remove(fileTC_sorted);
 
     return result ? 1 : 0;
 }
 
 // ============================================================================
-// Per-category CSV helpers
+// CSV helpers & Driver
 // ============================================================================
-
-// CSV format: filename,result,newCount,oldCount
-// result is one of: MATCH, MISMATCH, ERROR
-
 static string csvPathForCategory(const string &category)
 {
     return "results_" + category + ".csv";
 }
 
-// Load the set of filenames (base name only, not full path) already present
-// in a category's CSV, so we can skip them.
 static unordered_set<string> loadProcessedFiles(const string &csvPath)
 {
     unordered_set<string> processed;
@@ -125,7 +279,6 @@ static unordered_set<string> loadProcessedFiles(const string &csvPath)
         return processed;
 
     string line;
-    // skip header
     if (!getline(in, line))
         return processed;
 
@@ -159,21 +312,6 @@ static void appendResultCSV(const string &csvPath, const string &filename,
     out << filename << ',' << resultStr << ',' << newCount << ',' << oldCount << '\n';
 }
 
-// ============================================================================
-// Category discovery: every immediate subdirectory of the input root folder
-// is treated as its own category, e.g.
-//   input/cycle_3_to_15
-//   input/delaunay_subdivide_1x
-//   input/delaunay_subdivide_2x
-//   input/delaunay_subdivide_3x
-//   input/halin_graph
-// New categories can simply be added as new folders under "input" and will
-// be picked up automatically; no code changes required.
-//
-// Category indices (for the command-line argument) are assigned in
-// alphabetical order, 1-based: 1st category alphabetically = "1", etc.
-// ============================================================================
-
 static void printUsage(const vector<string> &categories, const char *progName)
 {
     cerr << "Usage: " << progName << " <category-index|all>\n\n";
@@ -185,7 +323,6 @@ static void printUsage(const vector<string> &categories, const char *progName)
     cerr << "  all -> run every category above\n";
 }
 
-// Runs correctness checking for a single category, returns its summary.
 struct Summary
 {
     string category;
@@ -269,7 +406,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // gather categories (subdirectories of input/), alphabetically sorted
     vector<string> categories;
     for (const auto &entry : fs::directory_iterator(rootFolder))
     {
@@ -286,9 +422,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // ------------------------------------------------------------------
-    // Parse command-line argument
-    // ------------------------------------------------------------------
     if (argc < 2)
     {
         printUsage(categories, argv[0]);
@@ -304,7 +437,6 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // must be a positive integer index
         bool isNumber = !arg.empty() && all_of(arg.begin(), arg.end(), ::isdigit);
         if (!isNumber)
         {
@@ -324,18 +456,12 @@ int main(int argc, char *argv[])
         categoriesToRun.push_back(categories[idx - 1]);
     }
 
-    // ------------------------------------------------------------------
-    // Run selected categories
-    // ------------------------------------------------------------------
     vector<Summary> summaries;
     for (const auto &category : categoriesToRun)
     {
         summaries.push_back(runCategory(rootFolder, category));
     }
 
-    // ------------------------------------------------------------------
-    // Final summary
-    // ------------------------------------------------------------------
     cout << "\n=================== SUMMARY ===================\n";
     for (const auto &s : summaries)
     {
