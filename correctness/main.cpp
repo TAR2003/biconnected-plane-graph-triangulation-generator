@@ -169,9 +169,97 @@ static void appendResultCSV(const string &csvPath, const string &filename,
 //   input/halin_graph
 // New categories can simply be added as new folders under "input" and will
 // be picked up automatically; no code changes required.
+//
+// Category indices (for the command-line argument) are assigned in
+// alphabetical order, 1-based: 1st category alphabetically = "1", etc.
 // ============================================================================
 
-int main()
+static void printUsage(const vector<string> &categories, const char *progName)
+{
+    cerr << "Usage: " << progName << " <category-index|all>\n\n";
+    cerr << "Available categories (alphabetical order):\n";
+    for (size_t i = 0; i < categories.size(); i++)
+    {
+        cerr << "  " << (i + 1) << " -> " << categories[i] << "\n";
+    }
+    cerr << "  all -> run every category above\n";
+}
+
+// Runs correctness checking for a single category, returns its summary.
+struct Summary
+{
+    string category;
+    int matched = 0;
+    int mismatched = 0;
+    int errors = 0;
+    int skipped = 0;
+};
+
+static Summary runCategory(const string &rootFolder, const string &category)
+{
+    string categoryFolder = rootFolder + "/" + category;
+    string csvPath = csvPathForCategory(category);
+
+    cout << "\n=== Category: " << category << " ===\n";
+    cout << "Results CSV: " << csvPath << "\n";
+
+    unordered_set<string> processed = loadProcessedFiles(csvPath);
+
+    Summary summ;
+    summ.category = category;
+
+    vector<string> fileList;
+    for (const auto &entry : fs::directory_iterator(categoryFolder))
+    {
+        if (entry.is_regular_file())
+        {
+            fileList.push_back(entry.path().filename().string());
+        }
+    }
+    sort(fileList.begin(), fileList.end());
+
+    for (const auto &filename : fileList)
+    {
+        if (processed.find(filename) != processed.end())
+        {
+            cout << "  Skipping already-tested: " << filename << "\n";
+            summ.skipped++;
+            continue;
+        }
+
+        string fullPath = categoryFolder + "/" + filename;
+        cout << "  Processing: " << filename << " ... " << flush;
+
+        size_t newCount = 0, oldCount = 0;
+        int result = matchTwoAlgorithms(fullPath, newCount, oldCount);
+
+        string resultStr;
+        if (result == 1)
+        {
+            resultStr = "MATCH";
+            summ.matched++;
+            cout << "\033[1;32mMATCH\033[0m (" << newCount << " triangulations)\n";
+        }
+        else if (result == 0)
+        {
+            resultStr = "MISMATCH";
+            summ.mismatched++;
+            cout << "\033[1;31mMISMATCH\033[0m (new=" << newCount << ", old=" << oldCount << ")\n";
+        }
+        else
+        {
+            resultStr = "ERROR";
+            summ.errors++;
+            cout << "\033[1;33mERROR (could not read file)\033[0m\n";
+        }
+
+        appendResultCSV(csvPath, filename, resultStr, newCount, oldCount);
+    }
+
+    return summ;
+}
+
+int main(int argc, char *argv[])
 {
     const string rootFolder = "input";
 
@@ -181,7 +269,7 @@ int main()
         return 1;
     }
 
-    // gather categories (subdirectories of input/)
+    // gather categories (subdirectories of input/), alphabetically sorted
     vector<string> categories;
     for (const auto &entry : fs::directory_iterator(rootFolder))
     {
@@ -198,79 +286,51 @@ int main()
         return 1;
     }
 
-    // overall summary across all categories, printed at the end
-    struct Summary
+    // ------------------------------------------------------------------
+    // Parse command-line argument
+    // ------------------------------------------------------------------
+    if (argc < 2)
     {
-        string category;
-        int matched = 0;
-        int mismatched = 0;
-        int errors = 0;
-        int skipped = 0;
-    };
+        printUsage(categories, argv[0]);
+        return 1;
+    }
+
+    string arg = argv[1];
+    vector<string> categoriesToRun;
+
+    if (arg == "all")
+    {
+        categoriesToRun = categories;
+    }
+    else
+    {
+        // must be a positive integer index
+        bool isNumber = !arg.empty() && all_of(arg.begin(), arg.end(), ::isdigit);
+        if (!isNumber)
+        {
+            cerr << "Invalid argument: '" << arg << "'\n\n";
+            printUsage(categories, argv[0]);
+            return 1;
+        }
+
+        int idx = stoi(arg);
+        if (idx < 1 || idx > (int)categories.size())
+        {
+            cerr << "Category index out of range: " << idx << "\n\n";
+            printUsage(categories, argv[0]);
+            return 1;
+        }
+
+        categoriesToRun.push_back(categories[idx - 1]);
+    }
+
+    // ------------------------------------------------------------------
+    // Run selected categories
+    // ------------------------------------------------------------------
     vector<Summary> summaries;
-
-    for (const auto &category : categories)
+    for (const auto &category : categoriesToRun)
     {
-        string categoryFolder = rootFolder + "/" + category;
-        string csvPath = csvPathForCategory(category);
-
-        cout << "\n=== Category: " << category << " ===\n";
-        cout << "Results CSV: " << csvPath << "\n";
-
-        unordered_set<string> processed = loadProcessedFiles(csvPath);
-
-        Summary summ;
-        summ.category = category;
-
-        vector<string> fileList;
-        for (const auto &entry : fs::directory_iterator(categoryFolder))
-        {
-            if (entry.is_regular_file())
-            {
-                fileList.push_back(entry.path().filename().string());
-            }
-        }
-        sort(fileList.begin(), fileList.end());
-
-        for (const auto &filename : fileList)
-        {
-            if (processed.find(filename) != processed.end())
-            {
-                cout << "  Skipping already-tested: " << filename << "\n";
-                summ.skipped++;
-                continue;
-            }
-
-            string fullPath = categoryFolder + "/" + filename;
-            cout << "  Processing: " << filename << " ... " << flush;
-
-            size_t newCount = 0, oldCount = 0;
-            int result = matchTwoAlgorithms(fullPath, newCount, oldCount);
-
-            string resultStr;
-            if (result == 1)
-            {
-                resultStr = "MATCH";
-                summ.matched++;
-                cout << "\033[1;32mMATCH\033[0m (" << newCount << " triangulations)\n";
-            }
-            else if (result == 0)
-            {
-                resultStr = "MISMATCH";
-                summ.mismatched++;
-                cout << "\033[1;31mMISMATCH\033[0m (new=" << newCount << ", old=" << oldCount << ")\n";
-            }
-            else
-            {
-                resultStr = "ERROR";
-                summ.errors++;
-                cout << "\033[1;33mERROR (could not read file)\033[0m\n";
-            }
-
-            appendResultCSV(csvPath, filename, resultStr, newCount, oldCount);
-        }
-
-        summaries.push_back(summ);
+        summaries.push_back(runCategory(rootFolder, category));
     }
 
     // ------------------------------------------------------------------

@@ -239,9 +239,115 @@ static void appendRunCSV(const string &csvPath, const RunRecord &r)
 }
 
 // ============================================================================
+// Category indices (for the command-line argument) are assigned in
+// alphabetical order, 1-based: 1st category alphabetically = "1", etc.
+// ============================================================================
+
+static void printUsage(const vector<string> &categories, const char *progName)
+{
+    cerr << "Usage: " << progName << " <category-index|all>\n\n";
+    cerr << "Available categories (alphabetical order):\n";
+    for (size_t i = 0; i < categories.size(); i++)
+    {
+        cerr << "  " << (i + 1) << " -> " << categories[i] << "\n";
+    }
+    cerr << "  all -> run every category above\n";
+}
+
+static void runCategory(const string &category)
+{
+    string categoryFolder = INPUT_ROOT + "/" + category;
+    string csvPath = csvPathForCategory(category);
+
+    cout << "\n--- Category: " << category << " (CSV: " << csvPath << ") ---\n";
+
+    vector<string> fileList;
+    for (const auto &entry : fs::directory_iterator(categoryFolder))
+    {
+        if (entry.is_regular_file())
+            fileList.push_back(entry.path().filename().string());
+    }
+    sort(fileList.begin(), fileList.end());
+
+    for (const auto &filename : fileList)
+    {
+        string fullPath = categoryFolder + "/" + filename;
+
+        int alreadyDone = countExistingRuns(csvPath, filename);
+        if (alreadyDone >= RUNS_PER_CASE)
+        {
+            cout << "  Skipping " << filename << " (already has " << alreadyDone
+                 << "/" << RUNS_PER_CASE << " runs)\n";
+            continue;
+        }
+
+        int remaining = RUNS_PER_CASE - alreadyDone;
+        cout << "  " << filename << ": " << alreadyDone << "/" << RUNS_PER_CASE
+             << " runs done, performing " << remaining << " more...\n";
+
+        int distinctVertices = 0;
+        vector<vector<int>> faces = readInput(fullPath, distinctVertices);
+        if (faces.empty())
+        {
+            cerr << "  Warning: skipping empty/invalid file: " << filename << "\n";
+            continue;
+        }
+
+        // warm-up run once per file if we're about to do more than one run
+        // overall (helps avoid first-run cache effects skewing results)
+        if (RUNS_PER_CASE > 1 && alreadyDone == 0)
+        {
+            biconnected *warm = new biconnected(faces);
+            warm->getAllTriangulations();
+            delete warm;
+        }
+
+        for (int localRun = 1; localRun <= remaining; localRun++)
+        {
+            int globalRunIndex = alreadyDone + localRun;
+
+            size_t memBefore = getCurrentMemoryUsage();
+
+            biconnected *bc = new biconnected(faces);
+
+            using clock = std::chrono::steady_clock;
+            auto start = clock::now();
+            bc->getAllTriangulations();
+            auto end = clock::now();
+
+            size_t memAfter = getCurrentMemoryUsage();
+            size_t memUsed = (memAfter > memBefore) ? (memAfter - memBefore) : 0;
+
+            auto dur_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+            double runSec = (double)dur_ns / 1'000'000'000.0;
+
+            u128 totalTriang = bc->totalTriangulations;
+            double memoryPerVertex = (distinctVertices > 0) ? (double)memUsed / distinctVertices : 0.0;
+
+            cout << "    run " << globalRunIndex << "/" << RUNS_PER_CASE
+                 << " -> " << fixed << setprecision(6) << runSec << " s, "
+                 << formatBytes(memUsed) << "\n";
+
+            RunRecord rec;
+            rec.filename = filename;
+            rec.runIndex = globalRunIndex;
+            rec.distinctVertices = distinctVertices;
+            rec.triangStr = u128_to_string(totalTriang);
+            rec.timeSeconds = runSec;
+            rec.peakMemory = memUsed;
+            rec.memoryPerVertex = memoryPerVertex;
+
+            appendRunCSV(csvPath, rec);
+
+            delete bc;
+        }
+    }
+}
+
+// ============================================================================
 // Main
 // ============================================================================
-int main()
+int main(int argc, char *argv[])
 {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -252,7 +358,7 @@ int main()
         return 1;
     }
 
-    // discover categories = subfolders of INPUT_ROOT
+    // discover categories = subfolders of INPUT_ROOT, alphabetically sorted
     vector<string> categories;
     for (const auto &entry : fs::directory_iterator(INPUT_ROOT))
     {
@@ -267,102 +373,54 @@ int main()
         return 1;
     }
 
+    // ------------------------------------------------------------------
+    // Parse command-line argument
+    // ------------------------------------------------------------------
+    if (argc < 2)
+    {
+        printUsage(categories, argv[0]);
+        return 1;
+    }
+
+    string arg = argv[1];
+    vector<string> categoriesToRun;
+
+    if (arg == "all")
+    {
+        categoriesToRun = categories;
+    }
+    else
+    {
+        bool isNumber = !arg.empty() && all_of(arg.begin(), arg.end(), ::isdigit);
+        if (!isNumber)
+        {
+            cerr << "Invalid argument: '" << arg << "'\n\n";
+            printUsage(categories, argv[0]);
+            return 1;
+        }
+
+        int idx = stoi(arg);
+        if (idx < 1 || idx > (int)categories.size())
+        {
+            cerr << "Category index out of range: " << idx << "\n\n";
+            printUsage(categories, argv[0]);
+            return 1;
+        }
+
+        categoriesToRun.push_back(categories[idx - 1]);
+    }
+
     cout << "\n";
     cout << "================================================================\n";
     cout << "   TRIANGULATION BENCHMARK - per-category, resumable per-run   \n";
     cout << "   Target runs per case: " << RUNS_PER_CASE << "\n";
     cout << "================================================================\n";
 
-    for (const auto &category : categories)
+    for (const auto &category : categoriesToRun)
     {
-        string categoryFolder = INPUT_ROOT + "/" + category;
-        string csvPath = csvPathForCategory(category);
-
-        cout << "\n--- Category: " << category << " (CSV: " << csvPath << ") ---\n";
-
-        vector<string> fileList;
-        for (const auto &entry : fs::directory_iterator(categoryFolder))
-        {
-            if (entry.is_regular_file())
-                fileList.push_back(entry.path().filename().string());
-        }
-        sort(fileList.begin(), fileList.end());
-
-        for (const auto &filename : fileList)
-        {
-            string fullPath = categoryFolder + "/" + filename;
-
-            int alreadyDone = countExistingRuns(csvPath, filename);
-            if (alreadyDone >= RUNS_PER_CASE)
-            {
-                cout << "  Skipping " << filename << " (already has " << alreadyDone
-                     << "/" << RUNS_PER_CASE << " runs)\n";
-                continue;
-            }
-
-            int remaining = RUNS_PER_CASE - alreadyDone;
-            cout << "  " << filename << ": " << alreadyDone << "/" << RUNS_PER_CASE
-                 << " runs done, performing " << remaining << " more...\n";
-
-            int distinctVertices = 0;
-            vector<vector<int>> faces = readInput(fullPath, distinctVertices);
-            if (faces.empty())
-            {
-                cerr << "  Warning: skipping empty/invalid file: " << filename << "\n";
-                continue;
-            }
-
-            // warm-up run once per file if we're about to do more than one run
-            // overall (helps avoid first-run cache effects skewing results)
-            if (RUNS_PER_CASE > 1 && alreadyDone == 0)
-            {
-                biconnected *warm = new biconnected(faces);
-                warm->getAllTriangulations();
-                delete warm;
-            }
-
-            for (int localRun = 1; localRun <= remaining; localRun++)
-            {
-                int globalRunIndex = alreadyDone + localRun;
-
-                size_t memBefore = getCurrentMemoryUsage();
-
-                biconnected *bc = new biconnected(faces);
-
-                using clock = std::chrono::steady_clock;
-                auto start = clock::now();
-                bc->getAllTriangulations();
-                auto end = clock::now();
-
-                size_t memAfter = getCurrentMemoryUsage();
-                size_t memUsed = (memAfter > memBefore) ? (memAfter - memBefore) : 0;
-
-                auto dur_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-                double runSec = (double)dur_ns / 1'000'000'000.0;
-
-                u128 totalTriang = bc->totalTriangulations;
-                double memoryPerVertex = (distinctVertices > 0) ? (double)memUsed / distinctVertices : 0.0;
-
-                cout << "    run " << globalRunIndex << "/" << RUNS_PER_CASE
-                     << " -> " << fixed << setprecision(6) << runSec << " s, "
-                     << formatBytes(memUsed) << "\n";
-
-                RunRecord rec;
-                rec.filename = filename;
-                rec.runIndex = globalRunIndex;
-                rec.distinctVertices = distinctVertices;
-                rec.triangStr = u128_to_string(totalTriang);
-                rec.timeSeconds = runSec;
-                rec.peakMemory = memUsed;
-                rec.memoryPerVertex = memoryPerVertex;
-
-                appendRunCSV(csvPath, rec);
-
-                delete bc;
-            }
-        }
+        runCategory(category);
     }
 
-    cout << "\nAll categories processed. Per-category CSVs contain one row per individual run.\n";
+    cout << "\nSelected categories processed. Per-category CSVs contain one row per individual run.\n";
     return 0;
 }
