@@ -53,45 +53,53 @@ struct ScopedTempFiles
 
 // ============================================================================
 // Disk Monitor (Asynchronous Watchdog Thread)
-// Now cooperates with an external atomic<bool> abort flag: as soon as the
-// watched files exceed maxBytes, it flips the flag so that the *running*
-// triangulation write loop (inside biconnected/triconnected) notices on its
-// own next check and throws TaskAbortedException, stopping the task
-// mid-flight instead of only being detected after it finishes.
+//
+// Enforces an INDIVIDUAL limit per watched file, not a combined/summed
+// limit. Each file in filesToWatch is checked against maxBytes on its own;
+// if watching two files together (e.g. a static already-finished file and
+// one still being written), each gets the full budget independently rather
+// than sharing it. As soon as ANY watched file individually exceeds
+// maxBytes, the shared abort flag is set so the *running* triangulation
+// write loop (inside biconnected/triconnected) notices on its own next
+// check and throws TaskAbortedException, stopping the task mid-flight
+// instead of only being detected after it finishes.
 // ============================================================================
 class DiskMonitor
 {
     atomic<bool> stopFlag{false};
     atomic<bool> limitExceeded{false};
+    string exceededFile; // which file tripped the limit, for logging
     thread worker;
 
 public:
-    // sharedAbortFlag: set to true the moment the limit is exceeded, so the
-    // producer loop (biconnected::addTriangulation / triconnected DFS leaf)
-    // can bail out promptly. Must outlive the monitor thread.
+    // sharedAbortFlag: set to true the moment any individual watched file
+    // exceeds maxBytes, so the producer loop (biconnected::addTriangulation
+    // / triconnected DFS leaf) can bail out promptly. Must outlive the
+    // monitor thread.
     void start(const vector<string> &filesToWatch, size_t maxBytes, atomic<bool> *sharedAbortFlag)
     {
         stopFlag = false;
         limitExceeded = false;
+        exceededFile.clear();
         worker = thread([this, filesToWatch, maxBytes, sharedAbortFlag]()
                         {
             while (!stopFlag)
             {
-                size_t totalBytes = 0;
                 for (const auto &filePath : filesToWatch)
                 {
                     if (fs::exists(filePath))
                     {
                         error_code ec;
-                        totalBytes += fs::file_size(filePath, ec);
+                        size_t sz = fs::file_size(filePath, ec);
+                        if (!ec && sz > maxBytes)
+                        {
+                            limitExceeded = true;
+                            exceededFile = filePath;
+                            if (sharedAbortFlag)
+                                sharedAbortFlag->store(true, memory_order_relaxed);
+                            return; // stop watching, this file alone tripped it
+                        }
                     }
-                }
-                if (totalBytes > maxBytes)
-                {
-                    limitExceeded = true;
-                    if (sharedAbortFlag)
-                        sharedAbortFlag->store(true, memory_order_relaxed);
-                    break;
                 }
                 this_thread::sleep_for(chrono::milliseconds(50));
             } });
@@ -108,6 +116,11 @@ public:
     bool hasExceeded() const
     {
         return limitExceeded;
+    }
+
+    const string &whichFileExceeded() const
+    {
+        return exceededFile;
     }
 };
 
@@ -370,12 +383,20 @@ bool compareTriangulationFiles(const string &file1, const string &file2, size_t 
 }
 
 // Returns: 1 = matched, 0 = mismatched, -1 = error, -2 = limit exceeded
+//
 // Every temp file this function creates is registered with ScopedTempFiles
 // the moment its name is decided, BEFORE any writing begins. That guard's
 // destructor removes them unconditionally on every exit path: normal
 // return, early return, or an exception (including TaskAbortedException
 // thrown mid-write from inside biconnected/triconnected when the disk
 // monitor trips the shared abort flag).
+//
+// Disk limit semantics: each temp file is checked INDIVIDUALLY against
+// MAX_DISK_BYTES (1 GB), not summed together. temp_bc_raw.bin,
+// temp_bc_sorted.bin, and temp_tc_sorted.bin each get their own full
+// budget. Additionally, temp_bc_raw.bin is deleted the moment it has been
+// successfully sorted into temp_bc_sorted.bin — it isn't kept around until
+// final cleanup, since its data has already been fully copied elsewhere.
 int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCount)
 {
     newCount = oldCount = 0;
@@ -430,12 +451,27 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
             return -2; // tempGuard cleans up everything registered so far
         }
 
+        // fileBC_raw's data has now been fully consumed and re-written,
+        // sorted, into fileBC_sorted. Remove the raw file completely right
+        // away instead of waiting for final cleanup — it's dead weight from
+        // here on and there's no reason to let it keep occupying disk space
+        // while Phase 3 runs.
+        {
+            error_code ec;
+            fs::remove(fileBC_raw, ec);
+        }
+
         // --- Phase 3: Triconnected Run ---
         {
             triconnected tc(faces);
             tc.getAllTriangulations();
 
-            monitor.start({fileBC_sorted, fileTC_sorted}, MAX_DISK_BYTES, &abortFlag);
+            // Individual limit: only the file actually being written this
+            // phase (fileTC_sorted) is watched. fileBC_sorted is already
+            // finished/static, so it isn't part of this check at all — each
+            // temp file gets its own full MAX_DISK_BYTES budget rather than
+            // sharing one combined limit.
+            monitor.start({fileTC_sorted}, MAX_DISK_BYTES, &abortFlag);
             bool taskAborted = false;
             try
             {
