@@ -21,6 +21,25 @@ namespace fs = std::filesystem;
 static const size_t MAX_DISK_BYTES = 1000ULL * 1024ULL * 1024ULL; // 1 GB limit
 
 // ============================================================================
+// Timestamp helper (used to record start/end of each per-file operation,
+// both for the CSV and for console logging).
+// ============================================================================
+static string currentTimeString()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t t = std::chrono::system_clock::to_time_t(now);
+    std::tm tm{};
+#ifdef _WIN32
+    localtime_s(&tm, &t);
+#else
+    localtime_r(&t, &tm);
+#endif
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
+    return string(buf);
+}
+
+// ============================================================================
 // RAII guard: guarantees every registered temp file is removed when the
 // guard goes out of scope, regardless of how the enclosing function exits
 // (normal return, early return, or exception). Register a filename as soon
@@ -397,13 +416,23 @@ bool compareTriangulationFiles(const string &file1, const string &file2, size_t 
 // budget. Additionally, temp_bc_raw.bin is deleted the moment it has been
 // successfully sorted into temp_bc_sorted.bin — it isn't kept around until
 // final cleanup, since its data has already been fully copied elsewhere.
-int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCount)
+//
+// startTs / endTs: set to the wall-clock time (via currentTimeString()) at
+// the very beginning and at every exit point of this function, so the
+// caller can log/record exactly when this test case's operation began and
+// ended, regardless of which path (success, mismatch, limit-exceeded,
+// error) was taken.
+int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCount,
+                       string &startTs, string &endTs)
 {
     newCount = oldCount = 0;
+    startTs = currentTimeString();
+    endTs.clear();
 
     vector<vector<int>> faces = solve(filename);
     if (faces.empty())
     {
+        endTs = currentTimeString();
         return -1;
     }
 
@@ -442,12 +471,16 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
             newCount = bc.totalCount;
 
             if (taskAborted || monitor.hasExceeded())
+            {
+                endTs = currentTimeString();
                 return -2; // tempGuard cleans up fileBC_raw
+            }
         }
 
         // --- Phase 2: External Sorting ---
         if (!externalSortBinaryFile(fileBC_raw, fileBC_sorted, tempGuard))
         {
+            endTs = currentTimeString();
             return -2; // tempGuard cleans up everything registered so far
         }
 
@@ -485,7 +518,10 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
             oldCount = tc.totalCount;
 
             if (taskAborted || monitor.hasExceeded())
+            {
+                endTs = currentTimeString();
                 return -2;
+            }
         }
 
         // --- Phase 4: Stream Comparison ---
@@ -493,6 +529,7 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
 
         // Success or mismatch: either way we're done with the temp files.
         tempGuard.removeAll();
+        endTs = currentTimeString();
         return result ? 1 : 0;
     }
     catch (const std::exception &e)
@@ -501,11 +538,13 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
         // treated as a plain error for this single test case; tempGuard
         // still cleans up on unwind. The batch continues with the next file.
         cerr << "    [exception] " << e.what() << "\n";
+        endTs = currentTimeString();
         return -1;
     }
     catch (...)
     {
         cerr << "    [unknown exception]\n";
+        endTs = currentTimeString();
         return -1;
     }
     // tempGuard destructor runs here on any path that didn't already call
@@ -545,7 +584,8 @@ static unordered_set<string> loadProcessedFiles(const string &csvPath)
 }
 
 static void appendResultCSV(const string &csvPath, const string &filename,
-                            const string &resultStr, size_t newCount, size_t oldCount)
+                            const string &resultStr, size_t newCount, size_t oldCount,
+                            const string &startTs, const string &endTs)
 {
     bool needHeader = !fs::exists(csvPath);
     ofstream out(csvPath, ios::app);
@@ -556,9 +596,10 @@ static void appendResultCSV(const string &csvPath, const string &filename,
     }
     if (needHeader)
     {
-        out << "filename,result,newAlgoCount,oldAlgoCount\n";
+        out << "filename,result,newAlgoCount,oldAlgoCount,startTime,endTime\n";
     }
-    out << filename << ',' << resultStr << ',' << newCount << ',' << oldCount << '\n';
+    out << filename << ',' << resultStr << ',' << newCount << ',' << oldCount << ','
+        << startTs << ',' << endTs << '\n';
 }
 
 static void printUsage(const vector<string> &categories, const char *progName)
@@ -615,10 +656,12 @@ static Summary runCategory(const string &rootFolder, const string &category)
         }
 
         string fullPath = categoryFolder + "/" + filename;
-        cout << "  Processing: " << filename << " ... " << flush;
 
         size_t newCount = 0, oldCount = 0;
         int result = -1;
+        string startTs, endTs;
+
+        cout << "  Processing: " << filename << " (start " << currentTimeString() << ") ... " << flush;
 
         // Second line of defense: matchTwoAlgorithms already catches its own
         // exceptions, but this guarantees that even a bug we didn't
@@ -627,7 +670,7 @@ static Summary runCategory(const string &rootFolder, const string &category)
         // gets marked ERROR and we move on to the next test case.
         try
         {
-            result = matchTwoAlgorithms(fullPath, newCount, oldCount);
+            result = matchTwoAlgorithms(fullPath, newCount, oldCount, startTs, endTs);
         }
         catch (const std::exception &e)
         {
@@ -640,33 +683,43 @@ static Summary runCategory(const string &rootFolder, const string &category)
             result = -1;
         }
 
+        // Defensive fallback: guarantee both timestamps are always populated
+        // even if matchTwoAlgorithms threw before setting them itself (e.g.
+        // an exception thrown before its own try block was entered).
+        if (startTs.empty())
+            startTs = currentTimeString();
+        if (endTs.empty())
+            endTs = currentTimeString();
+
         string resultStr;
         if (result == 1)
         {
             resultStr = "MATCH";
             summ.matched++;
-            cout << "\033[1;32mMATCH\033[0m (" << newCount << " triangulations)\n";
+            cout << "\033[1;32mMATCH\033[0m (" << newCount << " triangulations, end " << endTs << ")\n";
         }
         else if (result == 0)
         {
             resultStr = "MISMATCH";
             summ.mismatched++;
-            cout << "\033[1;31mMISMATCH\033[0m (new=" << newCount << ", old=" << oldCount << ")\n";
+            cout << "\033[1;31mMISMATCH\033[0m (new=" << newCount << ", old=" << oldCount
+                 << ", end " << endTs << ")\n";
         }
         else if (result == -2)
         {
             resultStr = "LIMIT_EXCEEDED";
             summ.limitExceeded++;
-            cout << "\033[1;35mLIMIT_EXCEEDED\033[0m (> " << (MAX_DISK_BYTES / (1024 * 1024)) << " MB limit, task stopped and temp files removed)\n";
+            cout << "\033[1;35mLIMIT_EXCEEDED\033[0m (> " << (MAX_DISK_BYTES / (1024 * 1024))
+                 << " MB limit, task stopped and temp files removed, end " << endTs << ")\n";
         }
         else
         {
             resultStr = "ERROR";
             summ.errors++;
-            cout << "\033[1;33mERROR (could not read file)\033[0m\n";
+            cout << "\033[1;33mERROR (could not read file)\033[0m (end " << endTs << ")\n";
         }
 
-        appendResultCSV(csvPath, filename, resultStr, newCount, oldCount);
+        appendResultCSV(csvPath, filename, resultStr, newCount, oldCount, startTs, endTs);
     }
 
     return summ;

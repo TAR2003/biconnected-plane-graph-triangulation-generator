@@ -167,6 +167,8 @@ string formatBytes(size_t bytes)
     return oss.str();
 }
 
+// Full date+time (was HH:MM:SS only before) so start/end timestamps remain
+// unambiguous across a run that spans midnight or multiple days.
 static string currentTimeString()
 {
     auto now = std::chrono::system_clock::now();
@@ -177,8 +179,8 @@ static string currentTimeString()
 #else
     localtime_r(&t, &tm);
 #endif
-    char buf[16];
-    std::strftime(buf, sizeof(buf), "%H:%M:%S", &tm);
+    char buf[32];
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tm);
     return string(buf);
 }
 
@@ -194,6 +196,8 @@ struct RunRecord
     double timeSeconds;
     size_t peakMemory;
     double memoryPerVertex;
+    string startTime; // wall-clock time when this run's timed section began
+    string endTime;   // wall-clock time when this run's timed section ended
 };
 
 static string csvPathForCategory(const string &category)
@@ -236,12 +240,12 @@ static void appendRunCSV(const string &csvPath, const RunRecord &r)
     }
     if (needHeader)
     {
-        out << "filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,timestamp\n";
+        out << "filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,startTime,endTime\n";
     }
     out << r.filename << ',' << r.runIndex << ',' << r.distinctVertices << ','
         << r.triangStr << ',' << fixed << setprecision(9) << r.timeSeconds << ','
         << r.peakMemory << ',' << fixed << setprecision(6) << r.memoryPerVertex << ','
-        << currentTimeString() << '\n';
+        << r.startTime << ',' << r.endTime << '\n';
 }
 
 // ============================================================================
@@ -311,8 +315,9 @@ static void runCategory(const string &category)
         {
             int globalRunIndex = alreadyDone + localRun;
 
-            // Print status BEFORE execution starts
-            cout << "    Running " << getOrdinal(globalRunIndex) << " run..." << flush;
+            // Capture and print the start time BEFORE execution starts
+            string startTs = currentTimeString();
+            cout << "    Running " << getOrdinal(globalRunIndex) << " run (start " << startTs << ")..." << flush;
 
             size_t memBefore = getCurrentMemoryUsage();
 
@@ -322,6 +327,9 @@ static void runCategory(const string &category)
             auto start = clock::now();
             bc->getAllTriangulations();
             auto end = clock::now();
+
+            // Capture the end time immediately once the timed work is done
+            string endTs = currentTimeString();
 
             size_t memAfter = getCurrentMemoryUsage();
             size_t memUsed = (memAfter > memBefore) ? (memAfter - memBefore) : 0;
@@ -333,7 +341,7 @@ static void runCategory(const string &category)
             double memoryPerVertex = (distinctVertices > 0) ? (double)memUsed / distinctVertices : 0.0;
 
             // Print timing results AFTER execution completes
-            cout << " done -> " << fixed << setprecision(6) << runSec << " s, "
+            cout << " done (end " << endTs << ") -> " << fixed << setprecision(6) << runSec << " s, "
                  << formatBytes(memUsed) << "\n";
 
             RunRecord rec;
@@ -344,6 +352,8 @@ static void runCategory(const string &category)
             rec.timeSeconds = runSec;
             rec.peakMemory = memUsed;
             rec.memoryPerVertex = memoryPerVertex;
+            rec.startTime = startTs;
+            rec.endTime = endTs;
 
             appendRunCSV(csvPath, rec);
 
