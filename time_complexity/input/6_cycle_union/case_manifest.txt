@@ -1,0 +1,100 @@
+case_001.txt	faces=3	max_face=6	vertices=6	edges=7	k=2 cycle_sizes=[4, 4] target_faces=3
+case_002.txt	faces=3	max_face=7	vertices=7	edges=8	k=2 cycle_sizes=[4, 5] target_faces=3
+case_003.txt	faces=3	max_face=8	vertices=8	edges=9	k=2 cycle_sizes=[4, 6] target_faces=3
+case_004.txt	faces=3	max_face=8	vertices=8	edges=9	k=2 cycle_sizes=[5, 5] target_faces=3
+case_005.txt	faces=3	max_face=9	vertices=9	edges=10	k=2 cycle_sizes=[4, 7] target_faces=3
+case_006.txt	faces=3	max_face=9	vertices=9	edges=10	k=2 cycle_sizes=[6, 5] target_faces=3
+case_007.txt	faces=3	max_face=10	vertices=10	edges=11	k=2 cycle_sizes=[4, 8] target_faces=3
+case_008.txt	faces=3	max_face=10	vertices=10	edges=11	k=2 cycle_sizes=[7, 5] target_faces=3
+case_009.txt	faces=3	max_face=10	vertices=10	edges=11	k=2 cycle_sizes=[6, 6] target_faces=3
+case_010.txt	faces=3	max_face=11	vertices=11	edges=12	k=2 cycle_sizes=[6, 7] target_faces=3
+case_011.txt	faces=3	max_face=11	vertices=11	edges=12	k=2 cycle_sizes=[9, 4] target_faces=3
+case_012.txt	faces=3	max_face=11	vertices=11	edges=12	k=2 cycle_sizes=[5, 8] target_faces=3
+case_013.txt	faces=3	max_face=12	vertices=12	edges=13	k=2 cycle_sizes=[6, 8] target_faces=3
+case_014.txt	faces=3	max_face=12	vertices=12	edges=13	k=2 cycle_sizes=[10, 4] target_faces=3
+case_015.txt	faces=3	max_face=12	vertices=12	edges=13	k=2 cycle_sizes=[5, 9] target_faces=3
+case_016.txt	faces=3	max_face=12	vertices=12	edges=13	k=2 cycle_sizes=[7, 7] target_faces=3
+case_017.txt	faces=3	max_face=13	vertices=13	edges=14	k=2 cycle_sizes=[10, 5] target_faces=3
+case_018.txt	faces=3	max_face=13	vertices=13	edges=14	k=2 cycle_sizes=[6, 9] target_faces=3
+case_019.txt	faces=3	max_face=13	vertices=13	edges=14	k=2 cycle_sizes=[4, 11] target_faces=3
+case_020.txt	faces=3	max_face=13	vertices=13	edges=14	k=2 cycle_sizes=[7, 8] target_faces=3
+case_021.txt	faces=3	max_face=14	vertices=14	edges=15	k=2 cycle_sizes=[6, 10] target_faces=3
+case_022.txt	faces=3	max_face=14	vertices=14	edges=15	k=2 cycle_sizes=[7, 9] target_faces=3
+case_023.txt	faces=3	max_face=14	vertices=14	edges=15	k=2 cycle_sizes=[8, 8] target_faces=3
+case_024.txt	faces=3	max_face=14	vertices=14	edges=15	k=2 cycle_sizes=[4, 12] target_faces=3
+case_025.txt	faces=3	max_face=14	vertices=14	edges=15	k=2 cycle_sizes=[5, 11] target_faces=3
+case_026.txt	faces=3	max_face=15	vertices=15	edges=16	k=2 cycle_sizes=[7, 10] target_faces=3
+case_027.txt	faces=3	max_face=15	vertices=15	edges=16	k=2 cycle_sizes=[12, 5] target_faces=3
+case_028.txt	faces=3	max_face=15	vertices=15	edges=16	k=2 cycle_sizes=[6, 11] target_faces=3
+case_029.txt	faces=3	max_face=15	vertices=15	edges=16	k=2 cycle_sizes=[8, 9] target_faces=3
+case_030.txt	faces=4	max_face=9	vertices=11	edges=13	k=3 cycle_sizes=[4, 7, 4] target_faces=4
+case_031.txt	faces=4	max_face=9	vertices=12	edges=14	k=3 cycle_sizes=[6, 5, 5] target_faces=4
+case_032.txt	faces=4	max_face=9	vertices=12	edges=14	k=3 cycle_sizes=[5, 6, 5] target_faces=4
+case_033.txt	faces=4	max_face=10	vertices=13	edges=15	k=3 cycle_sizes=[5, 4, 8] target_faces=4
+case_034.txt	faces=4	max_face=10	vertices=12	edges=14	k=3 cycle_sizes=[8, 4, 4] target_faces=4
+case_035.txt	faces=4	max_face=10	vertices=13	edges=15	k=3 cycle_sizes=[7, 5, 5] target_faces=4
+case_036.txt	faces=4	max_face=10	vertices=12	edges=14	k=3 cycle_sizes=[5, 7, 4] target_faces=4
+case_037.txt	faces=4	max_face=11	vertices=16	edges=18	k=3 cycle_sizes=[7, 4, 9] target_faces=4
+case_038.txt	faces=4	max_face=11	vertices=15	edges=17	k=3 cycle_sizes=[6, 4, 9] target_faces=4
+case_039.txt	faces=4	max_face=11	vertices=13	edges=15	k=3 cycle_sizes=[4, 5, 8] target_faces=4
+case_040.txt	faces=4	max_face=12	vertices=16	edges=18	k=3 cycle_sizes=[10, 4, 6] target_faces=4
+case_041.txt	faces=4	max_face=12	vertices=17	edges=19	k=3 cycle_sizes=[10, 4, 7] target_faces=4
+case_042.txt	faces=4	max_face=12	vertices=16	edges=18	k=3 cycle_sizes=[6, 6, 8] target_faces=4
+case_043.txt	faces=4	max_face=12	vertices=15	edges=17	k=3 cycle_sizes=[5, 4, 10] target_faces=4
+case_044.txt	faces=4	max_face=12	vertices=17	edges=19	k=3 cycle_sizes=[7, 5, 9] target_faces=4
+case_045.txt	faces=4	max_face=12	vertices=18	edges=20	k=3 cycle_sizes=[8, 5, 9] target_faces=4
+case_046.txt	faces=4	max_face=12	vertices=15	edges=17	k=3 cycle_sizes=[9, 5, 5] target_faces=4
+case_047.txt	faces=4	max_face=13	vertices=20	edges=22	k=3 cycle_sizes=[9, 5, 10] target_faces=4
+case_048.txt	faces=4	max_face=13	vertices=18	edges=20	k=3 cycle_sizes=[11, 4, 7] target_faces=4
+case_049.txt	faces=4	max_face=13	vertices=19	edges=21	k=3 cycle_sizes=[11, 4, 8] target_faces=4
+case_050.txt	faces=4	max_face=13	vertices=17	edges=19	k=3 cycle_sizes=[11, 4, 6] target_faces=4
+case_051.txt	faces=4	max_face=13	vertices=16	edges=18	k=3 cycle_sizes=[5, 6, 9] target_faces=4
+case_052.txt	faces=4	max_face=13	vertices=16	edges=18	k=3 cycle_sizes=[10, 5, 5] target_faces=4
+case_053.txt	faces=4	max_face=14	vertices=22	edges=24	k=3 cycle_sizes=[12, 4, 10] target_faces=4
+case_054.txt	faces=4	max_face=14	vertices=18	edges=20	k=3 cycle_sizes=[6, 5, 11] target_faces=4
+case_055.txt	faces=4	max_face=14	vertices=17	edges=19	k=3 cycle_sizes=[11, 5, 5] target_faces=4
+case_056.txt	faces=4	max_face=14	vertices=21	edges=23	k=3 cycle_sizes=[9, 6, 10] target_faces=4
+case_057.txt	faces=4	max_face=14	vertices=20	edges=22	k=3 cycle_sizes=[10, 6, 8] target_faces=4
+case_058.txt	faces=4	max_face=14	vertices=19	edges=21	k=3 cycle_sizes=[7, 9, 7] target_faces=4
+case_059.txt	faces=4	max_face=14	vertices=16	edges=18	k=3 cycle_sizes=[4, 12, 4] target_faces=4
+case_060.txt	faces=4	max_face=14	vertices=18	edges=20	k=3 cycle_sizes=[6, 6, 10] target_faces=4
+case_061.txt	faces=4	max_face=15	vertices=21	edges=23	k=3 cycle_sizes=[8, 8, 9] target_faces=4
+case_062.txt	faces=4	max_face=15	vertices=25	edges=27	k=3 cycle_sizes=[12, 5, 12] target_faces=4
+case_063.txt	faces=4	max_face=15	vertices=19	edges=21	k=3 cycle_sizes=[6, 9, 8] target_faces=4
+case_064.txt	faces=5	max_face=11	vertices=15	edges=18	k=4 cycle_sizes=[6, 5, 4, 6] target_faces=5
+case_065.txt	faces=5	max_face=11	vertices=15	edges=18	k=4 cycle_sizes=[6, 4, 7, 4] target_faces=5
+case_066.txt	faces=5	max_face=11	vertices=13	edges=16	k=4 cycle_sizes=[4, 4, 4, 7] target_faces=5
+case_067.txt	faces=5	max_face=12	vertices=16	edges=19	k=4 cycle_sizes=[6, 5, 4, 7] target_faces=5
+case_068.txt	faces=5	max_face=12	vertices=19	edges=22	k=4 cycle_sizes=[10, 4, 6, 5] target_faces=5
+case_069.txt	faces=5	max_face=12	vertices=16	edges=19	k=4 cycle_sizes=[7, 7, 4, 4] target_faces=5
+case_070.txt	faces=5	max_face=12	vertices=16	edges=19	k=4 cycle_sizes=[6, 6, 6, 4] target_faces=5
+case_071.txt	faces=5	max_face=12	vertices=16	edges=19	k=4 cycle_sizes=[9, 5, 4, 4] target_faces=5
+case_072.txt	faces=5	max_face=12	vertices=16	edges=19	k=4 cycle_sizes=[6, 4, 5, 7] target_faces=5
+case_073.txt	faces=5	max_face=12	vertices=20	edges=23	k=4 cycle_sizes=[10, 4, 8, 4] target_faces=5
+case_074.txt	faces=5	max_face=12	vertices=17	edges=20	k=4 cycle_sizes=[9, 5, 4, 5] target_faces=5
+case_075.txt	faces=5	max_face=13	vertices=20	edges=23	k=4 cycle_sizes=[11, 4, 5, 6] target_faces=5
+case_076.txt	faces=5	max_face=13	vertices=18	edges=21	k=4 cycle_sizes=[7, 8, 4, 5] target_faces=5
+case_077.txt	faces=5	max_face=13	vertices=20	edges=23	k=4 cycle_sizes=[9, 4, 5, 8] target_faces=5
+case_078.txt	faces=5	max_face=13	vertices=22	edges=25	k=4 cycle_sizes=[11, 4, 9, 4] target_faces=5
+case_079.txt	faces=5	max_face=13	vertices=18	edges=21	k=4 cycle_sizes=[7, 4, 6, 7] target_faces=5
+case_080.txt	faces=5	max_face=13	vertices=17	edges=20	k=4 cycle_sizes=[6, 6, 5, 6] target_faces=5
+case_081.txt	faces=5	max_face=13	vertices=18	edges=21	k=4 cycle_sizes=[7, 8, 5, 4] target_faces=5
+case_082.txt	faces=5	max_face=13	vertices=19	edges=22	k=4 cycle_sizes=[11, 4, 6, 4] target_faces=5
+case_083.txt	faces=5	max_face=13	vertices=17	edges=20	k=4 cycle_sizes=[6, 4, 5, 8] target_faces=5
+case_084.txt	faces=5	max_face=14	vertices=17	edges=20	k=4 cycle_sizes=[5, 7, 6, 5] target_faces=5
+case_085.txt	faces=5	max_face=14	vertices=17	edges=20	k=4 cycle_sizes=[5, 9, 5, 4] target_faces=5
+case_086.txt	faces=5	max_face=14	vertices=17	edges=20	k=4 cycle_sizes=[5, 7, 7, 4] target_faces=5
+case_087.txt	faces=5	max_face=14	vertices=21	edges=24	k=4 cycle_sizes=[9, 6, 5, 7] target_faces=5
+case_088.txt	faces=5	max_face=14	vertices=18	edges=21	k=4 cycle_sizes=[6, 9, 4, 5] target_faces=5
+case_089.txt	faces=5	max_face=14	vertices=24	edges=27	k=4 cycle_sizes=[12, 4, 8, 6] target_faces=5
+case_090.txt	faces=5	max_face=15	vertices=24	edges=27	k=4 cycle_sizes=[11, 4, 5, 10] target_faces=5
+case_091.txt	faces=5	max_face=15	vertices=25	edges=28	k=4 cycle_sizes=[12, 4, 5, 10] target_faces=5
+case_092.txt	faces=5	max_face=15	vertices=18	edges=21	k=4 cycle_sizes=[5, 8, 5, 6] target_faces=5
+case_093.txt	faces=5	max_face=15	vertices=22	edges=25	k=4 cycle_sizes=[9, 4, 10, 5] target_faces=5
+case_094.txt	faces=5	max_face=15	vertices=24	edges=27	k=4 cycle_sizes=[12, 5, 8, 5] target_faces=5
+case_095.txt	faces=5	max_face=15	vertices=22	edges=25	k=4 cycle_sizes=[9, 4, 7, 8] target_faces=5
+case_096.txt	faces=5	max_face=15	vertices=20	edges=23	k=4 cycle_sizes=[7, 4, 8, 7] target_faces=5
+case_097.txt	faces=5	max_face=15	vertices=20	edges=23	k=4 cycle_sizes=[7, 5, 7, 7] target_faces=5
+case_098.txt	faces=5	max_face=15	vertices=17	edges=20	k=4 cycle_sizes=[4, 8, 7, 4] target_faces=5
+case_099.txt	faces=5	max_face=15	vertices=23	edges=26	k=4 cycle_sizes=[10, 5, 5, 9] target_faces=5
+case_100.txt	faces=5	max_face=15	vertices=21	edges=24	k=4 cycle_sizes=[8, 5, 5, 9] target_faces=5
