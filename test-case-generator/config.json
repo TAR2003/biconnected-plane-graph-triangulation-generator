@@ -1,0 +1,41 @@
+{
+  "_comment": "Global defaults apply to every category unless overridden below. Each category can override any subset of: count, max_faces, max_vertices_in_face, max_vertices, min_vertices, seed.",
+
+  "defaults": {
+    "count": 100,
+    "max_faces": 8,
+    "max_vertices_in_face": 15,
+    "max_vertices": 200,
+    "min_vertices": 3,
+    "seed": 42
+  },
+
+  "categories": {
+    "1_triangulation_subdivide_1": {
+      "_comment": "Delaunay triangulation, subdivide each edge once. Leave empty {} to use defaults, or override any field below.",
+      "count": 100
+    },
+    "2_triangulation_subdivide_2": {
+      "count": 100
+    },
+    "3_triangulation_subdivide_3": {
+      "count": 100,
+      "_comment_example": "subdividing 3x triples face-boundary lengths, so this category often needs a larger max_vertices_in_face than the others -- e.g. uncomment below.",
+      "max_vertices_in_face": 40
+    },
+    "4_halin": {
+      "count": 100,
+      "_comment_example": "Halin graphs need max_faces >= 4 (mathematical minimum, see gen_halin.py).",
+      "max_faces": 15,
+      "max_vertices_in_face": 15
+    },
+    "5_cycles": {
+      "count": 13,
+      "_comment_example": "Only 13 distinct (non-isomorphic) cycle graphs exist (n=3..15), so requesting more than 13 here will always produce a shortfall warning -- see gen_cycles.py."
+    },
+    "6_cycle_union": {
+      "count": 100,
+      "_comment_example": "Cycle unions only reach k in [2,4], so max_faces above 5 has no effect on this category (faces = k+1)."
+    }
+  }
+}

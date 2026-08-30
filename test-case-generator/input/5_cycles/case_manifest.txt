@@ -1,0 +1,13 @@
+case_001.txt	faces=2	max_face=3	vertices=3	edges=3	n=3
+case_002.txt	faces=2	max_face=4	vertices=4	edges=4	n=4
+case_003.txt	faces=2	max_face=5	vertices=5	edges=5	n=5
+case_004.txt	faces=2	max_face=6	vertices=6	edges=6	n=6
+case_005.txt	faces=2	max_face=7	vertices=7	edges=7	n=7
+case_006.txt	faces=2	max_face=8	vertices=8	edges=8	n=8
+case_007.txt	faces=2	max_face=9	vertices=9	edges=9	n=9
+case_008.txt	faces=2	max_face=10	vertices=10	edges=10	n=10
+case_009.txt	faces=2	max_face=11	vertices=11	edges=11	n=11
+case_010.txt	faces=2	max_face=12	vertices=12	edges=12	n=12
+case_011.txt	faces=2	max_face=13	vertices=13	edges=13	n=13
+case_012.txt	faces=2	max_face=14	vertices=14	edges=14	n=14
+case_013.txt	faces=2	max_face=15	vertices=15	edges=15	n=15
