@@ -5,6 +5,7 @@ using namespace std;
 #include "pairHash.hpp"
 #include "FaceTriangulation.hpp"
 #include "ParvezRahmanNakano.hpp"
+#include "TriangulationHasher.hpp"
 
 class triconnected
 {
@@ -13,10 +14,12 @@ public:
     vector<vector<pair<int, int>>> allTriangulations;
     vector<vector<vector<pair<int, int>>>> triangulation_per_face;
     unordered_set<pair<int, int>, PairHash> present;
+    TriangulationRunStats *runStats = nullptr;
 
-    triconnected(vector<vector<int>> &faces)
+    triconnected(vector<vector<int>> &faces, TriangulationRunStats *stats = nullptr)
     {
         this->faces = faces;
+        runStats = stats;
 
         present = unordered_set<pair<int, int>, PairHash>();
         initiatePresent();
@@ -182,7 +185,17 @@ public:
             // every face has contributed a validated, non-duplicate,
             // non-boundary set of chords -> this is a complete, valid
             // triangulation of the triconnected component
-            allTriangulations.push_back(current);
+            vector<pair<int, int>> canonical = current;
+            sort(canonical.begin(), canonical.end());
+
+            if (runStats != nullptr)
+            {
+                runStats->recordTriangulation(canonical, &allTriangulations);
+            }
+            else
+            {
+                allTriangulations.push_back(canonical);
+            }
             return;
         }
 

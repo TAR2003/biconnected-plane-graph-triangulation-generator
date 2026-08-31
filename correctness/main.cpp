@@ -5,8 +5,12 @@ using namespace std;
 #include "biconnected.hpp"
 #include "FaceTriangulation.hpp"
 #include "triconnected.hpp"
+#include "TriangulationHasher.hpp"
 
+#include <chrono>
 #include <filesystem>
+#include <iomanip>
+#include <sstream>
 namespace fs = std::filesystem;
 
 // ============================================================================
@@ -39,12 +43,18 @@ vector<vector<int>> solve(const string &filename)
     return faces;
 }
 
-bool matchPairs(const pair<int, int> &p1, const pair<int, int> &p2)
+// ============================================================================
+// Comparison helpers
+// ============================================================================
+
+static bool matchPairs(const pair<int, int> &p1, const pair<int, int> &p2)
 {
     return (p1.first == p2.first && p1.second == p2.second);
 }
 
-bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int, int>> &t2)
+static bool matchTriangulations(
+    const vector<pair<int, int>> &t1,
+    const vector<pair<int, int>> &t2)
 {
     if (t1.size() != t2.size())
         return false;
@@ -56,67 +66,189 @@ bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int
     return true;
 }
 
-// Returns: 1 = matched, 0 = mismatched, -1 = error (couldn't read file)
-int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCount)
+static string formatTimestamp(const chrono::system_clock::time_point &tp)
 {
+    const auto tt = chrono::system_clock::to_time_t(tp);
+    tm localTm{};
+#ifdef _WIN32
+    localtime_s(&localTm, &tt);
+#else
+    localtime_r(&tt, &localTm);
+#endif
+    ostringstream oss;
+    oss << put_time(&localTm, "%Y-%m-%d %H:%M:%S");
+    return oss.str();
+}
+
+static string formatDurationSeconds(double seconds)
+{
+    ostringstream oss;
+    oss << fixed << setprecision(3) << seconds;
+    return oss.str();
+}
+
+enum class MatchVerdict
+{
+    MATCHED,
+    UNMATCHED
+};
+
+enum class ExactVerdict
+{
+    MATCHED,
+    UNMATCHED,
+    SPACE_EXCEEDED
+};
+
+struct ComparisonResult
+{
+    bool fileReadError = false;
+    MatchVerdict triangulationCountMatch = MatchVerdict::UNMATCHED;
+    MatchVerdict hashMatch = MatchVerdict::UNMATCHED;
+    ExactVerdict exactMatch = ExactVerdict::UNMATCHED;
+    MatchVerdict overallMatch = MatchVerdict::UNMATCHED;
+
+    TriangulationRunStats newStats;
+    TriangulationRunStats oldStats;
+
+    string startTime;
+    string endTime;
+    double totalSeconds = 0.0;
+};
+
+static MatchVerdict toMatchVerdict(bool matched)
+{
+    return matched ? MatchVerdict::MATCHED : MatchVerdict::UNMATCHED;
+}
+
+static string verdictToString(MatchVerdict v)
+{
+    return v == MatchVerdict::MATCHED ? "MATCHED" : "UNMATCHED";
+}
+
+static string exactVerdictToString(ExactVerdict v)
+{
+    switch (v)
+    {
+    case ExactVerdict::MATCHED:
+        return "MATCHED";
+    case ExactVerdict::UNMATCHED:
+        return "UNMATCHED";
+    case ExactVerdict::SPACE_EXCEEDED:
+        return "SPACE_EXCEEDED";
+    }
+    return "UNKNOWN";
+}
+
+static bool hashesMatch(const TriangulationRunStats &a, const TriangulationRunStats &b)
+{
+    return a.hashXxXor == b.hashXxXor &&
+           a.hashMurmurXor == b.hashMurmurXor &&
+           a.hashSipXor == b.hashSipXor;
+}
+
+static ExactVerdict compareExact(
+    const vector<vector<pair<int, int>>> &newStored,
+    const vector<vector<pair<int, int>>> &oldStored,
+    const TriangulationRunStats &newStats,
+    const TriangulationRunStats &oldStats)
+{
+    if (newStats.storageStopped || oldStats.storageStopped)
+        return ExactVerdict::SPACE_EXCEEDED;
+
+    if (newStored.size() != oldStored.size())
+        return ExactVerdict::UNMATCHED;
+
+    auto sortedNew = newStored;
+    auto sortedOld = oldStored;
+    sort(sortedNew.begin(), sortedNew.end());
+    sort(sortedOld.begin(), sortedOld.end());
+
+    for (size_t i = 0; i < sortedNew.size(); ++i)
+    {
+        if (!matchTriangulations(sortedNew[i], sortedOld[i]))
+            return ExactVerdict::UNMATCHED;
+    }
+    return ExactVerdict::MATCHED;
+}
+
+static MatchVerdict computeOverallMatch(
+    MatchVerdict countMatch,
+    MatchVerdict hashMatchResult,
+    ExactVerdict exactMatchResult)
+{
+    if (countMatch != MatchVerdict::MATCHED || hashMatchResult != MatchVerdict::MATCHED)
+        return MatchVerdict::UNMATCHED;
+
+    if (exactMatchResult == ExactVerdict::MATCHED ||
+        exactMatchResult == ExactVerdict::SPACE_EXCEEDED)
+    {
+        return MatchVerdict::MATCHED;
+    }
+    return MatchVerdict::UNMATCHED;
+}
+
+// Returns: 1 = matched, 0 = mismatched, -1 = error (couldn't read file)
+static ComparisonResult compareTwoAlgorithms(
+    const string &filename,
+    size_t memoryLimitBytes)
+{
+    ComparisonResult result;
+
+    const auto startClock = chrono::steady_clock::now();
+    result.startTime = formatTimestamp(chrono::system_clock::now());
+
     vector<vector<int>> faces = solve(filename);
     if (faces.empty())
     {
-        newCount = oldCount = 0;
-        return -1;
+        result.fileReadError = true;
+        result.endTime = formatTimestamp(chrono::system_clock::now());
+        return result;
     }
 
-    biconnected *bc = new biconnected(faces);
+    result.newStats.memoryLimitBytes = memoryLimitBytes;
+    result.oldStats.memoryLimitBytes = memoryLimitBytes;
+
+    biconnected *bc = new biconnected(faces, &result.newStats);
     bc->getAllTriangulations();
     bc->sortTriangulations();
 
-    triconnected *tc = new triconnected(faces);
+    triconnected *tc = new triconnected(faces, &result.oldStats);
     tc->getAllTriangulations();
     tc->refineTriangulations();
 
-    auto newalgo = bc->allTriangulations;
-    auto oldalgo = tc->allTriangulations;
+    const auto endClock = chrono::steady_clock::now();
+    result.endTime = formatTimestamp(chrono::system_clock::now());
+    result.totalSeconds = chrono::duration<double>(endClock - startClock).count();
 
-    newCount = newalgo.size();
-    oldCount = oldalgo.size();
-
-    bool result = true;
-    if (newalgo.size() != oldalgo.size())
-    {
-        result = false;
-    }
-    else
-    {
-        for (size_t i = 0; i < newalgo.size(); i++)
-        {
-            if (!matchTriangulations(newalgo[i], oldalgo[i]))
-            {
-                result = false;
-                break;
-            }
-        }
-    }
+    result.triangulationCountMatch = toMatchVerdict(
+        result.newStats.totalTriangulationCount == result.oldStats.totalTriangulationCount);
+    result.hashMatch = toMatchVerdict(hashesMatch(result.newStats, result.oldStats));
+    result.exactMatch = compareExact(
+        bc->allTriangulations,
+        tc->allTriangulations,
+        result.newStats,
+        result.oldStats);
+    result.overallMatch = computeOverallMatch(
+        result.triangulationCountMatch,
+        result.hashMatch,
+        result.exactMatch);
 
     delete bc;
     delete tc;
 
-    return result ? 1 : 0;
+    return result;
 }
 
 // ============================================================================
 // Per-category CSV helpers
 // ============================================================================
 
-// CSV format: filename,result,newCount,oldCount
-// result is one of: MATCH, MISMATCH, ERROR
-
 static string csvPathForCategory(const string &category)
 {
     return "results_" + category + ".csv";
 }
 
-// Load the set of filenames (base name only, not full path) already present
-// in a category's CSV, so we can skip them.
 static unordered_set<string> loadProcessedFiles(const string &csvPath)
 {
     unordered_set<string> processed;
@@ -125,7 +257,6 @@ static unordered_set<string> loadProcessedFiles(const string &csvPath)
         return processed;
 
     string line;
-    // skip header
     if (!getline(in, line))
         return processed;
 
@@ -142,8 +273,7 @@ static unordered_set<string> loadProcessedFiles(const string &csvPath)
     return processed;
 }
 
-static void appendResultCSV(const string &csvPath, const string &filename,
-                            const string &resultStr, size_t newCount, size_t oldCount)
+static void appendResultCSV(const string &csvPath, const string &filename, const ComparisonResult &r)
 {
     bool needHeader = !fs::exists(csvPath);
     ofstream out(csvPath, ios::app);
@@ -152,31 +282,50 @@ static void appendResultCSV(const string &csvPath, const string &filename,
         cerr << "Error: could not open " << csvPath << " for writing\n";
         return;
     }
+
     if (needHeader)
     {
-        out << "filename,result,newAlgoCount,oldAlgoCount\n";
+        out << "filename,startTime,endTime,totalTimeSeconds,"
+            << "newAlgoCount,oldAlgoCount,"
+            << "newStoredCount,oldStoredCount,"
+            << "newSpaceExceeded,oldSpaceExceeded,"
+            << "newHashXx,newHashMurmur,newHashSip,"
+            << "oldHashXx,oldHashMurmur,oldHashSip,"
+            << "triangulationCountMatch,hashMatch,exactMatch,matched\n";
     }
-    out << filename << ',' << resultStr << ',' << newCount << ',' << oldCount << '\n';
+
+    out << filename << ','
+        << r.startTime << ','
+        << r.endTime << ','
+        << formatDurationSeconds(r.totalSeconds) << ','
+        << r.newStats.totalTriangulationCount << ','
+        << r.oldStats.totalTriangulationCount << ','
+        << r.newStats.storedTriangulationCount << ','
+        << r.oldStats.storedTriangulationCount << ','
+        << (r.newStats.storageStopped ? "YES" : "NO") << ','
+        << (r.oldStats.storageStopped ? "YES" : "NO") << ','
+        << formatHashHex(r.newStats.hashXxXor) << ','
+        << formatHashHex(r.newStats.hashMurmurXor) << ','
+        << formatHashHex(r.newStats.hashSipXor) << ','
+        << formatHashHex(r.oldStats.hashXxXor) << ','
+        << formatHashHex(r.oldStats.hashMurmurXor) << ','
+        << formatHashHex(r.oldStats.hashSipXor) << ','
+        << verdictToString(r.triangulationCountMatch) << ','
+        << verdictToString(r.hashMatch) << ','
+        << exactVerdictToString(r.exactMatch) << ','
+        << verdictToString(r.overallMatch) << '\n';
 }
 
 // ============================================================================
-// Category discovery: every immediate subdirectory of the input root folder
-// is treated as its own category, e.g.
-//   input/cycle_3_to_15
-//   input/delaunay_subdivide_1x
-//   input/delaunay_subdivide_2x
-//   input/delaunay_subdivide_3x
-//   input/halin_graph
-// New categories can simply be added as new folders under "input" and will
-// be picked up automatically; no code changes required.
-//
-// Category indices (for the command-line argument) are assigned in
-// alphabetical order, 1-based: 1st category alphabetically = "1", etc.
+// Category discovery
 // ============================================================================
 
-static void printUsage(const vector<string> &categories, const char *progName)
+static void printUsage(const vector<string> &categories, const char *progName, size_t memoryLimitGb)
 {
-    cerr << "Usage: " << progName << " <category-index|all>\n\n";
+    cerr << "Usage: " << progName << " <category-index|all> [--memory-limit-gb N]\n\n";
+    cerr << "Options:\n";
+    cerr << "  --memory-limit-gb N   Stop storing triangulations after ~N GiB (default: "
+        << memoryLimitGb << ")\n\n";
     cerr << "Available categories (alphabetical order):\n";
     for (size_t i = 0; i < categories.size(); i++)
     {
@@ -185,7 +334,6 @@ static void printUsage(const vector<string> &categories, const char *progName)
     cerr << "  all -> run every category above\n";
 }
 
-// Runs correctness checking for a single category, returns its summary.
 struct Summary
 {
     string category;
@@ -195,13 +343,18 @@ struct Summary
     int skipped = 0;
 };
 
-static Summary runCategory(const string &rootFolder, const string &category)
+static Summary runCategory(
+    const string &rootFolder,
+    const string &category,
+    size_t memoryLimitBytes)
 {
-    string categoryFolder = rootFolder + "/" + category;
-    string csvPath = csvPathForCategory(category);
+    const string categoryFolder = rootFolder + "/" + category;
+    const string csvPath = csvPathForCategory(category);
 
     cout << "\n=== Category: " << category << " ===\n";
     cout << "Results CSV: " << csvPath << "\n";
+    cout << "Memory limit for stored triangulations: "
+         << (memoryLimitBytes / (1024ULL * 1024ULL * 1024ULL)) << " GiB\n";
 
     unordered_set<string> processed = loadProcessedFiles(csvPath);
 
@@ -212,13 +365,11 @@ static Summary runCategory(const string &rootFolder, const string &category)
     for (const auto &entry : fs::directory_iterator(categoryFolder))
     {
         if (entry.is_regular_file())
-        {
             fileList.push_back(entry.path().filename().string());
-        }
     }
     sort(fileList.begin(), fileList.end());
 
-    for (const auto &filename : fileList)
+    for (const string &filename : fileList)
     {
         if (processed.find(filename) != processed.end())
         {
@@ -227,41 +378,77 @@ static Summary runCategory(const string &rootFolder, const string &category)
             continue;
         }
 
-        string fullPath = categoryFolder + "/" + filename;
+        const string fullPath = categoryFolder + "/" + filename;
         cout << "  Processing: " << filename << " ... " << flush;
 
-        size_t newCount = 0, oldCount = 0;
-        int result = matchTwoAlgorithms(fullPath, newCount, oldCount);
+        ComparisonResult result = compareTwoAlgorithms(fullPath, memoryLimitBytes);
 
-        string resultStr;
-        if (result == 1)
+        if (result.fileReadError)
         {
-            resultStr = "MATCH";
-            summ.matched++;
-            cout << "\033[1;32mMATCH\033[0m (" << newCount << " triangulations)\n";
+            summ.errors++;
+            cout << "\033[1;33mERROR (could not read file)\033[0m\n";
+            appendResultCSV(csvPath, filename, result);
+            continue;
         }
-        else if (result == 0)
+
+        const bool isMatched = result.overallMatch == MatchVerdict::MATCHED;
+        if (isMatched)
         {
-            resultStr = "MISMATCH";
-            summ.mismatched++;
-            cout << "\033[1;31mMISMATCH\033[0m (new=" << newCount << ", old=" << oldCount << ")\n";
+            summ.matched++;
+            cout << "\033[1;32mMATCHED\033[0m"
+                 << " (count=" << result.newStats.totalTriangulationCount
+                 << ", time=" << formatDurationSeconds(result.totalSeconds) << "s";
+            if (result.exactMatch == ExactVerdict::SPACE_EXCEEDED)
+                cout << ", exact=SPACE_EXCEEDED";
+            cout << ")\n";
         }
         else
         {
-            resultStr = "ERROR";
-            summ.errors++;
-            cout << "\033[1;33mERROR (could not read file)\033[0m\n";
+            summ.mismatched++;
+            cout << "\033[1;31mUNMATCHED\033[0m"
+                 << " (new=" << result.newStats.totalTriangulationCount
+                 << ", old=" << result.oldStats.totalTriangulationCount
+                 << ", countMatch=" << verdictToString(result.triangulationCountMatch)
+                 << ", hashMatch=" << verdictToString(result.hashMatch)
+                 << ", exactMatch=" << exactVerdictToString(result.exactMatch)
+                 << ")\n";
         }
 
-        appendResultCSV(csvPath, filename, resultStr, newCount, oldCount);
+        cout << "    start=" << result.startTime
+             << "  end=" << result.endTime
+             << "  duration=" << formatDurationSeconds(result.totalSeconds) << "s\n";
+        cout << "    new hashes: xx=" << formatHashHex(result.newStats.hashXxXor)
+             << " murmur=" << formatHashHex(result.newStats.hashMurmurXor)
+             << " sip=" << formatHashHex(result.newStats.hashSipXor) << "\n";
+        cout << "    old hashes: xx=" << formatHashHex(result.oldStats.hashXxXor)
+             << " murmur=" << formatHashHex(result.oldStats.hashMurmurXor)
+             << " sip=" << formatHashHex(result.oldStats.hashSipXor) << "\n";
+
+        appendResultCSV(csvPath, filename, result);
     }
 
     return summ;
 }
 
+static size_t parseMemoryLimitGb(int argc, char *argv[], size_t defaultGb)
+{
+    for (int i = 2; i < argc; ++i)
+    {
+        string arg = argv[i];
+        if (arg == "--memory-limit-gb" && i + 1 < argc)
+        {
+            return static_cast<size_t>(stoull(argv[i + 1]));
+        }
+    }
+    return defaultGb;
+}
+
 int main(int argc, char *argv[])
 {
     const string rootFolder = "input";
+    const size_t defaultMemoryLimitGb = 2;
+    const size_t memoryLimitGb = parseMemoryLimitGb(argc, argv, defaultMemoryLimitGb);
+    const size_t memoryLimitBytes = memoryLimitGb * 1024ULL * 1024ULL * 1024ULL;
 
     if (!fs::exists(rootFolder) || !fs::is_directory(rootFolder))
     {
@@ -269,14 +456,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // gather categories (subdirectories of input/), alphabetically sorted
     vector<string> categories;
     for (const auto &entry : fs::directory_iterator(rootFolder))
     {
         if (entry.is_directory())
-        {
             categories.push_back(entry.path().filename().string());
-        }
     }
     sort(categories.begin(), categories.end());
 
@@ -286,16 +470,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // ------------------------------------------------------------------
-    // Parse command-line argument
-    // ------------------------------------------------------------------
     if (argc < 2)
     {
-        printUsage(categories, argv[0]);
+        printUsage(categories, argv[0], defaultMemoryLimitGb);
         return 1;
     }
 
-    string arg = argv[1];
+    const string arg = argv[1];
     vector<string> categoriesToRun;
 
     if (arg == "all")
@@ -304,47 +485,43 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // must be a positive integer index
-        bool isNumber = !arg.empty() && all_of(arg.begin(), arg.end(), ::isdigit);
+        const bool isNumber = !arg.empty() && all_of(arg.begin(), arg.end(), ::isdigit);
         if (!isNumber)
         {
             cerr << "Invalid argument: '" << arg << "'\n\n";
-            printUsage(categories, argv[0]);
+            printUsage(categories, argv[0], defaultMemoryLimitGb);
             return 1;
         }
 
-        int idx = stoi(arg);
-        if (idx < 1 || idx > (int)categories.size())
+        const int idx = stoi(arg);
+        if (idx < 1 || idx > static_cast<int>(categories.size()))
         {
             cerr << "Category index out of range: " << idx << "\n\n";
-            printUsage(categories, argv[0]);
+            printUsage(categories, argv[0], defaultMemoryLimitGb);
             return 1;
         }
 
         categoriesToRun.push_back(categories[idx - 1]);
     }
 
-    // ------------------------------------------------------------------
-    // Run selected categories
-    // ------------------------------------------------------------------
-    vector<Summary> summaries;
-    for (const auto &category : categoriesToRun)
-    {
-        summaries.push_back(runCategory(rootFolder, category));
-    }
+    cout << "Correctness verification started at "
+         << formatTimestamp(chrono::system_clock::now()) << "\n";
+    cout << "Memory limit per algorithm: " << memoryLimitGb << " GiB\n";
 
-    // ------------------------------------------------------------------
-    // Final summary
-    // ------------------------------------------------------------------
+    vector<Summary> summaries;
+    for (const string &category : categoriesToRun)
+        summaries.push_back(runCategory(rootFolder, category, memoryLimitBytes));
+
     cout << "\n=================== SUMMARY ===================\n";
     for (const auto &s : summaries)
     {
         cout << "Category: " << s.category << "\n";
         cout << "  Matched:    " << s.matched << "\n";
-        cout << "  Mismatched: " << s.mismatched << "\n";
+        cout << "  Unmatched:  " << s.mismatched << "\n";
         cout << "  Errors:     " << s.errors << "\n";
         cout << "  Skipped:    " << s.skipped << " (already tested previously)\n";
     }
+    cout << "Finished at " << formatTimestamp(chrono::system_clock::now()) << "\n";
     cout << "=================================================\n";
 
     return 0;

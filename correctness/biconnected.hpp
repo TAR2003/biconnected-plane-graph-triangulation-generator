@@ -3,6 +3,7 @@ using namespace std;
 #pragma once
 #include "Edge.hpp"
 #include "pairHash.hpp"
+#include "TriangulationHasher.hpp"
 
 // Forward declaration to avoid circular dependency
 class FaceTriangulation;
@@ -14,9 +15,12 @@ public:
     unordered_set<pair<int, int>, PairHash> present;
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation *> faceTriangulations;
-    biconnected(vector<vector<int>> &faces)
+    TriangulationRunStats *runStats = nullptr;
+
+    biconnected(vector<vector<int>> &faces, TriangulationRunStats *stats = nullptr)
     {
         this->faces = faces;
+        runStats = stats;
         present = unordered_set<pair<int, int>, PairHash>();
         initiatePresent();
         faceTriangulations = vector<FaceTriangulation *>(faces.size());
@@ -92,5 +96,14 @@ inline void biconnected::addTriangulation()
         sort(currentTriangulation.begin(), currentTriangulation.end());
         currentTriangulations.insert(currentTriangulations.end(), currentTriangulation.begin(), currentTriangulation.end());
     }
-    allTriangulations.push_back(currentTriangulations);
+    sort(currentTriangulations.begin(), currentTriangulations.end());
+
+    if (runStats != nullptr)
+    {
+        runStats->recordTriangulation(currentTriangulations, &allTriangulations);
+    }
+    else
+    {
+        allTriangulations.push_back(currentTriangulations);
+    }
 }
