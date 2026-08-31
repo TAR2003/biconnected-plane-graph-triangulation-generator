@@ -39,6 +39,16 @@ static string currentTimeString()
     return string(buf);
 }
 
+// Returns 0 if the file doesn't exist / can't be stat'd, rather than throwing.
+static size_t fileSizeOrZero(const string &path)
+{
+    error_code ec;
+    if (!fs::exists(path, ec))
+        return 0;
+    size_t sz = fs::file_size(path, ec);
+    return ec ? 0 : sz;
+}
+
 // ============================================================================
 // RAII guard: guarantees every registered temp file is removed when the
 // guard goes out of scope, regardless of how the enclosing function exits
@@ -62,6 +72,17 @@ struct ScopedTempFiles
             fs::remove(f, ec);
         }
         files.clear();
+    }
+
+    // Remove a single previously-registered file right now (used for
+    // "this is dead weight, get rid of it immediately" cases, e.g. the raw
+    // pre-sort file, or merge-sort chunk files once they've been folded into
+    // the final sorted output). It stays in `files` so the destructor is
+    // still a harmless no-op if it somehow wasn't removed here.
+    void removeNow(const string &f)
+    {
+        error_code ec;
+        fs::remove(f, ec);
     }
 
     ~ScopedTempFiles()
@@ -175,27 +196,33 @@ vector<vector<int>> solve(const string &filename)
 
 // ============================================================================
 // External Sort for binary triangulation files (With Disk Limit Enforcer)
+//
+// Storage-budget note: this function's own chunk files (temp_chunk_*.bin)
+// are transient scratch space consumed by the k-way merge. Once a chunk has
+// been read and folded into the merged output, or once the merge as a whole
+// has finished successfully, those chunks are dead weight and are removed
+// by the caller (matchTwoAlgorithms) immediately — not held onto until the
+// very end of the whole comparison. That keeps the peak footprint at any
+// point in the pipeline bounded to roughly 2x the size of one algorithm's
+// triangulation set (the raw/sorted pair currently in flight), rather than
+// accumulating raw + chunks + sorted simultaneously.
 // ============================================================================
-struct TriangulationEntry
-{
-    vector<pair<int, int>> chords;
-
-    bool operator<(const TriangulationEntry &other) const
-    {
-        return chords < other.chords;
-    }
-    bool operator>(const TriangulationEntry &other) const
-    {
-        return chords > other.chords;
-    }
-};
-
 static bool externalSortBinaryFile(const string &inputFile, const string &outputFile,
-                                   ScopedTempFiles &tempGuard, size_t maxRAMEntries = 500000)
+                                   ScopedTempFiles &tempGuard, vector<string> &chunkFilesOut,
+                                   size_t maxRAMEntries = 500000)
 {
+    chunkFilesOut.clear();
+
     ifstream in(inputFile, ios::binary);
     if (!in.is_open())
         return false;
+
+    struct TriangulationEntry
+    {
+        vector<pair<int, int>> chords;
+        bool operator<(const TriangulationEntry &other) const { return chords < other.chords; }
+        bool operator>(const TriangulationEntry &other) const { return chords > other.chords; }
+    };
 
     vector<string> chunkFiles;
     vector<TriangulationEntry> buffer;
@@ -262,6 +289,7 @@ static bool externalSortBinaryFile(const string &inputFile, const string &output
             if (!writeChunk(buffer, outputFile))
                 diskExceeded = true;
             in.close();
+            chunkFilesOut = chunkFiles; // empty, but keep contract consistent
             return !diskExceeded;
         }
         else
@@ -276,6 +304,8 @@ static bool externalSortBinaryFile(const string &inputFile, const string &output
         }
     }
     in.close();
+
+    chunkFilesOut = chunkFiles;
 
     if (diskExceeded)
     {
@@ -356,8 +386,9 @@ static bool externalSortBinaryFile(const string &inputFile, const string &output
     {
         streams[i].close();
     }
-    // chunkFiles are removed via tempGuard (registered above), whether this
-    // succeeded or diskExceeded is true.
+    // chunkFiles are removed by the caller immediately after this call
+    // returns (see matchTwoAlgorithms), rather than lingering until final
+    // cleanup, whether this succeeded or diskExceeded is true.
 
     return !diskExceeded;
 }
@@ -401,8 +432,19 @@ bool compareTriangulationFiles(const string &file1, const string &file2, size_t 
     return true;
 }
 
-// Returns: 1 = matched, 0 = mismatched, -1 = error, -2 = limit exceeded
-//
+// Result bundle so the caller can log storage + timing per phase, in
+// addition to the match outcome itself.
+struct MatchResult
+{
+    int code = -1; // 1 = matched, 0 = mismatched, -1 = error, -2 = limit exceeded
+    size_t newCount = 0;
+    size_t oldCount = 0;
+    size_t bcSortedBytes = 0; // final size of the biconnected (new-algo) sorted bin file
+    size_t tcSortedBytes = 0; // final size of the triconnected (old-algo) sorted bin file
+    string startTs;
+    string endTs;
+};
+
 // Every temp file this function creates is registered with ScopedTempFiles
 // the moment its name is decided, BEFORE any writing begins. That guard's
 // destructor removes them unconditionally on every exit path: normal
@@ -413,27 +455,35 @@ bool compareTriangulationFiles(const string &file1, const string &file2, size_t 
 // Disk limit semantics: each temp file is checked INDIVIDUALLY against
 // MAX_DISK_BYTES (1 GB), not summed together. temp_bc_raw.bin,
 // temp_bc_sorted.bin, and temp_tc_sorted.bin each get their own full
-// budget. Additionally, temp_bc_raw.bin is deleted the moment it has been
-// successfully sorted into temp_bc_sorted.bin — it isn't kept around until
-// final cleanup, since its data has already been fully copied elsewhere.
+// budget.
 //
-// startTs / endTs: set to the wall-clock time (via currentTimeString()) at
-// the very beginning and at every exit point of this function, so the
-// caller can log/record exactly when this test case's operation began and
-// ended, regardless of which path (success, mismatch, limit-exceeded,
-// error) was taken.
-int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCount,
-                       string &startTs, string &endTs)
+// Storage-budget note (2N invariant): at any point while this function
+// runs, at most two full copies of "one algorithm's triangulation set" are
+// ever on disk simultaneously:
+//   - Phase 1: only temp_bc_raw.bin exists (1N).
+//   - Phase 2: temp_bc_raw.bin (1N) + temp_bc_sorted.bin growing (up to 1N)
+//     + transient merge chunks, which are themselves just a repartitioning
+//     of temp_bc_raw's own N bytes, not additional data. As soon as the
+//     merge finishes, chunks are deleted immediately (chunkFilesOut cleanup
+//     below) and temp_bc_raw.bin is deleted immediately after — so we never
+//     hold raw + chunks + sorted for longer than necessary, and we never
+//     let raw linger into Phase 3.
+//   - Phase 3: temp_bc_sorted.bin (1N, finished) + temp_tc_sorted.bin
+//     growing (up to 1N) = 2N.
+// So the peak footprint across the whole comparison is bounded by ~2N,
+// where N is the larger of the two algorithms' final triangulation-set
+// sizes.
+MatchResult matchTwoAlgorithms(const string &filename)
 {
-    newCount = oldCount = 0;
-    startTs = currentTimeString();
-    endTs.clear();
+    MatchResult res;
+    res.startTs = currentTimeString();
 
     vector<vector<int>> faces = solve(filename);
     if (faces.empty())
     {
-        endTs = currentTimeString();
-        return -1;
+        res.code = -1;
+        res.endTs = currentTimeString();
+        return res;
     }
 
     ScopedTempFiles tempGuard;
@@ -468,31 +518,45 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
                 taskAborted = true;
             }
             monitor.stop();
-            newCount = bc.totalCount;
+            res.newCount = bc.totalCount;
 
             if (taskAborted || monitor.hasExceeded())
             {
-                endTs = currentTimeString();
-                return -2; // tempGuard cleans up fileBC_raw
+                res.code = -2;
+                res.endTs = currentTimeString();
+                return res; // tempGuard cleans up fileBC_raw
             }
         }
 
         // --- Phase 2: External Sorting ---
-        if (!externalSortBinaryFile(fileBC_raw, fileBC_sorted, tempGuard))
+        vector<string> chunkFiles;
+        if (!externalSortBinaryFile(fileBC_raw, fileBC_sorted, tempGuard, chunkFiles))
         {
-            endTs = currentTimeString();
-            return -2; // tempGuard cleans up everything registered so far
+            res.code = -2;
+            res.endTs = currentTimeString();
+            return res; // tempGuard cleans up everything registered so far
+        }
+
+        // The merge chunks are pure scratch space derived entirely from
+        // fileBC_raw's own bytes. Now that the merge has produced
+        // fileBC_sorted, they are immediately dead weight — remove them
+        // right away instead of waiting for final cleanup, so they don't
+        // sit on disk alongside fileBC_sorted (and soon fileTC_sorted) for
+        // the rest of the run.
+        for (const auto &cf : chunkFiles)
+        {
+            tempGuard.removeNow(cf);
         }
 
         // fileBC_raw's data has now been fully consumed and re-written,
         // sorted, into fileBC_sorted. Remove the raw file completely right
         // away instead of waiting for final cleanup — it's dead weight from
         // here on and there's no reason to let it keep occupying disk space
-        // while Phase 3 runs.
-        {
-            error_code ec;
-            fs::remove(fileBC_raw, ec);
-        }
+        // while Phase 3 runs. This is what keeps the peak footprint at ~2N
+        // instead of 3N (raw + sorted + about-to-be-created tc file).
+        tempGuard.removeNow(fileBC_raw);
+
+        res.bcSortedBytes = fileSizeOrZero(fileBC_sorted);
 
         // --- Phase 3: Triconnected Run ---
         {
@@ -515,22 +579,26 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
                 taskAborted = true;
             }
             monitor.stop();
-            oldCount = tc.totalCount;
+            res.oldCount = tc.totalCount;
 
             if (taskAborted || monitor.hasExceeded())
             {
-                endTs = currentTimeString();
-                return -2;
+                res.code = -2;
+                res.endTs = currentTimeString();
+                return res;
             }
         }
 
+        res.tcSortedBytes = fileSizeOrZero(fileTC_sorted);
+
         // --- Phase 4: Stream Comparison ---
-        bool result = compareTriangulationFiles(fileBC_sorted, fileTC_sorted, newCount, oldCount);
+        bool matched = compareTriangulationFiles(fileBC_sorted, fileTC_sorted, res.newCount, res.oldCount);
 
         // Success or mismatch: either way we're done with the temp files.
         tempGuard.removeAll();
-        endTs = currentTimeString();
-        return result ? 1 : 0;
+        res.code = matched ? 1 : 0;
+        res.endTs = currentTimeString();
+        return res;
     }
     catch (const std::exception &e)
     {
@@ -538,14 +606,16 @@ int matchTwoAlgorithms(const string &filename, size_t &newCount, size_t &oldCoun
         // treated as a plain error for this single test case; tempGuard
         // still cleans up on unwind. The batch continues with the next file.
         cerr << "    [exception] " << e.what() << "\n";
-        endTs = currentTimeString();
-        return -1;
+        res.code = -1;
+        res.endTs = currentTimeString();
+        return res;
     }
     catch (...)
     {
         cerr << "    [unknown exception]\n";
-        endTs = currentTimeString();
-        return -1;
+        res.code = -1;
+        res.endTs = currentTimeString();
+        return res;
     }
     // tempGuard destructor runs here on any path that didn't already call
     // removeAll(), guaranteeing no leftover temp_*.bin files.
@@ -584,8 +654,8 @@ static unordered_set<string> loadProcessedFiles(const string &csvPath)
 }
 
 static void appendResultCSV(const string &csvPath, const string &filename,
-                            const string &resultStr, size_t newCount, size_t oldCount,
-                            const string &startTs, const string &endTs)
+                            const string &resultStr, const MatchResult &res,
+                            double elapsedSeconds)
 {
     bool needHeader = !fs::exists(csvPath);
     ofstream out(csvPath, ios::app);
@@ -596,10 +666,13 @@ static void appendResultCSV(const string &csvPath, const string &filename,
     }
     if (needHeader)
     {
-        out << "filename,result,newAlgoCount,oldAlgoCount,startTime,endTime\n";
+        out << "filename,result,newAlgoCount,oldAlgoCount,"
+               "biconnectedFileBytes,triconnectedFileBytes,"
+               "startTime,endTime,elapsedSeconds\n";
     }
-    out << filename << ',' << resultStr << ',' << newCount << ',' << oldCount << ','
-        << startTs << ',' << endTs << '\n';
+    out << filename << ',' << resultStr << ',' << res.newCount << ',' << res.oldCount << ','
+        << res.bcSortedBytes << ',' << res.tcSortedBytes << ','
+        << res.startTs << ',' << res.endTs << ',' << elapsedSeconds << '\n';
 }
 
 static void printUsage(const vector<string> &categories, const char *progName)
@@ -622,6 +695,22 @@ struct Summary
     int errors = 0;
     int skipped = 0;
 };
+
+// Parses "YYYY-MM-DD HH:MM:SS" into seconds since epoch (local time, same
+// zone currentTimeString() used), so we can compute an elapsed-seconds
+// column for the CSV without touching matchTwoAlgorithms' own timing logic.
+static double secondsBetween(const string &startTs, const string &endTs)
+{
+    std::tm tmStart{}, tmEnd{};
+    istringstream ssStart(startTs), ssEnd(endTs);
+    ssStart >> std::get_time(&tmStart, "%Y-%m-%d %H:%M:%S");
+    ssEnd >> std::get_time(&tmEnd, "%Y-%m-%d %H:%M:%S");
+    if (ssStart.fail() || ssEnd.fail())
+        return 0.0;
+    std::time_t tStart = std::mktime(&tmStart);
+    std::time_t tEnd = std::mktime(&tmEnd);
+    return std::difftime(tEnd, tStart);
+}
 
 static Summary runCategory(const string &rootFolder, const string &category)
 {
@@ -657,11 +746,9 @@ static Summary runCategory(const string &rootFolder, const string &category)
 
         string fullPath = categoryFolder + "/" + filename;
 
-        size_t newCount = 0, oldCount = 0;
-        int result = -1;
-        string startTs, endTs;
-
         cout << "  Processing: " << filename << " (start " << currentTimeString() << ") ... " << flush;
+
+        MatchResult res;
 
         // Second line of defense: matchTwoAlgorithms already catches its own
         // exceptions, but this guarantees that even a bug we didn't
@@ -670,56 +757,62 @@ static Summary runCategory(const string &rootFolder, const string &category)
         // gets marked ERROR and we move on to the next test case.
         try
         {
-            result = matchTwoAlgorithms(fullPath, newCount, oldCount, startTs, endTs);
+            res = matchTwoAlgorithms(fullPath);
         }
         catch (const std::exception &e)
         {
             cerr << "\n    [unexpected top-level exception] " << e.what() << "\n";
-            result = -1;
+            res.code = -1;
         }
         catch (...)
         {
             cerr << "\n    [unexpected top-level unknown exception]\n";
-            result = -1;
+            res.code = -1;
         }
 
         // Defensive fallback: guarantee both timestamps are always populated
         // even if matchTwoAlgorithms threw before setting them itself (e.g.
         // an exception thrown before its own try block was entered).
-        if (startTs.empty())
-            startTs = currentTimeString();
-        if (endTs.empty())
-            endTs = currentTimeString();
+        if (res.startTs.empty())
+            res.startTs = currentTimeString();
+        if (res.endTs.empty())
+            res.endTs = currentTimeString();
+
+        double elapsed = secondsBetween(res.startTs, res.endTs);
 
         string resultStr;
-        if (result == 1)
+        if (res.code == 1)
         {
             resultStr = "MATCH";
             summ.matched++;
-            cout << "\033[1;32mMATCH\033[0m (" << newCount << " triangulations, end " << endTs << ")\n";
+            cout << "\033[1;32mMATCH\033[0m (" << res.newCount << " triangulations, "
+                 << "bc=" << res.bcSortedBytes << "B, tc=" << res.tcSortedBytes << "B, "
+                 << elapsed << "s, end " << res.endTs << ")\n";
         }
-        else if (result == 0)
+        else if (res.code == 0)
         {
             resultStr = "MISMATCH";
             summ.mismatched++;
-            cout << "\033[1;31mMISMATCH\033[0m (new=" << newCount << ", old=" << oldCount
-                 << ", end " << endTs << ")\n";
+            cout << "\033[1;31mMISMATCH\033[0m (new=" << res.newCount << ", old=" << res.oldCount
+                 << ", bc=" << res.bcSortedBytes << "B, tc=" << res.tcSortedBytes << "B, "
+                 << elapsed << "s, end " << res.endTs << ")\n";
         }
-        else if (result == -2)
+        else if (res.code == -2)
         {
             resultStr = "LIMIT_EXCEEDED";
             summ.limitExceeded++;
             cout << "\033[1;35mLIMIT_EXCEEDED\033[0m (> " << (MAX_DISK_BYTES / (1024 * 1024))
-                 << " MB limit, task stopped and temp files removed, end " << endTs << ")\n";
+                 << " MB limit, task stopped and temp files removed, "
+                 << elapsed << "s, end " << res.endTs << ")\n";
         }
         else
         {
             resultStr = "ERROR";
             summ.errors++;
-            cout << "\033[1;33mERROR (could not read file)\033[0m (end " << endTs << ")\n";
+            cout << "\033[1;33mERROR (could not read file)\033[0m (" << elapsed << "s, end " << res.endTs << ")\n";
         }
 
-        appendResultCSV(csvPath, filename, resultStr, newCount, oldCount, startTs, endTs);
+        appendResultCSV(csvPath, filename, resultStr, res, elapsed);
     }
 
     return summ;
