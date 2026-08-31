@@ -97,7 +97,7 @@ enum class ExactVerdict
 {
     MATCHED,
     UNMATCHED,
-    SPACE_EXCEEDED
+    NOT_RUN
 };
 
 struct ComparisonResult
@@ -134,17 +134,15 @@ static string exactVerdictToString(ExactVerdict v)
         return "MATCHED";
     case ExactVerdict::UNMATCHED:
         return "UNMATCHED";
-    case ExactVerdict::SPACE_EXCEEDED:
-        return "SPACE_EXCEEDED";
+    case ExactVerdict::NOT_RUN:
+        return "NOT_RUN";
     }
     return "UNKNOWN";
 }
 
-static bool hashesMatch(const TriangulationRunStats &a, const TriangulationRunStats &b)
+static bool hashAggregatesMatch(const TriangulationRunStats &a, const TriangulationRunStats &b)
 {
-    return a.hashXxXor == b.hashXxXor &&
-           a.hashMurmurXor == b.hashMurmurXor &&
-           a.hashSipXor == b.hashSipXor;
+    return a.aggregatesEqual(b);
 }
 
 static ExactVerdict compareExact(
@@ -154,7 +152,7 @@ static ExactVerdict compareExact(
     const TriangulationRunStats &oldStats)
 {
     if (newStats.storageStopped || oldStats.storageStopped)
-        return ExactVerdict::SPACE_EXCEEDED;
+        return ExactVerdict::NOT_RUN;
 
     if (newStored.size() != oldStored.size())
         return ExactVerdict::UNMATCHED;
@@ -181,7 +179,7 @@ static MatchVerdict computeOverallMatch(
         return MatchVerdict::UNMATCHED;
 
     if (exactMatchResult == ExactVerdict::MATCHED ||
-        exactMatchResult == ExactVerdict::SPACE_EXCEEDED)
+        exactMatchResult == ExactVerdict::NOT_RUN)
     {
         return MatchVerdict::MATCHED;
     }
@@ -223,7 +221,7 @@ static ComparisonResult compareTwoAlgorithms(
 
     result.triangulationCountMatch = toMatchVerdict(
         result.newStats.totalTriangulationCount == result.oldStats.totalTriangulationCount);
-    result.hashMatch = toMatchVerdict(hashesMatch(result.newStats, result.oldStats));
+    result.hashMatch = toMatchVerdict(hashAggregatesMatch(result.newStats, result.oldStats));
     result.exactMatch = compareExact(
         bc->allTriangulations,
         tc->allTriangulations,
@@ -286,11 +284,12 @@ static void appendResultCSV(const string &csvPath, const string &filename, const
     if (needHeader)
     {
         out << "filename,startTime,endTime,totalTimeSeconds,"
-            << "newAlgoCount,oldAlgoCount,"
+            << "triangulationCountA,triangulationCountB,"
             << "newStoredCount,oldStoredCount,"
             << "newSpaceExceeded,oldSpaceExceeded,"
-            << "newHashXx,newHashMurmur,newHashSip,"
-            << "oldHashXx,oldHashMurmur,oldHashSip,"
+            << "xxHashXorA,xxHashXorB,xxHashSumA,xxHashSumB,"
+            << "sipHashXorA,sipHashXorB,sipHashSumA,sipHashSumB,"
+            << "sha256XorA,sha256XorB,sha256SumA,sha256SumB,"
             << "triangulationCountMatch,hashMatch,exactMatch,matched\n";
     }
 
@@ -305,11 +304,17 @@ static void appendResultCSV(const string &csvPath, const string &filename, const
         << (r.newStats.storageStopped ? "YES" : "NO") << ','
         << (r.oldStats.storageStopped ? "YES" : "NO") << ','
         << formatHashHex(r.newStats.hashXxXor) << ','
-        << formatHashHex(r.newStats.hashMurmurXor) << ','
-        << formatHashHex(r.newStats.hashSipXor) << ','
         << formatHashHex(r.oldStats.hashXxXor) << ','
-        << formatHashHex(r.oldStats.hashMurmurXor) << ','
+        << formatHashHex(r.newStats.hashXxSum) << ','
+        << formatHashHex(r.oldStats.hashXxSum) << ','
+        << formatHashHex(r.newStats.hashSipXor) << ','
         << formatHashHex(r.oldStats.hashSipXor) << ','
+        << formatHashHex(r.newStats.hashSipSum) << ','
+        << formatHashHex(r.oldStats.hashSipSum) << ','
+        << formatSha256WordsHex(r.newStats.sha256Xor) << ','
+        << formatSha256WordsHex(r.oldStats.sha256Xor) << ','
+        << formatSha256WordsHex(r.newStats.sha256Sum) << ','
+        << formatSha256WordsHex(r.oldStats.sha256Sum) << ','
         << verdictToString(r.triangulationCountMatch) << ','
         << verdictToString(r.hashMatch) << ','
         << exactVerdictToString(r.exactMatch) << ','
@@ -398,8 +403,8 @@ static Summary runCategory(
             cout << "\033[1;32mMATCHED\033[0m"
                  << " (count=" << result.newStats.totalTriangulationCount
                  << ", time=" << formatDurationSeconds(result.totalSeconds) << "s";
-            if (result.exactMatch == ExactVerdict::SPACE_EXCEEDED)
-                cout << ", exact=SPACE_EXCEEDED";
+            if (result.exactMatch == ExactVerdict::NOT_RUN)
+                cout << ", exact=NOT_RUN";
             cout << ")\n";
         }
         else
@@ -417,12 +422,22 @@ static Summary runCategory(
         cout << "    start=" << result.startTime
              << "  end=" << result.endTime
              << "  duration=" << formatDurationSeconds(result.totalSeconds) << "s\n";
-        cout << "    new hashes: xx=" << formatHashHex(result.newStats.hashXxXor)
-             << " murmur=" << formatHashHex(result.newStats.hashMurmurXor)
-             << " sip=" << formatHashHex(result.newStats.hashSipXor) << "\n";
-        cout << "    old hashes: xx=" << formatHashHex(result.oldStats.hashXxXor)
-             << " murmur=" << formatHashHex(result.oldStats.hashMurmurXor)
-             << " sip=" << formatHashHex(result.oldStats.hashSipXor) << "\n";
+        cout << "    new xx: xor=" << formatHashHex(result.newStats.hashXxXor)
+             << " sum=" << formatHashHex(result.newStats.hashXxSum) << "\n";
+        cout << "    new sip: xor=" << formatHashHex(result.newStats.hashSipXor)
+             << " sum=" << formatHashHex(result.newStats.hashSipSum) << "\n";
+        cout << "    new sha256 xor: "
+             << formatSha256WordsHex(result.newStats.sha256Xor) << "\n";
+        cout << "    new sha256 sum: "
+             << formatSha256WordsHex(result.newStats.sha256Sum) << "\n";
+        cout << "    old xx: xor=" << formatHashHex(result.oldStats.hashXxXor)
+             << " sum=" << formatHashHex(result.oldStats.hashXxSum) << "\n";
+        cout << "    old sip: xor=" << formatHashHex(result.oldStats.hashSipXor)
+             << " sum=" << formatHashHex(result.oldStats.hashSipSum) << "\n";
+        cout << "    old sha256 xor: "
+             << formatSha256WordsHex(result.oldStats.sha256Xor) << "\n";
+        cout << "    old sha256 sum: "
+             << formatSha256WordsHex(result.oldStats.sha256Sum) << "\n";
 
         appendResultCSV(csvPath, filename, result);
     }
