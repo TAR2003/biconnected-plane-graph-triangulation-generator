@@ -18,7 +18,7 @@ namespace fs = std::filesystem;
 // CONFIGURATION
 // Max disk space allowed for binary temporary files per test case (e.g., 1 GB)
 // ============================================================================
-static const size_t MAX_DISK_BYTES = 1000ULL * 1024ULL * 1024ULL; // 1 GB limit
+static const size_t MAX_DISK_BYTES = 30 * 1000ULL * 1024ULL * 1024ULL; // 1 GB limit
 
 // ============================================================================
 // Timestamp helper (used to record start/end of each per-file operation,
