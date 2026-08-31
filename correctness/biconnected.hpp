@@ -1,10 +1,8 @@
-#pragma once
 #include <bits/stdc++.h>
 using namespace std;
-
+#pragma once
 #include "Edge.hpp"
 #include "pairHash.hpp"
-#include "TaskAborted.hpp"
 
 // Forward declaration to avoid circular dependency
 class FaceTriangulation;
@@ -16,69 +14,35 @@ public:
     unordered_set<pair<int, int>, PairHash> present;
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation *> faceTriangulations;
-
-    size_t totalCount = 0;
-    ofstream *outStream = nullptr;
-
-    // Cooperative-cancellation support (mirrors triconnected).
-    atomic<bool> *abortFlag = nullptr;
-    size_t checkInterval = 256;
-    size_t writesSinceCheck = 0;
-
     biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
         present = unordered_set<pair<int, int>, PairHash>();
         initiatePresent();
-        faceTriangulations = vector<FaceTriangulation *>(faces.size(), nullptr);
+        faceTriangulations = vector<FaceTriangulation *>(faces.size());
     }
-
-    ~biconnected()
-    {
-        for (auto ft : faceTriangulations)
-        {
-            delete ft;
-        }
-    }
-
     void initiatePresent()
     {
-        for (const auto &face : faces)
+        for (auto face : faces)
         {
-            for (size_t i = 0; i < face.size() - 1; i++)
+            for (int i = 0; i < face.size() - 1; i++)
             {
                 present.insert(make_pair(min(face[i], face[i + 1]), max(face[i], face[i + 1])));
             }
             present.insert(make_pair(min(face[0], face[face.size() - 1]), max(face[0], face[face.size() - 1])));
         }
     }
-
     void getAllTriangulations();
-    void getAllTriangulationsToFile(const string &outputPath, atomic<bool> *externalAbortFlag = nullptr);
     void output(int serial);
     void addTriangulation();
-
-    inline void checkAbort()
-    {
-        if (!abortFlag)
-            return;
-        if (++writesSinceCheck < checkInterval)
-            return;
-        writesSinceCheck = 0;
-        if (abortFlag->load(memory_order_relaxed))
-        {
-            throw TaskAbortedException();
-        }
-    }
-
     void sortTriangulations()
     {
         sort(allTriangulations.begin(), allTriangulations.end());
     }
-
     void printAllTriangulations()
     {
-        cout << "Total triangulations in biconnected component: " << (outStream ? totalCount : allTriangulations.size()) << endl;
+
+        cout << "Total triangulations in biconnected component: " << allTriangulations.size() << endl;
         for (auto &triangulation : allTriangulations)
         {
             for (auto &chord : triangulation)
@@ -93,47 +57,17 @@ public:
 // Include FaceTriangulation.hpp after class declaration to resolve circular dependency
 #include "FaceTriangulation.hpp"
 
+// Define methods that use FaceTriangulation after including the header
 inline void biconnected::getAllTriangulations()
 {
-    totalCount = 0;
-    outStream = nullptr;
-    abortFlag = nullptr;
     faceTriangulations[0] = new FaceTriangulation(faces[0].size(), faces[0], present, 0, this);
     faceTriangulations[0]->generateAllTriangulations();
-}
-
-inline void biconnected::getAllTriangulationsToFile(const string &outputPath, atomic<bool> *externalAbortFlag)
-{
-    totalCount = 0;
-    writesSinceCheck = 0;
-    abortFlag = externalAbortFlag;
-
-    ofstream file(outputPath, ios::binary);
-    outStream = &file;
-
-    try
-    {
-        faceTriangulations[0] = new FaceTriangulation(faces[0].size(), faces[0], present, 0, this);
-        faceTriangulations[0]->generateAllTriangulations();
-    }
-    catch (...)
-    {
-        // Ensure the stream is always closed, even when generateAllTriangulations
-        // (via output()/addTriangulation()) throws TaskAbortedException or
-        // anything else. main.cpp is responsible for removing outputPath.
-        if (file.is_open())
-            file.close();
-        outStream = nullptr;
-        throw;
-    }
-
-    file.close();
-    outStream = nullptr;
+    // printAllTriangulations();
 }
 
 inline void biconnected::output(int serial)
 {
-    if (serial == static_cast<int>(faces.size()) - 1)
+    if (serial == faces.size() - 1)
     {
         addTriangulation();
     }
@@ -147,10 +81,6 @@ inline void biconnected::output(int serial)
 
 inline void biconnected::addTriangulation()
 {
-    // Checked before doing the (moderately expensive) triangulation assembly
-    // and before writing, so an exceeded limit stops work promptly.
-    checkAbort(); // may throw TaskAbortedException
-
     vector<pair<int, int>> currentTriangulations;
     for (auto a : faceTriangulations)
     {
@@ -162,17 +92,5 @@ inline void biconnected::addTriangulation()
         sort(currentTriangulation.begin(), currentTriangulation.end());
         currentTriangulations.insert(currentTriangulations.end(), currentTriangulation.begin(), currentTriangulation.end());
     }
-
-    totalCount++;
-
-    if (outStream && outStream->is_open())
-    {
-        uint32_t sz = static_cast<uint32_t>(currentTriangulations.size());
-        outStream->write(reinterpret_cast<const char *>(&sz), sizeof(sz));
-        outStream->write(reinterpret_cast<const char *>(currentTriangulations.data()), sz * sizeof(pair<int, int>));
-    }
-    else
-    {
-        allTriangulations.push_back(currentTriangulations);
-    }
+    allTriangulations.push_back(currentTriangulations);
 }
