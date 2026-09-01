@@ -6,6 +6,9 @@ using namespace std;
 #include "FaceTriangulation.hpp"
 #include <filesystem>
 #include <chrono>
+#include <thread>
+#include <atomic>
+#include <future>
 
 using u128 = unsigned __int128;
 namespace fs = std::filesystem;
@@ -14,6 +17,11 @@ namespace fs = std::filesystem;
 // CONFIG: how many timing runs every single test case should have.
 // ============================================================================
 static const int RUNS_PER_CASE = 5;
+
+// ============================================================================
+// CONFIG: timeout (in seconds) for a single run. Change this value to adjust.
+// ============================================================================
+static const double TIMEOUT_SECONDS = 600.0;
 
 // The root folder containing one subfolder per category.
 static const string INPUT_ROOT = "input";
@@ -198,6 +206,7 @@ struct RunRecord
     double memoryPerVertex;
     string startTime; // wall-clock time when this run's timed section began
     string endTime;   // wall-clock time when this run's timed section ended
+    string status;    // "completed", "timeout", or "error"
 };
 
 static string csvPathForCategory(const string &category)
@@ -240,12 +249,12 @@ static void appendRunCSV(const string &csvPath, const RunRecord &r)
     }
     if (needHeader)
     {
-        out << "filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,startTime,endTime\n";
+        out << "filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,startTime,endTime,status\n";
     }
     out << r.filename << ',' << r.runIndex << ',' << r.distinctVertices << ','
         << r.triangStr << ',' << fixed << setprecision(9) << r.timeSeconds << ','
         << r.peakMemory << ',' << fixed << setprecision(6) << r.memoryPerVertex << ','
-        << r.startTime << ',' << r.endTime << '\n';
+        << r.startTime << ',' << r.endTime << ',' << r.status << '\n';
 }
 
 // ============================================================================
@@ -260,6 +269,46 @@ static void printUsage(const vector<string> &categories, const char *progName)
         cerr << "  " << (i + 1) << " -> " << categories[i] << "\n";
     }
     cerr << "  all -> run every category above\n";
+}
+
+// ============================================================================
+// Runs the triangulation computation on a worker thread and waits for it,
+// up to TIMEOUT_SECONDS. Returns true if it completed in time, false if it
+// timed out (in which case the worker thread is detached and left running
+// in the background, since there is no safe way to forcibly kill a plain
+// std::thread mid-computation).
+// ============================================================================
+static bool runWithTimeout(biconnected *bc, double timeoutSeconds, double &actualRunSeconds)
+{
+    std::promise<void> donePromise;
+    std::future<void> doneFuture = donePromise.get_future();
+
+    using clock = std::chrono::steady_clock;
+    auto start = clock::now();
+
+    std::thread worker([bc, &donePromise]()
+                       {
+        bc->getAllTriangulations();
+        donePromise.set_value(); });
+
+    auto status = doneFuture.wait_for(std::chrono::duration<double>(timeoutSeconds));
+
+    auto end = clock::now();
+    actualRunSeconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
+
+    if (status == std::future_status::ready)
+    {
+        worker.join();
+        return true;
+    }
+    else
+    {
+        // Timed out. We cannot safely terminate the thread, so detach it
+        // and let the caller move on. The thread will keep consuming CPU
+        // in the background until the process exits or it finishes.
+        worker.detach();
+        return false;
+    }
 }
 
 static void runCategory(const string &category)
@@ -301,63 +350,67 @@ static void runCategory(const string &category)
             continue;
         }
 
-        // warm-up run
-        // if (RUNS_PER_CASE > 1 && alreadyDone == 0)
-        // {
-        //     cout << "    Executing warm-up run..." << flush;
-        //     biconnected *warm = new biconnected(faces);
-        //     warm->getAllTriangulations();
-        //     delete warm;
-        //     cout << " done.\n";
-        // }
-
         for (int localRun = 1; localRun <= remaining; localRun++)
         {
             int globalRunIndex = alreadyDone + localRun;
 
             // Capture and print the start time BEFORE execution starts
             string startTs = currentTimeString();
-            cout << "    Running " << getOrdinal(globalRunIndex) << " run (start " << startTs << ")..." << flush;
+            cout << "    Running " << getOrdinal(globalRunIndex) << " run (start " << startTs
+                 << ", timeout " << TIMEOUT_SECONDS << "s)..." << flush;
 
             size_t memBefore = getCurrentMemoryUsage();
 
             biconnected *bc = new biconnected(faces);
 
-            using clock = std::chrono::steady_clock;
-            auto start = clock::now();
-            bc->getAllTriangulations();
-            auto end = clock::now();
+            double runSec = 0.0;
+            bool completed = runWithTimeout(bc, TIMEOUT_SECONDS, runSec);
 
-            // Capture the end time immediately once the timed work is done
+            // Capture the end time immediately once we stop waiting
             string endTs = currentTimeString();
 
             size_t memAfter = getCurrentMemoryUsage();
             size_t memUsed = (memAfter > memBefore) ? (memAfter - memBefore) : 0;
 
-            auto dur_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-            double runSec = (double)dur_ns / 1'000'000'000.0;
-
-            u128 totalTriang = bc->totalTriangulations;
             double memoryPerVertex = (distinctVertices > 0) ? (double)memUsed / distinctVertices : 0.0;
-
-            // Print timing results AFTER execution completes
-            cout << " done (end " << endTs << ") -> " << fixed << setprecision(6) << runSec << " s, "
-                 << formatBytes(memUsed) << "\n";
 
             RunRecord rec;
             rec.filename = filename;
             rec.runIndex = globalRunIndex;
             rec.distinctVertices = distinctVertices;
-            rec.triangStr = u128_to_string(totalTriang);
             rec.timeSeconds = runSec;
             rec.peakMemory = memUsed;
             rec.memoryPerVertex = memoryPerVertex;
             rec.startTime = startTs;
             rec.endTime = endTs;
 
-            appendRunCSV(csvPath, rec);
+            if (completed)
+            {
+                u128 totalTriang = bc->totalTriangulations;
+                rec.triangStr = u128_to_string(totalTriang);
+                rec.status = "completed";
 
-            delete bc;
+                cout << " done (end " << endTs << ") -> " << fixed << setprecision(6) << runSec << " s, "
+                     << formatBytes(memUsed) << "\n";
+
+                delete bc;
+            }
+            else
+            {
+                rec.triangStr = "N/A";
+                rec.status = "timeout";
+
+                cout << " TIMEOUT after " << fixed << setprecision(6) << runSec
+                     << " s (end " << endTs << "), " << formatBytes(memUsed) << "\n";
+
+                // NOTE: bc is intentionally NOT deleted here. The detached
+                // worker thread is still using it in the background; deleting
+                // it now would cause a use-after-free / crash. This leaks
+                // memory for timed-out cases, which is an acceptable tradeoff
+                // versus forcibly killing a thread mid-computation.
+            }
+
+            appendRunCSV(csvPath, rec);
         }
     }
 }
@@ -428,6 +481,7 @@ int main(int argc, char *argv[])
     cout << "================================================================\n";
     cout << "   TRIANGULATION BENCHMARK - per-category, resumable per-run   \n";
     cout << "   Target runs per case: " << RUNS_PER_CASE << "\n";
+    cout << "   Timeout per run: " << TIMEOUT_SECONDS << " seconds\n";
     cout << "================================================================\n";
 
     for (const auto &category : categoriesToRun)
