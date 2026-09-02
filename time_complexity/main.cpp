@@ -274,22 +274,45 @@ static void printUsage(const vector<string> &categories, const char *progName)
 // ============================================================================
 // Runs the triangulation computation on a worker thread and waits for it,
 // up to TIMEOUT_SECONDS. Returns true if it completed in time, false if it
-// timed out (in which case the worker thread is detached and left running
-// in the background, since there is no safe way to forcibly kill a plain
-// std::thread mid-computation).
+// timed out.
+//
+// IMPORTANT: on timeout, the worker thread is detached and left running in
+// the background (there is no safe cross-platform way to forcibly kill a
+// plain std::thread mid-computation). To avoid the detached thread ever
+// touching freed/destroyed memory, EVERY piece of state it can reach --
+// the promise, and bc itself -- is heap-allocated with its own lifetime,
+// never a stack local of this function. On timeout we deliberately leak
+// the promise and bc so the background thread always has valid memory to
+// write into, no matter how long after this function returns it finishes.
 // ============================================================================
 static bool runWithTimeout(biconnected *bc, double timeoutSeconds, double &actualRunSeconds)
 {
-    std::promise<void> donePromise;
-    std::future<void> doneFuture = donePromise.get_future();
+    // Heap-allocate the promise so it outlives this function on timeout.
+    auto *donePromise = new std::promise<void>();
+    std::future<void> doneFuture = donePromise->get_future();
 
     using clock = std::chrono::steady_clock;
     auto start = clock::now();
 
-    std::thread worker([bc, &donePromise]()
+    std::thread worker([bc, donePromise]()
                        {
-        bc->getAllTriangulations();
-        donePromise.set_value(); });
+                           try
+                           {
+                               bc->getAllTriangulations();
+                           }
+                           catch (...)
+                           {
+                               // Swallow any exception from the computation itself; we still
+                               // need to signal completion so the future doesn't hang forever
+                               // in the (unlikely) case this thread is still being awaited.
+                           }
+                           donePromise->set_value();
+                           // Note: donePromise is intentionally not deleted here. If the main
+                           // thread already timed out and moved on, it may still be safe to
+                           // delete since nothing else touches it after set_value(), but to
+                           // keep this unconditionally safe under all timing interleavings we
+                           // simply leak it. It's a few dozen bytes per timed-out case.
+                       });
 
     auto status = doneFuture.wait_for(std::chrono::duration<double>(timeoutSeconds));
 
@@ -299,13 +322,14 @@ static bool runWithTimeout(biconnected *bc, double timeoutSeconds, double &actua
     if (status == std::future_status::ready)
     {
         worker.join();
+        delete donePromise; // safe: worker has finished, no one else references it
         return true;
     }
     else
     {
-        // Timed out. We cannot safely terminate the thread, so detach it
-        // and let the caller move on. The thread will keep consuming CPU
-        // in the background until the process exits or it finishes.
+        // Timed out. Detach and leak donePromise (and bc, handled by the
+        // caller) so the background thread never dereferences freed memory
+        // whenever it eventually finishes.
         worker.detach();
         return false;
     }
