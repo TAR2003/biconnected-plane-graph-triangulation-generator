@@ -9,6 +9,7 @@ using namespace std;
 #include <thread>
 #include <atomic>
 #include <future>
+#include <mutex>
 
 using u128 = unsigned __int128;
 namespace fs = std::filesystem;
@@ -200,7 +201,7 @@ struct RunRecord
     string filename;
     int runIndex;
     int distinctVertices;
-    string triangStr;
+    string triangStr; // final count if completed, best-effort partial count so far if timeout
     double timeSeconds;
     size_t peakMemory;
     double memoryPerVertex;
@@ -285,7 +286,7 @@ static void printUsage(const vector<string> &categories, const char *progName)
 // the promise and bc so the background thread always has valid memory to
 // write into, no matter how long after this function returns it finishes.
 // ============================================================================
-static bool runWithTimeout(biconnected *bc, double timeoutSeconds, double &actualRunSeconds)
+static bool runWithTimeout(biconnected *bc, double timeoutSeconds, double &actualRunSeconds, u128 &triangCountOut)
 {
     // Heap-allocate the promise so it outlives this function on timeout.
     auto *donePromise = new std::promise<void>();
@@ -322,6 +323,10 @@ static bool runWithTimeout(biconnected *bc, double timeoutSeconds, double &actua
     if (status == std::future_status::ready)
     {
         worker.join();
+        // Safe: worker has fully finished (join() only returns after the
+        // thread function has returned), so its last write to
+        // totalTriangulations happens-before this read.
+        triangCountOut = bc->totalTriangulations;
         delete donePromise; // safe: worker has finished, no one else references it
         return true;
     }
@@ -330,6 +335,17 @@ static bool runWithTimeout(biconnected *bc, double timeoutSeconds, double &actua
         // Timed out. Detach and leak donePromise (and bc, handled by the
         // caller) so the background thread never dereferences freed memory
         // whenever it eventually finishes.
+        // Best-effort snapshot of however many triangulations had been
+        // counted so far. This is a benign data race on a plain (non-atomic)
+        // u128 counter that the worker thread is still incrementing in the
+        // background -- there is no std::atomic<unsigned __int128> support
+        // on common platforms, so we accept a possible torn/stale read here
+        // rather than adding locking to the hot recursive path in
+        // biconnected/FaceTriangulation. In practice this gives a usable
+        // "how far did it get" figure for a timed-out case, at the cost of
+        // not being 100% guaranteed exact.
+        triangCountOut = bc->totalTriangulations;
+
         worker.detach();
         return false;
     }
@@ -388,7 +404,8 @@ static void runCategory(const string &category)
             biconnected *bc = new biconnected(faces);
 
             double runSec = 0.0;
-            bool completed = runWithTimeout(bc, TIMEOUT_SECONDS, runSec);
+            u128 triangCount = 0;
+            bool completed = runWithTimeout(bc, TIMEOUT_SECONDS, runSec, triangCount);
 
             // Capture the end time immediately once we stop waiting
             string endTs = currentTimeString();
@@ -410,22 +427,27 @@ static void runCategory(const string &category)
 
             if (completed)
             {
-                u128 totalTriang = bc->totalTriangulations;
-                rec.triangStr = u128_to_string(totalTriang);
+                rec.triangStr = u128_to_string(triangCount);
                 rec.status = "completed";
 
                 cout << " done (end " << endTs << ") -> " << fixed << setprecision(6) << runSec << " s, "
+                     << u128_to_string(triangCount) << " triangulations, "
                      << formatBytes(memUsed) << "\n";
 
                 delete bc;
             }
             else
             {
-                rec.triangStr = "N/A";
+                // Best-effort count of triangulations found before the
+                // timeout struck (see runWithTimeout for the caveat that
+                // this is a benign-race snapshot, not a guaranteed-exact
+                // value).
+                rec.triangStr = u128_to_string(triangCount);
                 rec.status = "timeout";
 
                 cout << " TIMEOUT after " << fixed << setprecision(6) << runSec
-                     << " s (end " << endTs << "), " << formatBytes(memUsed) << "\n";
+                     << " s (end " << endTs << "), " << u128_to_string(triangCount)
+                     << " triangulations found so far, " << formatBytes(memUsed) << "\n";
 
                 // NOTE: bc is intentionally NOT deleted here. The detached
                 // worker thread is still using it in the background; deleting
