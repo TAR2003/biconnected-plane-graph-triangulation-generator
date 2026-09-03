@@ -3,9 +3,9 @@
 
   "defaults": {
     "count": 100,
-    "max_faces": 8,
-    "max_vertices_in_face": 15,
-    "max_vertices": 200,
+    "max_faces": 20,
+    "max_vertices_in_face": 20,
+    "max_vertices": 300,
     "min_vertices": 3,
     "seed": 42
   },
