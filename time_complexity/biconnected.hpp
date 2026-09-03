@@ -17,12 +17,22 @@ public:
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation *> faceTriangulations;
     u128 totalTriangulations = 0;
+    u128 triangulationLimit = 0;
+    bool limitExceeded = false;
+
     biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
         present = unordered_set<pair<int, int>, PairHash>();
         initiatePresent();
-        faceTriangulations = vector<FaceTriangulation *>(faces.size());
+        faceTriangulations = vector<FaceTriangulation *>(faces.size(), nullptr);
+    }
+
+    ~biconnected();
+
+    bool shouldStop() const
+    {
+        return limitExceeded;
     }
     void initiatePresent()
     {
@@ -61,8 +71,19 @@ public:
 #include "FaceTriangulation.hpp"
 
 // Define methods that use FaceTriangulation after including the header
+inline biconnected::~biconnected()
+{
+    for (auto *ft : faceTriangulations)
+    {
+        delete ft;
+    }
+}
+
 inline void biconnected::getAllTriangulations()
 {
+    if (shouldStop())
+        return;
+
     faceTriangulations[0] = new FaceTriangulation(faces[0].size(), faces[0], present, 0, this);
     faceTriangulations[0]->generateAllTriangulations();
     // printAllTriangulations();
@@ -74,8 +95,10 @@ inline void biconnected::output(int serial)
     {
         // addTriangulation();
         totalTriangulations++;
+        if (triangulationLimit > 0 && totalTriangulations >= triangulationLimit)
+            limitExceeded = true;
     }
-    else
+    else if (!shouldStop())
     {
         delete faceTriangulations[serial + 1];
         faceTriangulations[serial + 1] = new FaceTriangulation(faces[serial + 1].size(), faces[serial + 1], present, serial + 1, this);

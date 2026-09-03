@@ -240,6 +240,8 @@ public:
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &itrVGS)
     {
+        if (bc->shouldStop())
+            return;
 
         flip(itrVGS); // Flip the edge at the current iterator, and update neighbors accordingly
 
@@ -289,9 +291,13 @@ public:
         VGS.erase(itrVGS); // Remove the current edge from the list of all edges
 
         output();
+        if (bc->shouldStop())
+            return;
 
         for (; itrloop != VGS.end(); itrloop++)
         {
+            if (bc->shouldStop())
+                return;
             // Recursively generate child triangulations for edges that can block the current edge
             generateChildTriangulations(itrloop);
         }
@@ -329,6 +335,9 @@ public:
     /// @brief generates all triangulations of the cycle
     void generateAllTriangulations()
     {
+        if (bc->shouldStop())
+            return;
+
         for (int i = 2; i < n - 1; i++)
         {
             Edge *e = new Edge(0, i, i - 1, (i + 1) % n); // creating a new edge object
@@ -352,8 +361,13 @@ public:
 
         // addTriangulation(); // adding the initial root triangulation
         output();
+        if (bc->shouldStop())
+            return;
+
         for (auto itr = VGS.begin(); itr != VGS.end(); itr++)
         {
+            if (bc->shouldStop())
+                return;
             generateChildTriangulations(itr); // generating child triangulations recursively
         }
 

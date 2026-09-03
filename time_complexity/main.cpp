@@ -6,10 +6,6 @@ using namespace std;
 #include "FaceTriangulation.hpp"
 #include <filesystem>
 #include <chrono>
-#include <thread>
-#include <atomic>
-#include <future>
-#include <mutex>
 
 using u128 = unsigned __int128;
 namespace fs = std::filesystem;
@@ -20,9 +16,10 @@ namespace fs = std::filesystem;
 static const int RUNS_PER_CASE = 5;
 
 // ============================================================================
-// CONFIG: timeout (in seconds) for a single run. Change this value to adjust.
+// CONFIG: stop a run after this many triangulations have been generated.
+// Change this value to adjust the cutoff for future benchmarks.
 // ============================================================================
-static const double TIMEOUT_SECONDS = 600.0;
+static const u128 TRIANGULATION_LIMIT = 1000000000ULL;
 
 // The root folder containing one subfolder per category.
 static const string INPUT_ROOT = "input";
@@ -201,13 +198,13 @@ struct RunRecord
     string filename;
     int runIndex;
     int distinctVertices;
-    string triangStr; // final count if completed, best-effort partial count so far if timeout
+    string triangStr;
     double timeSeconds;
     size_t peakMemory;
     double memoryPerVertex;
     string startTime; // wall-clock time when this run's timed section began
     string endTime;   // wall-clock time when this run's timed section ended
-    string status;    // "completed", "timeout", or "error"
+    string status;    // "completed", "limit_exceeded", or "error"
 };
 
 static string csvPathForCategory(const string &category)
@@ -272,85 +269,6 @@ static void printUsage(const vector<string> &categories, const char *progName)
     cerr << "  all -> run every category above\n";
 }
 
-// ============================================================================
-// Runs the triangulation computation on a worker thread and waits for it,
-// up to TIMEOUT_SECONDS. Returns true if it completed in time, false if it
-// timed out.
-//
-// IMPORTANT: on timeout, the worker thread is detached and left running in
-// the background (there is no safe cross-platform way to forcibly kill a
-// plain std::thread mid-computation). To avoid the detached thread ever
-// touching freed/destroyed memory, EVERY piece of state it can reach --
-// the promise, and bc itself -- is heap-allocated with its own lifetime,
-// never a stack local of this function. On timeout we deliberately leak
-// the promise and bc so the background thread always has valid memory to
-// write into, no matter how long after this function returns it finishes.
-// ============================================================================
-static bool runWithTimeout(biconnected *bc, double timeoutSeconds, double &actualRunSeconds, u128 &triangCountOut)
-{
-    // Heap-allocate the promise so it outlives this function on timeout.
-    auto *donePromise = new std::promise<void>();
-    std::future<void> doneFuture = donePromise->get_future();
-
-    using clock = std::chrono::steady_clock;
-    auto start = clock::now();
-
-    std::thread worker([bc, donePromise]()
-                       {
-                           try
-                           {
-                               bc->getAllTriangulations();
-                           }
-                           catch (...)
-                           {
-                               // Swallow any exception from the computation itself; we still
-                               // need to signal completion so the future doesn't hang forever
-                               // in the (unlikely) case this thread is still being awaited.
-                           }
-                           donePromise->set_value();
-                           // Note: donePromise is intentionally not deleted here. If the main
-                           // thread already timed out and moved on, it may still be safe to
-                           // delete since nothing else touches it after set_value(), but to
-                           // keep this unconditionally safe under all timing interleavings we
-                           // simply leak it. It's a few dozen bytes per timed-out case.
-                       });
-
-    auto status = doneFuture.wait_for(std::chrono::duration<double>(timeoutSeconds));
-
-    auto end = clock::now();
-    actualRunSeconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
-
-    if (status == std::future_status::ready)
-    {
-        worker.join();
-        // Safe: worker has fully finished (join() only returns after the
-        // thread function has returned), so its last write to
-        // totalTriangulations happens-before this read.
-        triangCountOut = bc->totalTriangulations;
-        delete donePromise; // safe: worker has finished, no one else references it
-        return true;
-    }
-    else
-    {
-        // Timed out. Detach and leak donePromise (and bc, handled by the
-        // caller) so the background thread never dereferences freed memory
-        // whenever it eventually finishes.
-        // Best-effort snapshot of however many triangulations had been
-        // counted so far. This is a benign data race on a plain (non-atomic)
-        // u128 counter that the worker thread is still incrementing in the
-        // background -- there is no std::atomic<unsigned __int128> support
-        // on common platforms, so we accept a possible torn/stale read here
-        // rather than adding locking to the hot recursive path in
-        // biconnected/FaceTriangulation. In practice this gives a usable
-        // "how far did it get" figure for a timed-out case, at the cost of
-        // not being 100% guaranteed exact.
-        triangCountOut = bc->totalTriangulations;
-
-        worker.detach();
-        return false;
-    }
-}
-
 static void runCategory(const string &category)
 {
     string categoryFolder = INPUT_ROOT + "/" + category;
@@ -397,17 +315,23 @@ static void runCategory(const string &category)
             // Capture and print the start time BEFORE execution starts
             string startTs = currentTimeString();
             cout << "    Running " << getOrdinal(globalRunIndex) << " run (start " << startTs
-                 << ", timeout " << TIMEOUT_SECONDS << "s)..." << flush;
+                 << ", limit " << u128_to_string(TRIANGULATION_LIMIT) << " triangulations)..." << flush;
 
             size_t memBefore = getCurrentMemoryUsage();
 
             biconnected *bc = new biconnected(faces);
+            bc->triangulationLimit = TRIANGULATION_LIMIT;
 
-            double runSec = 0.0;
-            u128 triangCount = 0;
-            bool completed = runWithTimeout(bc, TIMEOUT_SECONDS, runSec, triangCount);
+            using clock = std::chrono::steady_clock;
+            auto runStart = clock::now();
+            bc->getAllTriangulations();
+            auto runEnd = clock::now();
+            double runSec = std::chrono::duration_cast<std::chrono::duration<double>>(runEnd - runStart).count();
 
-            // Capture the end time immediately once we stop waiting
+            u128 triangCount = bc->totalTriangulations;
+            bool limitExceeded = bc->limitExceeded;
+
+            // Capture the end time immediately once generation stops
             string endTs = currentTimeString();
 
             size_t memAfter = getCurrentMemoryUsage();
@@ -419,43 +343,29 @@ static void runCategory(const string &category)
             rec.filename = filename;
             rec.runIndex = globalRunIndex;
             rec.distinctVertices = distinctVertices;
+            rec.triangStr = u128_to_string(triangCount);
             rec.timeSeconds = runSec;
             rec.peakMemory = memUsed;
             rec.memoryPerVertex = memoryPerVertex;
             rec.startTime = startTs;
             rec.endTime = endTs;
+            rec.status = limitExceeded ? "limit_exceeded" : "completed";
 
-            if (completed)
+            if (limitExceeded)
             {
-                rec.triangStr = u128_to_string(triangCount);
-                rec.status = "completed";
-
-                cout << " done (end " << endTs << ") -> " << fixed << setprecision(6) << runSec << " s, "
-                     << u128_to_string(triangCount) << " triangulations, "
+                cout << " LIMIT EXCEEDED (end " << endTs << ") -> " << fixed << setprecision(6) << runSec << " s, "
+                     << u128_to_string(triangCount) << " triangulations (limit "
+                     << u128_to_string(TRIANGULATION_LIMIT) << "), "
                      << formatBytes(memUsed) << "\n";
-
-                delete bc;
             }
             else
             {
-                // Best-effort count of triangulations found before the
-                // timeout struck (see runWithTimeout for the caveat that
-                // this is a benign-race snapshot, not a guaranteed-exact
-                // value).
-                rec.triangStr = u128_to_string(triangCount);
-                rec.status = "timeout";
-
-                cout << " TIMEOUT after " << fixed << setprecision(6) << runSec
-                     << " s (end " << endTs << "), " << u128_to_string(triangCount)
-                     << " triangulations found so far, " << formatBytes(memUsed) << "\n";
-
-                // NOTE: bc is intentionally NOT deleted here. The detached
-                // worker thread is still using it in the background; deleting
-                // it now would cause a use-after-free / crash. This leaks
-                // memory for timed-out cases, which is an acceptable tradeoff
-                // versus forcibly killing a thread mid-computation.
+                cout << " done (end " << endTs << ") -> " << fixed << setprecision(6) << runSec << " s, "
+                     << u128_to_string(triangCount) << " triangulations, "
+                     << formatBytes(memUsed) << "\n";
             }
 
+            delete bc;
             appendRunCSV(csvPath, rec);
         }
     }
@@ -527,7 +437,7 @@ int main(int argc, char *argv[])
     cout << "================================================================\n";
     cout << "   TRIANGULATION BENCHMARK - per-category, resumable per-run   \n";
     cout << "   Target runs per case: " << RUNS_PER_CASE << "\n";
-    cout << "   Timeout per run: " << TIMEOUT_SECONDS << " seconds\n";
+    cout << "   Triangulation limit per run: " << u128_to_string(TRIANGULATION_LIMIT) << "\n";
     cout << "================================================================\n";
 
     for (const auto &category : categoriesToRun)
