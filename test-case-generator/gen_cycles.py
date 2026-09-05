@@ -50,7 +50,7 @@ def generate_category_cycles(count, constraints: Constraints, seed=0):
     asked us to eliminate.
     """
     rng = random.Random(seed)
-    n_values = list(range(3, 16))  # 3..15 inclusive
+    n_values = list(range(3, 103))  # 3..15 inclusive
 
     dedup = DedupTracker()
     instances = []
