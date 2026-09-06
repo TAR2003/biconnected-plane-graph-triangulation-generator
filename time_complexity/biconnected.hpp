@@ -17,8 +17,6 @@ public:
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation *> faceTriangulations;
     u128 totalTriangulations = 0;
-    u128 triangulationLimit = 0;
-    bool limitExceeded = false;
 
     biconnected(vector<vector<int>> &faces)
     {
@@ -30,10 +28,6 @@ public:
 
     ~biconnected();
 
-    bool shouldStop() const
-    {
-        return limitExceeded;
-    }
     void initiatePresent()
     {
         for (auto face : faces)
@@ -81,9 +75,6 @@ inline biconnected::~biconnected()
 
 inline void biconnected::getAllTriangulations()
 {
-    if (shouldStop())
-        return;
-
     faceTriangulations[0] = new FaceTriangulation(faces[0].size(), faces[0], present, 0, this);
     faceTriangulations[0]->generateAllTriangulations();
     // printAllTriangulations();
@@ -95,10 +86,8 @@ inline void biconnected::output(int serial)
     {
         // addTriangulation();
         totalTriangulations++;
-        if (triangulationLimit > 0 && totalTriangulations >= triangulationLimit)
-            limitExceeded = true;
     }
-    else if (!shouldStop())
+    else
     {
         delete faceTriangulations[serial + 1];
         faceTriangulations[serial + 1] = new FaceTriangulation(faces[serial + 1].size(), faces[serial + 1], present, serial + 1, this);
