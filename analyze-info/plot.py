@@ -476,7 +476,7 @@ def plot_06_time_per_triangulation_boxplot(df, out_dir):
     data = [df[df["category"] == c]["time_per_triangulation"].dropna().values for c in categories]
     data = [d[d > 0] for d in data]
     fig, ax = plt.subplots(figsize=(max(8, 0.6 * len(categories)), 6))
-    bp = ax.boxplot(data, labels=categories, patch_artist=True, showfliers=True, medianprops=dict(color="black", linewidth=2))
+    bp = ax.boxplot(data, tick_labels=categories, patch_artist=True, showfliers=True, medianprops=dict(color="black", linewidth=2))
     for patch, cat in zip(bp["boxes"], categories):
         patch.set_facecolor(colors[cat])
         patch.set_alpha(0.7)
@@ -622,7 +622,7 @@ def plot_12_memory_per_vertex(summary, out_dir):
         print("  (skipped memory-per-vertex: no data)")
         return
     fig, ax = plt.subplots(figsize=(max(8, 0.6 * len(categories)), 6))
-    bp = ax.boxplot(data, labels=categories, patch_artist=True, showfliers=True)
+    bp = ax.boxplot(data, tick_labels=categories, patch_artist=True, showfliers=True)
     for patch, cat in zip(bp["boxes"], categories):
         patch.set_facecolor(colors[cat])
         patch.set_alpha(0.7)
@@ -1008,7 +1008,7 @@ def plot_26_avg_time_per_tri_boxplot_by_category(summary, out_dir):
         print("  (skipped avg-time-per-tri boxplot by category: no data)")
         return
     fig, ax = plt.subplots(figsize=(max(8, 0.6 * len(categories)), 6))
-    bp = ax.boxplot(data, labels=categories, patch_artist=True, showfliers=True,
+    bp = ax.boxplot(data, tick_labels=categories, patch_artist=True, showfliers=True,
                      medianprops=dict(color="black", linewidth=2))
     for patch, cat in zip(bp["boxes"], categories):
         patch.set_facecolor(colors[cat])
@@ -1189,7 +1189,7 @@ def cmp_04_throughput_boxplot_by_dataset(all_summary, out_dir):
         print("  (skipped throughput-boxplot: no data)")
         return
     fig, ax = plt.subplots(figsize=(max(6, 1.5 * len(datasets)), 6))
-    bp = ax.boxplot(data, labels=datasets, patch_artist=True, showfliers=True)
+    bp = ax.boxplot(data, tick_labels=datasets, patch_artist=True, showfliers=True)
     for patch, ds in zip(bp["boxes"], datasets):
         patch.set_facecolor(dcolors[ds])
         patch.set_alpha(0.7)
@@ -1208,7 +1208,7 @@ def cmp_05_time_per_triangulation_boxplot_by_dataset(all_df, out_dir):
         print("  (skipped time-per-tri boxplot by dataset: no data)")
         return
     fig, ax = plt.subplots(figsize=(max(6, 1.5 * len(datasets)), 6))
-    bp = ax.boxplot(data, labels=datasets, patch_artist=True, showfliers=True, medianprops=dict(color="black", linewidth=2))
+    bp = ax.boxplot(data, tick_labels=datasets, patch_artist=True, showfliers=True, medianprops=dict(color="black", linewidth=2))
     for patch, ds in zip(bp["boxes"], datasets):
         patch.set_facecolor(dcolors[ds])
         patch.set_alpha(0.7)
