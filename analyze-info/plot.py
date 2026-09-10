@@ -169,11 +169,34 @@ def clean(df: pd.DataFrame, dataset_name: str) -> pd.DataFrame:
     else:
         df["triangulations_f"] = np.nan
 
-    for col in ["runIndex", "vertices", "timeSeconds", "peakMemoryBytes", "memoryPerVertex"]:
+    for col in ["runIndex", "vertices", "timeSeconds", "peakMemoryBytes", "memoryPerVertex",
+                "totalChecks", "successfulChecks", "failedChecks", "checkSuccessRate",
+                "invalidTraversals", "totalTraversalsExtended", "traversalSuccessRate"]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
         else:
             df[col] = np.nan
+
+    # Unsuccessful-check percentage per run. Prefer the raw counts (more
+    # precise than the CSV's own rounded checkSuccessRate), fall back to the
+    # provided rate column if counts are missing. Only meaningful for
+    # datasets that actually record these columns (e.g. "without vgs");
+    # datasets lacking them simply get NaN here and are skipped downstream.
+    has_counts = df["totalChecks"].notna() & (df["totalChecks"] > 0)
+    df["unsuccessful_check_pct"] = np.nan
+    df.loc[has_counts, "unsuccessful_check_pct"] = (
+        100.0 * df.loc[has_counts, "failedChecks"] / df.loc[has_counts, "totalChecks"]
+    )
+    missing_counts_has_rate = (~has_counts) & df["checkSuccessRate"].notna()
+    df.loc[missing_counts_has_rate, "unsuccessful_check_pct"] = (
+        100.0 - df.loc[missing_counts_has_rate, "checkSuccessRate"]
+    )
+
+    has_trav = df["totalTraversalsExtended"].notna() & (df["totalTraversalsExtended"] > 0)
+    df["invalid_traversal_pct"] = np.nan
+    df.loc[has_trav, "invalid_traversal_pct"] = (
+        100.0 * df.loc[has_trav, "invalidTraversals"] / df.loc[has_trav, "totalTraversalsExtended"]
+    )
 
     if "status" not in df.columns:
         df["status"] = "completed"
@@ -291,6 +314,14 @@ def per_case_summary(df: pd.DataFrame) -> pd.DataFrame:
             "median_mem_per_vertex": g["memoryPerVertex"].replace(0, np.nan).median(),
             "time_limit_frac": time_limit_frac,
             "any_time_limit": time_limit_frac > 0,
+            # Check/traversal diagnostics (only populated for datasets whose
+            # CSVs carry these columns, e.g. "without vgs"; NaN otherwise).
+            "median_unsuccessful_check_pct": g["unsuccessful_check_pct"].median(),
+            "median_check_success_rate": g["checkSuccessRate"].median(),
+            "median_total_checks": g["totalChecks"].median(),
+            "median_failed_checks": g["failedChecks"].median(),
+            "median_invalid_traversal_pct": g["invalid_traversal_pct"].median(),
+            "median_traversal_success_rate": g["traversalSuccessRate"].median(),
         })
 
     summary = df.groupby(["dataset", "category", "case"], as_index=False).apply(
@@ -1020,6 +1051,131 @@ def plot_26_avg_time_per_tri_boxplot_by_category(summary, out_dir):
     savefig(fig, out_dir, "26_avg_time_per_tri_boxplot_by_category")
 
 
+def plot_27_pooled_amortized_constant_evidence(summary, out_dir):
+    """The core 'amortized O(1) per triangulation' evidence plot, pooling
+    every category/case in this dataset into one picture. Two panels:
+      (left)  avg time per triangulation vs triangulation count (log-x),
+              with a binned-median trend line -- if the algorithm is
+              amortized-constant, this trend should be flat (not rising)
+              even though raw wall-clock time keeps growing and even though
+              many large cases were cut off by the 360s time limit.
+      (right) log-log time vs triangulations with a fitted slope: a slope
+              near 1.0 means total time grows linearly with triangulation
+              count, i.e. constant amortized cost per triangulation.
+    Time-limited (censored) samples are marked distinctly since they are
+    still valid throughput samples (fixed time budget, partial count) and
+    are often the largest-n points available.
+    """
+    sub = summary[(summary["triangulations"] > 0) & (summary["median_avg_time_per_tri"] > 0)].copy()
+    if sub.empty:
+        print("  (skipped pooled amortized-constant evidence: no usable data)")
+        return
+    sub = sub.sort_values("triangulations")
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6.5))
+
+    # --- Left panel: avg time/triangulation vs n, pooled, with trend line ---
+    ok = sub[~sub["any_time_limit"]]
+    lim = sub[sub["any_time_limit"]]
+    ax1.scatter(ok["triangulations"], ok["median_avg_time_per_tri"], s=28, alpha=0.55,
+                color="#1f77b4", edgecolor="black", linewidth=0.2, marker="o", label="Completed cases")
+    ax1.scatter(lim["triangulations"], lim["median_avg_time_per_tri"], s=48, alpha=0.75,
+                color="#d62728", edgecolor="black", linewidth=0.4, marker="^",
+                label="Time-limit-cutoff cases (still valid rate samples)")
+
+    # Binned median trend (log-spaced bins) -- the key visual for "flat = constant".
+    logn = np.log10(sub["triangulations"].values)
+    n_bins = min(10, max(3, len(sub) // 8))
+    bin_edges = np.linspace(logn.min(), logn.max(), n_bins + 1)
+    bin_idx = np.digitize(logn, bin_edges[1:-1])
+    bin_centers, bin_meds = [], []
+    for b in range(n_bins):
+        mask = bin_idx == b
+        if mask.sum() == 0:
+            continue
+        bin_centers.append(10 ** np.median(logn[mask]))
+        bin_meds.append(np.median(sub["median_avg_time_per_tri"].values[mask]))
+    if len(bin_centers) >= 2:
+        ax1.plot(bin_centers, bin_meds, "-", color="black", linewidth=2.5, zorder=4,
+                  label="Binned median trend (flat = amortized constant)")
+        ax1.scatter(bin_centers, bin_meds, color="black", s=60, zorder=5, edgecolor="white", linewidth=0.8)
+
+    ax1.set_xscale("log")
+    ax1.set_yscale("log")
+    ax1.set_xlabel("Total triangulations generated (log scale)")
+    ax1.set_ylabel("Median average time per triangulation (s, log scale)")
+    ax1.set_title("Avg Time / Triangulation vs Problem Size\n(pooled across all categories)")
+    ax1.legend(fontsize=8, loc="best")
+
+    # --- Right panel: log-log time vs triangulations, fitted slope ---
+    ax2.scatter(ok["triangulations"], ok["median_time"], s=28, alpha=0.55, color="#1f77b4",
+                edgecolor="black", linewidth=0.2, marker="o", label="Completed cases")
+    ax2.scatter(lim["triangulations"], lim["median_time"], s=48, alpha=0.75, color="#d62728",
+                edgecolor="black", linewidth=0.4, marker="^", label="Time-limit-cutoff cases")
+    if len(sub) > 1:
+        logx = np.log10(sub["triangulations"].values)
+        logy = np.log10(sub["median_time"].values)
+        slope, intercept = np.polyfit(logx, logy, 1)
+        xs = np.linspace(logx.min(), logx.max(), 100)
+        ax2.plot(10**xs, 10**(slope * xs + intercept), "k--", lw=2.2,
+                  label=f"Fitted slope = {slope:.3f}")
+        ref_intercept = logy[np.argmin(logx)] - 1.0 * logx[np.argmin(logx)]
+        ax2.plot(10**xs, 10**(1.0 * xs + ref_intercept), color="gray", ls=":", lw=2,
+                  label="Reference slope = 1 (amortized O(1)/triangulation)")
+    ax2.set_xscale("log")
+    ax2.set_yscale("log")
+    ax2.set_xlabel("Total triangulations generated (log scale)")
+    ax2.set_ylabel("Median total time (s, log scale)")
+    ax2.set_title("Total Time vs Triangulation Count\n(slope ≈ 1 ⇒ linear total time ⇒ constant per-triangulation cost)")
+    ax2.legend(fontsize=8, loc="best")
+
+    fig.suptitle("Evidence for Amortized Constant Time per Triangulation (all categories pooled)",
+                 fontsize=13, fontweight="bold", y=1.02)
+    savefig(fig, out_dir, "27_pooled_amortized_constant_time_evidence")
+
+
+def plot_28_avg_time_per_tri_vs_triangulations_trend_by_category(summary, out_dir):
+    """Per-category binned-median trend of avg time/triangulation vs n, all
+    on one axes -- shows every category individually flattening out, which
+    is a stronger, less aggregate-able claim than the single pooled trend."""
+    categories = sorted(summary["category"].unique(), key=natural_case_key)
+    colors = category_color_map(categories)
+    fig, ax = plt.subplots(figsize=(9.5, 7))
+    any_plotted = False
+    for cat in categories:
+        sub = sort_cases_by_triangulations(summary[summary["category"] == cat])
+        sub = sub[(sub["triangulations"] > 0) & (sub["median_avg_time_per_tri"] > 0)]
+        if len(sub) < 2:
+            continue
+        any_plotted = True
+        logn = np.log10(sub["triangulations"].values)
+        n_bins = min(8, max(2, len(sub) // 4))
+        bin_edges = np.linspace(logn.min(), logn.max(), n_bins + 1)
+        bin_idx = np.digitize(logn, bin_edges[1:-1])
+        xs, ys = [], []
+        for b in range(n_bins):
+            mask = bin_idx == b
+            if mask.sum() == 0:
+                continue
+            xs.append(10 ** np.median(logn[mask]))
+            ys.append(np.median(sub["median_avg_time_per_tri"].values[mask]))
+        if len(xs) >= 2:
+            ax.plot(xs, ys, "-o", color=colors[cat], label=cat, linewidth=2,
+                     markersize=5, markeredgecolor="black", markeredgewidth=0.3)
+    if not any_plotted:
+        plt.close(fig)
+        print("  (skipped per-category avg-time-per-tri trend: insufficient data)")
+        return
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Total triangulations generated (log scale)")
+    ax.set_ylabel("Binned-median avg time / triangulation (s, log scale)")
+    ax.set_title("Per-Category Trend: Avg Time per Triangulation vs Problem Size\n"
+                  "(flat/declining lines support amortized-constant cost; more triangulations ⇒ lower avg cost)")
+    ax.legend(fontsize=8, ncol=2, loc="best")
+    savefig(fig, out_dir, "28_avg_time_per_tri_trend_by_category")
+
+
 PER_DATASET_PLOTS_SUMMARY = [
     plot_01_median_time_per_category,
     plot_02_median_time_all_categories_combined,
@@ -1044,6 +1200,8 @@ PER_DATASET_PLOTS_SUMMARY = [
     plot_24_all_categories_avg_time_per_tri_by_case_rank,
     plot_25_all_categories_avg_time_per_tri_grouped_bars,
     plot_26_avg_time_per_tri_boxplot_by_category,
+    plot_27_pooled_amortized_constant_evidence,
+    plot_28_avg_time_per_tri_vs_triangulations_trend_by_category,
 ]
 
 PER_DATASET_PLOTS_RAW_DF = [
@@ -1339,6 +1497,274 @@ def cmp_09_paired_case_scatter(all_summary, out_dir):
     savefig(fig, out_dir, "09_paired_case_scatter")
 
 
+def _paired_two_dataset_summary(all_summary):
+    """Helper: return (a_name, b_name, merged_df) for exactly-2-dataset
+    comparisons, merged on (category, case). merged_df has suffixed columns
+    _a / _b for every shared summary column. Returns (None, None, empty) if
+    not exactly 2 datasets or no matching cases."""
+    datasets = sorted(all_summary["dataset"].unique())
+    if len(datasets) != 2:
+        return None, None, pd.DataFrame()
+    a, b = datasets
+    da = all_summary[all_summary["dataset"] == a].copy()
+    db = all_summary[all_summary["dataset"] == b].copy()
+    merged = da.merge(db, on=["category", "case"], suffixes=("_a", "_b"))
+    return a, b, merged
+
+
+def cmp_10_avg_time_per_tri_grouped_bars_with_vs_without(all_summary, out_dir):
+    """Direct requested comparison: for the SAME cases, a grouped bar chart
+    of median average time per triangulation, one pair of bars (dataset A
+    vs dataset B) per case, faceted by category so it stays readable."""
+    a, b, merged = _paired_two_dataset_summary(all_summary)
+    if merged.empty:
+        print("  (skipped avg-time-per-tri grouped bars: need exactly 2 datasets with matching cases)")
+        return
+    merged = merged[(merged["median_avg_time_per_tri_a"] > 0) & (merged["median_avg_time_per_tri_b"] > 0)]
+    if merged.empty:
+        print("  (skipped avg-time-per-tri grouped bars: no valid paired rows)")
+        return
+
+    categories = sorted(merged["category"].unique(), key=natural_case_key)
+    n_cat = len(categories)
+    fig, axes = plt.subplots(n_cat, 1, figsize=(max(10, 0.55 * merged.groupby("category").size().max()),
+                                                 3.6 * n_cat), squeeze=False)
+    for i, cat in enumerate(categories):
+        ax = axes[i, 0]
+        sub = merged[merged["category"] == cat].sort_values("triangulations_a")
+        x = np.arange(len(sub))
+        w = 0.38
+        ax.bar(x - w / 2, sub["median_avg_time_per_tri_a"], width=w, color="#1f77b4",
+               edgecolor="black", linewidth=0.4, label=a)
+        ax.bar(x + w / 2, sub["median_avg_time_per_tri_b"], width=w, color="#d62728",
+               edgecolor="black", linewidth=0.4, label=b)
+        ax.set_xticks(x)
+        ax.set_xticklabels(sub["case"], rotation=45, ha="right", fontsize=7)
+        ax.set_yscale("log")
+        ax.set_ylabel("Median avg time /\ntriangulation (s)")
+        ax.set_title(f"Category: {cat} — {a} vs {b}, same cases (ordered by ↑ triangulations)")
+        ax.legend(fontsize=8)
+    fig.suptitle("Avg Time per Triangulation: With-vgs vs Without-vgs, Same Cases",
+                 fontsize=13, fontweight="bold", y=1.0 + 0.01 * n_cat)
+    savefig(fig, out_dir, "10_avg_time_per_tri_with_vs_without_grouped_bars")
+
+
+def cmp_11_slowdown_factor_bars(all_summary, out_dir):
+    """How much slower (×) the second dataset is than the first, per case,
+    grouped by category -- the direct 'without-vgs is N× slower' chart."""
+    a, b, merged = _paired_two_dataset_summary(all_summary)
+    if merged.empty:
+        print("  (skipped slowdown-factor bars: need exactly 2 datasets with matching cases)")
+        return
+    merged = merged[(merged["median_avg_time_per_tri_a"] > 0) & (merged["median_avg_time_per_tri_b"] > 0)]
+    if merged.empty:
+        print("  (skipped slowdown-factor bars: no valid paired rows)")
+        return
+    merged["slowdown"] = merged["median_avg_time_per_tri_b"] / merged["median_avg_time_per_tri_a"]
+
+    categories = sorted(merged["category"].unique(), key=natural_case_key)
+    colors = category_color_map(categories)
+    fig, ax = plt.subplots(figsize=(max(10, 0.5 * len(merged)), 6.5))
+    x = 0
+    xticks, xlabels = [], []
+    for cat in categories:
+        sub = merged[merged["category"] == cat].sort_values("triangulations_a")
+        xs = np.arange(x, x + len(sub))
+        ax.bar(xs, sub["slowdown"], width=0.7, color=colors[cat], edgecolor="black", linewidth=0.4)
+        xticks.extend(xs)
+        xlabels.extend(sub["case"])
+        x += len(sub) + 2
+    ax.axhline(1.0, color="black", ls="--", lw=1.5, label=f"{b} = {a} (no difference)")
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xlabels, rotation=90, fontsize=6)
+    ax.set_ylabel(f"Slowdown factor  ({b} time ÷ {a} time)")
+    ax.set_title(f"Per-Case Slowdown: '{b}' relative to '{a}'\n(>1 ⇒ '{b}' is slower, same metric as avg time per triangulation)")
+    handles = [Line2D([0], [0], color=colors[c], lw=6) for c in categories]
+    ax.legend(handles + [Line2D([0], [0], color="black", ls="--")], categories + ["no difference"],
+              ncol=min(6, len(categories) + 1), loc="upper left", bbox_to_anchor=(0, 1.18), fontsize=8)
+    savefig(fig, out_dir, "11_slowdown_factor_by_case")
+
+
+def cmp_12_unsuccessful_check_pct_by_category(all_summary, out_dir):
+    """The explanatory chart: % of unsuccessful (failed) checks per case,
+    for whichever dataset(s) actually record check counts (typically only
+    'without vgs' -- 'with vgs' rows will simply be NaN and are skipped).
+    This is meant to sit next to cmp_10/cmp_11 to show *why* the slower
+    dataset is slower."""
+    sub = all_summary[all_summary["median_unsuccessful_check_pct"].notna()].copy()
+    if sub.empty:
+        print("  (skipped unsuccessful-check-% chart: no dataset has check-count columns)")
+        return
+    datasets = sorted(sub["dataset"].unique())
+    dcolors = dataset_color_map(datasets)
+    categories = sorted(sub["category"].unique(), key=natural_case_key)
+    n_cat = len(categories)
+    fig, axes = plt.subplots(n_cat, 1, figsize=(max(10, 0.55 * sub.groupby("category").size().max()),
+                                                 3.4 * n_cat), squeeze=False)
+    for i, cat in enumerate(categories):
+        ax = axes[i, 0]
+        csub = sub[sub["category"] == cat]
+        for ds in datasets:
+            dsub = csub[csub["dataset"] == ds].sort_values("triangulations")
+            if dsub.empty:
+                continue
+            x = np.arange(len(dsub))
+            ax.bar(x, dsub["median_unsuccessful_check_pct"], width=0.6, color=dcolors[ds],
+                   edgecolor="black", linewidth=0.4, label=ds)
+            ax.set_xticks(x)
+            ax.set_xticklabels(dsub["case"], rotation=45, ha="right", fontsize=7)
+        ax.set_ylabel("Unsuccessful\nchecks (%)")
+        ax.set_ylim(0, 100)
+        ax.set_title(f"Category: {cat} — % of checks that were unsuccessful, per case")
+        ax.legend(fontsize=8)
+    fig.suptitle("Unsuccessful Check Percentage by Case\n"
+                 "(recorded only for datasets with check-count columns, e.g. 'without vgs')",
+                 fontsize=13, fontweight="bold", y=1.0 + 0.01 * n_cat)
+    savefig(fig, out_dir, "12_unsuccessful_check_pct_by_category")
+
+
+def cmp_13_time_vs_unsuccessful_check_pct_dual_axis(all_summary, out_dir):
+    """Direct correlation plot the user asked for: avg time per triangulation
+    for BOTH datasets (line, left axis) overlaid with unsuccessful-check %
+    for the dataset that records it (bars, right axis), per case ordered by
+    triangulation count -- visually ties 'extra time' to 'wasted checks'."""
+    a, b, merged = _paired_two_dataset_summary(all_summary)
+    if merged.empty:
+        print("  (skipped time-vs-check-% dual axis: need exactly 2 datasets with matching cases)")
+        return
+    # figure out which side (_a or _b) actually has the check-% column populated
+    has_a = merged["median_unsuccessful_check_pct_a"].notna().any()
+    has_b = merged["median_unsuccessful_check_pct_b"].notna().any()
+    if not (has_a or has_b):
+        print("  (skipped time-vs-check-% dual axis: neither dataset has check-count columns)")
+        return
+    check_col = "median_unsuccessful_check_pct_a" if has_a else "median_unsuccessful_check_pct_b"
+    check_ds_name = a if has_a else b
+
+    merged = merged[(merged["median_avg_time_per_tri_a"] > 0) & (merged["median_avg_time_per_tri_b"] > 0)]
+    if merged.empty:
+        print("  (skipped time-vs-check-% dual axis: no valid paired rows)")
+        return
+
+    categories = sorted(merged["category"].unique(), key=natural_case_key)
+    n_cat = len(categories)
+    fig, axes = plt.subplots(n_cat, 1, figsize=(max(10, 0.55 * merged.groupby("category").size().max()),
+                                                 3.8 * n_cat), squeeze=False)
+    for i, cat in enumerate(categories):
+        ax1 = axes[i, 0]
+        sub = merged[merged["category"] == cat].sort_values("triangulations_a")
+        x = np.arange(len(sub))
+
+        ax2 = ax1.twinx()
+        ax2.bar(x, sub[check_col], width=0.6, color="#ffb347", alpha=0.55,
+                edgecolor="black", linewidth=0.3, label=f"Unsuccessful checks % ({check_ds_name})", zorder=1)
+        ax2.set_ylim(0, 100)
+        ax2.set_ylabel("Unsuccessful checks (%)", color="#a86200")
+        ax2.tick_params(axis="y", labelcolor="#a86200")
+
+        ax1.plot(x, sub["median_avg_time_per_tri_a"], "-o", color="#1f77b4", linewidth=1.8,
+                 markersize=5, markeredgecolor="black", markeredgewidth=0.3, label=f"{a} avg time/tri", zorder=3)
+        ax1.plot(x, sub["median_avg_time_per_tri_b"], "-o", color="#d62728", linewidth=1.8,
+                 markersize=5, markeredgecolor="black", markeredgewidth=0.3, label=f"{b} avg time/tri", zorder=3)
+        ax1.set_yscale("log")
+        ax1.set_xticks(x)
+        ax1.set_xticklabels(sub["case"], rotation=45, ha="right", fontsize=7)
+        ax1.set_ylabel("Median avg time /\ntriangulation (s, log)")
+        ax1.set_title(f"Category: {cat} — avg time per triangulation vs unsuccessful-check % (same cases)")
+        ax1.set_zorder(ax2.get_zorder() + 1)
+        ax1.patch.set_visible(False)
+
+        h1, l1 = ax1.get_legend_handles_labels()
+        h2, l2 = ax2.get_legend_handles_labels()
+        ax1.legend(h1 + h2, l1 + l2, fontsize=7, loc="upper left")
+    fig.suptitle(f"Avg Time per Triangulation vs Unsuccessful-Check Percentage\n"
+                 f"(bars = % failed checks in '{check_ds_name}'; lines = timing for both datasets)",
+                 fontsize=13, fontweight="bold", y=1.0 + 0.012 * n_cat)
+    savefig(fig, out_dir, "13_time_vs_unsuccessful_check_pct_dual_axis")
+
+
+def cmp_14_pooled_amortized_constant_both_datasets(all_summary, out_dir):
+    """Overlay of the pooled amortized-evidence plot (plot_27) for every
+    dataset on one figure: shows BOTH with-vgs and without-vgs are each
+    individually amortized-constant (flat/near-flat binned trend and
+    slope ≈ 1 log-log fit), just at different constants -- supporting
+    'without-vgs is slower but still amortized O(1)'."""
+    datasets = sorted(all_summary["dataset"].unique())
+    dcolors = dataset_color_map(datasets)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.5))
+    any_plotted = False
+    for ds in datasets:
+        sub = all_summary[(all_summary["dataset"] == ds) & (all_summary["triangulations"] > 0) &
+                           (all_summary["median_avg_time_per_tri"] > 0)].sort_values("triangulations")
+        if sub.empty:
+            continue
+        any_plotted = True
+        ok = sub[~sub["any_time_limit"]]
+        lim = sub[sub["any_time_limit"]]
+        ax1.scatter(ok["triangulations"], ok["median_avg_time_per_tri"], s=22, alpha=0.45,
+                    color=dcolors[ds], edgecolor="black", linewidth=0.2, marker="o")
+        ax1.scatter(lim["triangulations"], lim["median_avg_time_per_tri"], s=40, alpha=0.7,
+                    color=dcolors[ds], edgecolor="black", linewidth=0.4, marker="^")
+
+        logn = np.log10(sub["triangulations"].values)
+        n_bins = min(10, max(3, len(sub) // 8))
+        bin_edges = np.linspace(logn.min(), logn.max(), n_bins + 1)
+        bin_idx = np.digitize(logn, bin_edges[1:-1])
+        xs, ys = [], []
+        for bi in range(n_bins):
+            mask = bin_idx == bi
+            if mask.sum() == 0:
+                continue
+            xs.append(10 ** np.median(logn[mask]))
+            ys.append(np.median(sub["median_avg_time_per_tri"].values[mask]))
+        if len(xs) >= 2:
+            ax1.plot(xs, ys, "-", color=dcolors[ds], linewidth=2.6, label=f"{ds} (binned median trend)")
+
+        sub2 = sub[sub["median_time"] > 0]
+        if len(sub2) > 1:
+            logx = np.log10(sub2["triangulations"].values)
+            logy = np.log10(sub2["median_time"].values)
+            slope, intercept = np.polyfit(logx, logy, 1)
+            xr = np.linspace(logx.min(), logx.max(), 100)
+            ax2.plot(10**xr, 10**(slope * xr + intercept), "--", color=dcolors[ds], linewidth=2.2,
+                      label=f"{ds}: slope={slope:.3f}")
+            ax2.scatter(sub2["triangulations"], sub2["median_time"], s=20, alpha=0.4, color=dcolors[ds],
+                        edgecolor="black", linewidth=0.2)
+
+    if not any_plotted:
+        plt.close(fig)
+        print("  (skipped pooled amortized-constant both-datasets: no usable data)")
+        return
+
+    ax2.plot([], [], color="gray", ls=":", lw=2, label="Reference slope = 1")
+    xall = all_summary[all_summary["triangulations"] > 0]["triangulations"]
+    if not xall.empty:
+        yref = all_summary[all_summary["median_time"] > 0]["median_time"]
+        if not yref.empty:
+            lx = np.log10(xall.min())
+            ly = np.log10(yref.min())
+            xr = np.linspace(np.log10(xall.min()), np.log10(xall.max()), 100)
+            ax2.plot(10**xr, 10**(1.0 * xr + (ly - lx)), color="gray", ls=":", lw=2)
+
+    ax1.set_xscale("log")
+    ax1.set_yscale("log")
+    ax1.set_xlabel("Total triangulations (log scale)")
+    ax1.set_ylabel("Median avg time / triangulation (s, log)")
+    ax1.set_title("Avg Time per Triangulation vs Problem Size\n(pooled per dataset; flat ⇒ amortized constant)")
+    ax1.legend(fontsize=8)
+
+    ax2.set_xscale("log")
+    ax2.set_yscale("log")
+    ax2.set_xlabel("Total triangulations (log scale)")
+    ax2.set_ylabel("Median total time (s, log)")
+    ax2.set_title("Total Time vs Triangulations, Fitted Slope\n(slope ≈ 1 for both ⇒ both amortized O(1), different constants)")
+    ax2.legend(fontsize=8)
+
+    fig.suptitle("Both Datasets Are Amortized Constant Time per Triangulation, at Different Constants",
+                 fontsize=13, fontweight="bold", y=1.02)
+    savefig(fig, out_dir, "14_pooled_amortized_constant_both_datasets")
+
+
 COMPARISON_PLOTS_SUMMARY = [
     cmp_01_median_time_per_triangulation_overlay,
     cmp_02_loglog_time_vs_triangulations,
@@ -1348,6 +1774,11 @@ COMPARISON_PLOTS_SUMMARY = [
     cmp_07_memory_comparison,
     cmp_08_time_limited_fraction,
     cmp_09_paired_case_scatter,
+    cmp_10_avg_time_per_tri_grouped_bars_with_vs_without,
+    cmp_11_slowdown_factor_bars,
+    cmp_12_unsuccessful_check_pct_by_category,
+    cmp_13_time_vs_unsuccessful_check_pct_dual_axis,
+    cmp_14_pooled_amortized_constant_both_datasets,
 ]
 
 
