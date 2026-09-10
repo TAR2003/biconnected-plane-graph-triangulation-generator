@@ -230,21 +230,63 @@ static string getExecutablePath()
 #endif
 }
 
-static void writeProgressFile(const string &path, u128 count)
+// Progress file now carries the same search-quality counters as the final
+// result file, not just the triangulation count, so that a run killed for
+// exceeding the time limit still reports accurate totalChecks /
+// successfulChecks / invalidTraversals (previously these silently stayed at
+// 0 for time_limit_exceeded rows because only the triangulation count was
+// ever persisted before the kill).
+struct ProgressSnapshot
+{
+    u128 triangulations = 0;
+    long long totalChecks = 0;
+    long long successfulChecks = 0;
+    long long invalidTraversals = 0;
+};
+
+static void writeProgressFile(const string &path, const ProgressSnapshot &p)
 {
     ofstream out(path, ios::trunc);
-    if (out.is_open())
-        out << u128_to_string(count) << '\n';
+    if (!out.is_open())
+        return;
+    out << "triangulations=" << u128_to_string(p.triangulations) << '\n';
+    out << "totalChecks=" << p.totalChecks << '\n';
+    out << "successfulChecks=" << p.successfulChecks << '\n';
+    out << "invalidTraversals=" << p.invalidTraversals << '\n';
 }
 
-static u128 readProgressFile(const string &path)
+static ProgressSnapshot readProgressFile(const string &path)
 {
+    ProgressSnapshot p;
     ifstream in(path);
     if (!in.is_open())
-        return 0;
+        return p;
+
     string line;
-    getline(in, line);
-    return string_to_u128(line);
+    while (getline(in, line))
+    {
+        if (line.empty())
+            continue;
+        auto eq = line.find('=');
+        if (eq == string::npos)
+        {
+            // Backward compatibility: older progress files contained just a
+            // bare triangulation count on the first line with no "key=".
+            p.triangulations = string_to_u128(line);
+            continue;
+        }
+        string key = line.substr(0, eq);
+        string value = line.substr(eq + 1);
+        if (key == "triangulations")
+            p.triangulations = string_to_u128(value);
+        else if (key == "totalChecks")
+            p.totalChecks = stoll(value);
+        else if (key == "successfulChecks")
+            p.successfulChecks = stoll(value);
+        else if (key == "invalidTraversals")
+            p.invalidTraversals = stoll(value);
+    }
+    return p;
 }
 
 struct WorkerResult
@@ -491,14 +533,24 @@ static int runWorkerMode(const char *inputPath, const char *resultPath, const ch
     biconnected *bc = new biconnected(faces);
     std::atomic<bool> stopProgress{false};
 
+    auto snapshotNow = [&]() -> ProgressSnapshot
+    {
+        ProgressSnapshot p;
+        p.triangulations = bc->totalTriangulations;
+        p.totalChecks = bc->totalChecks;
+        p.successfulChecks = bc->successfulChecks;
+        p.invalidTraversals = bc->invalidTraversals;
+        return p;
+    };
+
     std::thread progressThread([&]()
                                {
         while (!stopProgress.load(std::memory_order_relaxed))
         {
-            writeProgressFile(progressPath, bc->totalTriangulations);
+            writeProgressFile(progressPath, snapshotNow());
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
-        writeProgressFile(progressPath, bc->totalTriangulations); });
+        writeProgressFile(progressPath, snapshotNow()); });
 
     using clock = std::chrono::steady_clock;
     auto runStart = clock::now();
@@ -649,20 +701,55 @@ static void runCategory(const string &category)
                 }
                 else
                 {
-                    rec.triangStr = u128_to_string(readProgressFile(progressPath));
+                    ProgressSnapshot snap = readProgressFile(progressPath);
+                    rec.triangStr = u128_to_string(snap.triangulations);
                     rec.timeSeconds = runSec;
                     rec.peakMemory = memUsed;
                     rec.status = "error";
+
+                    rec.totalChecks = snap.totalChecks;
+                    rec.successfulChecks = snap.successfulChecks;
+                    rec.failedChecks = snap.totalChecks - snap.successfulChecks;
+                    rec.checkSuccessRate = (snap.totalChecks > 0)
+                                               ? (static_cast<double>(snap.successfulChecks) / snap.totalChecks) * 100.0
+                                               : 0.0;
+                    rec.invalidTraversals = snap.invalidTraversals;
+                    {
+                        long long successfulTraversals = static_cast<long long>(snap.triangulations);
+                        rec.totalTraversalsExtended = snap.invalidTraversals + successfulTraversals;
+                        rec.traversalSuccessRate = (rec.totalTraversalsExtended > 0)
+                                                       ? (static_cast<double>(successfulTraversals) / rec.totalTraversalsExtended) * 100.0
+                                                       : 0.0;
+                    }
+
                     cout << " ERROR: worker finished but result file missing (end " << endTs << ")\n";
                 }
             }
             else if (subprocessStatus == 1)
             {
-                u128 triangCount = readProgressFile(progressPath);
-                rec.triangStr = u128_to_string(triangCount);
+                ProgressSnapshot snap = readProgressFile(progressPath);
+                rec.triangStr = u128_to_string(snap.triangulations);
                 rec.timeSeconds = runSec;
                 rec.peakMemory = memUsed;
                 rec.status = "time_limit_exceeded";
+
+                // Populate the same search-quality metrics as the "completed"
+                // path using the last progress snapshot taken before the
+                // worker was killed, instead of leaving these at 0.
+                rec.totalChecks = snap.totalChecks;
+                rec.successfulChecks = snap.successfulChecks;
+                rec.failedChecks = snap.totalChecks - snap.successfulChecks;
+                rec.checkSuccessRate = (snap.totalChecks > 0)
+                                           ? (static_cast<double>(snap.successfulChecks) / snap.totalChecks) * 100.0
+                                           : 0.0;
+                rec.invalidTraversals = snap.invalidTraversals;
+                {
+                    long long successfulTraversals = static_cast<long long>(snap.triangulations);
+                    rec.totalTraversalsExtended = snap.invalidTraversals + successfulTraversals;
+                    rec.traversalSuccessRate = (rec.totalTraversalsExtended > 0)
+                                                   ? (static_cast<double>(successfulTraversals) / rec.totalTraversalsExtended) * 100.0
+                                                   : 0.0;
+                }
 
                 cout << " TIME LIMIT EXCEEDED (end " << endTs << ") -> " << fixed << setprecision(6)
                      << rec.timeSeconds << " s, " << rec.triangStr
@@ -671,10 +758,27 @@ static void runCategory(const string &category)
             }
             else
             {
-                rec.triangStr = u128_to_string(readProgressFile(progressPath));
+                ProgressSnapshot snap = readProgressFile(progressPath);
+                rec.triangStr = u128_to_string(snap.triangulations);
                 rec.timeSeconds = runSec;
                 rec.peakMemory = memUsed;
                 rec.status = "error";
+
+                rec.totalChecks = snap.totalChecks;
+                rec.successfulChecks = snap.successfulChecks;
+                rec.failedChecks = snap.totalChecks - snap.successfulChecks;
+                rec.checkSuccessRate = (snap.totalChecks > 0)
+                                           ? (static_cast<double>(snap.successfulChecks) / snap.totalChecks) * 100.0
+                                           : 0.0;
+                rec.invalidTraversals = snap.invalidTraversals;
+                {
+                    long long successfulTraversals = static_cast<long long>(snap.triangulations);
+                    rec.totalTraversalsExtended = snap.invalidTraversals + successfulTraversals;
+                    rec.traversalSuccessRate = (rec.totalTraversalsExtended > 0)
+                                                   ? (static_cast<double>(successfulTraversals) / rec.totalTraversalsExtended) * 100.0
+                                                   : 0.0;
+                }
+
                 cout << " ERROR: failed to spawn or wait on worker process (end " << endTs << ")\n";
             }
 
