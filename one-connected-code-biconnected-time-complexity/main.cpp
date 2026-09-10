@@ -255,6 +255,10 @@ struct WorkerResult
     size_t peakMemory = 0;
     string startTime;
     string endTime;
+    // Additional search-quality metrics (from check-stats.cpp)
+    long long totalChecks = 0;
+    long long successfulChecks = 0;
+    long long invalidTraversals = 0;
 };
 
 static void writeWorkerResultFile(const string &path, const WorkerResult &r)
@@ -268,6 +272,9 @@ static void writeWorkerResultFile(const string &path, const WorkerResult &r)
     out << "peakMemoryBytes=" << r.peakMemory << '\n';
     out << "startTime=" << r.startTime << '\n';
     out << "endTime=" << r.endTime << '\n';
+    out << "totalChecks=" << r.totalChecks << '\n';
+    out << "successfulChecks=" << r.successfulChecks << '\n';
+    out << "invalidTraversals=" << r.invalidTraversals << '\n';
 }
 
 static bool readWorkerResultFile(const string &path, WorkerResult &r)
@@ -300,6 +307,12 @@ static bool readWorkerResultFile(const string &path, WorkerResult &r)
             r.startTime = value;
         else if (key == "endTime")
             r.endTime = value;
+        else if (key == "totalChecks")
+            r.totalChecks = stoll(value);
+        else if (key == "successfulChecks")
+            r.successfulChecks = stoll(value);
+        else if (key == "invalidTraversals")
+            r.invalidTraversals = stoll(value);
     }
     return any;
 }
@@ -319,6 +332,15 @@ struct RunRecord
     string startTime;
     string endTime;
     string status; // "completed", "time_limit_exceeded", or "error"
+
+    // Additional search-quality metrics (from check-stats.cpp)
+    long long totalChecks = 0;
+    long long successfulChecks = 0;
+    long long failedChecks = 0;
+    double checkSuccessRate = 0.0;
+    long long invalidTraversals = 0;
+    long long totalTraversalsExtended = 0; // invalidTraversals + successful triangulations
+    double traversalSuccessRate = 0.0;
 };
 
 static string csvPathForCategory(const string &category)
@@ -361,12 +383,18 @@ static void appendRunCSV(const string &csvPath, const RunRecord &r)
     }
     if (needHeader)
     {
-        out << "filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,startTime,endTime,status\n";
+        out << "filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,startTime,endTime,status,"
+            << "totalChecks,successfulChecks,failedChecks,checkSuccessRate,"
+            << "invalidTraversals,totalTraversalsExtended,traversalSuccessRate\n";
     }
     out << r.filename << ',' << r.runIndex << ',' << r.distinctVertices << ','
         << r.triangStr << ',' << fixed << setprecision(9) << r.timeSeconds << ','
         << r.peakMemory << ',' << fixed << setprecision(6) << r.memoryPerVertex << ','
-        << r.startTime << ',' << r.endTime << ',' << r.status << '\n';
+        << r.startTime << ',' << r.endTime << ',' << r.status << ','
+        << r.totalChecks << ',' << r.successfulChecks << ',' << r.failedChecks << ','
+        << fixed << setprecision(2) << r.checkSuccessRate << ','
+        << r.invalidTraversals << ',' << r.totalTraversalsExtended << ','
+        << fixed << setprecision(2) << r.traversalSuccessRate << '\n';
 }
 
 // ============================================================================
@@ -493,6 +521,9 @@ static int runWorkerMode(const char *inputPath, const char *resultPath, const ch
     result.peakMemory = memUsed;
     result.startTime = startTs;
     result.endTime = endTs;
+    result.totalChecks = bc->totalChecks;
+    result.successfulChecks = bc->successfulChecks;
+    result.invalidTraversals = bc->invalidTraversals;
     writeWorkerResultFile(resultPath, result);
 
     delete bc;
@@ -596,6 +627,21 @@ static void runCategory(const string &category)
                     rec.startTime = workerResult.startTime.empty() ? startTs : workerResult.startTime;
                     rec.endTime = workerResult.endTime.empty() ? endTs : workerResult.endTime;
                     rec.status = "completed";
+
+                    rec.totalChecks = workerResult.totalChecks;
+                    rec.successfulChecks = workerResult.successfulChecks;
+                    rec.failedChecks = workerResult.totalChecks - workerResult.successfulChecks;
+                    rec.checkSuccessRate = (workerResult.totalChecks > 0)
+                                               ? (static_cast<double>(workerResult.successfulChecks) / workerResult.totalChecks) * 100.0
+                                               : 0.0;
+                    rec.invalidTraversals = workerResult.invalidTraversals;
+                    {
+                        long long successfulTraversals = static_cast<long long>(workerResult.triangulations);
+                        rec.totalTraversalsExtended = workerResult.invalidTraversals + successfulTraversals;
+                        rec.traversalSuccessRate = (rec.totalTraversalsExtended > 0)
+                                                       ? (static_cast<double>(successfulTraversals) / rec.totalTraversalsExtended) * 100.0
+                                                       : 0.0;
+                    }
 
                     cout << " done (end " << rec.endTime << ") -> " << fixed << setprecision(6)
                          << rec.timeSeconds << " s, " << rec.triangStr << " triangulations, "
