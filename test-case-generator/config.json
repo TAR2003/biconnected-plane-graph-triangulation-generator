@@ -1,6 +1,5 @@
 {
   "_comment": "Global defaults apply to every category unless overridden below. Each category can override any subset of: count, max_faces, max_vertices_in_face, max_vertices, min_vertices, seed.",
-
   "defaults": {
     "count": 100,
     "max_faces": 20,
@@ -9,7 +8,6 @@
     "min_vertices": 3,
     "seed": 42
   },
-
   "categories": {
     "1_triangulation_subdivide_1": {
       "_comment": "Delaunay triangulation, subdivide each edge once. Leave empty {} to use defaults, or override any field below.",
@@ -37,6 +35,13 @@
     "6_cycle_union": {
       "count": 100,
       "_comment_example": "Cycle unions only reach k in [2,4], so max_faces above 5 has no effect on this category (faces = k+1)."
+    },
+    "7_snowflake": {
+      "_comment_example": "Snowflake = maximal outerplanar graph (fully triangulated except the outer face). Needs max_faces >= 3 (mathematical minimum: n=4 vertices -> 2 inner triangles + 1 outer face). Since faces = n_vertices - 1 here, max_vertices also effectively caps the largest reachable face count -- keep max_vertices comfortably above max_faces+1 or you'll cut off the top of the range.",
+      "count": 100,
+      "max_faces": 20,
+      "max_vertices_in_face": 20,
+      "max_vertices": 300
     }
   }
 }
