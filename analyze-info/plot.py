@@ -96,9 +96,17 @@ STATUS_LIMIT = {"time_limit_exceeded", "limit_exceeded", "triangulation_limit_ex
 # ============================================================================
 
 def natural_case_key(name: str):
-    """Sort helper: case_1_2 < case_1_10 (numeric-aware), not lexicographic."""
+    """Sort helper: case_1_2 < case_1_10 (numeric-aware), not lexicographic.
+    Returns a tuple of (str, int) pairs so that keys are always safely
+    comparable across different case names, even with differing numbers of
+    numeric runs or mismatched segment counts."""
     parts = re.split(r"(\d+)", str(name))
-    return [int(p) if p.isdigit() else p for p in parts]
+    out = []
+    for p in parts:
+        if p == "":
+            continue
+        out.append((1, int(p)) if p.isdigit() else (0, p))
+    return tuple(out)
 
 
 def discover_datasets(input_dir: str):
@@ -285,6 +293,15 @@ def savefig(fig, out_dir, name):
     fig.savefig(png, bbox_inches="tight")
     plt.close(fig)
     print(f"  -> {png}")
+
+
+def sort_by_case_name(sub: pd.DataFrame, case_col: str = "case") -> pd.DataFrame:
+    """Sort rows by case name in ascending natural order (case_1, case_2, ...,
+    case_10, not lexicographic case_1, case_10, case_2, ...). Used for every
+    plot whose x-axis lists cases one by one, so they always read left-to-
+    right in increasing case number."""
+    order = sub[case_col].map(natural_case_key)
+    return sub.assign(_case_sort_key=order).sort_values("_case_sort_key", kind="stable").drop(columns="_case_sort_key")
 
 
 def sort_cases_by_triangulations(sub: pd.DataFrame) -> pd.DataFrame:
@@ -1541,7 +1558,7 @@ def cmp_10_avg_time_per_tri_grouped_bars_with_vs_without(all_summary, out_dir):
                                                  3.6 * n_cat), squeeze=False)
     for i, cat in enumerate(categories):
         ax = axes[i, 0]
-        sub = merged[merged["category"] == cat].sort_values("triangulations_a")
+        sub = merged[merged["category"] == cat].pipe(sort_by_case_name)
         x = np.arange(len(sub))
         w = 0.38
         ax.bar(x - w / 2, sub["median_avg_time_per_tri_a"], width=w, color="#1f77b4",
@@ -1578,7 +1595,7 @@ def cmp_11_slowdown_factor_bars(all_summary, out_dir):
     x = 0
     xticks, xlabels = [], []
     for cat in categories:
-        sub = merged[merged["category"] == cat].sort_values("triangulations_a")
+        sub = merged[merged["category"] == cat].pipe(sort_by_case_name)
         xs = np.arange(x, x + len(sub))
         ax.bar(xs, sub["slowdown"], width=0.7, color=colors[cat], edgecolor="black", linewidth=0.4)
         xticks.extend(xs)
@@ -1615,7 +1632,7 @@ def cmp_12_unsuccessful_check_pct_by_category(all_summary, out_dir):
         ax = axes[i, 0]
         csub = sub[sub["category"] == cat]
         for ds in datasets:
-            dsub = csub[csub["dataset"] == ds].sort_values("triangulations")
+            dsub = csub[csub["dataset"] == ds].pipe(sort_by_case_name)
             if dsub.empty:
                 continue
             x = np.arange(len(dsub))
@@ -1662,7 +1679,7 @@ def cmp_13_time_vs_unsuccessful_check_pct_dual_axis(all_summary, out_dir):
                                                  3.8 * n_cat), squeeze=False)
     for i, cat in enumerate(categories):
         ax1 = axes[i, 0]
-        sub = merged[merged["category"] == cat].sort_values("triangulations_a")
+        sub = merged[merged["category"] == cat].pipe(sort_by_case_name)
         x = np.arange(len(sub))
 
         ax2 = ax1.twinx()
@@ -1742,7 +1759,7 @@ def cmp_15_time_ratio_vs_checks_ratio_lines(all_summary, out_dir):
                                                  3.8 * n_cat), squeeze=False)
     for i, cat in enumerate(categories):
         ax = axes[i, 0]
-        sub = merged[merged["category"] == cat].sort_values("triangulations_a")
+        sub = merged[merged["category"] == cat].pipe(sort_by_case_name)
         x = np.arange(len(sub))
 
         ax.plot(x, sub["time_ratio"], "-o", color="#1f77b4", linewidth=2, markersize=6,
