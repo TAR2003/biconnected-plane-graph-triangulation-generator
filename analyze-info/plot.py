@@ -306,6 +306,40 @@ def dataset_color_map(datasets):
     return {d: cmap(i / max(n - 1, 1)) if n > 1 else cmap(0) for i, d in enumerate(cats)}
 
 
+# ----------------------------------------------------------------------------
+# Fixed red/blue coloring for "with vgs" vs "without vgs" datasets.
+# Any dataset whose name contains "without" (case-insensitive) is drawn RED;
+# any dataset containing "with" (but not "without") is drawn BLUE. Any other
+# / extra dataset names fall back to the generic Set1 palette so nothing
+# crashes if the ablation isn't exactly two datasets.
+# ----------------------------------------------------------------------------
+VGS_RED = "#d62728"   # without vgs
+VGS_BLUE = "#1f77b4"  # with vgs
+
+
+def vgs_color_map(datasets):
+    fallback = dataset_color_map(datasets)
+    colors = {}
+    for d in datasets:
+        dl = str(d).lower()
+        if "without" in dl:
+            colors[d] = VGS_RED
+        elif "with" in dl:
+            colors[d] = VGS_BLUE
+        else:
+            colors[d] = fallback[d]
+    return colors
+
+
+def vgs_label(dataset_name):
+    dl = str(dataset_name).lower()
+    if "without" in dl:
+        return f"{dataset_name} (without VGS)"
+    if "with" in dl:
+        return f"{dataset_name} (with VGS)"
+    return str(dataset_name)
+
+
 def savefig(fig, out_dir, name):
     png = os.path.join(out_dir, f"{name}.png")
     os.makedirs(os.path.dirname(png), exist_ok=True)
@@ -1879,6 +1913,358 @@ def cmp_14_pooled_amortized_constant_both_datasets(all_summary, out_dir):
     savefig(fig, out_dir, "14_pooled_amortized_constant_both_datasets")
 
 
+\
+# ============================================================================
+# PER-CATEGORY COMPARISON PLOTS (with-vgs vs without-vgs, red/blue)
+# ----------------------------------------------------------------------------
+# For every category, a subfolder plots_comparison/<category>/ is created
+# containing several chart TYPES, each with every case of that category on
+# the x-axis and BOTH datasets ("with vgs" = blue, "without vgs" = red)
+# drawn together so the two are always compared directly.
+# ============================================================================
+
+def _cat_subdir(out_dir, category):
+    safe = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(category))
+    d = os.path.join(out_dir, safe)
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+def catcmp_01_line_avg_time_per_case(sub_cat, category, out_dir, vcolors):
+    """Line graph: x-axis = each case in the category (in natural/case-number
+    order), y-axis = median average time per triangulation. One line per
+    dataset -- red = without vgs, blue = with vgs -- so the two are directly
+    comparable case-by-case."""
+    datasets = sorted(sub_cat["dataset"].unique())
+    all_cases = sorted(sub_cat["case"].unique(), key=natural_case_key)
+    x_index = {c: i for i, c in enumerate(all_cases)}
+
+    fig, ax = plt.subplots(figsize=(max(9, 0.55 * len(all_cases)), 6))
+    for ds in datasets:
+        sub = sub_cat[sub_cat["dataset"] == ds]
+        sub = sort_by_case_name(sub[sub["median_avg_time_per_tri"].notna()])
+        if sub.empty:
+            continue
+        xs = [x_index[c] for c in sub["case"]]
+        ax.plot(xs, sub["median_avg_time_per_tri"], "-", color=vcolors[ds], linewidth=2,
+                alpha=0.9, zorder=2)
+        ok = sub[~sub["any_time_limit"]]
+        lim = sub[sub["any_time_limit"]]
+        ax.scatter([x_index[c] for c in ok["case"]], ok["median_avg_time_per_tri"],
+                   color=vcolors[ds], s=36, edgecolor="black", linewidth=0.4, marker="o",
+                   zorder=3, label=vgs_label(ds))
+        if not lim.empty:
+            ax.scatter([x_index[c] for c in lim["case"]], lim["median_avg_time_per_tri"],
+                       color=vcolors[ds], s=60, edgecolor="black", linewidth=0.7, marker="^",
+                       zorder=3, label=f"{vgs_label(ds)} (time limit hit)")
+    ax.set_xticks(range(len(all_cases)))
+    ax.set_xticklabels(all_cases, rotation=45, ha="right", fontsize=8)
+    ax.set_xlabel("Case")
+    ax.set_ylabel("Median average time per triangulation (s)")
+    ax.set_yscale("log")
+    ax.set_title(f"Category: {category} — Average Time per Case\nWith VGS (blue) vs Without VGS (red)")
+    ax.legend(fontsize=8, loc="best")
+    savefig(fig, out_dir, f"line_avg_time_per_case")
+
+
+def catcmp_02_bar_avg_time_per_case(sub_cat, category, out_dir, vcolors):
+    """Grouped bar chart: x-axis = each case, one red bar (without vgs) and
+    one blue bar (with vgs) side-by-side per case."""
+    datasets = sorted(sub_cat["dataset"].unique())
+    all_cases = sorted(sub_cat["case"].unique(), key=natural_case_key)
+    x = np.arange(len(all_cases))
+    n_ds = max(len(datasets), 1)
+    width = 0.8 / n_ds
+
+    fig, ax = plt.subplots(figsize=(max(9, 0.6 * len(all_cases)), 6))
+    for i, ds in enumerate(datasets):
+        sub = sub_cat[sub_cat["dataset"] == ds].set_index("case")
+        vals = [sub.loc[c, "median_avg_time_per_tri"] if c in sub.index else np.nan for c in all_cases]
+        offset = (i - (n_ds - 1) / 2) * width
+        ax.bar(x + offset, vals, width=width * 0.92, color=vcolors[ds],
+               edgecolor="black", linewidth=0.5, label=vgs_label(ds))
+    ax.set_xticks(x)
+    ax.set_xticklabels(all_cases, rotation=45, ha="right", fontsize=8)
+    ax.set_xlabel("Case")
+    ax.set_ylabel("Median average time per triangulation (s)")
+    ax.set_yscale("log")
+    ax.set_title(f"Category: {category} — Average Time per Case (grouped bars)\nWith VGS (blue) vs Without VGS (red)")
+    ax.legend(fontsize=8)
+    savefig(fig, out_dir, "bar_avg_time_per_case")
+
+
+def catcmp_03_bar_median_total_time_per_case(sub_cat, category, out_dir, vcolors):
+    """Grouped bar chart of median TOTAL time (not per-triangulation) per
+    case, red vs blue."""
+    datasets = sorted(sub_cat["dataset"].unique())
+    all_cases = sorted(sub_cat["case"].unique(), key=natural_case_key)
+    x = np.arange(len(all_cases))
+    n_ds = max(len(datasets), 1)
+    width = 0.8 / n_ds
+
+    fig, ax = plt.subplots(figsize=(max(9, 0.6 * len(all_cases)), 6))
+    for i, ds in enumerate(datasets):
+        sub = sub_cat[sub_cat["dataset"] == ds].set_index("case")
+        vals = [sub.loc[c, "median_time"] if c in sub.index else np.nan for c in all_cases]
+        offset = (i - (n_ds - 1) / 2) * width
+        ax.bar(x + offset, vals, width=width * 0.92, color=vcolors[ds],
+               edgecolor="black", linewidth=0.5, label=vgs_label(ds))
+    ax.set_xticks(x)
+    ax.set_xticklabels(all_cases, rotation=45, ha="right", fontsize=8)
+    ax.set_xlabel("Case")
+    ax.set_ylabel("Median total time (s)")
+    ax.set_yscale("log")
+    ax.set_title(f"Category: {category} — Median Total Time per Case\nWith VGS (blue) vs Without VGS (red)")
+    ax.legend(fontsize=8)
+    savefig(fig, out_dir, "bar_median_total_time_per_case")
+
+
+def catcmp_04_scatter_time_vs_triangulations(sub_cat, category, out_dir, vcolors):
+    """Log-log scatter + line: total triangulations (x) vs median total time
+    (y), one point per case, connected in triangulation order, red vs blue."""
+    datasets = sorted(sub_cat["dataset"].unique())
+    fig, ax = plt.subplots(figsize=(8, 6.5))
+    for ds in datasets:
+        sub = sub_cat[(sub_cat["dataset"] == ds) & (sub_cat["triangulations"] > 0) &
+                       (sub_cat["median_time"] > 0)]
+        sub = sort_cases_by_triangulations(sub)
+        if sub.empty:
+            continue
+        ax.plot(sub["triangulations"], sub["median_time"], "-", color=vcolors[ds], linewidth=1.6, alpha=0.8)
+        ok = sub[~sub["any_time_limit"]]
+        lim = sub[sub["any_time_limit"]]
+        ax.scatter(ok["triangulations"], ok["median_time"], color=vcolors[ds], s=32,
+                   edgecolor="black", linewidth=0.3, marker="o", label=vgs_label(ds))
+        ax.scatter(lim["triangulations"], lim["median_time"], color=vcolors[ds], s=55,
+                   edgecolor="black", linewidth=0.6, marker="^")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Total triangulations (log scale)")
+    ax.set_ylabel("Median total time (s, log scale)")
+    ax.set_title(f"Category: {category} — Total Time vs Triangulations\nWith VGS (blue) vs Without VGS (red)")
+    ax.legend(fontsize=8)
+    savefig(fig, out_dir, "scatter_time_vs_triangulations")
+
+
+def catcmp_05_box_time_per_tri_distribution(sub_df_cat, category, out_dir, vcolors):
+    """Boxplot of the full per-run time_per_triangulation distribution for
+    every case in the category, positioned side-by-side per dataset so the
+    spread (not just the median) is compared, red vs blue."""
+    datasets = sorted(sub_df_cat["dataset"].unique())
+    all_cases = sorted(sub_df_cat["case"].unique(), key=natural_case_key)
+    n_ds = max(len(datasets), 1)
+    width = 0.8 / n_ds
+
+    fig, ax = plt.subplots(figsize=(max(10, 0.7 * len(all_cases)), 6.5))
+    for i, ds in enumerate(datasets):
+        data, positions = [], []
+        for j, c in enumerate(all_cases):
+            vals = sub_df_cat[(sub_df_cat["dataset"] == ds) & (sub_df_cat["case"] == c)][
+                "time_per_triangulation"].dropna().values
+            if len(vals) == 0:
+                continue
+            data.append(vals)
+            positions.append(j + (i - (n_ds - 1) / 2) * width)
+        if not data:
+            continue
+        bp = ax.boxplot(data, positions=positions, widths=width * 0.85, patch_artist=True,
+                         showfliers=False)
+        for box in bp["boxes"]:
+            box.set_facecolor(vcolors[ds])
+            box.set_alpha(0.6)
+            box.set_edgecolor("black")
+        for med in bp["medians"]:
+            med.set_color("black")
+    ax.plot([], [], color=VGS_BLUE, lw=6, alpha=0.6, label="with VGS")
+    ax.plot([], [], color=VGS_RED, lw=6, alpha=0.6, label="without VGS")
+    ax.set_xticks(range(len(all_cases)))
+    ax.set_xticklabels(all_cases, rotation=45, ha="right", fontsize=8)
+    ax.set_xlabel("Case")
+    ax.set_ylabel("Time per triangulation (s)")
+    ax.set_yscale("log")
+    ax.set_title(f"Category: {category} — Per-Run Time-per-Triangulation Distribution\nWith VGS (blue) vs Without VGS (red)")
+    ax.legend(fontsize=8)
+    savefig(fig, out_dir, "box_time_per_tri_distribution")
+
+
+def catcmp_06_slowdown_factor_per_case(sub_cat, category, out_dir, vcolors):
+    """Bar chart of the without-vgs / with-vgs slowdown factor for each case
+    in this category (single bar per case; only meaningful when both
+    datasets are present). Bars colored red (the 'without vgs' side is what
+    slows down) with a reference line at 1.0 = no difference."""
+    datasets = sorted(sub_cat["dataset"].unique())
+    without_ds = next((d for d in datasets if "without" in str(d).lower()), None)
+    with_ds = next((d for d in datasets if "with" in str(d).lower() and d != without_ds), None)
+    if without_ds is None or with_ds is None:
+        print(f"  (skipped slowdown factor for category '{category}': need both a with-vgs and without-vgs dataset)")
+        return
+
+    a = sub_cat[sub_cat["dataset"] == with_ds].set_index("case")["median_avg_time_per_tri"]
+    b = sub_cat[sub_cat["dataset"] == without_ds].set_index("case")["median_avg_time_per_tri"]
+    common = sorted(set(a.index) & set(b.index), key=natural_case_key)
+    if not common:
+        print(f"  (skipped slowdown factor for category '{category}': no shared cases)")
+        return
+    ratio = [(b[c] / a[c]) if (a[c] and a[c] > 0) else np.nan for c in common]
+
+    fig, ax = plt.subplots(figsize=(max(9, 0.6 * len(common)), 5.5))
+    x = np.arange(len(common))
+    ax.bar(x, ratio, width=0.65, color=VGS_RED, edgecolor="black", linewidth=0.5, alpha=0.85)
+    ax.axhline(1.0, color=VGS_BLUE, ls="--", lw=1.6, label="Ratio = 1 (no difference from with-VGS baseline)")
+    ax.set_xticks(x)
+    ax.set_xticklabels(common, rotation=45, ha="right", fontsize=8)
+    ax.set_xlabel("Case")
+    ax.set_ylabel("Slowdown factor (without-VGS time / with-VGS time)")
+    ax.set_title(f"Category: {category} — Without-VGS Slowdown Factor per Case")
+    ax.legend(fontsize=8)
+    savefig(fig, out_dir, "bar_slowdown_factor_per_case")
+
+
+def catcmp_07_line_median_total_time_per_case(sub_cat, category, out_dir, vcolors):
+    """Line graph (same style as catcmp_01, but for TOTAL time instead of
+    per-triangulation time): x-axis = each case, y-axis = median total time.
+    Red = without vgs, blue = with vgs."""
+    datasets = sorted(sub_cat["dataset"].unique())
+    all_cases = sorted(sub_cat["case"].unique(), key=natural_case_key)
+    x_index = {c: i for i, c in enumerate(all_cases)}
+
+    fig, ax = plt.subplots(figsize=(max(9, 0.55 * len(all_cases)), 6))
+    for ds in datasets:
+        sub = sub_cat[sub_cat["dataset"] == ds]
+        sub = sort_by_case_name(sub[sub["median_time"].notna()])
+        if sub.empty:
+            continue
+        xs = [x_index[c] for c in sub["case"]]
+        ax.plot(xs, sub["median_time"], "-", color=vcolors[ds], linewidth=2, alpha=0.9, zorder=2)
+        ok = sub[~sub["any_time_limit"]]
+        lim = sub[sub["any_time_limit"]]
+        ax.scatter([x_index[c] for c in ok["case"]], ok["median_time"],
+                   color=vcolors[ds], s=36, edgecolor="black", linewidth=0.4, marker="o",
+                   zorder=3, label=vgs_label(ds))
+        if not lim.empty:
+            ax.scatter([x_index[c] for c in lim["case"]], lim["median_time"],
+                       color=vcolors[ds], s=60, edgecolor="black", linewidth=0.7, marker="^",
+                       zorder=3, label=f"{vgs_label(ds)} (time limit hit)")
+    ax.set_xticks(range(len(all_cases)))
+    ax.set_xticklabels(all_cases, rotation=45, ha="right", fontsize=8)
+    ax.set_xlabel("Case")
+    ax.set_ylabel("Median total time (s)")
+    ax.set_yscale("log")
+    ax.set_title(f"Category: {category} — Total Time per Case\nWith VGS (blue) vs Without VGS (red)")
+    ax.legend(fontsize=8, loc="best")
+    savefig(fig, out_dir, "line_median_total_time_per_case")
+
+
+def catcmp_08_bar_avg_time_per_case_with_errorbars(sub_cat, category, out_dir, vcolors):
+    """Grouped bar chart of median avg time per triangulation, same as
+    catcmp_02, but with MAD-based error bars showing run-to-run spread for
+    each case/dataset, red vs blue."""
+    datasets = sorted(sub_cat["dataset"].unique())
+    all_cases = sorted(sub_cat["case"].unique(), key=natural_case_key)
+    x = np.arange(len(all_cases))
+    n_ds = max(len(datasets), 1)
+    width = 0.8 / n_ds
+
+    err_col = None
+    for cand in ["mad_avg_time_per_tri", "iqr_avg_time_per_tri", "std_avg_time_per_tri"]:
+        if cand in sub_cat.columns:
+            err_col = cand
+            break
+
+    fig, ax = plt.subplots(figsize=(max(9, 0.6 * len(all_cases)), 6))
+    for i, ds in enumerate(datasets):
+        sub = sub_cat[sub_cat["dataset"] == ds].set_index("case")
+        vals = [sub.loc[c, "median_avg_time_per_tri"] if c in sub.index else np.nan for c in all_cases]
+        if err_col is not None:
+            errs = [sub.loc[c, err_col] if c in sub.index and pd.notna(sub.loc[c, err_col]) else 0
+                    for c in all_cases]
+        else:
+            errs = None
+        offset = (i - (n_ds - 1) / 2) * width
+        ax.bar(x + offset, vals, width=width * 0.92, color=vcolors[ds],
+               edgecolor="black", linewidth=0.5, label=vgs_label(ds),
+               yerr=errs, capsize=3, ecolor="black", error_kw={"linewidth": 0.8, "alpha": 0.7})
+    ax.set_xticks(x)
+    ax.set_xticklabels(all_cases, rotation=45, ha="right", fontsize=8)
+    ax.set_xlabel("Case")
+    ax.set_ylabel("Median average time per triangulation (s)")
+    ax.set_yscale("log")
+    ax.set_title(f"Category: {category} — Average Time per Case with Spread\nWith VGS (blue) vs Without VGS (red)")
+    ax.legend(fontsize=8)
+    savefig(fig, out_dir, "bar_avg_time_per_case_errorbars")
+
+
+def catcmp_09_scatter_all_runs_per_case(sub_df_cat, category, out_dir, vcolors):
+    """Raw scatter: every individual run (not just the median) plotted with
+    its case on the x-axis and its own time_per_triangulation on the
+    y-axis, red = without vgs, blue = with vgs. Shows the full spread of
+    raw samples underlying the summary plots above."""
+    datasets = sorted(sub_df_cat["dataset"].unique())
+    all_cases = sorted(sub_df_cat["case"].unique(), key=natural_case_key)
+    x_index = {c: i for i, c in enumerate(all_cases)}
+    n_ds = max(len(datasets), 1)
+    jitter_width = 0.8 / n_ds
+
+    fig, ax = plt.subplots(figsize=(max(10, 0.6 * len(all_cases)), 6.5))
+    rng = np.random.default_rng(42)
+    for i, ds in enumerate(datasets):
+        sub = sub_df_cat[(sub_df_cat["dataset"] == ds) & sub_df_cat["time_per_triangulation"].notna()]
+        if sub.empty:
+            continue
+        offset = (i - (n_ds - 1) / 2) * jitter_width
+        xs = [x_index[c] + offset + rng.uniform(-jitter_width * 0.15, jitter_width * 0.15)
+              for c in sub["case"]]
+        ax.scatter(xs, sub["time_per_triangulation"], color=vcolors[ds], s=14,
+                   alpha=0.5, edgecolor="none", label=vgs_label(ds))
+    ax.set_xticks(range(len(all_cases)))
+    ax.set_xticklabels(all_cases, rotation=45, ha="right", fontsize=8)
+    ax.set_xlabel("Case")
+    ax.set_ylabel("Time per triangulation (s, per run)")
+    ax.set_yscale("log")
+    ax.set_title(f"Category: {category} — All Individual Runs per Case\nWith VGS (blue) vs Without VGS (red)")
+    ax.legend(fontsize=8, markerscale=2)
+    savefig(fig, out_dir, "scatter_all_runs_per_case")
+
+
+CATEGORY_COMPARISON_PLOTS = [
+    catcmp_01_line_avg_time_per_case,
+    catcmp_02_bar_avg_time_per_case,
+    catcmp_03_bar_median_total_time_per_case,
+    catcmp_04_scatter_time_vs_triangulations,
+    catcmp_06_slowdown_factor_per_case,
+    catcmp_07_line_median_total_time_per_case,
+    catcmp_08_bar_avg_time_per_case_with_errorbars,
+]
+
+
+def run_category_comparison_plots(all_df, all_summary, out_dir):
+    """Create out_dir/<category>/ for every category, with several chart
+    TYPES inside each, all comparing with-vgs (blue) against without-vgs
+    (red) for that category's cases."""
+    categories = sorted(all_summary["category"].unique(), key=natural_case_key)
+    datasets = sorted(all_summary["dataset"].unique())
+    vcolors = vgs_color_map(datasets)
+
+    for cat in categories:
+        cat_dir = _cat_subdir(out_dir, cat)
+        sub_cat = all_summary[all_summary["category"] == cat]
+        sub_df_cat = all_df[all_df["category"] == cat]
+        print(f"  [category] {cat} -> {cat_dir}")
+        for fn in CATEGORY_COMPARISON_PLOTS:
+            try:
+                fn(sub_cat, cat, cat_dir, vcolors)
+            except Exception as e:
+                print(f"    [WARN] {fn.__name__} failed for category '{cat}': {e}")
+        try:
+            catcmp_05_box_time_per_tri_distribution(sub_df_cat, cat, cat_dir, vcolors)
+        except Exception as e:
+            print(f"    [WARN] catcmp_05_box_time_per_tri_distribution failed for category '{cat}': {e}")
+        try:
+            catcmp_09_scatter_all_runs_per_case(sub_df_cat, cat, cat_dir, vcolors)
+        except Exception as e:
+            print(f"    [WARN] catcmp_09_scatter_all_runs_per_case failed for category '{cat}': {e}")
+
+
 COMPARISON_PLOTS_SUMMARY = [
     cmp_01_median_time_per_triangulation_overlay,
     cmp_02_loglog_time_vs_triangulations,
@@ -1907,6 +2293,9 @@ def run_comparison_plots(all_df, all_summary, out_dir):
         cmp_05_time_per_triangulation_boxplot_by_dataset(all_df, out_dir)
     except Exception as e:
         print(f"  [WARN] cmp_05_time_per_triangulation_boxplot_by_dataset failed: {e}")
+
+    print("[INFO] Generating per-category comparison subfolders (with-vgs vs without-vgs)...")
+    run_category_comparison_plots(all_df, all_summary, out_dir)
 
 
 # ============================================================================
