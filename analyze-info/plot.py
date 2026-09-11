@@ -182,20 +182,29 @@ def clean(df: pd.DataFrame, dataset_name: str) -> pd.DataFrame:
     # provided rate column if counts are missing. Only meaningful for
     # datasets that actually record these columns (e.g. "without vgs");
     # datasets lacking them simply get NaN here and are skipped downstream.
-    has_counts = df["totalChecks"].notna() & (df["totalChecks"] > 0)
+    # Unsuccessful-check % = failedChecks / totalChecks * 100, always
+    # computed directly from counts (never as 100 - checkSuccessRate).
+    # Edge case: if totalChecks == 0 (no checks were performed at all),
+    # that means there were 0 failed checks out of 0 total -> 0% unsuccessful
+    # (equivalently 100% successful), NOT NaN and NOT 100%. NaN is reserved
+    # only for rows where the dataset doesn't record this column at all
+    # (e.g. "with vgs" runs), so those are correctly skipped downstream.
+    has_check_data = df["totalChecks"].notna() & df["failedChecks"].notna()
+    zero_checks = has_check_data & (df["totalChecks"] == 0)
+    nonzero_checks = has_check_data & (df["totalChecks"] > 0)
     df["unsuccessful_check_pct"] = np.nan
-    df.loc[has_counts, "unsuccessful_check_pct"] = (
-        100.0 * df.loc[has_counts, "failedChecks"] / df.loc[has_counts, "totalChecks"]
-    )
-    missing_counts_has_rate = (~has_counts) & df["checkSuccessRate"].notna()
-    df.loc[missing_counts_has_rate, "unsuccessful_check_pct"] = (
-        100.0 - df.loc[missing_counts_has_rate, "checkSuccessRate"]
+    df.loc[zero_checks, "unsuccessful_check_pct"] = 0.0
+    df.loc[nonzero_checks, "unsuccessful_check_pct"] = (
+        100.0 * df.loc[nonzero_checks, "failedChecks"] / df.loc[nonzero_checks, "totalChecks"]
     )
 
-    has_trav = df["totalTraversalsExtended"].notna() & (df["totalTraversalsExtended"] > 0)
+    has_trav_data = df["totalTraversalsExtended"].notna() & df["invalidTraversals"].notna()
+    zero_trav = has_trav_data & (df["totalTraversalsExtended"] == 0)
+    nonzero_trav = has_trav_data & (df["totalTraversalsExtended"] > 0)
     df["invalid_traversal_pct"] = np.nan
-    df.loc[has_trav, "invalid_traversal_pct"] = (
-        100.0 * df.loc[has_trav, "invalidTraversals"] / df.loc[has_trav, "totalTraversalsExtended"]
+    df.loc[zero_trav, "invalid_traversal_pct"] = 0.0
+    df.loc[nonzero_trav, "invalid_traversal_pct"] = (
+        100.0 * df.loc[nonzero_trav, "invalidTraversals"] / df.loc[nonzero_trav, "totalTraversalsExtended"]
     )
 
     if "status" not in df.columns:
@@ -319,6 +328,7 @@ def per_case_summary(df: pd.DataFrame) -> pd.DataFrame:
             "median_unsuccessful_check_pct": g["unsuccessful_check_pct"].median(),
             "median_check_success_rate": g["checkSuccessRate"].median(),
             "median_total_checks": g["totalChecks"].median(),
+            "median_successful_checks": g["successfulChecks"].median(),
             "median_failed_checks": g["failedChecks"].median(),
             "median_invalid_traversal_pct": g["invalid_traversal_pct"].median(),
             "median_traversal_success_rate": g["traversalSuccessRate"].median(),
@@ -1683,6 +1693,77 @@ def cmp_13_time_vs_unsuccessful_check_pct_dual_axis(all_summary, out_dir):
     savefig(fig, out_dir, "13_time_vs_unsuccessful_check_pct_dual_axis")
 
 
+def cmp_15_time_ratio_vs_checks_ratio_lines(all_summary, out_dir):
+    """Requested plot: two lines per case, one showing the time ratio
+    (dataset B time / dataset A time, typically without-vgs / with-vgs)
+    and the other showing the checks ratio (totalChecks / successfulChecks,
+    i.e. how many checks were needed per successful check -- 1.0 means
+    every check succeeded, higher means more wasted/failed checks). Both
+    plotted on the same axis (both are unitless ratios), ordered by
+    triangulation count, so a reviewer can see the two lines move together
+    -- i.e. that the time slowdown tracks the check-failure overhead."""
+    a, b, merged = _paired_two_dataset_summary(all_summary)
+    if merged.empty:
+        print("  (skipped time-ratio vs checks-ratio lines: need exactly 2 datasets with matching cases)")
+        return
+
+    # total/successful checks ratio: prefer whichever side actually has
+    # check-count columns (only one side normally will, e.g. "without vgs").
+    def checks_ratio(row, suffix):
+        total = row.get(f"median_total_checks{suffix}")
+        succ = row.get(f"median_successful_checks{suffix}")
+        if pd.isna(total) or pd.isna(succ):
+            return np.nan
+        if total == 0:
+            return 1.0  # 0 checks needed for 0 successful checks -> no overhead
+        if succ == 0:
+            return np.nan  # undefined: checks were made but none succeeded (ratio -> inf)
+        return total / succ
+
+    merged["checks_ratio_a"] = merged.apply(lambda r: checks_ratio(r, "_a"), axis=1)
+    merged["checks_ratio_b"] = merged.apply(lambda r: checks_ratio(r, "_b"), axis=1)
+    has_a = merged["checks_ratio_a"].notna().any()
+    has_b = merged["checks_ratio_b"].notna().any()
+    if not (has_a or has_b):
+        print("  (skipped time-ratio vs checks-ratio lines: neither dataset has check-count columns)")
+        return
+    checks_col = "checks_ratio_a" if has_a else "checks_ratio_b"
+    checks_ds_name = a if has_a else b
+
+    merged = merged[(merged["median_avg_time_per_tri_a"] > 0) & (merged["median_avg_time_per_tri_b"] > 0)]
+    if merged.empty:
+        print("  (skipped time-ratio vs checks-ratio lines: no valid paired rows)")
+        return
+    merged["time_ratio"] = merged["median_avg_time_per_tri_b"] / merged["median_avg_time_per_tri_a"]
+
+    categories = sorted(merged["category"].unique(), key=natural_case_key)
+    n_cat = len(categories)
+    fig, axes = plt.subplots(n_cat, 1, figsize=(max(10, 0.55 * merged.groupby("category").size().max()),
+                                                 3.8 * n_cat), squeeze=False)
+    for i, cat in enumerate(categories):
+        ax = axes[i, 0]
+        sub = merged[merged["category"] == cat].sort_values("triangulations_a")
+        x = np.arange(len(sub))
+
+        ax.plot(x, sub["time_ratio"], "-o", color="#1f77b4", linewidth=2, markersize=6,
+                 markeredgecolor="black", markeredgewidth=0.4,
+                 label=f"Time ratio ({b} / {a} avg time per triangulation)")
+        if sub[checks_col].notna().any():
+            ax.plot(x, sub[checks_col], "-s", color="#d62728", linewidth=2, markersize=6,
+                     markeredgecolor="black", markeredgewidth=0.4,
+                     label=f"Checks ratio (total / successful checks, {checks_ds_name})")
+        ax.axhline(1.0, color="gray", ls="--", lw=1.3, label="Ratio = 1 (no overhead)")
+        ax.set_xticks(x)
+        ax.set_xticklabels(sub["case"], rotation=45, ha="right", fontsize=7)
+        ax.set_ylabel("Ratio (unitless)")
+        ax.set_title(f"Category: {cat} — time slowdown vs check overhead, same cases")
+        ax.legend(fontsize=7, loc="best")
+    fig.suptitle(f"Does Check-Failure Overhead Explain the Time Slowdown?\n"
+                 f"(time ratio = {b}/{a} avg time-per-triangulation; checks ratio = total/successful checks in {checks_ds_name})",
+                 fontsize=13, fontweight="bold", y=1.0 + 0.012 * n_cat)
+    savefig(fig, out_dir, "15_time_ratio_vs_checks_ratio_lines")
+
+
 def cmp_14_pooled_amortized_constant_both_datasets(all_summary, out_dir):
     """Overlay of the pooled amortized-evidence plot (plot_27) for every
     dataset on one figure: shows BOTH with-vgs and without-vgs are each
@@ -1779,6 +1860,7 @@ COMPARISON_PLOTS_SUMMARY = [
     cmp_12_unsuccessful_check_pct_by_category,
     cmp_13_time_vs_unsuccessful_check_pct_dual_axis,
     cmp_14_pooled_amortized_constant_both_datasets,
+    cmp_15_time_ratio_vs_checks_ratio_lines,
 ]
 
 
