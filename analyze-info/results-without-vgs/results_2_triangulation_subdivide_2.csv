@@ -1,3 +1,4 @@
+filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,startTime,endTime,status,totalChecks,successfulChecks,failedChecks,checkSuccessRate,invalidTraversals,totalTraversalsExtended,traversalSuccessRate
 case_001.txt,1,9,46782,0.033468589,278528,30947.555556,2026-09-11 03:55:35,2026-09-11 03:55:36,completed,74264,46781,27483,62.99,0,46782,100.00
 case_001.txt,2,9,46782,0.031086788,282624,31402.666667,2026-09-11 03:55:36,2026-09-11 03:55:36,completed,74264,46781,27483,62.99,0,46782,100.00
 case_001.txt,3,9,46782,0.030468834,282624,31402.666667,2026-09-11 03:55:36,2026-09-11 03:55:36,completed,74264,46781,27483,62.99,0,46782,100.00
