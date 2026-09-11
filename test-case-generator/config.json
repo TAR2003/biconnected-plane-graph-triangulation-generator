@@ -39,8 +39,8 @@
     "7_snowflake": {
       "_comment_example": "Snowflake = outer n-cycle kept fully intact, interior fully triangulated (every inner face is EXACTLY a triangle, none larger). Needs max_faces >= 3 (mathematical minimum: n=4 vertices -> 2 inner triangles + 1 outer 4-cycle). faces = n_vertices - 1 here, and -- important -- the OUTER face always has size exactly n, so max_vertices_in_face must be set to at least max_faces + 1 or it will silently cap the reachable range from below (inner faces are always triangles and never bind on this constraint, only the outer cycle does).",
       "count": 100,
-      "max_faces": 20,
-      "max_vertices_in_face": 25,
+      "max_faces": 200,
+      "max_vertices_in_face": 30,
       "max_vertices": 300
     }
   }
