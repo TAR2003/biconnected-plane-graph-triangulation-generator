@@ -215,6 +215,26 @@ def clean(df: pd.DataFrame, dataset_name: str) -> pd.DataFrame:
         100.0 * df.loc[nonzero_trav, "invalidTraversals"] / df.loc[nonzero_trav, "totalTraversalsExtended"]
     )
 
+    # Checks-ratio (total / successful) per run. Computed PER ROW first,
+    # then later aggregated with a median -- never as
+    # median(total)/median(successful), since medians of the two columns
+    # are computed independently and don't respect totalChecks =
+    # successfulChecks + failedChecks row-by-row, which can produce a
+    # ratio < 1.0 even though every individual run always has
+    # total >= successful (impossible: total = successful + failed >= successful).
+    has_succ_data = df["totalChecks"].notna() & df["successfulChecks"].notna()
+    zero_total = has_succ_data & (df["totalChecks"] == 0)
+    nonzero_total = has_succ_data & (df["totalChecks"] > 0)
+    df["checks_ratio"] = np.nan
+    df.loc[zero_total, "checks_ratio"] = 1.0  # 0 checks needed for 0 successful checks -> no overhead
+    df.loc[nonzero_total, "checks_ratio"] = (
+        df.loc[nonzero_total, "totalChecks"] / df.loc[nonzero_total, "successfulChecks"]
+    )
+    # succ == 0 with total > 0 leaves an inf/NaN naturally (division by zero
+    # -> inf via numpy, then explicitly set to NaN so it's excluded from
+    # medians rather than blowing up plots with an infinite value).
+    df.loc[nonzero_total & (df["successfulChecks"] == 0), "checks_ratio"] = np.nan
+
     if "status" not in df.columns:
         df["status"] = "completed"
     df["status"] = df["status"].fillna("completed").str.strip().str.lower()
@@ -347,6 +367,7 @@ def per_case_summary(df: pd.DataFrame) -> pd.DataFrame:
             "median_total_checks": g["totalChecks"].median(),
             "median_successful_checks": g["successfulChecks"].median(),
             "median_failed_checks": g["failedChecks"].median(),
+            "median_checks_ratio": g["checks_ratio"].median(),
             "median_invalid_traversal_pct": g["invalid_traversal_pct"].median(),
             "median_traversal_success_rate": g["traversalSuccessRate"].median(),
         })
@@ -1717,34 +1738,29 @@ def cmp_15_time_ratio_vs_checks_ratio_lines(all_summary, out_dir):
     i.e. how many checks were needed per successful check -- 1.0 means
     every check succeeded, higher means more wasted/failed checks). Both
     plotted on the same axis (both are unitless ratios), ordered by
-    triangulation count, so a reviewer can see the two lines move together
-    -- i.e. that the time slowdown tracks the check-failure overhead."""
+    ascending case name, so a reviewer can see the two lines move together
+    -- i.e. that the time slowdown tracks the check-failure overhead.
+
+    The checks ratio is taken from median_checks_ratio, which is the
+    median of the PER-RUN ratio (totalChecks/successfulChecks computed row
+    by row, always >= 1 since total = successful + failed >= successful).
+    It is NOT median(total)/median(successful): those two medians are
+    computed independently across runs and don't respect the per-run
+    identity, which can and does produce a ratio below 1.0 -- an
+    impossible value for a total/successful checks ratio."""
     a, b, merged = _paired_two_dataset_summary(all_summary)
     if merged.empty:
         print("  (skipped time-ratio vs checks-ratio lines: need exactly 2 datasets with matching cases)")
         return
 
-    # total/successful checks ratio: prefer whichever side actually has
-    # check-count columns (only one side normally will, e.g. "without vgs").
-    def checks_ratio(row, suffix):
-        total = row.get(f"median_total_checks{suffix}")
-        succ = row.get(f"median_successful_checks{suffix}")
-        if pd.isna(total) or pd.isna(succ):
-            return np.nan
-        if total == 0:
-            return 1.0  # 0 checks needed for 0 successful checks -> no overhead
-        if succ == 0:
-            return np.nan  # undefined: checks were made but none succeeded (ratio -> inf)
-        return total / succ
-
-    merged["checks_ratio_a"] = merged.apply(lambda r: checks_ratio(r, "_a"), axis=1)
-    merged["checks_ratio_b"] = merged.apply(lambda r: checks_ratio(r, "_b"), axis=1)
-    has_a = merged["checks_ratio_a"].notna().any()
-    has_b = merged["checks_ratio_b"].notna().any()
+    # checks ratio: prefer whichever side actually has check-count columns
+    # (only one side normally will, e.g. "without vgs").
+    has_a = merged["median_checks_ratio_a"].notna().any()
+    has_b = merged["median_checks_ratio_b"].notna().any()
     if not (has_a or has_b):
         print("  (skipped time-ratio vs checks-ratio lines: neither dataset has check-count columns)")
         return
-    checks_col = "checks_ratio_a" if has_a else "checks_ratio_b"
+    checks_col = "median_checks_ratio_a" if has_a else "median_checks_ratio_b"
     checks_ds_name = a if has_a else b
 
     merged = merged[(merged["median_avg_time_per_tri_a"] > 0) & (merged["median_avg_time_per_tri_b"] > 0)]
