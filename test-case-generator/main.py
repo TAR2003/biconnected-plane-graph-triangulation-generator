@@ -38,6 +38,7 @@ from gen_triangulation_subdivide import generate_category as gen_subdiv
 from gen_halin import generate_category as gen_halin
 from gen_cycles import generate_category_cycles, generate_category_union
 from gen_snowflake import generate_category as gen_snowflake
+from gen_chord_sequence import generate_category as gen_chord_sequence
 
 
 CATEGORY_ORDER = [
@@ -48,6 +49,7 @@ CATEGORY_ORDER = [
     "5_cycles",
     "6_cycle_union",
     "7_snowflake",
+    "8_chord_sequence",
 ]
 
 CATEGORY_LABELS = {
@@ -58,6 +60,7 @@ CATEGORY_LABELS = {
     "5_cycles": "Category 5: Cycles C_n, n = 3..15",
     "6_cycle_union": "Category 6: Union of k cycles (k=2..4, sizes 4..12)",
     "7_snowflake": "Category 7: Snowflake graphs (maximal outerplanar / fully-triangulated-except-outer-face)",
+    "8_chord_sequence": "Category 8: Incremental chord-triangulation sequences (fixed n-cycle, one chord added at a time until fully triangulated)",
 }
 
 
@@ -133,6 +136,8 @@ def run_category(name, settings, out_root):
         inst = generate_category_union(count=count, constraints=constraints, seed=seed)
     elif name == "7_snowflake":
         inst = gen_snowflake(count=count, constraints=constraints, seed=seed)
+    elif name == "8_chord_sequence":
+        inst = gen_chord_sequence(count=count, constraints=constraints, seed=seed)
     else:
         raise ValueError(f"Unknown category: {name}")
 
