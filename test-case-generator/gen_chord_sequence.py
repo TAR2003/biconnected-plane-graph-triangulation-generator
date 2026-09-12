@@ -1,8 +1,8 @@
 """
 Category 8: Incremental chord-triangulation sequence.
 
-For a SINGLE fixed n-vertex cycle, generate the full sequence of graphs
-produced by adding non-crossing chords ONE AT A TIME:
+ONE fixed n-vertex cycle. Generate the full sequence of graphs produced
+by adding non-crossing chords ONE AT A TIME to that SAME cycle:
 
     case 1: the bare n-cycle (0 chords)
     case 2: cycle + 1 chord
@@ -13,67 +13,45 @@ produced by adding non-crossing chords ONE AT A TIME:
                 once the polygon is fully triangulated there is nothing
                 left to add, so generation stops here.
 
-Every graph in this category is outerplanar BY CONSTRUCTION: the
-original n-cycle is never touched, and every chord added is a diagonal
-of the current (sub-)polygon, so no two chords ever cross and every
-vertex remains on the single outer boundary throughout. Each successive
-graph is identical to the previous one PLUS exactly one more edge (a
-strict superset), so face count strictly increases by exactly 1 each
-step (each new chord splits exactly one existing face into two).
+This category does NOT target a requested "count" of graphs. n is fixed
+(a single settings value), and the sequence naturally has exactly n - 2
+graphs -- that number can be smaller or larger than any nominal `count`
+elsewhere in the config, and that's expected: the number of graphs
+produced is however many steps it genuinely takes to fully triangulate
+that one cycle, no more, no less.
 
-This mirrors category 7 (snowflake / maximal outerplanar graphs), but
-where category 7 emits ONE fully-triangulated graph per requested face
-count, category 8 emits an entire progressive BUILD-UP -- every
-intermediate stage of triangulating ONE polygon, from empty to full.
+Every graph in the sequence is outerplanar BY CONSTRUCTION: the original
+n-cycle is never touched, and every chord added is a diagonal of the
+current (sub-)polygon, so no two chords ever cross and every vertex
+remains on the single outer boundary throughout. Each successive graph
+is identical to the previous one PLUS exactly one more edge (a strict
+superset), so face count strictly increases by exactly 1 each step
+(each new chord splits exactly one existing face into two).
 
 FACE COUNT: with n vertices and c chords added (0 <= c <= n-3), the
-graph has (c + 1) faces total: 1 outer face (the original n-cycle) plus
-c inner faces from the c chords having each split one face into two,
-except technically it's (1 + c) faces for c=0 (just the cycle itself,
-counted as inner-cycle==outer-cycle -- see note below) and (n-1) faces
-once c = n-3 (fully triangulated, matching category 7's face count for
-the same n). Concretely: faces_after_c_chords = c + 2 for c >= 1
-(1 outer + (c+1) pieces of the original polygon interior)... the
-precise, verified-by-construction formula actually used here is:
-
-    faces(c) = c + 2   for a SIMPLE POLYGON interpretation where the
-                         bare cycle (c=0) is treated as enclosing ONE
-                         single interior face plus the outer face (2
-                         faces total for c=0), and each subsequent
-                         chord adds exactly 1 face (splits one interior
-                         region into two).
-
-This is verified directly from the actual extracted planar faces at
-every step (not just asserted), so the code is self-checking regardless
-of which convention networkx's face traversal uses for c=0.
-
-One sequence = one "instance group" sharing a single n. The category
-generator produces multiple independent sequences (different n, and/or
-different random chord orders for the same n) until `count` total
-graphs have been emitted, honoring the standard Constraints exactly
-like every other category (each individual graph in every sequence is
-still validated and must satisfy max_faces / max_vertices /
-max_vertices_in_face on its own).
+graph has (c + 2) faces total -- 1 outer face (the original n-cycle)
+plus (c + 1) pieces of the interior (the interior starts as a single
+polygonal region with the bare cycle, and each chord splits one
+interior region into two). This is verified directly from the actual
+extracted planar faces at every step (not just asserted).
 """
 
-import random
 import networkx as nx
 
-from common import Constraints, validate_graph, relabel_consecutive, DedupTracker
+from common import Constraints, validate_graph, relabel_consecutive
 
 
 def _build_chord_sequence(n, rng):
     """
-    Build ONE full incremental-triangulation sequence for a fixed
+    Build the full incremental-triangulation sequence for a fixed
     n-vertex cycle: a list of networkx Graphs
         [G_0 (bare cycle), G_1 (+1 chord), ..., G_{n-3} (fully triangulated)]
     where G_{k+1} = G_k plus exactly one new non-crossing chord.
 
-    Uses the same "recursively split a polygon with a random diagonal"
-    idea as category 7's _triangulate_polygon, but instead of recursing
-    all the way to the end before returning, it does ONE split at a
-    time, snapshotting the graph after every single chord, by keeping
-    an explicit worklist of "regions" (sub-polygon boundaries) still
+    Uses a "recursively split a polygon with a random diagonal" process
+    (same idea as category 7's _triangulate_polygon), but does ONE split
+    at a time, snapshotting the graph after every single chord, via an
+    explicit worklist of "regions" (sub-polygon boundaries) still
     needing to be split.
     """
     G = nx.Graph()
@@ -118,7 +96,7 @@ def _build_chord_sequence(n, rng):
 
 def verify_sequence_structure(sequence, n):
     """
-    Independent, definition-level sanity check on an entire sequence:
+    Independent, definition-level sanity check on the sequence:
 
       1. Exactly n - 2 graphs (c = 0 .. n-3 chords, inclusive).
       2. Every graph has exactly n vertices.
@@ -176,87 +154,32 @@ def verify_sequence_structure(sequence, n):
     return True
 
 
-def generate_one_sequence(n, constraints: Constraints, rng, dedup: DedupTracker, max_attempts=200):
-    """
-    Build and validate one full chord-addition sequence for a fixed n.
-
-    Every individual graph in the sequence is run through the standard
-    common.validate_graph pipeline (biconnectivity / planarity /
-    max_faces / max_vertices_in_face / max_vertices), exactly like every
-    other category. If ANY graph in the sequence fails, the whole
-    sequence is discarded and retried with a fresh random chord order
-    (a different random triangulation order can still fail the same
-    max_faces ceiling since the final face count is fixed by n -- in
-    that case retrying is pointless and the caller should not request
-    an n whose final state already violates max_faces).
-
-    The DedupTracker is applied to the FINAL (fully triangulated) graph
-    of each sequence only, since that's what distinguishes one sequence
-    of a given n from another (different chord orders on the same n
-    that happen to produce isomorphic intermediate steps are still a
-    legitimately different sequence overall unless the two full
-    sequences are edge-for-edge identical after relabeling -- checking
-    only the endpoint is the same convention category 7 uses for single
-    graphs and keeps this category's semantics simple and predictable).
-
-    Returns (sequence, per_graph_faces, meta) or (None, None, None).
-    """
-    for _ in range(max_attempts):
-        sequence = _build_chord_sequence(n, rng)
-
-        if not verify_sequence_structure(sequence, n):
-            continue
-
-        per_graph_faces = []
-        all_ok = True
-        for G in sequence:
-            ok, faces, reason = validate_graph(G, constraints)
-            if not ok:
-                all_ok = False
-                break
-            per_graph_faces.append(faces)
-        if not all_ok:
-            # this n's final state (or an intermediate state) can't
-            # satisfy the constraints under any chord order -- no point
-            # retrying with a different random order for the same n
-            return None, None, None
-
-        final_relabeled, _ = relabel_consecutive(sequence[-1])
-        if not dedup.try_add(final_relabeled):
-            continue  # this exact final triangulation already used; retry with a new order
-
-        return sequence, per_graph_faces, {"n_vertices": n, "num_chords_final": n - 3}
-
-    return None, None, None
-
-
 def generate_category(count, constraints: Constraints, seed=0):
     """
-    Generates chord-addition sequences (see module docstring) across a
-    range of n values until `count` TOTAL GRAPHS (summed across all
-    sequences, not sequences themselves) have been produced, or no
-    further progress is possible.
+    Generate ONE chord-addition sequence for a SINGLE fixed cycle size n,
+    and return every graph in that sequence (n - 2 graphs total).
 
-    n starts at the minimum that yields a genuine outer/inner
-    distinction (n = 4, same floor as category 7) and increases until
-    the fully-triangulated endpoint's face count (n - 1) would exceed
-    constraints.max_faces, or n itself would exceed constraints.max_vertices,
-    or the outer face size (n) would exceed constraints.max_vertices_in_face
-    -- whichever is smallest. This mirrors the ceiling logic in category 7
-    exactly, since both categories share the same underlying triangulated
-    structure.
+    `count` is accepted only for interface consistency with every other
+    category's generate_category(count, constraints, seed) signature; it
+    is NOT used to pad or truncate output here. This category's natural
+    output size is fixed by n alone (n - 2 graphs) -- it may end up
+    smaller or larger than `count`, and that mismatch is expected and
+    fine, not an error.
 
-    Sequences are generated in increasing order of n, cycling back to
-    smaller n values (with a fresh random chord order, producing a
-    different sequence) if `count` hasn't been reached after exhausting
-    every feasible n once -- this keeps output size predictable and
-    controllable via `count`, the same as every other category, even
-    though this category's natural unit of work is a whole sequence
-    rather than a single graph.
+    n itself is taken from constraints in the same way category 7 infers
+    its ceiling, but here it picks the SINGLE LARGEST n that still keeps
+    every graph in the sequence -- including the final, fully
+    triangulated one -- within max_faces / max_vertices /
+    max_vertices_in_face, since a bigger n means a longer, more
+    informative sequence and there is no "count" pressure pushing toward
+    smaller n. If constraints leave the choice ambiguous, min_vertices
+    (when > 4) is used as a floor.
+
+    Every individual graph in the sequence is still validated against
+    the standard common.validate_graph pipeline before being returned,
+    as a safety net (construction already guarantees they pass).
     """
-    rng = random.Random(seed)
-
-    min_n = 4
+    min_n = max(4, constraints.min_vertices if constraints.min_vertices else 4)
     max_n = min_n + 20  # generous default if nothing else constrains it
 
     if constraints.max_vertices is not None:
@@ -281,52 +204,52 @@ def generate_category(count, constraints: Constraints, seed=0):
     if max_n < min_n:
         raise RuntimeError(
             f"After combining max_faces / max_vertices / "
-            f"max_vertices_in_face, no cycle size n >= {min_n} remains "
+            f"max_vertices_in_face / min_vertices, no cycle size n is "
             f"feasible for the chord-triangulation-sequence category. "
             f"Loosen one of these constraints (remember the fully "
             f"triangulated endpoint of an n-cycle has n-1 faces and an "
             f"outer face of size n)."
         )
 
-    instances = []
-    dedup = DedupTracker()
-    exhausted_n = set()
+    n = max_n  # pick the largest feasible n for the longest, most useful sequence
 
-    n = min_n
-    while len(instances) < count:
-        if len(exhausted_n) >= (max_n - min_n + 1):
-            break  # every feasible n has been tried and failed at least once in a row
+    rng = __import__("random").Random(seed)
 
-        if n in exhausted_n:
-            n = min_n if n >= max_n else n + 1
-            continue
+    sequence = None
+    for _ in range(200):
+        candidate = _build_chord_sequence(n, rng)
+        if verify_sequence_structure(candidate, n):
+            sequence = candidate
+            break
 
-        sequence, per_graph_faces, meta = generate_one_sequence(n, constraints, rng, dedup)
-        if sequence is None:
-            exhausted_n.add(n)
-            n = min_n if n >= max_n else n + 1
-            continue
-
-        for c, (G, faces) in enumerate(zip(sequence, per_graph_faces)):
-            if len(instances) >= count:
-                break
-            instances.append({
-                "graph": G,
-                "faces": faces,
-                "meta": {"n_vertices": n, "num_chords": c, "sequence_id": meta["n_vertices"]},
-            })
-
-        n = min_n if n >= max_n else n + 1
-
-    if len(instances) < count:
-        print(
-            f"  [warning] Chord-sequence category: only {len(instances)} "
-            f"graphs could be generated out of the requested {count} -- "
-            f"every feasible cycle size n in [{min_n}, {max_n}] ran out of "
-            f"distinct chord orderings (or violated constraints) under the "
-            f"current settings. Consider loosening max_vertices / "
-            f"max_vertices_in_face / max_faces, or reducing the requested "
-            f"count."
+    if sequence is None:
+        raise RuntimeError(
+            f"Failed to construct a valid chord-triangulation sequence for "
+            f"n={n} after repeated attempts -- this should not happen; "
+            f"please report it as a bug."
         )
+
+    instances = []
+    for c, G in enumerate(sequence):
+        ok, faces, reason = validate_graph(G, constraints)
+        if not ok:
+            raise RuntimeError(
+                f"Sequence step {c} (n={n}, {c} chords) unexpectedly failed "
+                f"validation ({reason}) despite passing construction-time "
+                f"checks -- please report this as a bug."
+            )
+        G_relabeled, _ = relabel_consecutive(G)
+        instances.append({
+            "graph": G_relabeled,
+            "faces": faces,
+            "meta": {"n_vertices": n, "num_chords": c, "step": f"{c + 1}/{len(sequence)}"},
+        })
+
+    print(
+        f"  [info] Chord-sequence category: generated {len(instances)} graphs "
+        f"(one fixed {n}-cycle, chords 0..{n - 3}) -- this is the natural "
+        f"length of the sequence and is independent of the requested "
+        f"count={count}."
+    )
 
     return instances
