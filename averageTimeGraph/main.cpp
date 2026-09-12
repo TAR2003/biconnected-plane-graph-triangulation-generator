@@ -236,6 +236,7 @@ int main()
             timer.begin();
 
             biconnected bc(faces);
+            bc.storeTriangulationChords = false;
             bc.onTriangulationGenerated = [&timer]() { timer.record(); };
             bc.getAllTriangulations();
 
