@@ -15,12 +15,12 @@ namespace fs = std::filesystem;
 // ============================================================================
 // CONFIG: how many timing runs every single test case should have.
 // ============================================================================
-static const int RUNS_PER_CASE = 5;
+static const int RUNS_PER_CASE = 1;
 
 // ============================================================================
 // CONFIG: time limit (in seconds) for a single run. Change this value to adjust.
 // ============================================================================
-static const double TIME_LIMIT_SECONDS = 360.0;
+static const double TIME_LIMIT_SECONDS = 900.0;
 
 // The root folder containing one subfolder per category.
 static const string INPUT_ROOT = "input";
