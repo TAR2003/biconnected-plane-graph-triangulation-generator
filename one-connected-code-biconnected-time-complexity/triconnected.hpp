@@ -9,23 +9,23 @@ using namespace std;
 class triconnected
 {
 public:
-    vector<vector<int>> faces;
-    vector<vector<pair<int, int>>> allTriangulations;
-    vector<vector<vector<pair<int, int>>>> triangulation_per_face;
-    unordered_multiset<pair<int, int>, PairHash> present;
-    triconnected(vector<vector<int>> &faces)
+    vector<vector<long long>> faces;
+    vector<vector<pair<long long, long long>>> allTriangulations;
+    vector<vector<vector<pair<long long, long long>>>> triangulation_per_face;
+    unordered_multiset<pair<long long, long long>, PairHash> present;
+    triconnected(vector<vector<long long>> &faces)
     {
         this->faces = faces;
 
-        present = unordered_multiset<pair<int, int>, PairHash>();
+        present = unordered_multiset<pair<long long, long long>, PairHash>();
         initiatePresent();
-        triangulation_per_face = vector<vector<vector<pair<int, int>>>>(faces.size());
+        triangulation_per_face = vector<vector<vector<pair<long long, long long>>>>(faces.size());
     }
     void initiatePresent()
     {
         for (auto face : faces)
         {
-            for (int i = 0; i < face.size() - 1; i++)
+            for (long long i = 0; i < face.size() - 1; i++)
             {
                 present.insert(make_pair(min(face[i], face[i + 1]), max(face[i], face[i + 1])));
             }
@@ -37,15 +37,15 @@ public:
     void getAllTriangulations()
     {
         ParvezRahmanNakano *ft;
-        int pos = 0;
+        long long pos = 0;
         for (auto &face : faces)
         {
-            int n = face.size();
+            long long n = face.size();
             ft = new ParvezRahmanNakano(n);
             ft->generateAllTriangulations();
             for (auto &triangulation : ft->allTriangulations)
             {
-                vector<pair<int, int>> mappedTriangulation;
+                vector<pair<long long, long long>> mappedTriangulation;
                 for (auto &chord : triangulation)
                 {
                     // cout << "Chord in triangulation: (" << chord.first << ", " << chord.second << ")" << endl;
@@ -62,20 +62,20 @@ public:
 
     /// @brief Combines triangulations from different faces
     void combineTriangulations(
-        const vector<vector<vector<pair<int, int>>>> &triangulation_per_face,
-        int index,
-        vector<pair<int, int>> &current,
-        vector<vector<pair<int, int>>> &allTriangulations)
+        const vector<vector<vector<pair<long long, long long>>>> &triangulation_per_face,
+        long long index,
+        vector<pair<long long, long long>> &current,
+        vector<vector<pair<long long, long long>>> &allTriangulations)
     {
         // Skip faces with 0 triangulations
-        while (index < (int)triangulation_per_face.size() &&
+        while (index < (long long)triangulation_per_face.size() &&
                triangulation_per_face[index].empty())
         {
             index++;
         }
 
         // Base case: all faces processed
-        if (index == (int)triangulation_per_face.size())
+        if (index == (long long)triangulation_per_face.size())
         {
             allTriangulations.push_back(current);
             return;
@@ -103,17 +103,17 @@ public:
     /// @brief Removes duplicated triangulations
     void removeDuplicated()
     {
-        vector<vector<pair<int, int>>> uniqueTriangulations;
-        int totalLength = allTriangulations[0].size();
+        vector<vector<pair<long long, long long>>> uniqueTriangulations;
+        long long totalLength = allTriangulations[0].size();
         for (auto &triangulation : allTriangulations)
         {
-            set<pair<int, int>> allPairsInsideThisTriangulation;
+            set<pair<long long, long long>> allPairsInsideThisTriangulation;
             bool arm = false;
             bool selfloop = false;
             for (auto &p : triangulation)
             {
-                int a = min(p.first, p.second);
-                int b = max(p.first, p.second);
+                long long a = min(p.first, p.second);
+                long long b = max(p.first, p.second);
                 allPairsInsideThisTriangulation.insert({a, b});
                 if (present.find({a, b}) != present.end())
                 {
@@ -151,7 +151,7 @@ public:
     void refineTriangulations()
     {
         sortTriangulations();
-        vector<pair<int, int>> current;
+        vector<pair<long long, long long>> current;
         combineTriangulations(triangulation_per_face, 0, current, allTriangulations);
 
         // removeDuplicated();
@@ -159,7 +159,7 @@ public:
 
     void printTriangulationsPerFace()
     {
-        int face_no = 0;
+        long long face_no = 0;
         for (auto &face_triangulations : triangulation_per_face)
         {
             cout << "Face " << face_no << " has " << face_triangulations.size() << " triangulations:" << endl;

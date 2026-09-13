@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 // ============================================================================
 // Input Reader
 // ============================================================================
-vector<vector<int>> readInput(const string &filename, int &distinctVertices)
+vector<vector<long long>> readInput(const string &filename, long long &distinctVertices)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -22,18 +22,18 @@ vector<vector<int>> readInput(const string &filename, int &distinctVertices)
         distinctVertices = 0;
         return {};
     }
-    vector<vector<int>> faces;
-    unordered_set<int> uniqueVertices;
-    int faceno;
+    vector<vector<long long>> faces;
+    unordered_set<long long> uniqueVertices;
+    long long faceno;
     infile >> faceno;
-    for (int i = 0; i < faceno; i++)
+    for (long long i = 0; i < faceno; i++)
     {
-        int vertices;
+        long long vertices;
         infile >> vertices;
-        vector<int> face;
-        for (int j = 0; j < vertices; j++)
+        vector<long long> face;
+        for (long long j = 0; j < vertices; j++)
         {
-            int vertex;
+            long long vertex;
             infile >> vertex;
             face.push_back(vertex);
             uniqueVertices.insert(vertex);
@@ -139,7 +139,7 @@ static string u128ToString(u128 x)
     return s;
 }
 
-int main()
+long long main()
 {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -158,18 +158,18 @@ int main()
     {
         streambuf *sb1, *sb2;
         tee_buf(streambuf *s1, streambuf *s2) : sb1(s1), sb2(s2) {}
-        int overflow(int c) override
+        long long overflow(long long c) override
         {
             if (c == EOF)
                 return !EOF;
-            int r1 = sb1->sputc(c);
+            long long r1 = sb1->sputc(c);
             sb2->sputc(c);
             return (r1 == EOF) ? EOF : c;
         }
-        int sync() override
+        long long sync() override
         {
-            int r1 = sb1->pubsync();
-            int r2 = sb2->pubsync();
+            long long r1 = sb1->pubsync();
+            long long r2 = sb2->pubsync();
             return (r1 == 0 && r2 == 0) ? 0 : -1;
         }
     } tbuf(cout.rdbuf(), logFile.rdbuf());
@@ -224,8 +224,8 @@ int main()
 
             out << "Processing: " << filename << " ... " << flush;
 
-            int distinctVertices = 0;
-            vector<vector<int>> faces = readInput(fullpath, distinctVertices);
+            long long distinctVertices = 0;
+            vector<vector<long long>> faces = readInput(fullpath, distinctVertices);
             if (faces.empty())
             {
                 cerr << "\nWarning: skipping empty or invalid file: " << filename << endl;
@@ -259,7 +259,7 @@ int main()
             char buf[256];
             while (fgets(buf, sizeof(buf), pipe))
                 out << "  " << buf;
-            int status = pclose(pipe);
+            long long status = pclose(pipe);
             if (status != 0)
                 out << "  (plotting script exited with code " << status << ")\n";
         }

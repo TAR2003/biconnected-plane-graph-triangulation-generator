@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 // ============================================================================
 // CONFIG: how many timing runs every single test case should have.
 // ============================================================================
-static const int RUNS_PER_CASE = 5;
+static const long long RUNS_PER_CASE = 5;
 
 // ============================================================================
 // CONFIG: time limit (in seconds) for a single run. Change this value to adjust.
@@ -33,7 +33,7 @@ static string u128_to_string(u128 x)
     string s;
     while (x > 0)
     {
-        int digit = (int)(x % 10);
+        long long digit = (long long)(x % 10);
         s.push_back('0' + digit);
         x /= 10;
     }
@@ -53,12 +53,12 @@ static u128 string_to_u128(const string &s)
 }
 
 // Helper to format numbers like 1st, 2nd, 3rd, 4th, 5th, etc.
-static string getOrdinal(int n)
+static string getOrdinal(long long n)
 {
-    int tens = (n / 10) % 10;
+    long long tens = (n / 10) % 10;
     if (tens == 1)
         return to_string(n) + "th";
-    int ones = n % 10;
+    long long ones = n % 10;
     if (ones == 1)
         return to_string(n) + "st";
     if (ones == 2)
@@ -142,7 +142,7 @@ size_t getCurrentMemoryUsage()
 // ============================================================================
 // Input Reader
 // ============================================================================
-vector<vector<int>> readInput(const string &filename, int &distinctVertices)
+vector<vector<long long>> readInput(const string &filename, long long &distinctVertices)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -151,18 +151,18 @@ vector<vector<int>> readInput(const string &filename, int &distinctVertices)
         distinctVertices = 0;
         return {};
     }
-    vector<vector<int>> faces;
-    unordered_set<int> uniqueVertices;
-    int faceno;
+    vector<vector<long long>> faces;
+    unordered_set<long long> uniqueVertices;
+    long long faceno;
     infile >> faceno;
-    for (int i = 0; i < faceno; i++)
+    for (long long i = 0; i < faceno; i++)
     {
-        int vertices;
+        long long vertices;
         infile >> vertices;
-        vector<int> face;
-        for (int j = 0; j < vertices; j++)
+        vector<long long> face;
+        for (long long j = 0; j < vertices; j++)
         {
-            int vertex;
+            long long vertex;
             infile >> vertex;
             face.push_back(vertex);
             uniqueVertices.insert(vertex);
@@ -179,7 +179,7 @@ vector<vector<int>> readInput(const string &filename, int &distinctVertices)
 string formatBytes(size_t bytes)
 {
     const char *units[] = {"B", "KB", "MB", "GB"};
-    int unitIndex = 0;
+    long long unitIndex = 0;
     double size = (double)bytes;
     while (size >= 1024.0 && unitIndex < 3)
     {
@@ -365,8 +365,8 @@ static bool readWorkerResultFile(const string &path, WorkerResult &r)
 struct RunRecord
 {
     string filename;
-    int runIndex;
-    int distinctVertices;
+    long long runIndex;
+    long long distinctVertices;
     string triangStr;
     double timeSeconds;
     size_t peakMemory;
@@ -390,7 +390,7 @@ static string csvPathForCategory(const string &category)
     return "results_" + category + ".csv";
 }
 
-static int countExistingRuns(const string &csvPath, const string &filename)
+static long long countExistingRuns(const string &csvPath, const string &filename)
 {
     ifstream in(csvPath);
     if (!in.is_open())
@@ -400,7 +400,7 @@ static int countExistingRuns(const string &csvPath, const string &filename)
     if (!getline(in, line))
         return 0;
 
-    int count = 0;
+    long long count = 0;
     while (getline(in, line))
     {
         if (line.empty())
@@ -444,7 +444,7 @@ static void appendRunCSV(const string &csvPath, const RunRecord &r)
 // Returns: 0 = child finished in time, 1 = time limit exceeded (child killed),
 //          -1 = spawn/wait error
 // ============================================================================
-static int runInSubprocess(const string &inputPath,
+static long long runInSubprocess(const string &inputPath,
                            const string &resultPath,
                            const string &progressPath,
                            double timeLimitSeconds)
@@ -500,7 +500,7 @@ static int runInSubprocess(const string &inputPath,
 
     while (true)
     {
-        int status = 0;
+        long long status = 0;
         pid_t waited = waitpid(pid, &status, WNOHANG);
         if (waited == pid)
             return 0;
@@ -520,10 +520,10 @@ static int runInSubprocess(const string &inputPath,
 // ============================================================================
 // Worker mode: run one timed computation in an isolated child process.
 // ============================================================================
-static int runWorkerMode(const char *inputPath, const char *resultPath, const char *progressPath)
+static long long runWorkerMode(const char *inputPath, const char *resultPath, const char *progressPath)
 {
-    int distinctVertices = 0;
-    vector<vector<int>> faces = readInput(inputPath, distinctVertices);
+    long long distinctVertices = 0;
+    vector<vector<long long>> faces = readInput(inputPath, distinctVertices);
     if (faces.empty())
         return 1;
 
@@ -615,7 +615,7 @@ static void runCategory(const string &category)
     {
         string fullPath = categoryFolder + "/" + filename;
 
-        int alreadyDone = countExistingRuns(csvPath, filename);
+        long long alreadyDone = countExistingRuns(csvPath, filename);
         if (alreadyDone >= RUNS_PER_CASE)
         {
             cout << "  " << filename << ": Found " << alreadyDone << " run(s) in CSV. Already complete ("
@@ -623,21 +623,21 @@ static void runCategory(const string &category)
             continue;
         }
 
-        int remaining = RUNS_PER_CASE - alreadyDone;
+        long long remaining = RUNS_PER_CASE - alreadyDone;
         cout << "  " << filename << ": Found " << alreadyDone << " run(s) in CSV. Need "
              << remaining << " more run(s).\n";
 
-        int distinctVertices = 0;
-        vector<vector<int>> faces = readInput(fullPath, distinctVertices);
+        long long distinctVertices = 0;
+        vector<vector<long long>> faces = readInput(fullPath, distinctVertices);
         if (faces.empty())
         {
             cerr << "    Warning: skipping empty/invalid file: " << filename << "\n";
             continue;
         }
 
-        for (int localRun = 1; localRun <= remaining; localRun++)
+        for (long long localRun = 1; localRun <= remaining; localRun++)
         {
-            int globalRunIndex = alreadyDone + localRun;
+            long long globalRunIndex = alreadyDone + localRun;
 
             string startTs = currentTimeString();
             cout << "    Running " << getOrdinal(globalRunIndex) << " run (start " << startTs
@@ -653,7 +653,7 @@ static void runCategory(const string &category)
 
             using clock = std::chrono::steady_clock;
             auto runStart = clock::now();
-            int subprocessStatus = runInSubprocess(fullPath, resultPath, progressPath, TIME_LIMIT_SECONDS);
+            long long subprocessStatus = runInSubprocess(fullPath, resultPath, progressPath, TIME_LIMIT_SECONDS);
             auto runEnd = clock::now();
             double runSec = std::chrono::duration_cast<std::chrono::duration<double>>(runEnd - runStart).count();
 
@@ -794,7 +794,7 @@ static void runCategory(const string &category)
 // ============================================================================
 // Main
 // ============================================================================
-int main(int argc, char *argv[])
+long long main(long long argc, char *argv[])
 {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -845,8 +845,8 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        int idx = stoi(arg);
-        if (idx < 1 || idx > (int)categories.size())
+        long long idx = stoi(arg);
+        if (idx < 1 || idx > (long long)categories.size())
         {
             cerr << "Category index out of range: " << idx << "\n\n";
             printUsage(categories, argv[0]);

@@ -80,7 +80,7 @@ void printStructure(T &t)
 }
 
 
-int main()
+long long main()
 {
 
     ParvezRahmanNakano *parvezRahmanNakano = new ParvezRahmanNakano(4);

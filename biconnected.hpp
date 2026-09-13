@@ -12,15 +12,15 @@ class FaceTriangulation;
 class biconnected
 {
 public:
-    vector<vector<int>> faces;
-    unordered_set<pair<int, int>, PairHash> present;
-    vector<vector<pair<int, int>>> allTriangulations;
+    vector<vector<long long>> faces;
+    unordered_set<pair<long long, long long>, PairHash> present;
+    vector<vector<pair<long long, long long>>> allTriangulations;
     vector<FaceTriangulation*> faceTriangulations;
     u128 totalTriangulations = 0;
-    biconnected(vector<vector<int>> &faces)
+    biconnected(vector<vector<long long>> &faces)
     {
         this->faces = faces;
-        present = unordered_set<pair<int, int>, PairHash>();
+        present = unordered_set<pair<long long, long long>, PairHash>();
         initiatePresent();
         faceTriangulations = vector<FaceTriangulation*>(faces.size());
     }
@@ -28,7 +28,7 @@ public:
     {
         for (auto face : faces)
         {
-            for (int i = 0; i < face.size() - 1; i++)
+            for (long long i = 0; i < face.size() - 1; i++)
             {
                 present.insert(make_pair(min(face[i], face[i + 1]), max(face[i], face[i + 1])));
             }
@@ -36,7 +36,7 @@ public:
         }
     }
     void getAllTriangulations();
-    void output(int serial);
+    void output(long long serial);
     void addTriangulation();
     void sortTriangulations()
     {
@@ -68,7 +68,7 @@ inline void biconnected::getAllTriangulations()
     // printAllTriangulations();
 }
 
-inline void biconnected::output(int serial)
+inline void biconnected::output(long long serial)
 {
     if (serial == faces.size() - 1)
     {
@@ -87,10 +87,10 @@ inline void biconnected::output(int serial)
 /// @brief Adds the current triangulation (combination of triangulations from all faces) to the list of all triangulations in the biconnected component.
 inline void biconnected::addTriangulation()
 {
-    vector<pair<int, int>> currentTriangulations;
+    vector<pair<long long, long long>> currentTriangulations;
     for (auto a : faceTriangulations)
     {
-        vector<pair<int, int>> currentTriangulation;
+        vector<pair<long long, long long>> currentTriangulation;
         for (auto &chord : a->chords)
         {
             currentTriangulation.push_back(a->getPair(chord));

@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 // ============================================================================
 // Input reader (same format as before: face count, then per-face vertex list)
 // ============================================================================
-vector<vector<int>> solve(const string &filename)
+vector<vector<long long>> solve(const string &filename)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -24,17 +24,17 @@ vector<vector<int>> solve(const string &filename)
         cerr << "Error opening file: " << filename << endl;
         return {};
     }
-    vector<vector<int>> faces;
-    int faceno;
+    vector<vector<long long>> faces;
+    long long faceno;
     infile >> faceno;
-    for (int i = 0; i < faceno; i++)
+    for (long long i = 0; i < faceno; i++)
     {
-        int vertices;
+        long long vertices;
         infile >> vertices;
-        vector<int> face;
-        for (int j = 0; j < vertices; j++)
+        vector<long long> face;
+        for (long long j = 0; j < vertices; j++)
         {
-            int vertex;
+            long long vertex;
             infile >> vertex;
             face.push_back(vertex);
         }
@@ -47,14 +47,14 @@ vector<vector<int>> solve(const string &filename)
 // Comparison helpers
 // ============================================================================
 
-static bool matchPairs(const pair<int, int> &p1, const pair<int, int> &p2)
+static bool matchPairs(const pair<long long, long long> &p1, const pair<long long, long long> &p2)
 {
     return (p1.first == p2.first && p1.second == p2.second);
 }
 
 static bool matchTriangulations(
-    const vector<pair<int, int>> &t1,
-    const vector<pair<int, int>> &t2)
+    const vector<pair<long long, long long>> &t1,
+    const vector<pair<long long, long long>> &t2)
 {
     if (t1.size() != t2.size())
         return false;
@@ -146,8 +146,8 @@ static bool hashAggregatesMatch(const TriangulationRunStats &a, const Triangulat
 }
 
 static ExactVerdict compareExact(
-    const vector<vector<pair<int, int>>> &newStored,
-    const vector<vector<pair<int, int>>> &oldStored,
+    const vector<vector<pair<long long, long long>>> &newStored,
+    const vector<vector<pair<long long, long long>>> &oldStored,
     const TriangulationRunStats &newStats,
     const TriangulationRunStats &oldStats)
 {
@@ -196,7 +196,7 @@ static ComparisonResult compareTwoAlgorithms(
     const auto startClock = chrono::steady_clock::now();
     result.startTime = formatTimestamp(chrono::system_clock::now());
 
-    vector<vector<int>> faces = solve(filename);
+    vector<vector<long long>> faces = solve(filename);
     if (faces.empty())
     {
         result.fileReadError = true;
@@ -342,10 +342,10 @@ static void printUsage(const vector<string> &categories, const char *progName, s
 struct Summary
 {
     string category;
-    int matched = 0;
-    int mismatched = 0;
-    int errors = 0;
-    int skipped = 0;
+    long long matched = 0;
+    long long mismatched = 0;
+    long long errors = 0;
+    long long skipped = 0;
 };
 
 static Summary runCategory(
@@ -445,9 +445,9 @@ static Summary runCategory(
     return summ;
 }
 
-static size_t parseMemoryLimitGb(int argc, char *argv[], size_t defaultGb)
+static size_t parseMemoryLimitGb(long long argc, char *argv[], size_t defaultGb)
 {
-    for (int i = 2; i < argc; ++i)
+    for (long long i = 2; i < argc; ++i)
     {
         string arg = argv[i];
         if (arg == "--memory-limit-gb" && i + 1 < argc)
@@ -458,7 +458,7 @@ static size_t parseMemoryLimitGb(int argc, char *argv[], size_t defaultGb)
     return defaultGb;
 }
 
-int main(int argc, char *argv[])
+long long main(long long argc, char *argv[])
 {
     const string rootFolder = "input";
     const size_t defaultMemoryLimitGb = 2;
@@ -508,8 +508,8 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        const int idx = stoi(arg);
-        if (idx < 1 || idx > static_cast<int>(categories.size()))
+        const long long idx = stoi(arg);
+        if (idx < 1 || idx > static_cast<long long>(categories.size()))
         {
             cerr << "Category index out of range: " << idx << "\n\n";
             printUsage(categories, argv[0], defaultMemoryLimitGb);
