@@ -27,9 +27,9 @@ public:
     vector<int> positions; // vector to store the positions of the vertices in the cycle
     vector<int> elements;  // vector to store the elements of the cycle
 
-    int problems;
+    long long problems;
     biconnected *bc;
-    int serial;
+    long long serial;
 
     /// @brief the constructor of the class
     /// @param n the number of vertices in the cycle

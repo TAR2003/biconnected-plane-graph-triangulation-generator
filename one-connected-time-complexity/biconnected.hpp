@@ -14,10 +14,10 @@ public:
     unordered_multiset<pair<int, int>, PairHash> present;
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation*> faceTriangulations;
-    int totalTriangulations;
-    int totalChecks;
-    int successfulChecks;
-    int invalidTraversals;
+    long long totalTriangulations;
+    long long totalChecks;
+    long long successfulChecks;
+    long long invalidTraversals;
     biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
