@@ -11,13 +11,13 @@ public:
     /// @brief the generating set of the cycle
     list<Edge *> GS;
     /// @brief the vertex number of the cycle
-    long long n;
+    int n;
     /// @brief all the triangulations generated
-    vector<vector<pair<long long, long long>>> allTriangulations;
+    vector<vector<pair<int, int>>> allTriangulations;
 
     /// @brief the constructor of the class
     /// @param n the number of vertices in the cycle
-    ParvezRahmanNakano(long long n)
+    ParvezRahmanNakano(int n)
     {
         this->n = n;
     }
@@ -49,20 +49,20 @@ public:
     /// @param newChord The new chord after the flip
     /// @param oldChord The old chord before the flip
     void flipit(list<Edge *>::iterator itr, list<Edge *>::iterator itr_other,
-                pair<long long, long long> newChord, pair<long long, long long> oldChord)
+                pair<int, int> newChord, pair<int, int> oldChord)
     {
 
         Edge *other_e = *itr_other; // other edge whose opposite endpoints need to be updated
 
         // Find which endpoint to update
-        long long oldPoint = oldChord.first;
+        int oldPoint = oldChord.first;
         if (oldPoint == other_e->first || oldPoint == other_e->second)
         {
             oldPoint = oldChord.second;
         }
 
         // Find the new endpoint to set
-        long long newPoint = newChord.first;
+        int newPoint = newChord.first;
         if (newPoint == other_e->first || newPoint == other_e->second)
         {
             newPoint = newChord.second;
@@ -85,8 +85,8 @@ public:
         Edge *e = *itr; // Edge to be flipped
 
         // Store the values BEFORE flipping
-        pair<long long, long long> newChord = make_pair(e->opposite_first, e->opposite_second); // New chord after flip
-        pair<long long, long long> oldChord = make_pair(e->first, e->second);                   // Old chord before flip
+        pair<int, int> newChord = make_pair(e->opposite_first, e->opposite_second); // New chord after flip
+        pair<int, int> oldChord = make_pair(e->first, e->second);                   // Old chord before flip
 
         // Update neighbors with the stored values
         if (next(itr) != GS.end())
@@ -101,7 +101,7 @@ public:
     /// @brief adds the current triangulation to the list of all triangulations
     void addTriangulation()
     {
-        vector<pair<long long, long long>> currentTriangulation;
+        vector<pair<int, int>> currentTriangulation;
         for (auto &chord : chords)
         {
             currentTriangulation.push_back({chord->first, chord->second});
@@ -138,7 +138,7 @@ public:
         GS.erase(itr); // Remove the current edge from the generating set
 
         // Determine the leftmost blocking endpoint
-        long long leftmost_blocking_b = min(c->first, c->second);
+        int leftmost_blocking_b = min(c->first, c->second);
 
         addTriangulation(); // Add the current triangulation to the list of all triangulations
 
@@ -167,7 +167,7 @@ public:
     /// @brief generates all triangulations of the cycle
     void generateAllTriangulations()
     {
-        for (long long i = 2; i < n - 1; i++)
+        for (int i = 2; i < n - 1; i++)
         {
             Edge *e = new Edge(0, i, i - 1, (i + 1) % n); // creating a new edge object
             GS.push_back(e); // adding the edge to the generating set

@@ -17,19 +17,19 @@ public:
     /// @brief the list of all edges in the cycle (for memory management)
     // list<Edge *> VGS;
     /// @brief the vertex number of the cycle
-    long long n;
+    int n;
     /// @brief set of all present chords in the original graph (reference to shared set)
-    unordered_multiset<pair<long long, long long>, PairHash> &present;
+    unordered_multiset<pair<int, int>, PairHash> &present;
     /// @brief set of all present chords in the current face, need to keep track for the root triangulation multi edge conflict
-    unordered_multiset<pair<long long, long long>, PairHash> presentFace;
+    unordered_multiset<pair<int, int>, PairHash> presentFace;
     /// @brief all the triangulations generated
-    vector<vector<pair<long long, long long>>> allTriangulations;
-    vector<long long> positions; // vector to store the positions of the vertices in the cycle
-    vector<long long> elements;  // vector to store the elements of the cycle
+    vector<vector<pair<int, int>>> allTriangulations;
+    vector<int> positions; // vector to store the positions of the vertices in the cycle
+    vector<int> elements;  // vector to store the elements of the cycle
 
-    long long problems;
+    int problems;
     biconnected *bc;
-    long long serial;
+    int serial;
 
     /// @brief the constructor of the class
     /// @param n the number of vertices in the cycle
@@ -37,7 +37,7 @@ public:
     /// @param present the set of present chords
     /// @param serial the serial number of the face
     /// @param bc pointer to the biconnected class
-    FaceTriangulation(long long n, vector<long long> &elements, unordered_multiset<pair<long long, long long>, PairHash> &present, long long serial, biconnected *bc)
+    FaceTriangulation(int n, vector<int> &elements, unordered_multiset<pair<int, int>, PairHash> &present, int serial, biconnected *bc)
         : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1),  problems(0)
     {
         findSafeRoot();
@@ -81,19 +81,19 @@ public:
         cout << endl;
     }
 
-    void printPair(pair<long long, long long> p)
+    void printPair(pair<int, int> p)
     {
         cout << " (" << p.first << ", " << p.second << ") ";
     }
 
-    pair<long long, long long> getPair(Edge *e)
+    pair<int, int> getPair(Edge *e)
     {
         return {min(positions[e->first], positions[e->second]), max(positions[e->first], positions[e->second])};
     }
 
-    pair<long long, long long> getOppositePair(Edge *e)
+    pair<int, int> getOppositePair(Edge *e)
     {
-        pair<long long, long long> p = {min(positions[e->opposite_first], positions[e->opposite_second]), max(positions[e->opposite_first], positions[e->opposite_second])};
+        pair<int, int> p = {min(positions[e->opposite_first], positions[e->opposite_second]), max(positions[e->opposite_first], positions[e->opposite_second])};
         return p;
     }
 
@@ -106,8 +106,8 @@ public:
     /// @brief finds a safe root for the cycle and updates the positions vector accordingly
     void findSafeRoot()
     {
-        long long startIndex = 0;
-        long long endIndex = n - 2;
+        int startIndex = 0;
+        int endIndex = n - 2;
         while (startIndex < endIndex - 1)
         {
             if (present.find({elements[startIndex], elements[endIndex]}) != present.end() || present.find({elements[endIndex], elements[startIndex]}) != present.end())
@@ -120,7 +120,7 @@ public:
             }
         }
         // start Index is the safe root
-        for (long long i = 0; i < n; i++)
+        for (int i = 0; i < n; i++)
         {
             positions[i] = elements[(startIndex + i) % n];
         }
@@ -146,20 +146,20 @@ public:
     /// @param newChord The new chord after the flip
     /// @param oldChord The old chord before the flip
     void flipit(list<Edge *>::iterator itr, list<Edge *>::iterator itr_other,
-                pair<long long, long long> newChord, pair<long long, long long> oldChord)
+                pair<int, int> newChord, pair<int, int> oldChord)
     {
 
         Edge *other_e = *itr_other; // other edge whose opposite endpoints need to be updated
 
         // Find which endpoint to update
-        long long oldPoint = oldChord.first;
+        int oldPoint = oldChord.first;
         if (oldPoint == other_e->first || oldPoint == other_e->second)
         {
             oldPoint = oldChord.second;
         }
 
         // Find the new endpoint to set
-        long long newPoint = newChord.first;
+        int newPoint = newChord.first;
         if (newPoint == other_e->first || newPoint == other_e->second)
         {
             newPoint = newChord.second;
@@ -183,8 +183,8 @@ public:
         Edge *e = *itrGS; // Edge to be flipped
 
         // Store the values BEFORE flipping
-        pair<long long, long long> newChord = make_pair(e->opposite_first, e->opposite_second); // New chord after flip
-        pair<long long, long long> oldChord = make_pair(e->first, e->second);                   // Old chord before flip
+        pair<int, int> newChord = make_pair(e->opposite_first, e->opposite_second); // New chord after flip
+        pair<int, int> oldChord = make_pair(e->first, e->second);                   // Old chord before flip
         auto itr = e->chordItrGS;                                                   // Corresponding iterator in the generating set
         // Update neighbors with the stored values
         if (next(itr) != GS.end())
@@ -250,7 +250,7 @@ public:
     /// @brief adds the current triangulation to the list of all triangulations
     void addTriangulation()
     {
-        vector<pair<long long, long long>> currentTriangulation;
+        vector<pair<int, int>> currentTriangulation;
         for (auto &chord : chords)
         {
             currentTriangulation.push_back(getPair(chord));
@@ -374,7 +374,7 @@ public:
         // }
         // cout << endl;
 
-        for (long long i = 2; i < n - 1; i++)
+        for (int i = 2; i < n - 1; i++)
         {
             
             Edge *e = new Edge(0, i, i - 1, (i + 1) % n); // creating a new edge object

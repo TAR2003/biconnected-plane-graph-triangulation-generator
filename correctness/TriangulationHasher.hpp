@@ -28,24 +28,24 @@ inline void writeLE32(uint8_t *dst, uint32_t value)
 inline uint64_t readLE64(const uint8_t *src)
 {
     uint64_t value = 0;
-    for (long long i = 0; i < 8; ++i)
+    for (int i = 0; i < 8; ++i)
         value |= static_cast<uint64_t>(src[i]) << (i * 8);
     return value;
 }
 
 inline void loadSha256Words(const uint8_t digest[32], uint64_t words[4])
 {
-    for (long long i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i)
         words[i] = readLE64(digest + i * 8);
 }
 
-inline uint64_t rotl64(uint64_t x, long long r)
+inline uint64_t rotl64(uint64_t x, int r)
 {
     return (x << r) | (x >> (64 - r));
 }
 
 inline void serializeTriangulation(
-    const std::vector<std::pair<long long, long long>> &tri,
+    const std::vector<std::pair<int, int>> &tri,
     std::vector<uint8_t> &buffer)
 {
     buffer.resize(tri.size() * 8);
@@ -156,7 +156,7 @@ inline uint64_t sipHash24(const void *data, size_t len, uint64_t seed0, uint64_t
 
     const uint8_t *p = static_cast<const uint8_t *>(data);
     const uint8_t *end = p + (len & ~static_cast<size_t>(7));
-    const long long left = static_cast<long long>(len & 7);
+    const int left = static_cast<int>(len & 7);
     uint64_t b = static_cast<uint64_t>(len) << 56;
 
     if (len)
@@ -165,7 +165,7 @@ inline uint64_t sipHash24(const void *data, size_t len, uint64_t seed0, uint64_t
         {
             uint64_t m = readLE64(p);
             v3 ^= m;
-            for (long long r = 0; r < 2; ++r)
+            for (int r = 0; r < 2; ++r)
             {
                 v0 += v1;
                 v1 = rotl64(v1, 13);
@@ -213,7 +213,7 @@ inline uint64_t sipHash24(const void *data, size_t len, uint64_t seed0, uint64_t
     }
 
     v3 ^= b;
-    for (long long r = 0; r < 2; ++r)
+    for (int r = 0; r < 2; ++r)
     {
         v0 += v1;
         v1 = rotl64(v1, 13);
@@ -232,7 +232,7 @@ inline uint64_t sipHash24(const void *data, size_t len, uint64_t seed0, uint64_t
     }
     v0 ^= b;
     v2 ^= 0xFF;
-    for (long long r = 0; r < 4; ++r)
+    for (int r = 0; r < 4; ++r)
     {
         v0 += v1;
         v1 = rotl64(v1, 13);
@@ -256,7 +256,7 @@ inline uint64_t sipHash24(const void *data, size_t len, uint64_t seed0, uint64_t
 // SHA-256 (self-contained, public-domain style implementation)
 // ---------------------------------------------------------------------------
 
-inline uint32_t rotr32(uint32_t x, long long n)
+inline uint32_t rotr32(uint32_t x, int n)
 {
     return (x >> n) | (x << (32 - n));
 }
@@ -320,13 +320,13 @@ inline void sha256(const uint8_t *data, size_t len, uint8_t outDigest[32])
         msg.push_back(0x00);
 
     const uint64_t bitLen = static_cast<uint64_t>(len) * 8ULL;
-    for (long long i = 7; i >= 0; --i)
+    for (int i = 7; i >= 0; --i)
         msg.push_back(static_cast<uint8_t>((bitLen >> (i * 8)) & 0xFF));
 
     for (size_t offset = 0; offset < msg.size(); offset += 64)
     {
         uint32_t w[64];
-        for (long long i = 0; i < 16; ++i)
+        for (int i = 0; i < 16; ++i)
         {
             const uint8_t *block = msg.data() + offset + i * 4;
             w[i] = (static_cast<uint32_t>(block[0]) << 24) |
@@ -334,7 +334,7 @@ inline void sha256(const uint8_t *data, size_t len, uint8_t outDigest[32])
                    (static_cast<uint32_t>(block[2]) << 8) |
                    static_cast<uint32_t>(block[3]);
         }
-        for (long long i = 16; i < 64; ++i)
+        for (int i = 16; i < 64; ++i)
             w[i] = sha256Gamma1(w[i - 2]) + w[i - 7] + sha256Gamma0(w[i - 15]) + w[i - 16];
 
         uint32_t a = h0;
@@ -346,7 +346,7 @@ inline void sha256(const uint8_t *data, size_t len, uint8_t outDigest[32])
         uint32_t g = h6;
         uint32_t h = h7;
 
-        for (long long i = 0; i < 64; ++i)
+        for (int i = 0; i < 64; ++i)
         {
             const uint32_t t1 = h + sha256Sigma1(e) + sha256Ch(e, f, g) + K[i] + w[i];
             const uint32_t t2 = sha256Sigma0(a) + sha256Maj(a, b, c);
@@ -371,7 +371,7 @@ inline void sha256(const uint8_t *data, size_t len, uint8_t outDigest[32])
     }
 
     const uint32_t hs[8] = {h0, h1, h2, h3, h4, h5, h6, h7};
-    for (long long i = 0; i < 8; ++i)
+    for (int i = 0; i < 8; ++i)
     {
         outDigest[i * 4 + 0] = static_cast<uint8_t>((hs[i] >> 24) & 0xFF);
         outDigest[i * 4 + 1] = static_cast<uint8_t>((hs[i] >> 16) & 0xFF);
@@ -394,9 +394,9 @@ struct TriangulationFingerprint
 };
 
 inline TriangulationFingerprint hashTriangulation(
-    const std::vector<std::pair<long long, long long>> &tri)
+    const std::vector<std::pair<int, int>> &tri)
 {
-    std::vector<std::pair<long long, long long>> canonical = tri;
+    std::vector<std::pair<int, int>> canonical = tri;
     for (auto &p : canonical)
     {
         if (p.first > p.second)
@@ -423,7 +423,7 @@ inline TriangulationFingerprint hashTriangulation(
 
 struct TriangulationRunStats
 {
-    static constexpr long long SHA_WORDS = 4;
+    static constexpr int SHA_WORDS = 4;
 
     uint64_t totalTriangulationCount = 0;
 
@@ -440,10 +440,10 @@ struct TriangulationRunStats
 
     size_t memoryLimitBytes = 2ULL * 1024ULL * 1024ULL * 1024ULL;
 
-    static size_t estimateTriangulationBytes(const std::vector<std::pair<long long, long long>> &tri)
+    static size_t estimateTriangulationBytes(const std::vector<std::pair<int, int>> &tri)
     {
-        return sizeof(std::vector<std::pair<long long, long long>>) +
-               tri.size() * sizeof(std::pair<long long, long long>);
+        return sizeof(std::vector<std::pair<int, int>>) +
+               tri.size() * sizeof(std::pair<int, int>);
     }
 
     void accumulateFingerprint(const TriangulationFingerprint &fp)
@@ -455,7 +455,7 @@ struct TriangulationRunStats
 
         uint64_t words[SHA_WORDS];
         tri_hash_detail::loadSha256Words(fp.sha256.data(), words);
-        for (long long i = 0; i < SHA_WORDS; ++i)
+        for (int i = 0; i < SHA_WORDS; ++i)
         {
             sha256Xor[i] ^= words[i];
             sha256Sum[i] += words[i];
@@ -463,8 +463,8 @@ struct TriangulationRunStats
     }
 
     void recordTriangulation(
-        const std::vector<std::pair<long long, long long>> &tri,
-        std::vector<std::vector<std::pair<long long, long long>>> *storage)
+        const std::vector<std::pair<int, int>> &tri,
+        std::vector<std::vector<std::pair<int, int>>> *storage)
     {
         ++totalTriangulationCount;
         accumulateFingerprint(hashTriangulation(tri));
@@ -494,7 +494,7 @@ struct TriangulationRunStats
             return false;
         if (hashSipXor != other.hashSipXor || hashSipSum != other.hashSipSum)
             return false;
-        for (long long i = 0; i < SHA_WORDS; ++i)
+        for (int i = 0; i < SHA_WORDS; ++i)
         {
             if (sha256Xor[i] != other.sha256Xor[i] || sha256Sum[i] != other.sha256Sum[i])
                 return false;
@@ -514,7 +514,7 @@ inline std::string formatHashHex(uint64_t value)
 inline std::string formatSha256WordsHex(const uint64_t words[TriangulationRunStats::SHA_WORDS])
 {
     std::string out;
-    for (long long i = 0; i < TriangulationRunStats::SHA_WORDS; ++i)
+    for (int i = 0; i < TriangulationRunStats::SHA_WORDS; ++i)
     {
         if (i > 0)
             out += '|';

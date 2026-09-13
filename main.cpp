@@ -14,7 +14,7 @@ static string u128_to_string(u128 x)
     string s;
     while (x > 0)
     {
-        long long digit = (long long)(x % 10);
+        int digit = (int)(x % 10);
         s.push_back('0' + digit);
         x /= 10;
     }
@@ -22,7 +22,7 @@ static string u128_to_string(u128 x)
     return s;
 }
 
-vector<vector<long long>> input(string filename)
+vector<vector<int>> input(string filename)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -30,17 +30,17 @@ vector<vector<long long>> input(string filename)
         cerr << "Error opening file: " << filename << endl;
         return {};
     }
-    vector<vector<long long>> faces;
-    long long faceno;
+    vector<vector<int>> faces;
+    int faceno;
     infile >> faceno;
-    for (long long i = 0; i < faceno; i++)
+    for (int i = 0; i < faceno; i++)
     {
-        long long vertices;
+        int vertices;
         infile >> vertices;
-        vector<long long> face;
-        for (long long j = 0; j < vertices; j++)
+        vector<int> face;
+        for (int j = 0; j < vertices; j++)
         {
-            long long vertex;
+            int vertex;
             infile >> vertex;
             face.push_back(vertex);
         }
@@ -49,7 +49,7 @@ vector<vector<long long>> input(string filename)
     return faces;
 }
 
-void output(vector<vector<pair<long long, long long>>> &allTriangulations, string filename)
+void output(vector<vector<pair<int, int>>> &allTriangulations, string filename)
 {
     ofstream outfile(filename);
     if (!outfile.is_open())
@@ -72,13 +72,13 @@ void output(vector<vector<pair<long long, long long>>> &allTriangulations, strin
 #include <filesystem>
 namespace fs = std::filesystem;
 
-long long main()
+int main()
 {
     string filename = "input.txt";
 
     cout << "Processing: " << filename << endl;
 
-    vector<vector<long long>> faces = input(filename);
+    vector<vector<int>> faces = input(filename);
     
     biconnected *bc = new biconnected(faces);
 

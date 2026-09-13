@@ -27,7 +27,7 @@ struct FileMetrics
     bool isContained;
 };
 
-vector<vector<long long>> solve(string filename)
+vector<vector<int>> solve(string filename)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -35,17 +35,17 @@ vector<vector<long long>> solve(string filename)
         cerr << "Error opening file: " << filename << endl;
         return {};
     }
-    vector<vector<long long>> faces;
-    long long faceno;
+    vector<vector<int>> faces;
+    int faceno;
     infile >> faceno;
-    for (long long i = 0; i < faceno; i++)
+    for (int i = 0; i < faceno; i++)
     {
-        long long vertices;
+        int vertices;
         infile >> vertices;
-        vector<long long> face;
-        for (long long j = 0; j < vertices; j++)
+        vector<int> face;
+        for (int j = 0; j < vertices; j++)
         {
-            long long vertex;
+            int vertex;
             infile >> vertex;
             face.push_back(vertex);
         }
@@ -54,12 +54,12 @@ vector<vector<long long>> solve(string filename)
     return faces;
 }
 
-bool matchPairs(const pair<long long, long long> &p1, const pair<long long, long long> &p2)
+bool matchPairs(const pair<int, int> &p1, const pair<int, int> &p2)
 {
     return (p1.first == p2.first && p1.second == p2.second);
 }
 
-bool matchTriangulations(const vector<pair<long long, long long>> &t1, const vector<pair<long long, long long>> &t2)
+bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int, int>> &t2)
 {
     if (t1.size() != t2.size())
         return false;
@@ -72,8 +72,8 @@ bool matchTriangulations(const vector<pair<long long, long long>> &t1, const vec
 }
 
 void compareAndPrintTriangulations(
-    vector<vector<pair<long long, long long>>> &triangulationsByAlgo,
-    vector<vector<pair<long long, long long>>> &triangulationsByTriconnectedBruteForce)
+    vector<vector<pair<int, int>>> &triangulationsByAlgo,
+    vector<vector<pair<int, int>>> &triangulationsByTriconnectedBruteForce)
 {
     // ANSI color codes for terminal output
     const string GREEN = "\033[32m";
@@ -93,7 +93,7 @@ void compareAndPrintTriangulations(
 
     sort(triangulationsByAlgo.begin(), triangulationsByAlgo.end());
 
-    multiset<vector<pair<long long, long long>>> bruteForceSet(
+    multiset<vector<pair<int, int>>> bruteForceSet(
         triangulationsByTriconnectedBruteForce.begin(),
         triangulationsByTriconnectedBruteForce.end());
 
@@ -136,8 +136,8 @@ void compareAndPrintTriangulations(
 }
 
 bool compareAndOutput(
-    vector<vector<pair<long long, long long>>> &triangulationsByAlgo,
-    vector<vector<pair<long long, long long>>> &triangulationsByTriconnectedBruteForce,
+    vector<vector<pair<int, int>>> &triangulationsByAlgo,
+    vector<vector<pair<int, int>>> &triangulationsByTriconnectedBruteForce,
     const string &filename,
     bool enableFileOutput)
 {
@@ -164,12 +164,12 @@ bool compareAndOutput(
 
     sort(triangulationsByAlgo.begin(), triangulationsByAlgo.end());
 
-    multiset<vector<pair<long long, long long>>> bruteForceSet(
+    multiset<vector<pair<int, int>>> bruteForceSet(
         triangulationsByTriconnectedBruteForce.begin(),
         triangulationsByTriconnectedBruteForce.end());
 
     // Evaluate containment status
-    multiset<vector<pair<long long, long long>>> checkSet = bruteForceSet;
+    multiset<vector<pair<int, int>>> checkSet = bruteForceSet;
     for (const auto &triangulation : triangulationsByAlgo)
     {
         auto it = checkSet.find(triangulation);
@@ -241,7 +241,7 @@ bool compareAndOutput(
 
 FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
 {
-    vector<vector<long long>> faces = solve(filename);
+    vector<vector<int>> faces = solve(filename);
 
     biconnected *bc = new biconnected(faces);
     bc->getAllTriangulations();
@@ -369,7 +369,7 @@ void writeCSVReport(const string &reportPath, const vector<FileMetrics> &allMetr
     cout << "\n\033[1;34m[REPORT] Summary CSV report successfully written to: " << reportPath << "\033[0m" << endl;
 }
 
-long long main()
+int main()
 {
     // ================= CONFIGURATION FLAGS =================
     bool ENABLE_FILE_OUTPUT = false; // Set to false to disable per-file detailed triangulation outputs
