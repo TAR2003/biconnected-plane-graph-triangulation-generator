@@ -7,7 +7,7 @@ using namespace std;
 // Forward declaration to avoid circular dependency
 class FaceTriangulation;
 
-class biconnected
+class Biconnected
 {
 public:
     vector<vector<int>> faces;
@@ -17,7 +17,7 @@ public:
     int totalChecks;
     int successfulChecks;
     int invalidTraversals;
-    biconnected(vector<vector<int>> &faces)
+    Biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
         present = unordered_multiset<pair<int, int>, PairHash>();
@@ -70,14 +70,14 @@ public:
 #include "FaceTriangulation.hpp"
 
 // Define methods that use FaceTriangulation after including the header
-inline void biconnected::getAllTriangulations()
+inline void Biconnected::getAllTriangulations()
 {
     faceTriangulations[0] = new FaceTriangulation(faces[0].size(), faces[0], present, 0, this);
     faceTriangulations[0]->generateAllTriangulations();
     // printAllTriangulations();
 }
 
-inline void biconnected::output(int serial)
+inline void Biconnected::output(int serial)
 {
     if (serial == faces.size() - 1)
     {
@@ -92,7 +92,7 @@ inline void biconnected::output(int serial)
     }
 }
 
-inline void biconnected::addTriangulation()
+inline void Biconnected::addTriangulation()
 {
     vector<pair<int, int>> currentTriangulations;
     for (auto a : faceTriangulations)

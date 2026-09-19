@@ -207,11 +207,11 @@ static ComparisonResult compareTwoAlgorithms(
     result.newStats.memoryLimitBytes = memoryLimitBytes;
     result.oldStats.memoryLimitBytes = memoryLimitBytes;
 
-    biconnected *bc = new biconnected(faces, &result.newStats);
+    Biconnected *bc = new Biconnected(faces, &result.newStats);
     bc->getAllTriangulations();
     bc->sortTriangulations();
 
-    triconnected *tc = new triconnected(faces, &result.oldStats);
+    Triconnected *tc = new Triconnected(faces, &result.oldStats);
     tc->getAllTriangulations();
     tc->refineTriangulations();
 

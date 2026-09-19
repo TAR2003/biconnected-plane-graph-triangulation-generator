@@ -243,11 +243,11 @@ FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
 {
     vector<vector<int>> faces = solve(filename);
 
-    biconnected *bc = new biconnected(faces);
+    Biconnected *bc = new Biconnected(faces);
     bc->getAllTriangulations();
     bc->sortTriangulations();
 
-    triconnected *tc = new triconnected(faces);
+    Triconnected *tc = new Triconnected(faces);
     tc->getAllTriangulations();
     tc->refineTriangulations();
     tc->removeDuplicated();

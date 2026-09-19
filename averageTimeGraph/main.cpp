@@ -235,7 +235,7 @@ int main()
             TriangulationTimer timer;
             timer.begin();
 
-            biconnected bc(faces);
+            Biconnected bc(faces);
             bc.onTriangulationGenerated = [&timer]() { timer.record(); };
             bc.getAllTriangulations();
 

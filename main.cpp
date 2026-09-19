@@ -80,7 +80,7 @@ int main()
 
     vector<vector<int>> faces = input(filename);
     
-    biconnected *bc = new biconnected(faces);
+    Biconnected *bc = new Biconnected(faces);
 
     bc->getAllTriangulations();
 

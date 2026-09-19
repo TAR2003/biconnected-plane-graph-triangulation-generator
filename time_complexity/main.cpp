@@ -460,7 +460,7 @@ static int runWorkerMode(const char *inputPath, const char *resultPath, const ch
     string startTs = currentTimeString();
     size_t memBefore = getCurrentMemoryUsage();
 
-    biconnected *bc = new biconnected(faces);
+    Biconnected *bc = new Biconnected(faces);
     std::atomic<bool> stopProgress{false};
 
     std::thread progressThread([&]()

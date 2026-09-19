@@ -5,7 +5,7 @@ using namespace std;
 #include "pairHash.hpp"
 
 // Forward declaration to avoid circular dependency
-class biconnected;
+class Biconnected;
 
 class FaceTriangulation
 {
@@ -28,7 +28,7 @@ public:
     vector<int> elements;  // vector to store the elements of the cycle
 
     long long problems;
-    biconnected *bc;
+    Biconnected *bc;
     long long serial;
 
     /// @brief the constructor of the class
@@ -37,7 +37,7 @@ public:
     /// @param present the set of present chords
     /// @param serial the serial number of the face
     /// @param bc pointer to the biconnected class
-    FaceTriangulation(int n, vector<int> &elements, unordered_multiset<pair<int, int>, PairHash> &present, int serial, biconnected *bc)
+    FaceTriangulation(int n, vector<int> &elements, unordered_multiset<pair<int, int>, PairHash> &present, int serial, Biconnected *bc)
         : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1),  problems(0)
     {
         findSafeRoot();

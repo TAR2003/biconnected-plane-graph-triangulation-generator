@@ -9,7 +9,7 @@ using u128 = unsigned __int128;
 // Forward declaration to avoid circular dependency
 class FaceTriangulation;
 
-class biconnected
+class Biconnected
 {
 public:
     vector<vector<int>> faces;
@@ -18,7 +18,7 @@ public:
     vector<FaceTriangulation *> faceTriangulations;
     u128 totalTriangulations = 0;
     std::function<void()> onTriangulationGenerated;
-    biconnected(vector<vector<int>> &faces)
+    Biconnected(vector<vector<int>> &faces)
     {
         this->faces = faces;
         present = unordered_set<pair<int, int>, PairHash>();
@@ -62,14 +62,14 @@ public:
 #include "FaceTriangulation.hpp"
 
 // Define methods that use FaceTriangulation after including the header
-inline void biconnected::getAllTriangulations()
+inline void Biconnected::getAllTriangulations()
 {
     faceTriangulations[0] = new FaceTriangulation(faces[0].size(), faces[0], present, 0, this);
     faceTriangulations[0]->generateAllTriangulations();
     // printAllTriangulations();
 }
 
-inline void biconnected::output(int serial)
+inline void Biconnected::output(int serial)
 {
     if (serial == faces.size() - 1)
     {

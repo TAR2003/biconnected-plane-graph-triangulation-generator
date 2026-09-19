@@ -7,7 +7,7 @@ using namespace std;
 #include "ParvezRahmanNakano.hpp"
 #include "TriangulationHasher.hpp"
 
-class triconnected
+class Triconnected
 {
 public:
     vector<vector<int>> faces;
@@ -16,7 +16,7 @@ public:
     unordered_set<pair<int, int>, PairHash> present;
     TriangulationRunStats *runStats = nullptr;
 
-    triconnected(vector<vector<int>> &faces, TriangulationRunStats *stats = nullptr)
+    Triconnected(vector<vector<int>> &faces, TriangulationRunStats *stats = nullptr)
     {
         this->faces = faces;
         runStats = stats;
