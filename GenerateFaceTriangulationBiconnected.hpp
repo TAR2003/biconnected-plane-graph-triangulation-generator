@@ -95,17 +95,17 @@ public:
     /// @brief finds a safe root for the cycle and updates the positions vector accordingly
     void findSafeRoot()
     {
-        int startIndex = n - 1;
-        int endIndex = 1;
-        while (startIndex > endIndex + 1)
+        int startIndex = 0;
+        int endIndex = n - 2;
+        while (startIndex < endIndex - 1)
         {
             if (present.find({elements[startIndex], elements[endIndex]}) != present.end() || present.find({elements[endIndex], elements[startIndex]}) != present.end())
             {
-                startIndex--;
+                startIndex++;
             }
             else
             {
-                endIndex++;
+                endIndex--;
             }
         }
         // start Index is the safe root
@@ -114,7 +114,7 @@ public:
             positions[i] = elements[(startIndex + i) % n];
         }
     }
-
+    
     /// @brief printing all the triangulations after finishing the complete task
     void printAllTriangulations()
     {

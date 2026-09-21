@@ -235,16 +235,6 @@ public:
 
         present.insert(getPair(e));
         presentFace.insert(getPair(e));
-        // cout << "Flipping edge: " << getOppositePair(e).first << " " << getOppositePair(e).second << endl;
-        // cout << "Flipped edge: " << positions[e->first] << " " << positions[e->second] << endl;
-        // cout << "Printing GS : " << endl;
-        // for (auto &edge : GS)
-        // {
-        //     cout << "(" << positions[edge->first] << ", " << positions[edge->second] << ") , ";
-        // }
-        // cout << endl;
-        // cout << "Problems: " << problems << endl;
-        // cout << "=================================" << endl;
     }
 
     /// @brief adds the current triangulation to the list of all triangulations
