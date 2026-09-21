@@ -1,8 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 #include "Edge.hpp"
-#include "pairHash.hpp"
-#include "biconnected.hpp"
+#include "PairHash.hpp"
+#include "Biconnected.hpp"
 #include "FaceTriangulation.hpp"
 
 using u128 = unsigned __int128;
@@ -80,13 +80,13 @@ int main()
 
     vector<vector<int>> faces = input(filename);
     
-    Biconnected *bc = new Biconnected(faces);
+    Biconnected *bc = new Biconnected(faces, NULL, "IO");
 
     bc->getAllTriangulations();
 
-    // bc->printAllTriangulations();
+    bc->printAllTriangulations();
     u128 totalTriangulations = bc->totalTriangulations;
-    cout << "Total triangulations in biconnected component: " << u128_to_string(totalTriangulations) << endl;
+    cout << "Total triangulations in biconnected component:- " << u128_to_string(totalTriangulations) << endl;
     output(bc->allTriangulations, "output.txt");
     delete bc;
 

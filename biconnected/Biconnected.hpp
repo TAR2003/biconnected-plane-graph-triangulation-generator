@@ -18,10 +18,12 @@ public:
     vector<vector<pair<int, int>>> allTriangulations;
     vector<FaceTriangulation *> faceTriangulations;
     TriangulationRunStats *runStats = nullptr;
-    enum class BenchmarkType{
-        BruteForceCorrectness, 
+    enum class BenchmarkType
+    {
+        BruteForceCorrectness,
         HashCorrectness,
-        TimeComplexity
+        TimeComplexity,
+        IO
     };
     BenchmarkType type;
     u128 totalTriangulations = 0;
@@ -33,16 +35,21 @@ public:
         present = unordered_set<pair<int, int>, PairHash>();
         initiatePresent();
         faceTriangulations = vector<FaceTriangulation *>(faces.size(), nullptr);
-        if(typeOfOperation == "hashCorrectness") {
+        if (typeOfOperation == "hashCorrectness")
+        {
             type = BenchmarkType::HashCorrectness;
         }
-        if(typeOfOperation == "bruteForceCorrectness")
+        if (typeOfOperation == "bruteForceCorrectness")
         {
             type = BenchmarkType::BruteForceCorrectness;
         }
-        if(typeOfOperation == "timeComplexity")
+        if (typeOfOperation == "timeComplexity")
         {
             type = BenchmarkType::TimeComplexity;
+        }
+        if (typeOfOperation == "IO")
+        {
+            type = BenchmarkType::IO;
         }
     }
 
@@ -104,15 +111,11 @@ inline void Biconnected::output(int serial)
 {
     if (serial == faces.size() - 1)
     {
-        if(type == BenchmarkType::BruteForceCorrectness || type == BenchmarkType::HashCorrectness) 
+        totalTriangulations++;
+        if (type == BenchmarkType::BruteForceCorrectness || type == BenchmarkType::HashCorrectness || type == BenchmarkType::IO)
         {
-           addTriangulation(); 
+            addTriangulation();
         }
-        if(type == BenchmarkType::TimeComplexity)
-        {
-            totalTriangulations++;
-        }
-        
     }
     else
     {
