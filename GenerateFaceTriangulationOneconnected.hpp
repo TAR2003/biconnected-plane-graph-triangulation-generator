@@ -2,7 +2,7 @@
 using namespace std;
 #pragma once
 #include "Edge.hpp"
-#include "pairHash.hpp"
+#include "PairHash.hpp"
 
 // Forward declaration to avoid circular dependency
 class Biconnected;
@@ -38,7 +38,7 @@ public:
     /// @param serial the serial number of the face
     /// @param bc pointer to the biconnected class
     FaceTriangulation(int n, vector<int> &elements, unordered_multiset<pair<int, int>, PairHash> &present, int serial, Biconnected *bc)
-        : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1),  problems(0)
+        : n(n), present(present), elements(elements), serial(serial), bc(bc), positions(n, -1), problems(0)
     {
         findSafeRoot();
     }
@@ -93,14 +93,7 @@ public:
 
     pair<int, int> getOppositePair(Edge *e)
     {
-        pair<int, int> p = {min(positions[e->opposite_first], positions[e->opposite_second]), max(positions[e->opposite_first], positions[e->opposite_second])};
-        return p;
-    }
-
-    bool returnTrue()
-    {
-        cout << "always return true" << endl;
-        return true;
+        return {min(positions[e->opposite_first], positions[e->opposite_second]), max(positions[e->opposite_first], positions[e->opposite_second])};
     }
 
     /// @brief finds a safe root for the cycle and updates the positions vector accordingly
@@ -199,16 +192,6 @@ public:
             auto oldPair = getOppositePair(*prev(itr));
             flipit(itr, prev(itr), newChord, oldChord); // if it is not the first edge, update the previous edge
         }
-
-        // cout << "=================================" << endl;
-        // cout << "Printing GS : " << endl;
-        // for (auto &edge : GS)
-        // {
-        //     cout << "(" << positions[edge->first] << ", " << positions[edge->second] << ") , ";
-        // }
-        // cout << endl;
-        // cout << "Problems: " << problems << endl;
-
         // Now flip the edge
         auto it = present.find(getPair(e));
         if (it != present.end())
@@ -216,9 +199,6 @@ public:
         auto it2 = presentFace.find(getPair(e));
         if (it2 != presentFace.end())
             presentFace.erase(it2);
-
-    
-      
 
         e->flip();
 
@@ -264,15 +244,14 @@ public:
         // cout << "On the matter of flipping the chord: " << oppositePair.first << " " << oppositePair.second << endl;
         if (present.find(oppositePair) != present.end())
         {
-            if(oppositePair.first != positions[0] && oppositePair.second != positions[0])
+            if (oppositePair.first != positions[0] && oppositePair.second != positions[0])
             {
                 return; // that means it does not conflict with any of the root triangulation generating set
             }
             if (presentFace.find(oppositePair) == presentFace.end())
             {
-                return; // that means it might have a conflict with the border chord or other edges from other faces 
+                return; // that means it might have a conflict with the border chord or other edges from other faces
             }
-            
         }
         bc->successfulChecks++;
 
@@ -312,13 +291,7 @@ public:
 
         GS.erase(itrGS); // Remove the current edge from the generating set
 
-        // cout << "Now the situation for GS" << endl;
-        // printSet(GS);
-        // cout << "Now the opposite pair for GS" << endl;
-        // for (auto &edge : GS)
-        // {
-        //     cout << "Opposite pair for edge: (" << positions[edge->first] << ", " << positions[edge->second] << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
-        // }
+      
 
         output();
 
@@ -343,30 +316,13 @@ public:
 
         // cout << "Now performing the reverse flip for the edge : " << c->first << " " << c->second << endl;
         flip(itrGS); // Flip back the edge to restore the original state
-        // cout << "Reverse flip done for the edge : " << c->first << " " << c->second << endl;
-
-        // printSet(GS);
-        // cout << "Now the opposite pair for GS" << endl;
-        // for (auto &edge : GS)
-        // {
-        //     cout << "Opposite pair for edge: (" << positions[edge->first] << ", " << positions[edge->second] << ") is: (" << getOppositePair(edge).first << ", " << getOppositePair(edge).second << ")" << endl;
-        // }
     }
 
     /// @brief generates all triangulations of the cycle
     void generateAllTriangulations()
     {
-        // cout << "Started at generate all triangulation method" << endl;
-        // cout << "A positions elements" << endl;
-        // for (auto a : positions)
-        // {
-        //     cout << a << " ";
-        // }
-        // cout << endl;
-
         for (int i = 2; i < n - 1; i++)
         {
-            
             Edge *e = new Edge(0, i, i - 1, (i + 1) % n); // creating a new edge object
             GS.push_back(e);                              // adding the edge to the generating set
             chords.push_back(e);                          // adding the edge to the list of all chords
@@ -376,27 +332,19 @@ public:
                 problems++;
             }
 
-
-            present.insert(getPair(e));                   // marking the edge as present in the original graph
+            present.insert(getPair(e)); // marking the edge as present in the original graph
             presentFace.insert(getPair(e));
             auto itrGS = prev(GS.end());
             e->chordItrGS = itrGS; // setting the iterator of the chord
-            
         }
-
-        // cout << "Finished initializing triangulations" << endl;
         // addTriangulation(); // adding the initial root triangulation
-        
+
         output();
-        
 
         // printSet(GS);
 
         for (auto itr = GS.begin(); itr != GS.end(); itr++)
         {
-            // cout << "Situation for GS in the main loop" << endl;
-            // printSet(GS);
-            // cout << "Generating child triangulations for edge: " << (*itr)->first << " " << (*itr)->second << endl;
             generateChildTriangulations(itr); // generating child triangulations recursively
         }
 
@@ -415,18 +363,18 @@ public:
 };
 
 // Include biconnected.hpp after class declaration to resolve circular dependency
-#include "biconnected.hpp"
+#include "TriangulationGeneratorOneconnected.hpp"
 
-// Define output() method after including biconnected.hpp
+// Define output() method after including one connected.hpp
 inline void FaceTriangulation::output()
 {
     // cout << "Problems: " << problems << endl;
-    if(problems == 0) 
+    if (problems == 0)
     {
         bc->output(serial);
     }
-    else {
+    else
+    {
         bc->invalidTraversals++;
     }
-    
 }

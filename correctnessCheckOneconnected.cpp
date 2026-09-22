@@ -5,9 +5,9 @@ namespace fs = std::filesystem;
 
 #include "Edge.hpp"
 #include "pairHash.hpp"
-#include "biconnected.hpp"
-#include "FaceTriangulation.hpp"
-#include "triconnected.hpp"
+#include "TriangulationGeneratorOneconnected.hpp"
+#include "GenerateFaceTriangulationOneconnected.hpp"
+#include "TriangulationGeneratorTriconnected.hpp"
 
 // Structure to hold metrics for CSV reporting
 struct FileMetrics

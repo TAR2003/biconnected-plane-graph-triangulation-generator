@@ -2,8 +2,8 @@
 using namespace std;
 #include "Edge.hpp"
 #include "PairHash.hpp"
-#include "Biconnected.hpp"
-#include "FaceTriangulation.hpp"
+#include "TriangulationGeneratorBiconnected.hpp"
+#include "GenerateFaceTriangulationBiconnected.hpp"
 
 using u128 = unsigned __int128;
 

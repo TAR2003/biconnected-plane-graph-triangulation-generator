@@ -2,9 +2,9 @@
 using namespace std;
 #include "Edge.hpp"
 #include "PairHash.hpp"
-#include "Biconnected.hpp"
-#include "FaceTriangulation.hpp"
-#include "Triconnected.hpp"
+#include "TriangulationGeneratorBiconnected.hpp"
+#include "GenerateFaceTriangulationBiconnected.hpp"
+#include "TriangulationGeneratorTriconnected.hpp"
 #include "TriangulationHasher.hpp"
 
 #include <chrono>
