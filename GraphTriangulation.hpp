@@ -124,7 +124,7 @@ inline void GraphTriangulation::addTriangulation()
     allTriangulations.push_back(currentTriangulations);
 }
 
-#include "FaceTriangulationOneConnected.hpp"
+#include "FaceTriangulationOneconnected.hpp"
 #include "FaceTriangulationBiconnected.hpp"
 
 class GraphTriangulationOneconnected : public GraphTriangulation
