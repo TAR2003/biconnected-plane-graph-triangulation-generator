@@ -1,4 +1,66 @@
-# Ignore LaTeX build artifacts - keep only source, bibliography, and PDF output
+# --- C / C++ / CMake ---
+build/
+cmake-build-*/
+out/
+_deps/
+
+*.exe
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+*.pdb
+*.ilk
+*.exp
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+Makefile
+*.ninja
+.ninja_deps
+.ninja_log
+
+# Benchmark binary (if built outside build/)
+triangulation_bench
+triangulation_bench.exe
+
+# Local benchmark / sweep outputs (keep analyze-info/ committed results in git)
+results/
+benchmark_results/
+*.benchmark.json
+sweep_summary.csv
+*.stdout.log
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- LaTeX ---
 *.aux
 *.bbl
 *.blg
@@ -26,22 +88,8 @@
 *.ps
 *.pdfsync
 *.backup
-*~
 *.tmp
-*.log
-*.aux
-*.bbl
-*.blg
-*.fdb_latexmk
-*.fls
-*.synctex.gz
-*.nav
-*.aux
 
-# If you want to ignore C/C++ build artifacts too, uncomment these:
-*.exe
-*.o
-*.obj
-# *.out
-*.dll
-*.pdb
+# Note: graph *.txt under inputs/ and analyze-info/ are tracked on purpose.
+# Note: oldCodes/output.txt and similar may be local run artifacts — uncomment if needed:
+# oldCodes/output.txt
