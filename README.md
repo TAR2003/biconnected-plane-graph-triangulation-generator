@@ -37,11 +37,12 @@ biconnected-plane-graph-triangulation-generator/
 ├── src/                        # Benchmark driver, synthetic graphs, memory/timeout helpers
 ├── build/                      # Local CMake build directory (created by you; often gitignored)
 │
-├── inputs/                     # Real graph instances for batch / dataset experiments
-│   ├── Biconnected/            # ~900+ graphs in 9 category folders
-│   └── Oneconnected/           # Path, star, tree, and misc. one-connected graphs
+├── test-cases/input/           # Real graph instances used by the dataset benchmark
+│   ├── Biconnected/            # Biconnected cases, recursively grouped by family
+│   └── Oneconnected/           # One-connected cases, recursively grouped by family
 │
 ├── test-case-generator/        # Python generators + visualizations for synthetic families
+├── benchmark-results/          # Generated per-category CSV files (created at runtime)
 ├── analyze-info/               # CSV results and plotting scripts for thesis experiments
 ├── averageTimeGraph/           # Records cumulative average time at every triangulation
 ├── oldCodes/                   # Previous layout: correctness/time checks, plots, notebook
@@ -71,7 +72,8 @@ These headers are included by `src/bench_main.cpp` and by the legacy programs in
 
 | File | Role |
 |------|------|
-| `bench_main.cpp` | Google Benchmark cases (timing + custom counters) |
+| `bench_main.cpp` | Synthetic Google Benchmark cases (timing + custom counters) |
+| `dataset_bench_main.cpp` | Recursive file-dataset benchmark with algorithm selection and CSV output |
 | `graph_generator.hpp` / `graph_generator.cpp` | Synthetic inputs: simple polygon, fan of faces, strip of faces |
 | `memory_tracker.hpp` / `memory_tracker.cpp` | Peak RSS and malloc-interposition counters (Linux-oriented) |
 | `timeout_guard.hpp` | In-process watchdog thread (aborts if a case runs too long) |
@@ -232,7 +234,153 @@ Example (two faces sharing edge `(0, 2)`):
 4 0 2 3 4
 ```
 
-The CMake benchmark binary uses **synthetic** graphs from `graph_generator` by default; file-based batch runs live in `oldCodes/` and other experiment folders.
+The `triangulation_bench` binary uses synthetic graphs. The `triangulation_dataset_bench` binary reads the real cases under `test-cases/input/` recursively.
+
+### File-dataset benchmark
+
+Build and list the discovered cases:
+
+```bash
+cmake --build build --target triangulation_dataset_bench -j
+./build/triangulation_dataset_bench --algorithm biconnected --list-cases
+./build/triangulation_dataset_bench --algorithm oneconnected --list-cases
+```
+
+Select the algorithm explicitly with `--algorithm biconnected` or `--algorithm oneconnected`. The benchmark constructs the matching performance class from `GraphTriangulation.hpp`:
+
+- `biconnected` -> `GraphTriangulationBiconnectedPerformance`
+- `oneconnected` -> `GraphTriangulationOneconnectedPerformance`
+
+### How many times does one case run?
+
+There are two Google Benchmark controls:
+
+- `--benchmark_repetitions=N` repeats the measured benchmark `N` times. Use this for independent timing samples.
+- `--runs-per-case=N` fixes the number of algorithm executions in each repetition. The default is one. This is an application option implemented with Google Benchmark's fixed-iteration API.
+
+For a clear research run, use `--runs-per-case=1 --benchmark_repetitions=10`. This produces ten measured CSV rows for each case, unless the case is skipped because that filename already exists in its category CSV.
+
+The default is **resume mode**. Before registering a case, the program checks the category CSV. If the filename is already present, it prints `[SKIP]` and does not run it again. This check is per algorithm output directory, so biconnected and one-connected results are kept separate. Resume mode treats any existing row as complete; it does not try to infer whether a partially completed set of repetitions needs more rows.
+
+Use `--rerun-existing` to ignore the CSV and run selected cases again. New rows are appended, not overwritten.
+
+### Common commands
+
+Run one biconnected algorithm case on one biconnected input:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm biconnected \
+	--case-filter=4_halin/case_001.txt \
+	--runs-per-case=1 --benchmark_repetitions=10
+```
+
+Run the one-connected algorithm on one biconnected input:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm oneconnected \
+	--input-root=test-cases/input/Biconnected \
+	--case-filter=4_halin/case_001.txt \
+	--runs-per-case=1 --benchmark_repetitions=10
+```
+
+Run one biconnected algorithm case on one one-connected input:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm biconnected \
+	--input-root=test-cases/input/Oneconnected \
+	--case-filter=04_others/bridge.txt \
+	--runs-per-case=1 --benchmark_repetitions=10
+```
+
+Run one one-connected algorithm case on one one-connected input:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm oneconnected \
+	--case-filter=04_others/bridge.txt \
+	--runs-per-case=1 --benchmark_repetitions=10
+```
+
+Run all biconnected inputs with the biconnected algorithm. Omit `--case-filter`:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm biconnected \
+	--runs-per-case=1 --benchmark_repetitions=10 \
+	--benchmark_report_aggregates_only=true
+```
+
+Run all one-connected inputs with the one-connected algorithm:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm oneconnected \
+	--input-root=test-cases/input/Oneconnected \
+	--runs-per-case=1 --benchmark_repetitions=10 \
+	--benchmark_report_aggregates_only=true
+```
+
+Run all biconnected inputs with the one-connected algorithm:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm oneconnected \
+	--input-root=test-cases/input/Biconnected \
+	--runs-per-case=1 --benchmark_repetitions=10
+```
+
+Run all one-connected inputs with the biconnected algorithm:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm biconnected \
+	--input-root=test-cases/input/Oneconnected \
+	--runs-per-case=1 --benchmark_repetitions=10
+```
+
+Force a rerun even when the selected filenames already exist in CSV:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm biconnected --case-filter=4_halin \
+	--rerun-existing --runs-per-case=1 --benchmark_repetitions=10
+```
+
+The `--input-root` and `--case-filter` options combine: the filter is matched against the path relative to the selected input root. `--case-filter=4_halin` selects a whole family; `--case-filter=4_halin/case_001.txt` selects one file.
+
+List every matching input without running it or applying resume skipping:
+
+```bash
+./build/triangulation_dataset_bench --algorithm biconnected --list-cases
+```
+
+The program prints progress during execution:
+
+```text
+[SKIP] Biconnected/4_halin/case_001.txt | already present in benchmark-results/biconnected/Biconnected/4_halin.csv
+[RUNNING] Biconnected/4_halin/case_002.txt | algorithm=biconnected | iteration=1
+[DONE] Biconnected/4_halin/case_002.txt | run=1 | 0.012345 s | triangulations=42 | csv=benchmark-results/biconnected/Biconnected/4_halin.csv
+```
+
+The `[RUNNING]` and `[DONE]` messages are printed once per measured iteration. Google Benchmark's summary is printed after the cases finish.
+
+The older `--benchmark_min_time=1s` style is also valid, but it allows Google Benchmark to choose the number of iterations. Use `--runs-per-case=1` when each CSV row must represent exactly one algorithm execution.
+
+On Windows, use the repository's WSL2 build and run the Linux commands above from WSL. The current memory tracker and `pthread` linkage are Linux-oriented; native Visual Studio builds are not the supported research configuration.
+
+Each `.txt` file is registered as one Google Benchmark case. Input parsing and graph construction are paused out of the measured interval; only `getAllTriangulations()` is timed. Results are appended to a CSV whose path mirrors the input category, for example:
+
+```text
+benchmark-results/biconnected/Biconnected/04_halin.csv
+benchmark-results/oneconnected/Oneconnected/04_others.csv
+```
+
+The CSV contains the legacy experiment fields: filename, run index, distinct vertices, triangulation count, seconds, peak RSS, memory per vertex, timestamps, status, total/successful/failed checks, check success rate, invalid traversals, extended traversal count, and traversal success rate. Google Benchmark's own JSON/CSV report can be emitted separately with `--benchmark_format=json --benchmark_out=benchmark-results/google-benchmark.json`.
+
+For research runs, pin the executable build to Release, record the command line and machine details, use multiple `--benchmark_repetitions`, and keep `--benchmark_report_aggregates_only=true` for aggregate summaries. The generator enumerates every triangulation, so use `--benchmark_filter` or `--case-filter` to isolate expensive cases. For a hard kill boundary, run one case per process with an external OS timeout; an in-process timeout would terminate the complete benchmark run.
 
 ---
 

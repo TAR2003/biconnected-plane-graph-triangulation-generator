@@ -2563,8 +2563,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-W4CJvV"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-W4CJvV"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-L5N8Kn"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-L5N8Kn"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -2575,14 +2575,14 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-W4CJvV'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-L5N8Kn'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_1e03d/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_1e03d.dir/build.make CMakeFiles/cmTC_1e03d.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-W4CJvV'
-        gmake[1]: Warning: File 'CMakeFiles/cmTC_1e03d.dir/progress.make' has modification time 0.008 s in the future
-        Building CXX object CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o
-        /usr/bin/c++   -v -o CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o -c /home/ttt/.local/lib/python3.10/site-packages/cmake/data/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_bbf50/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_bbf50.dir/build.make CMakeFiles/cmTC_bbf50.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-L5N8Kn'
+        gmake[1]: Warning: File 'CMakeFiles/cmTC_bbf50.dir/progress.make' has modification time 0.0042 s in the future
+        Building CXX object CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o
+        /usr/bin/c++   -v -o CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o -c /home/ttt/.local/lib/python3.10/site-packages/cmake/data/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa
@@ -2592,8 +2592,8 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_1e03d.dir/'
-         /usr/lib/gcc/x86_64-linux-gnu/11/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /home/ttt/.local/lib/python3.10/site-packages/cmake/data/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_1e03d.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/cccavsxP.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_bbf50.dir/'
+         /usr/lib/gcc/x86_64-linux-gnu/11/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /home/ttt/.local/lib/python3.10/site-packages/cmake/data/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_bbf50.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccBYbDeT.s
         GNU C++17 (Ubuntu 11.4.0-1ubuntu1~22.04) version 11.4.0 (x86_64-linux-gnu)
         	compiled by GNU C version 11.4.0, GMP version 6.2.1, MPFR version 4.1.0, MPC version 1.2.1, isl version isl-0.24-GMP
         
@@ -2617,14 +2617,14 @@ events:
         
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: d591828bb4d392ae8b7b160e5bb0b95f
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_1e03d.dir/'
-         as -v --64 -o CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o /tmp/cccavsxP.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_bbf50.dir/'
+         as -v --64 -o CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccBYbDeT.s
         GNU assembler version 2.38 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.38
         COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.'
-        Linking CXX executable cmTC_1e03d
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1e03d.dir/link.txt --verbose=1
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX executable cmTC_bbf50
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bbf50.dir/link.txt --verbose=1
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper
@@ -2637,15 +2637,15 @@ events:
         gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) 
         COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/
         LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_1e03d' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_1e03d.'
-         /usr/lib/gcc/x86_64-linux-gnu/11/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cclJff9c.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_1e03d /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/11 -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/11/../../.. -v CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_bbf50' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_bbf50.'
+         /usr/lib/gcc/x86_64-linux-gnu/11/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccl99pw0.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_bbf50 /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/11 -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/11/../../.. -v CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o
         collect2 version 11.4.0
-        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cclJff9c.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_1e03d /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/11 -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/11/../../.. -v CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o
+        /usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccl99pw0.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_bbf50 /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/11 -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/11/../../.. -v CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o
         GNU ld (GNU Binutils for Ubuntu) 2.38
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_1e03d' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_1e03d.'
-        /usr/bin/c++  -v -Wl,-v CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_1e03d
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_bbf50' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_bbf50.'
+        /usr/bin/c++  -v -Wl,-v CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_bbf50
         gmake[1]: warning:  Clock skew detected.  Your build may be incomplete.
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-W4CJvV'
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-L5N8Kn'
         
       exitCode: 0
   -
@@ -2686,14 +2686,14 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)))("|,| |$)]
-        ignore line: [Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-W4CJvV']
+        ignore line: [Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-L5N8Kn']
         ignore line: []
-        ignore line: [Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_1e03d/fast]
-        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_1e03d.dir/build.make CMakeFiles/cmTC_1e03d.dir/build]
-        ignore line: [gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-W4CJvV']
-        ignore line: [gmake[1]: Warning: File 'CMakeFiles/cmTC_1e03d.dir/progress.make' has modification time 0.008 s in the future]
-        ignore line: [Building CXX object CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o]
-        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o -c /home/ttt/.local/lib/python3.10/site-packages/cmake/data/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_bbf50/fast]
+        ignore line: [/usr/bin/gmake  -f CMakeFiles/cmTC_bbf50.dir/build.make CMakeFiles/cmTC_bbf50.dir/build]
+        ignore line: [gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-L5N8Kn']
+        ignore line: [gmake[1]: Warning: File 'CMakeFiles/cmTC_bbf50.dir/progress.make' has modification time 0.0042 s in the future]
+        ignore line: [Building CXX object CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o -c /home/ttt/.local/lib/python3.10/site-packages/cmake/data/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none:amdgcn-amdhsa]
@@ -2703,8 +2703,8 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_1e03d.dir/']
-        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/11/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /home/ttt/.local/lib/python3.10/site-packages/cmake/data/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_1e03d.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/cccavsxP.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_bbf50.dir/']
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/11/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE /home/ttt/.local/lib/python3.10/site-packages/cmake/data/share/cmake-4.3/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_bbf50.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64 -version -fasynchronous-unwind-tables -fstack-protector-strong -Wformat -Wformat-security -fstack-clash-protection -fcf-protection -o /tmp/ccBYbDeT.s]
         ignore line: [GNU C++17 (Ubuntu 11.4.0-1ubuntu1~22.04) version 11.4.0 (x86_64-linux-gnu)]
         ignore line: [	compiled by GNU C version 11.4.0  GMP version 6.2.1  MPFR version 4.1.0  MPC version 1.2.1  isl version isl-0.24-GMP]
         ignore line: []
@@ -2728,14 +2728,14 @@ events:
         ignore line: []
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: d591828bb4d392ae8b7b160e5bb0b95f]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_1e03d.dir/']
-        ignore line: [ as -v --64 -o CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o /tmp/cccavsxP.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_bbf50.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccBYbDeT.s]
         ignore line: [GNU assembler version 2.38 (x86_64-linux-gnu) using BFD version (GNU Binutils for Ubuntu) 2.38]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.']
-        ignore line: [Linking CXX executable cmTC_1e03d]
-        ignore line: [/home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1e03d.dir/link.txt --verbose=1]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX executable cmTC_bbf50]
+        ignore line: [/home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bbf50.dir/link.txt --verbose=1]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper]
@@ -2748,13 +2748,13 @@ events:
         ignore line: [gcc version 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04) ]
         ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/]
         ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/11/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/11/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_1e03d' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_1e03d.']
-        link line: [ /usr/lib/gcc/x86_64-linux-gnu/11/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cclJff9c.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_1e03d /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/11 -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/11/../../.. -v CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_bbf50' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-dumpdir' 'cmTC_bbf50.']
+        link line: [ /usr/lib/gcc/x86_64-linux-gnu/11/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccl99pw0.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_bbf50 /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/11 -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/11/../../.. -v CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/11/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/cclJff9c.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccl99pw0.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -2772,7 +2772,7 @@ events:
           arg [-znow] ==> ignore
           arg [-zrelro] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_1e03d] ==> ignore
+          arg [cmTC_bbf50] ==> ignore
           arg [/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o]
@@ -2785,7 +2785,7 @@ events:
           arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
           arg [-L/usr/lib/gcc/x86_64-linux-gnu/11/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/11/../../..]
           arg [-v] ==> ignore
-          arg [CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
           arg [-lstdc++] ==> lib [stdc++]
           arg [-lm] ==> lib [m]
           arg [-lgcc_s] ==> lib [gcc_s]
@@ -2796,7 +2796,7 @@ events:
           arg [/usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o]
           arg [/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
         ignore line: [collect2 version 11.4.0]
-        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cclJff9c.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_1e03d /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/11 -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/11/../../.. -v CMakeFiles/cmTC_1e03d.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
+        ignore line: [/usr/bin/ld -plugin /usr/lib/gcc/x86_64-linux-gnu/11/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccl99pw0.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu --as-needed -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -z now -z relro -o cmTC_bbf50 /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/11/crtbeginS.o -L/usr/lib/gcc/x86_64-linux-gnu/11 -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/11/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/11/../../.. -v CMakeFiles/cmTC_bbf50.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/11/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crtn.o]
         linker tool for 'CXX': /usr/bin/ld
         collapse obj [/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o] ==> [/usr/lib/x86_64-linux-gnu/Scrt1.o]
         collapse obj [/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
@@ -3252,8 +3252,8 @@ events:
     checks:
       - "Looking for shm_open in rt"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-sIpnuB"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-sIpnuB"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-MdLYOL"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-MdLYOL"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3264,17 +3264,17 @@ events:
       variable: "HAVE_LIB_RT"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-sIpnuB'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-MdLYOL'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_dbe2f/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_dbe2f.dir/build.make CMakeFiles/cmTC_dbe2f.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-sIpnuB'
-        Building CXX object CMakeFiles/cmTC_dbe2f.dir/CheckFunctionExists.cxx.o
-        /usr/bin/c++   -DCHECK_FUNCTION_EXISTS=shm_open -std=gnu++17 -o CMakeFiles/cmTC_dbe2f.dir/CheckFunctionExists.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-sIpnuB/CheckFunctionExists.cxx
-        Linking CXX executable cmTC_dbe2f
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dbe2f.dir/link.txt --verbose=1
-        /usr/bin/c++  -DCHECK_FUNCTION_EXISTS=shm_open CMakeFiles/cmTC_dbe2f.dir/CheckFunctionExists.cxx.o -o cmTC_dbe2f  -lrt
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-sIpnuB'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_4381a/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_4381a.dir/build.make CMakeFiles/cmTC_4381a.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-MdLYOL'
+        Building CXX object CMakeFiles/cmTC_4381a.dir/CheckFunctionExists.cxx.o
+        /usr/bin/c++   -DCHECK_FUNCTION_EXISTS=shm_open -std=gnu++17 -o CMakeFiles/cmTC_4381a.dir/CheckFunctionExists.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-MdLYOL/CheckFunctionExists.cxx
+        Linking CXX executable cmTC_4381a
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4381a.dir/link.txt --verbose=1
+        /usr/bin/c++  -DCHECK_FUNCTION_EXISTS=shm_open CMakeFiles/cmTC_4381a.dir/CheckFunctionExists.cxx.o -o cmTC_4381a  -lrt
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-MdLYOL'
         
       exitCode: 0
   -
@@ -3288,8 +3288,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WALL"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-p6h3kM"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-p6h3kM"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-DknvMX"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-DknvMX"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3300,17 +3300,17 @@ events:
       variable: "HAVE_CXX_FLAG_WALL"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-p6h3kM'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-DknvMX'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_66346/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_66346.dir/build.make CMakeFiles/cmTC_66346.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-p6h3kM'
-        Building CXX object CMakeFiles/cmTC_66346.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WALL  -Wall -std=c++17   -Wall -o CMakeFiles/cmTC_66346.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-p6h3kM/src.cxx
-        Linking CXX executable cmTC_66346
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_66346.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall CMakeFiles/cmTC_66346.dir/src.cxx.o -o cmTC_66346
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-p6h3kM'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f5512/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_f5512.dir/build.make CMakeFiles/cmTC_f5512.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-DknvMX'
+        Building CXX object CMakeFiles/cmTC_f5512.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WALL  -Wall -std=c++17   -Wall -o CMakeFiles/cmTC_f5512.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-DknvMX/src.cxx
+        Linking CXX executable cmTC_f5512
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f5512.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall CMakeFiles/cmTC_f5512.dir/src.cxx.o -o cmTC_f5512
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-DknvMX'
         
       exitCode: 0
   -
@@ -3324,8 +3324,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WEXTRA"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gPSOKU"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gPSOKU"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-csfszl"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-csfszl"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3336,17 +3336,17 @@ events:
       variable: "HAVE_CXX_FLAG_WEXTRA"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gPSOKU'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-csfszl'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_3fd5d/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_3fd5d.dir/build.make CMakeFiles/cmTC_3fd5d.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gPSOKU'
-        Building CXX object CMakeFiles/cmTC_3fd5d.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WEXTRA  -Wall  -Wextra -std=c++17   -Wextra -o CMakeFiles/cmTC_3fd5d.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gPSOKU/src.cxx
-        Linking CXX executable cmTC_3fd5d
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3fd5d.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra CMakeFiles/cmTC_3fd5d.dir/src.cxx.o -o cmTC_3fd5d
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gPSOKU'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_5fe19/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_5fe19.dir/build.make CMakeFiles/cmTC_5fe19.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-csfszl'
+        Building CXX object CMakeFiles/cmTC_5fe19.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WEXTRA  -Wall  -Wextra -std=c++17   -Wextra -o CMakeFiles/cmTC_5fe19.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-csfszl/src.cxx
+        Linking CXX executable cmTC_5fe19
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5fe19.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra CMakeFiles/cmTC_5fe19.dir/src.cxx.o -o cmTC_5fe19
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-csfszl'
         
       exitCode: 0
   -
@@ -3360,8 +3360,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WSHADOW"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-iMIYmd"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-iMIYmd"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-mpN8mX"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-mpN8mX"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3372,17 +3372,17 @@ events:
       variable: "HAVE_CXX_FLAG_WSHADOW"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-iMIYmd'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-mpN8mX'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6dd91/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_6dd91.dir/build.make CMakeFiles/cmTC_6dd91.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-iMIYmd'
-        Building CXX object CMakeFiles/cmTC_6dd91.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WSHADOW  -Wall  -Wextra  -Wshadow -std=c++17   -Wshadow -o CMakeFiles/cmTC_6dd91.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-iMIYmd/src.cxx
-        Linking CXX executable cmTC_6dd91
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6dd91.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow CMakeFiles/cmTC_6dd91.dir/src.cxx.o -o cmTC_6dd91
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-iMIYmd'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_0e851/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_0e851.dir/build.make CMakeFiles/cmTC_0e851.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-mpN8mX'
+        Building CXX object CMakeFiles/cmTC_0e851.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WSHADOW  -Wall  -Wextra  -Wshadow -std=c++17   -Wshadow -o CMakeFiles/cmTC_0e851.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-mpN8mX/src.cxx
+        Linking CXX executable cmTC_0e851
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0e851.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow CMakeFiles/cmTC_0e851.dir/src.cxx.o -o cmTC_0e851
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-mpN8mX'
         
       exitCode: 0
   -
@@ -3396,8 +3396,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WFLOAT_EQUAL"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aHSxJX"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aHSxJX"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-RHQeHH"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-RHQeHH"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3408,17 +3408,17 @@ events:
       variable: "HAVE_CXX_FLAG_WFLOAT_EQUAL"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aHSxJX'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-RHQeHH'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6000c/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_6000c.dir/build.make CMakeFiles/cmTC_6000c.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aHSxJX'
-        Building CXX object CMakeFiles/cmTC_6000c.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WFLOAT_EQUAL  -Wall  -Wextra  -Wshadow  -Wfloat-equal -std=c++17   -Wfloat-equal -o CMakeFiles/cmTC_6000c.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aHSxJX/src.cxx
-        Linking CXX executable cmTC_6000c
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6000c.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal CMakeFiles/cmTC_6000c.dir/src.cxx.o -o cmTC_6000c
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aHSxJX'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_73465/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_73465.dir/build.make CMakeFiles/cmTC_73465.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-RHQeHH'
+        Building CXX object CMakeFiles/cmTC_73465.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WFLOAT_EQUAL  -Wall  -Wextra  -Wshadow  -Wfloat-equal -std=c++17   -Wfloat-equal -o CMakeFiles/cmTC_73465.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-RHQeHH/src.cxx
+        Linking CXX executable cmTC_73465
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_73465.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal CMakeFiles/cmTC_73465.dir/src.cxx.o -o cmTC_73465
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-RHQeHH'
         
       exitCode: 0
   -
@@ -3432,8 +3432,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WOLD_STYLE_CAST"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-UIWB2L"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-UIWB2L"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gxNPjM"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gxNPjM"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3444,17 +3444,17 @@ events:
       variable: "HAVE_CXX_FLAG_WOLD_STYLE_CAST"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-UIWB2L'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gxNPjM'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_54eff/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_54eff.dir/build.make CMakeFiles/cmTC_54eff.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-UIWB2L'
-        Building CXX object CMakeFiles/cmTC_54eff.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WOLD_STYLE_CAST  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast -std=c++17   -Wold-style-cast -o CMakeFiles/cmTC_54eff.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-UIWB2L/src.cxx
-        Linking CXX executable cmTC_54eff
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_54eff.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast CMakeFiles/cmTC_54eff.dir/src.cxx.o -o cmTC_54eff
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-UIWB2L'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_05055/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_05055.dir/build.make CMakeFiles/cmTC_05055.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gxNPjM'
+        Building CXX object CMakeFiles/cmTC_05055.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WOLD_STYLE_CAST  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast -std=c++17   -Wold-style-cast -o CMakeFiles/cmTC_05055.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gxNPjM/src.cxx
+        Linking CXX executable cmTC_05055
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_05055.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast CMakeFiles/cmTC_05055.dir/src.cxx.o -o cmTC_05055
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-gxNPjM'
         
       exitCode: 0
   -
@@ -3468,8 +3468,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WCONVERSION"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-4yS5P0"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-4yS5P0"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-9heNiH"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-9heNiH"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3480,17 +3480,17 @@ events:
       variable: "HAVE_CXX_FLAG_WCONVERSION"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-4yS5P0'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-9heNiH'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_77e5d/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_77e5d.dir/build.make CMakeFiles/cmTC_77e5d.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-4yS5P0'
-        Building CXX object CMakeFiles/cmTC_77e5d.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WCONVERSION  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion -std=c++17   -Wconversion -o CMakeFiles/cmTC_77e5d.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-4yS5P0/src.cxx
-        Linking CXX executable cmTC_77e5d
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_77e5d.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion CMakeFiles/cmTC_77e5d.dir/src.cxx.o -o cmTC_77e5d
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-4yS5P0'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_2f3d3/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_2f3d3.dir/build.make CMakeFiles/cmTC_2f3d3.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-9heNiH'
+        Building CXX object CMakeFiles/cmTC_2f3d3.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WCONVERSION  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion -std=c++17   -Wconversion -o CMakeFiles/cmTC_2f3d3.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-9heNiH/src.cxx
+        Linking CXX executable cmTC_2f3d3
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2f3d3.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion CMakeFiles/cmTC_2f3d3.dir/src.cxx.o -o cmTC_2f3d3
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-9heNiH'
         
       exitCode: 0
   -
@@ -3504,8 +3504,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WERROR"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lpX0K3"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lpX0K3"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-qq0o4C"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-qq0o4C"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3516,17 +3516,17 @@ events:
       variable: "HAVE_CXX_FLAG_WERROR"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lpX0K3'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-qq0o4C'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6e68d/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_6e68d.dir/build.make CMakeFiles/cmTC_6e68d.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lpX0K3'
-        Building CXX object CMakeFiles/cmTC_6e68d.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WERROR  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror -std=c++17   -Werror -o CMakeFiles/cmTC_6e68d.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lpX0K3/src.cxx
-        Linking CXX executable cmTC_6e68d
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6e68d.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror CMakeFiles/cmTC_6e68d.dir/src.cxx.o -o cmTC_6e68d
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lpX0K3'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_75a5e/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_75a5e.dir/build.make CMakeFiles/cmTC_75a5e.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-qq0o4C'
+        Building CXX object CMakeFiles/cmTC_75a5e.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WERROR  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror -std=c++17   -Werror -o CMakeFiles/cmTC_75a5e.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-qq0o4C/src.cxx
+        Linking CXX executable cmTC_75a5e
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_75a5e.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror CMakeFiles/cmTC_75a5e.dir/src.cxx.o -o cmTC_75a5e
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-qq0o4C'
         
       exitCode: 0
   -
@@ -3540,8 +3540,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WSUGGEST_OVERRIDE"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-TsVRBm"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-TsVRBm"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-LjGqhI"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-LjGqhI"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3552,17 +3552,17 @@ events:
       variable: "HAVE_CXX_FLAG_WSUGGEST_OVERRIDE"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-TsVRBm'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-LjGqhI'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_a7b89/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_a7b89.dir/build.make CMakeFiles/cmTC_a7b89.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-TsVRBm'
-        Building CXX object CMakeFiles/cmTC_a7b89.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WSUGGEST_OVERRIDE  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override -std=c++17   -Wsuggest-override -o CMakeFiles/cmTC_a7b89.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-TsVRBm/src.cxx
-        Linking CXX executable cmTC_a7b89
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a7b89.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override CMakeFiles/cmTC_a7b89.dir/src.cxx.o -o cmTC_a7b89
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-TsVRBm'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_3e95a/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_3e95a.dir/build.make CMakeFiles/cmTC_3e95a.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-LjGqhI'
+        Building CXX object CMakeFiles/cmTC_3e95a.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WSUGGEST_OVERRIDE  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override -std=c++17   -Wsuggest-override -o CMakeFiles/cmTC_3e95a.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-LjGqhI/src.cxx
+        Linking CXX executable cmTC_3e95a
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3e95a.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override CMakeFiles/cmTC_3e95a.dir/src.cxx.o -o cmTC_3e95a
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-LjGqhI'
         
       exitCode: 0
   -
@@ -3576,8 +3576,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_PEDANTIC"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-w6lIpU"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-w6lIpU"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-zmHjbL"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-zmHjbL"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3588,17 +3588,17 @@ events:
       variable: "HAVE_CXX_FLAG_PEDANTIC"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-w6lIpU'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-zmHjbL'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_abe1e/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_abe1e.dir/build.make CMakeFiles/cmTC_abe1e.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-w6lIpU'
-        Building CXX object CMakeFiles/cmTC_abe1e.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_PEDANTIC  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic -std=c++17   -pedantic -o CMakeFiles/cmTC_abe1e.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-w6lIpU/src.cxx
-        Linking CXX executable cmTC_abe1e
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_abe1e.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic CMakeFiles/cmTC_abe1e.dir/src.cxx.o -o cmTC_abe1e
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-w6lIpU'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_96ee4/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_96ee4.dir/build.make CMakeFiles/cmTC_96ee4.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-zmHjbL'
+        Building CXX object CMakeFiles/cmTC_96ee4.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_PEDANTIC  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic -std=c++17   -pedantic -o CMakeFiles/cmTC_96ee4.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-zmHjbL/src.cxx
+        Linking CXX executable cmTC_96ee4
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_96ee4.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic CMakeFiles/cmTC_96ee4.dir/src.cxx.o -o cmTC_96ee4
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-zmHjbL'
         
       exitCode: 0
   -
@@ -3612,8 +3612,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_PEDANTIC_ERRORS"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-7o0aHh"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-7o0aHh"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-AY3F1j"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-AY3F1j"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3624,17 +3624,17 @@ events:
       variable: "HAVE_CXX_FLAG_PEDANTIC_ERRORS"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-7o0aHh'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-AY3F1j'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f801e/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_f801e.dir/build.make CMakeFiles/cmTC_f801e.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-7o0aHh'
-        Building CXX object CMakeFiles/cmTC_f801e.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_PEDANTIC_ERRORS  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors -std=c++17   -pedantic-errors -o CMakeFiles/cmTC_f801e.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-7o0aHh/src.cxx
-        Linking CXX executable cmTC_f801e
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f801e.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors CMakeFiles/cmTC_f801e.dir/src.cxx.o -o cmTC_f801e
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-7o0aHh'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_0befa/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_0befa.dir/build.make CMakeFiles/cmTC_0befa.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-AY3F1j'
+        Building CXX object CMakeFiles/cmTC_0befa.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_PEDANTIC_ERRORS  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors -std=c++17   -pedantic-errors -o CMakeFiles/cmTC_0befa.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-AY3F1j/src.cxx
+        Linking CXX executable cmTC_0befa
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0befa.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors CMakeFiles/cmTC_0befa.dir/src.cxx.o -o cmTC_0befa
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-AY3F1j'
         
       exitCode: 0
   -
@@ -3648,8 +3648,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WSHORTEN_64_TO_32"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fM1td4"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fM1td4"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YYpSsM"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YYpSsM"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3660,18 +3660,18 @@ events:
       variable: "HAVE_CXX_FLAG_WSHORTEN_64_TO_32"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fM1td4'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YYpSsM'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_bcda0/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_bcda0.dir/build.make CMakeFiles/cmTC_bcda0.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fM1td4'
-        Building CXX object CMakeFiles/cmTC_bcda0.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WSHORTEN_64_TO_32  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -Wshorten-64-to-32 -std=c++17   -Wshorten-64-to-32 -o CMakeFiles/cmTC_bcda0.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fM1td4/src.cxx
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_21ef9/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_21ef9.dir/build.make CMakeFiles/cmTC_21ef9.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YYpSsM'
+        Building CXX object CMakeFiles/cmTC_21ef9.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WSHORTEN_64_TO_32  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -Wshorten-64-to-32 -std=c++17   -Wshorten-64-to-32 -o CMakeFiles/cmTC_21ef9.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YYpSsM/src.cxx
         c++: error: unrecognized command-line option '-Wshorten-64-to-32'
         c++: error: unrecognized command-line option '-Wshorten-64-to-32'
-        gmake[1]: *** [CMakeFiles/cmTC_bcda0.dir/build.make:81: CMakeFiles/cmTC_bcda0.dir/src.cxx.o] Error 1
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fM1td4'
-        gmake: *** [Makefile:134: cmTC_bcda0/fast] Error 2
+        gmake[1]: *** [CMakeFiles/cmTC_21ef9.dir/build.make:81: CMakeFiles/cmTC_21ef9.dir/src.cxx.o] Error 1
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YYpSsM'
+        gmake: *** [Makefile:134: cmTC_21ef9/fast] Error 2
         
       exitCode: 2
   -
@@ -3685,8 +3685,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_FSTRICT_ALIASING"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JIisA5"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JIisA5"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-krWl5z"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-krWl5z"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3697,17 +3697,17 @@ events:
       variable: "HAVE_CXX_FLAG_FSTRICT_ALIASING"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JIisA5'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-krWl5z'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_b2258/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_b2258.dir/build.make CMakeFiles/cmTC_b2258.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JIisA5'
-        Building CXX object CMakeFiles/cmTC_b2258.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_FSTRICT_ALIASING  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing -std=c++17   -fstrict-aliasing -o CMakeFiles/cmTC_b2258.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JIisA5/src.cxx
-        Linking CXX executable cmTC_b2258
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b2258.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing CMakeFiles/cmTC_b2258.dir/src.cxx.o -o cmTC_b2258
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JIisA5'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_81833/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_81833.dir/build.make CMakeFiles/cmTC_81833.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-krWl5z'
+        Building CXX object CMakeFiles/cmTC_81833.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_FSTRICT_ALIASING  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing -std=c++17   -fstrict-aliasing -o CMakeFiles/cmTC_81833.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-krWl5z/src.cxx
+        Linking CXX executable cmTC_81833
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_81833.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing CMakeFiles/cmTC_81833.dir/src.cxx.o -o cmTC_81833
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-krWl5z'
         
       exitCode: 0
   -
@@ -3721,8 +3721,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WNO_DEPRECATED_DECLARATIONS"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-2JItmR"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-2JItmR"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ZvfapR"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ZvfapR"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3733,17 +3733,17 @@ events:
       variable: "HAVE_CXX_FLAG_WNO_DEPRECATED_DECLARATIONS"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-2JItmR'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ZvfapR'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_cee26/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_cee26.dir/build.make CMakeFiles/cmTC_cee26.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-2JItmR'
-        Building CXX object CMakeFiles/cmTC_cee26.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WNO_DEPRECATED_DECLARATIONS  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations -std=c++17   -Wno-deprecated-declarations -o CMakeFiles/cmTC_cee26.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-2JItmR/src.cxx
-        Linking CXX executable cmTC_cee26
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cee26.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations CMakeFiles/cmTC_cee26.dir/src.cxx.o -o cmTC_cee26
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-2JItmR'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_f05f5/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_f05f5.dir/build.make CMakeFiles/cmTC_f05f5.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ZvfapR'
+        Building CXX object CMakeFiles/cmTC_f05f5.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WNO_DEPRECATED_DECLARATIONS  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations -std=c++17   -Wno-deprecated-declarations -o CMakeFiles/cmTC_f05f5.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ZvfapR/src.cxx
+        Linking CXX executable cmTC_f05f5
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f05f5.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations CMakeFiles/cmTC_f05f5.dir/src.cxx.o -o cmTC_f05f5
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ZvfapR'
         
       exitCode: 0
   -
@@ -3757,8 +3757,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WNO_DEPRECATED"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lRl94p"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lRl94p"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JPxM0l"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JPxM0l"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3769,17 +3769,17 @@ events:
       variable: "HAVE_CXX_FLAG_WNO_DEPRECATED"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lRl94p'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JPxM0l'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_fc351/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_fc351.dir/build.make CMakeFiles/cmTC_fc351.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lRl94p'
-        Building CXX object CMakeFiles/cmTC_fc351.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WNO_DEPRECATED  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated -std=c++17   -Wno-deprecated -o CMakeFiles/cmTC_fc351.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lRl94p/src.cxx
-        Linking CXX executable cmTC_fc351
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fc351.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated CMakeFiles/cmTC_fc351.dir/src.cxx.o -o cmTC_fc351
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-lRl94p'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_05d0b/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_05d0b.dir/build.make CMakeFiles/cmTC_05d0b.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JPxM0l'
+        Building CXX object CMakeFiles/cmTC_05d0b.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WNO_DEPRECATED  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated -std=c++17   -Wno-deprecated -o CMakeFiles/cmTC_05d0b.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JPxM0l/src.cxx
+        Linking CXX executable cmTC_05d0b
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_05d0b.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated CMakeFiles/cmTC_05d0b.dir/src.cxx.o -o cmTC_05d0b
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-JPxM0l'
         
       exitCode: 0
   -
@@ -3793,8 +3793,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WSTRICT_ALIASING"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Kgj7ly"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Kgj7ly"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-knuoZ2"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-knuoZ2"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3805,17 +3805,17 @@ events:
       variable: "HAVE_CXX_FLAG_WSTRICT_ALIASING"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Kgj7ly'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-knuoZ2'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_2601e/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_2601e.dir/build.make CMakeFiles/cmTC_2601e.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Kgj7ly'
-        Building CXX object CMakeFiles/cmTC_2601e.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WSTRICT_ALIASING  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing -std=c++17   -Wstrict-aliasing -o CMakeFiles/cmTC_2601e.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Kgj7ly/src.cxx
-        Linking CXX executable cmTC_2601e
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2601e.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing CMakeFiles/cmTC_2601e.dir/src.cxx.o -o cmTC_2601e
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Kgj7ly'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_92603/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_92603.dir/build.make CMakeFiles/cmTC_92603.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-knuoZ2'
+        Building CXX object CMakeFiles/cmTC_92603.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WSTRICT_ALIASING  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing -std=c++17   -Wstrict-aliasing -o CMakeFiles/cmTC_92603.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-knuoZ2/src.cxx
+        Linking CXX executable cmTC_92603
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_92603.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing CMakeFiles/cmTC_92603.dir/src.cxx.o -o cmTC_92603
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-knuoZ2'
         
       exitCode: 0
   -
@@ -3829,8 +3829,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WD654"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-IXis1a"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-IXis1a"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Nrz2zd"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Nrz2zd"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3841,18 +3841,18 @@ events:
       variable: "HAVE_CXX_FLAG_WD654"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-IXis1a'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Nrz2zd'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_0aabe/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_0aabe.dir/build.make CMakeFiles/cmTC_0aabe.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-IXis1a'
-        Building CXX object CMakeFiles/cmTC_0aabe.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WD654  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -wd654 -std=c++17   -wd654 -o CMakeFiles/cmTC_0aabe.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-IXis1a/src.cxx
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_6bb1e/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_6bb1e.dir/build.make CMakeFiles/cmTC_6bb1e.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Nrz2zd'
+        Building CXX object CMakeFiles/cmTC_6bb1e.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WD654  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -wd654 -std=c++17   -wd654 -o CMakeFiles/cmTC_6bb1e.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Nrz2zd/src.cxx
         c++: error: unrecognized command-line option '-wd654'
         c++: error: unrecognized command-line option '-wd654'
-        gmake[1]: *** [CMakeFiles/cmTC_0aabe.dir/build.make:81: CMakeFiles/cmTC_0aabe.dir/src.cxx.o] Error 1
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-IXis1a'
-        gmake: *** [Makefile:134: cmTC_0aabe/fast] Error 2
+        gmake[1]: *** [CMakeFiles/cmTC_6bb1e.dir/build.make:81: CMakeFiles/cmTC_6bb1e.dir/src.cxx.o] Error 1
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-Nrz2zd'
+        gmake: *** [Makefile:134: cmTC_6bb1e/fast] Error 2
         
       exitCode: 2
   -
@@ -3866,8 +3866,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_WTHREAD_SAFETY"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ju6XUb"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ju6XUb"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YF35xV"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YF35xV"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3878,18 +3878,18 @@ events:
       variable: "HAVE_CXX_FLAG_WTHREAD_SAFETY"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ju6XUb'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YF35xV'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_2a03d/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_2a03d.dir/build.make CMakeFiles/cmTC_2a03d.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ju6XUb'
-        Building CXX object CMakeFiles/cmTC_2a03d.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_WTHREAD_SAFETY  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -Wthread-safety -std=c++17   -Wthread-safety -o CMakeFiles/cmTC_2a03d.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ju6XUb/src.cxx
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_56d94/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_56d94.dir/build.make CMakeFiles/cmTC_56d94.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YF35xV'
+        Building CXX object CMakeFiles/cmTC_56d94.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_WTHREAD_SAFETY  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -Wthread-safety -std=c++17   -Wthread-safety -o CMakeFiles/cmTC_56d94.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YF35xV/src.cxx
         c++: error: unrecognized command-line option '-Wthread-safety'
         c++: error: unrecognized command-line option '-Wthread-safety'
-        gmake[1]: *** [CMakeFiles/cmTC_2a03d.dir/build.make:81: CMakeFiles/cmTC_2a03d.dir/src.cxx.o] Error 1
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-ju6XUb'
-        gmake: *** [Makefile:134: cmTC_2a03d/fast] Error 2
+        gmake[1]: *** [CMakeFiles/cmTC_56d94.dir/build.make:81: CMakeFiles/cmTC_56d94.dir/src.cxx.o] Error 1
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-YF35xV'
+        gmake: *** [Makefile:134: cmTC_56d94/fast] Error 2
         
       exitCode: 2
   -
@@ -3903,8 +3903,8 @@ events:
     checks:
       - "Performing Test HAVE_CXX_FLAG_COVERAGE"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aBTBrQ"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aBTBrQ"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-n8IX9F"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-n8IX9F"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -3915,17 +3915,17 @@ events:
       variable: "HAVE_CXX_FLAG_COVERAGE"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aBTBrQ'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-n8IX9F'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_b7ca5/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_b7ca5.dir/build.make CMakeFiles/cmTC_b7ca5.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aBTBrQ'
-        Building CXX object CMakeFiles/cmTC_b7ca5.dir/src.cxx.o
-        /usr/bin/c++ -DHAVE_CXX_FLAG_COVERAGE  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  --coverage -std=c++17   --coverage -o CMakeFiles/cmTC_b7ca5.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aBTBrQ/src.cxx
-        Linking CXX executable cmTC_b7ca5
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b7ca5.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  --coverage CMakeFiles/cmTC_b7ca5.dir/src.cxx.o -o cmTC_b7ca5
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-aBTBrQ'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_78fd8/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_78fd8.dir/build.make CMakeFiles/cmTC_78fd8.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-n8IX9F'
+        Building CXX object CMakeFiles/cmTC_78fd8.dir/src.cxx.o
+        /usr/bin/c++ -DHAVE_CXX_FLAG_COVERAGE  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  --coverage -std=c++17   --coverage -o CMakeFiles/cmTC_78fd8.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-n8IX9F/src.cxx
+        Linking CXX executable cmTC_78fd8
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_78fd8.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  --coverage CMakeFiles/cmTC_78fd8.dir/src.cxx.o -o cmTC_78fd8
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-n8IX9F'
         
       exitCode: 0
   -
@@ -3948,14 +3948,14 @@ events:
       stdout: |
         Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_fba50/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_fba50.dir/build.make CMakeFiles/cmTC_fba50.dir/build
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_907d2/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_907d2.dir/build.make CMakeFiles/cmTC_907d2.dir/build
         gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
-        Building CXX object CMakeFiles/cmTC_fba50.dir/std_regex.cpp.o
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_fba50.dir/std_regex.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/std_regex.cpp
-        Linking CXX executable cmTC_fba50
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fba50.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_fba50.dir/std_regex.cpp.o -o cmTC_fba50
+        Building CXX object CMakeFiles/cmTC_907d2.dir/std_regex.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_907d2.dir/std_regex.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/std_regex.cpp
+        Linking CXX executable cmTC_907d2
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_907d2.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_907d2.dir/std_regex.cpp.o -o cmTC_907d2
         gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
       exitCode: 0
@@ -3984,18 +3984,18 @@ events:
       stdout: |
         Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_42499/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_42499.dir/build.make CMakeFiles/cmTC_42499.dir/build
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_c9900/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_c9900.dir/build.make CMakeFiles/cmTC_c9900.dir/build
         gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
-        Building CXX object CMakeFiles/cmTC_42499.dir/gnu_posix_regex.cpp.o
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_42499.dir/gnu_posix_regex.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/gnu_posix_regex.cpp
+        Building CXX object CMakeFiles/cmTC_c9900.dir/gnu_posix_regex.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_c9900.dir/gnu_posix_regex.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/gnu_posix_regex.cpp
         /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/gnu_posix_regex.cpp:1:10: fatal error: gnuregex.h: No such file or directory
             1 | #include <gnuregex.h>
               |          ^~~~~~~~~~~~
         compilation terminated.
-        gmake[1]: *** [CMakeFiles/cmTC_42499.dir/build.make:81: CMakeFiles/cmTC_42499.dir/gnu_posix_regex.cpp.o] Error 1
+        gmake[1]: *** [CMakeFiles/cmTC_c9900.dir/build.make:81: CMakeFiles/cmTC_c9900.dir/gnu_posix_regex.cpp.o] Error 1
         gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
-        gmake: *** [Makefile:134: cmTC_42499/fast] Error 2
+        gmake: *** [Makefile:134: cmTC_c9900/fast] Error 2
         
       exitCode: 2
     runResult:
@@ -4021,14 +4021,14 @@ events:
       stdout: |
         Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_054f0/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_054f0.dir/build.make CMakeFiles/cmTC_054f0.dir/build
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_12ac1/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_12ac1.dir/build.make CMakeFiles/cmTC_12ac1.dir/build
         gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
-        Building CXX object CMakeFiles/cmTC_054f0.dir/posix_regex.cpp.o
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_054f0.dir/posix_regex.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/posix_regex.cpp
-        Linking CXX executable cmTC_054f0
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_054f0.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_054f0.dir/posix_regex.cpp.o -o cmTC_054f0
+        Building CXX object CMakeFiles/cmTC_12ac1.dir/posix_regex.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_12ac1.dir/posix_regex.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/posix_regex.cpp
+        Linking CXX executable cmTC_12ac1
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_12ac1.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_12ac1.dir/posix_regex.cpp.o -o cmTC_12ac1
         gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
       exitCode: 0
@@ -4057,14 +4057,14 @@ events:
       stdout: |
         Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_12b8e/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_12b8e.dir/build.make CMakeFiles/cmTC_12b8e.dir/build
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_7b21f/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_7b21f.dir/build.make CMakeFiles/cmTC_7b21f.dir/build
         gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
-        Building CXX object CMakeFiles/cmTC_12b8e.dir/steady_clock.cpp.o
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_12b8e.dir/steady_clock.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/steady_clock.cpp
-        Linking CXX executable cmTC_12b8e
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_12b8e.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_12b8e.dir/steady_clock.cpp.o -o cmTC_12b8e
+        Building CXX object CMakeFiles/cmTC_7b21f.dir/steady_clock.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_7b21f.dir/steady_clock.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/steady_clock.cpp
+        Linking CXX executable cmTC_7b21f
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7b21f.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_7b21f.dir/steady_clock.cpp.o -o cmTC_7b21f
         gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
       exitCode: 0
@@ -4084,8 +4084,8 @@ events:
     checks:
       - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
     directories:
-      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-u5kra6"
-      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-u5kra6"
+      source: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fU1RvN"
+      binary: "/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fU1RvN"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing"
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -4096,17 +4096,17 @@ events:
       variable: "CMAKE_HAVE_LIBC_PTHREAD"
       cached: true
       stdout: |
-        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-u5kra6'
+        Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fU1RvN'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_488dc/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_488dc.dir/build.make CMakeFiles/cmTC_488dc.dir/build
-        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-u5kra6'
-        Building CXX object CMakeFiles/cmTC_488dc.dir/src.cxx.o
-        /usr/bin/c++ -DCMAKE_HAVE_LIBC_PTHREAD  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++17 -o CMakeFiles/cmTC_488dc.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-u5kra6/src.cxx
-        Linking CXX executable cmTC_488dc
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_488dc.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_488dc.dir/src.cxx.o -o cmTC_488dc
-        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-u5kra6'
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_41255/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_41255.dir/build.make CMakeFiles/cmTC_41255.dir/build
+        gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fU1RvN'
+        Building CXX object CMakeFiles/cmTC_41255.dir/src.cxx.o
+        /usr/bin/c++ -DCMAKE_HAVE_LIBC_PTHREAD  -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++17 -o CMakeFiles/cmTC_41255.dir/src.cxx.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fU1RvN/src.cxx
+        Linking CXX executable cmTC_41255
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_41255.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_41255.dir/src.cxx.o -o cmTC_41255
+        gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeScratch/TryCompile-fU1RvN'
         
       exitCode: 0
   -
@@ -4129,14 +4129,14 @@ events:
       stdout: |
         Change Dir: '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
-        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9d4fb/fast
-        /usr/bin/gmake  -f CMakeFiles/cmTC_9d4fb.dir/build.make CMakeFiles/cmTC_9d4fb.dir/build
+        Run Build Command(s): /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_3e5e3/fast
+        /usr/bin/gmake  -f CMakeFiles/cmTC_3e5e3.dir/build.make CMakeFiles/cmTC_3e5e3.dir/build
         gmake[1]: Entering directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
-        Building CXX object CMakeFiles/cmTC_9d4fb.dir/pthread_affinity.cpp.o
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_9d4fb.dir/pthread_affinity.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/pthread_affinity.cpp
-        Linking CXX executable cmTC_9d4fb
-        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9d4fb.dir/link.txt --verbose=1
-        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_9d4fb.dir/pthread_affinity.cpp.o -o cmTC_9d4fb
+        Building CXX object CMakeFiles/cmTC_3e5e3.dir/pthread_affinity.cpp.o
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  -std=c++11 -o CMakeFiles/cmTC_3e5e3.dir/pthread_affinity.cpp.o -c /mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src/cmake/pthread_affinity.cpp
+        Linking CXX executable cmTC_3e5e3
+        /home/ttt/.local/lib/python3.10/site-packages/cmake/data/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3e5e3.dir/link.txt --verbose=1
+        /usr/bin/c++   -Wall  -Wextra  -Wshadow  -Wfloat-equal  -Wold-style-cast  -Wconversion  -Werror  -Wsuggest-override  -pedantic  -pedantic-errors  -fstrict-aliasing  -Wno-deprecated-declarations  -Wno-deprecated  -Wstrict-aliasing  CMakeFiles/cmTC_3e5e3.dir/pthread_affinity.cpp.o -o cmTC_3e5e3
         gmake[1]: Leaving directory '/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/CMakeFiles/CMakeTmp'
         
       exitCode: 0

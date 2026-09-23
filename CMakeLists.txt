@@ -29,16 +29,28 @@ add_executable(triangulation_bench
   src/bench_main.cpp
 )
 
+add_executable(triangulation_dataset_bench
+  src/memory_tracker.cpp
+  src/dataset_bench_main.cpp
+)
+
 target_include_directories(triangulation_bench PRIVATE
   ${CMAKE_SOURCE_DIR}/src
   ${CMAKE_SOURCE_DIR}/include   # <- put your Edge.hpp, GraphTriangulation.hpp etc. here
 )
 
 target_link_libraries(triangulation_bench PRIVATE benchmark::benchmark pthread)
+target_include_directories(triangulation_dataset_bench PRIVATE
+  ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_SOURCE_DIR}/include
+)
+target_link_libraries(triangulation_dataset_bench PRIVATE benchmark::benchmark pthread)
 
 # Sanitizer builds for correctness-under-load sanity checks, not for timing.
 option(WITH_ASAN "Build with AddressSanitizer" OFF)
 if(WITH_ASAN)
   target_compile_options(triangulation_bench PRIVATE -fsanitize=address,undefined -g)
   target_link_options(triangulation_bench PRIVATE -fsanitize=address,undefined)
+  target_compile_options(triangulation_dataset_bench PRIVATE -fsanitize=address,undefined -g)
+  target_link_options(triangulation_dataset_bench PRIVATE -fsanitize=address,undefined)
 endif()

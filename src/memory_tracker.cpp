@@ -2,7 +2,9 @@
 
 #include <sys/resource.h>
 #include <atomic>
+#include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <dlfcn.h>
 #include <cstdio>
 
@@ -24,9 +26,13 @@ std::atomic<bool> g_tracking_enabled{false};
 
 using MallocFn = void* (*)(size_t);
 using FreeFn = void (*)(void*);
+using CallocFn = void* (*)(size_t, size_t);
+using ReallocFn = void* (*)(void*, size_t);
 
 MallocFn real_malloc = nullptr;
 FreeFn real_free = nullptr;
+CallocFn real_calloc = nullptr;
+ReallocFn real_realloc = nullptr;
 
 // We need to know how big each allocation was when free() is called, but
 // libc doesn't give us that directly. We prepend a small header storing
@@ -43,6 +49,12 @@ void EnsureRealFnsLoaded() {
     }
     if (!real_free) {
         real_free = reinterpret_cast<FreeFn>(dlsym(RTLD_NEXT, "free"));
+    }
+    if (!real_calloc) {
+        real_calloc = reinterpret_cast<CallocFn>(dlsym(RTLD_NEXT, "calloc"));
+    }
+    if (!real_realloc) {
+        real_realloc = reinterpret_cast<ReallocFn>(dlsym(RTLD_NEXT, "realloc"));
     }
 }
 } // namespace
@@ -71,6 +83,32 @@ extern "C" void free(void* ptr) {
 
     void* raw = reinterpret_cast<char*>(ptr) - kHeaderSize;
     real_free(raw);
+}
+
+extern "C" void* calloc(size_t count, size_t size) {
+    EnsureRealFnsLoaded();
+    if (!real_malloc) return nullptr;
+    if (size != 0 && count > static_cast<size_t>(-1) / size) return nullptr;
+    const size_t bytes = count * size;
+    void* ptr = malloc(bytes);
+    if (ptr) std::memset(ptr, 0, bytes);
+    return ptr;
+}
+
+extern "C" void* realloc(void* ptr, size_t size) {
+    EnsureRealFnsLoaded();
+    if (!ptr) return malloc(size);
+    if (size == 0) {
+        free(ptr);
+        return nullptr;
+    }
+    auto* old_header = reinterpret_cast<AllocHeader*>(reinterpret_cast<char*>(ptr) - kHeaderSize);
+    const size_t old_size = old_header->size;
+    void* replacement = malloc(size);
+    if (!replacement) return nullptr;
+    std::memcpy(replacement, ptr, std::min(old_size, size));
+    free(ptr);
+    return replacement;
 }
 
 namespace membench {
