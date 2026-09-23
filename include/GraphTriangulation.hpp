@@ -3,6 +3,7 @@ using namespace std;
 #pragma once
 #include "Edge.hpp"
 #include "PairHash.hpp"
+#include <functional>
 
 // Forward declaration to avoid circular dependency
 class FaceTriangulation;
@@ -20,6 +21,13 @@ public:
     long long invalidTraversals = 0;
 
     long long totalTriangulations = 0;
+
+    // Optional hook, called periodically (decided by the callback itself,
+    // e.g. every N triangulations) with a chance to persist current stats
+    // to disk BEFORE a possible SIGKILL. Defaults to a no-op so callers
+    // that don't need checkpointing (correctness_check, triangulate) pay
+    // zero overhead. See checkpoint.hpp for the actual writer.
+    std::function<void(const GraphTriangulation&)> onProgressTick = [](const GraphTriangulation&) {};
 
     GraphTriangulation(vector<vector<long long>> &faces)
     {
@@ -99,6 +107,7 @@ inline void GraphTriangulation::output(long long serial)
     if (serial == faces.size() - 1)
     {
         totalTriangulations++;
+        onProgressTick(*this); // no-op unless a checkpoint callback was set
         storeTriangulation();
     }
     else

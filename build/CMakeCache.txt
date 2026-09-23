@@ -230,7 +230,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=TriangulationBenchmarks
+CMAKE_PROJECT_NAME:STATIC=TriangulationTools
 
 //Value Computed by CMake
 CMAKE_PROJECT_SPDX_LICENSE:STATIC=
@@ -345,16 +345,13 @@ GIT_EXECUTABLE:FILEPATH=/usr/bin/git
 LLVM_FILECHECK_EXE:FILEPATH=LLVM_FILECHECK_EXE-NOTFOUND
 
 //Value Computed by CMake
-TriangulationBenchmarks_BINARY_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build
+TriangulationTools_BINARY_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build
 
 //Value Computed by CMake
-TriangulationBenchmarks_IS_TOP_LEVEL:STATIC=ON
+TriangulationTools_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
-TriangulationBenchmarks_SOURCE_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator
-
-//Build with AddressSanitizer
-WITH_ASAN:BOOL=OFF
+TriangulationTools_SOURCE_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator
 
 //Value Computed by CMake
 benchmark_BINARY_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-build

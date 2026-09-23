@@ -201,6 +201,7 @@ public:
         else
         {
             gt->invalidTraversals++;
+            gt->onProgressTick(*gt); // same optional checkpoint hook as the valid-triangulation path
         }
     }
 };

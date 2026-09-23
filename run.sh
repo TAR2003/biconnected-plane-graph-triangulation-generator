@@ -1,0 +1,1 @@
+./build/dataset_bench --algorithm=oneconnected --input-root=test-cases/input/Oneconnected/03_tree --timeout=10 

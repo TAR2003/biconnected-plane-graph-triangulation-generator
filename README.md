@@ -76,7 +76,7 @@ These headers are included by `src/bench_main.cpp` and by the legacy programs in
 | `dataset_bench_main.cpp` | Recursive file-dataset benchmark with algorithm selection and CSV output |
 | `graph_generator.hpp` / `graph_generator.cpp` | Synthetic inputs: simple polygon, fan of faces, strip of faces |
 | `memory_tracker.hpp` / `memory_tracker.cpp` | Peak RSS and malloc-interposition counters (Linux-oriented) |
-| `timeout_guard.hpp` | In-process watchdog thread (aborts if a case runs too long) |
+| `timeout_guard.hpp` | Watchdog used by the synthetic benchmark harness |
 
 **CMake** (`CMakeLists.txt`):
 
@@ -207,7 +207,7 @@ Registered in `src/bench_main.cpp` (names appear as `TriangulationFixture/<CaseN
 - `peak_rss_KB`, `bytes_allocated`, `alloc_count` (from `memory_tracker`)
 - `triangulations_found` (and one-connected diagnostic counters where applicable)
 
-**Default in-process timeout:** 60 seconds per iteration (`timeout_guard.hpp`). Slow cases may need a smaller `DenseRange` or the external `run_sweep.sh` wrapper.
+The synthetic benchmark harness keeps its existing watchdog behavior. For dataset runs, use the runner-level timeout below: each case is launched in a separate child process, so a timeout kills only that case and the parent continues with the next one.
 
 > **Catalan growth:** triangulation count on a convex `N`-gon grows like Catalan numbers. Extending `N` far beyond ~16–20 can make single cases run for minutes or hours even in “performance” (discard) mode, because enumeration still visits every triangulation.
 
@@ -250,6 +250,19 @@ Select the algorithm explicitly with `--algorithm biconnected` or `--algorithm o
 
 - `biconnected` -> `GraphTriangulationBiconnectedPerformance`
 - `oneconnected` -> `GraphTriangulationOneconnectedPerformance`
+
+### Dataset timeout
+
+Use `--timeout=30s` (or `--timeout 30s`) to enforce a hard per-case process timeout:
+
+```bash
+./build/triangulation_dataset_bench \
+	--algorithm biconnected \
+	--timeout=30s \
+	--runs-per-case=1
+```
+
+The parent runner launches one child per case. A completed child writes the normal CSV row. A child that exceeds the timeout is terminated, receives a `timed_out` CSV row with its input vertex count and elapsed wall time, and the next case starts. Counters that exist only inside the killed process cannot be recovered and are recorded as zero; the graph algorithms are not instrumented or modified.
 
 ### How many times does one case run?
 
