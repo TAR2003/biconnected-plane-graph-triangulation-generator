@@ -9,13 +9,12 @@ using namespace std;
 #include <thread>
 #include <atomic>
 
-using u128 = unsigned __int128;
 namespace fs = std::filesystem;
 
 // ============================================================================
 // CONFIG: how many timing runs every single test case should have.
 // ============================================================================
-static const int RUNS_PER_CASE = 1;
+static const long long RUNS_PER_CASE = 1;
 
 // ============================================================================
 // CONFIG: time limit (in seconds) for a single run. Change this value to adjust.
@@ -23,17 +22,17 @@ static const int RUNS_PER_CASE = 1;
 static const double TIME_LIMIT_SECONDS = 360.0;
 
 // The root folder containing one subfolder per category.
-static const string INPUT_ROOT = "input";
+static const string INPUT_ROOT = "inputs/Biconnected";
 
 // Helper to convert 128-bit numbers to string (decimal)
-static string u128_to_string(u128 x)
+static string u128_to_string(long long x)
 {
     if (x == 0)
         return "0";
     string s;
     while (x > 0)
     {
-        int digit = (int)(x % 10);
+        long long digit = x % 10;
         s.push_back('0' + digit);
         x /= 10;
     }
@@ -41,24 +40,24 @@ static string u128_to_string(u128 x)
     return s;
 }
 
-static u128 string_to_u128(const string &s)
+static long long string_to_u128(const string &s)
 {
-    u128 x = 0;
+    long long x = 0;
     for (char c : s)
     {
         if (c >= '0' && c <= '9')
-            x = x * 10 + (u128)(c - '0');
+            x = x * 10 + (c - '0');
     }
     return x;
 }
 
 // Helper to format numbers like 1st, 2nd, 3rd, 4th, 5th, etc.
-static string getOrdinal(int n)
+static string getOrdinal(long long n)
 {
-    int tens = (n / 10) % 10;
+    long long tens = (n / 10) % 10;
     if (tens == 1)
         return to_string(n) + "th";
-    int ones = n % 10;
+    long long ones = n % 10;
     if (ones == 1)
         return to_string(n) + "st";
     if (ones == 2)
@@ -142,7 +141,7 @@ size_t getCurrentMemoryUsage()
 // ============================================================================
 // Input Reader
 // ============================================================================
-vector<vector<int>> readInput(const string &filename, int &distinctVertices)
+vector<vector<long long>> readInput(const string &filename, long long &distinctVertices)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -151,18 +150,18 @@ vector<vector<int>> readInput(const string &filename, int &distinctVertices)
         distinctVertices = 0;
         return {};
     }
-    vector<vector<int>> faces;
-    unordered_set<int> uniqueVertices;
-    int faceno;
+    vector<vector<long long>> faces;
+    unordered_set<long long> uniqueVertices;
+    long long faceno;
     infile >> faceno;
-    for (int i = 0; i < faceno; i++)
+    for (long long i = 0; i < faceno; i++)
     {
-        int vertices;
+        long long vertices;
         infile >> vertices;
-        vector<int> face;
-        for (int j = 0; j < vertices; j++)
+        vector<long long> face;
+        for (long long j = 0; j < vertices; j++)
         {
-            int vertex;
+            long long vertex;
             infile >> vertex;
             face.push_back(vertex);
             uniqueVertices.insert(vertex);
@@ -179,7 +178,7 @@ vector<vector<int>> readInput(const string &filename, int &distinctVertices)
 string formatBytes(size_t bytes)
 {
     const char *units[] = {"B", "KB", "MB", "GB"};
-    int unitIndex = 0;
+    long long unitIndex = 0;
     double size = (double)bytes;
     while (size >= 1024.0 && unitIndex < 3)
     {
@@ -230,14 +229,14 @@ static string getExecutablePath()
 #endif
 }
 
-static void writeProgressFile(const string &path, u128 count)
+static void writeProgressFile(const string &path, long long count)
 {
     ofstream out(path, ios::trunc);
     if (out.is_open())
         out << u128_to_string(count) << '\n';
 }
 
-static u128 readProgressFile(const string &path)
+static long long readProgressFile(const string &path)
 {
     ifstream in(path);
     if (!in.is_open())
@@ -250,7 +249,7 @@ static u128 readProgressFile(const string &path)
 struct WorkerResult
 {
     string status;
-    u128 triangulations = 0;
+    long long triangulations = 0;
     double timeSeconds = 0.0;
     size_t peakMemory = 0;
     string startTime;
@@ -310,8 +309,8 @@ static bool readWorkerResultFile(const string &path, WorkerResult &r)
 struct RunRecord
 {
     string filename;
-    int runIndex;
-    int distinctVertices;
+    long long runIndex;
+    long long distinctVertices;
     string triangStr;
     double timeSeconds;
     size_t peakMemory;
@@ -326,7 +325,7 @@ static string csvPathForCategory(const string &category)
     return "results_time_complexity_check_" + category + ".csv";
 }
 
-static int countExistingRuns(const string &csvPath, const string &filename)
+static long long countExistingRuns(const string &csvPath, const string &filename)
 {
     ifstream in(csvPath);
     if (!in.is_open())
@@ -336,7 +335,7 @@ static int countExistingRuns(const string &csvPath, const string &filename)
     if (!getline(in, line))
         return 0;
 
-    int count = 0;
+    long long count = 0;
     while (getline(in, line))
     {
         if (line.empty())
@@ -452,29 +451,30 @@ static int runInSubprocess(const string &inputPath,
 // ============================================================================
 static int runWorkerMode(const char *inputPath, const char *resultPath, const char *progressPath)
 {
-    int distinctVertices = 0;
-    vector<vector<int>> faces = readInput(inputPath, distinctVertices);
+    long long distinctVertices = 0;
+    vector<vector<long long>> faces = readInput(inputPath, distinctVertices);
     if (faces.empty())
         return 1;
 
     string startTs = currentTimeString();
     size_t memBefore = getCurrentMemoryUsage();
 
-    GraphTriangulationBiconnected *bc = new GraphTriangulationBiconnectedPerformance(faces);
+    GraphTriangulation *gt = new GraphTriangulationBiconnectedPerformance(faces);
+    cout << "start the process" << endl;
     std::atomic<bool> stopProgress{false};
 
     std::thread progressThread([&]()
                                {
         while (!stopProgress.load(std::memory_order_relaxed))
         {
-            writeProgressFile(progressPath, bc->totalTriangulations);
+            writeProgressFile(progressPath, gt->totalTriangulations);
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
-        writeProgressFile(progressPath, bc->totalTriangulations); });
+        writeProgressFile(progressPath, gt->totalTriangulations); });
 
     using clock = std::chrono::steady_clock;
     auto runStart = clock::now();
-    bc->getAllTriangulations();
+    gt->getAllTriangulations();
     auto runEnd = clock::now();
 
     stopProgress.store(true, std::memory_order_relaxed);
@@ -488,14 +488,14 @@ static int runWorkerMode(const char *inputPath, const char *resultPath, const ch
 
     WorkerResult result;
     result.status = "completed";
-    result.triangulations = bc->totalTriangulations;
+    result.triangulations = gt->totalTriangulations;
     result.timeSeconds = runSec;
     result.peakMemory = memUsed;
     result.startTime = startTs;
     result.endTime = endTs;
     writeWorkerResultFile(resultPath, result);
 
-    delete bc;
+    delete gt;
     return 0;
 }
 
@@ -532,7 +532,7 @@ static void runCategory(const string &category)
     {
         string fullPath = categoryFolder + "/" + filename;
 
-        int alreadyDone = countExistingRuns(csvPath, filename);
+        long long alreadyDone = countExistingRuns(csvPath, filename);
         if (alreadyDone >= RUNS_PER_CASE)
         {
             cout << "  " << filename << ": Found " << alreadyDone << " run(s) in CSV. Already complete ("
@@ -540,21 +540,21 @@ static void runCategory(const string &category)
             continue;
         }
 
-        int remaining = RUNS_PER_CASE - alreadyDone;
+        long long remaining = RUNS_PER_CASE - alreadyDone;
         cout << "  " << filename << ": Found " << alreadyDone << " run(s) in CSV. Need "
              << remaining << " more run(s).\n";
 
-        int distinctVertices = 0;
-        vector<vector<int>> faces = readInput(fullPath, distinctVertices);
+        long long distinctVertices = 0;
+        vector<vector<long long>> faces = readInput(fullPath, distinctVertices);
         if (faces.empty())
         {
             cerr << "    Warning: skipping empty/invalid file: " << filename << "\n";
             continue;
         }
 
-        for (int localRun = 1; localRun <= remaining; localRun++)
+        for (long long localRun = 1; localRun <= remaining; localRun++)
         {
-            int globalRunIndex = alreadyDone + localRun;
+            long long globalRunIndex = alreadyDone + localRun;
 
             string startTs = currentTimeString();
             cout << "    Running " << getOrdinal(globalRunIndex) << " run (start " << startTs
@@ -612,7 +612,7 @@ static void runCategory(const string &category)
             }
             else if (subprocessStatus == 1)
             {
-                u128 triangCount = readProgressFile(progressPath);
+                long long triangCount = readProgressFile(progressPath);
                 rec.triangStr = u128_to_string(triangCount);
                 rec.timeSeconds = runSec;
                 rec.peakMemory = memUsed;
@@ -695,8 +695,8 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        int idx = stoi(arg);
-        if (idx < 1 || idx > (int)categories.size())
+        long long idx = stoll(arg);
+        if (idx < 1 || idx > static_cast<long long>(categories.size()))
         {
             cerr << "Category index out of range: " << idx << "\n\n";
             printUsage(categories, argv[0]);
