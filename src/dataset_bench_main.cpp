@@ -234,17 +234,17 @@ void run_case(benchmark::State& state, const InputCase& test_case) {
         fs::create_directories(ckptPath.parent_path());
         checkpoint::Writer checkpointWriter(ckptPath);
         const auto runStart = std::chrono::steady_clock::now();
-        graph->onProgressTick = [&](const GraphTriangulation& g) {
-            checkpoint::Stats s;
-            s.vertices = input.vertices;
-            s.triangulations = g.totalTriangulations;
-            s.totalChecks = g.totalChecks;
-            s.successfulChecks = g.successfulChecks;
-            s.invalidTraversals = g.invalidTraversals;
-            s.peakMemoryKb = membench::TakeSnapshot().peak_rss_kb; // cheap: just reads getrusage, no allocation-counter side effects here
-            s.elapsedSeconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - runStart).count();
-            checkpointWriter.Tick(s);
-        };
+        // graph->onProgressTick = [&](const GraphTriangulation& g) {
+        //     checkpoint::Stats s;
+        //     s.vertices = input.vertices;
+        //     s.triangulations = g.totalTriangulations;
+        //     s.totalChecks = g.totalChecks;
+        //     s.successfulChecks = g.successfulChecks;
+        //     s.invalidTraversals = g.invalidTraversals;
+        //     s.peakMemoryKb = membench::TakeSnapshot().peak_rss_kb; // cheap: just reads getrusage, no allocation-counter side effects here
+        //     s.elapsedSeconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - runStart).count();
+        //     checkpointWriter.Tick(s);
+        // };
 
         state.ResumeTiming();
         const auto begin = std::chrono::steady_clock::now();
