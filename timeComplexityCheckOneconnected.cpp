@@ -2,8 +2,8 @@
 using namespace std;
 #include "Edge.hpp"
 #include "pairHash.hpp"
-#include "TriangulationgeneratorOneconnected.hpp"
-#include "GenerateFaceTriangulationOneconnected.hpp"
+#include "GraphTriangulation.hpp"
+#include "FaceTriangulationOneconnected.hpp"
 #include <filesystem>
 #include <chrono>
 #include <thread>
@@ -530,7 +530,7 @@ static int runWorkerMode(const char *inputPath, const char *resultPath, const ch
     string startTs = currentTimeString();
     size_t memBefore = getCurrentMemoryUsage();
 
-    Biconnected *bc = new Biconnected(faces);
+    GraphTriangulationBiconnected *bc = new GraphTriangulationBiconnectedPerformance(faces);
     std::atomic<bool> stopProgress{false};
 
     auto snapshotNow = [&]() -> ProgressSnapshot

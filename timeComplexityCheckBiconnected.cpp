@@ -2,8 +2,8 @@
 using namespace std;
 #include "Edge.hpp"
 #include "PairHash.hpp"
-#include "TriangulationGeneratorBiconnected.hpp"
-#include "GenerateFaceTriangulationBiconnected.hpp"
+#include "GraphTriangulation.hpp"
+#include "FaceTriangulationBiconnected.hpp"
 #include <filesystem>
 #include <chrono>
 #include <thread>
@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 // ============================================================================
 // CONFIG: how many timing runs every single test case should have.
 // ============================================================================
-static const int RUNS_PER_CASE = 5;
+static const int RUNS_PER_CASE = 1;
 
 // ============================================================================
 // CONFIG: time limit (in seconds) for a single run. Change this value to adjust.
@@ -460,7 +460,7 @@ static int runWorkerMode(const char *inputPath, const char *resultPath, const ch
     string startTs = currentTimeString();
     size_t memBefore = getCurrentMemoryUsage();
 
-    Biconnected *bc = new Biconnected(faces, NULL, "timeComplexity");
+    GraphTriangulationBiconnected *bc = new GraphTriangulationBiconnectedPerformance(faces);
     std::atomic<bool> stopProgress{false};
 
     std::thread progressThread([&]()

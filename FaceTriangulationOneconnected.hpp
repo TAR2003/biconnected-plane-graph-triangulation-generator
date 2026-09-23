@@ -121,10 +121,12 @@ public:
 
           output();
 
-        for (; itrloop != GS.end(); itrloop++)
+            for (; itrloop != GS.end();)
         {
             // Recursively generate child triangulations for edges that can block the current edge
+                Edge *child = *itrloop;
             generateChildTriangulations(itrloop);
+                itrloop = next(child->chordItrGS);
         }
         if (lastChordGS) // If the current edge was the last in the generating set
         {
@@ -169,9 +171,11 @@ public:
 
         // printSet(GS);
 
-        for (auto itr = GS.begin(); itr != GS.end(); itr++)
+        for (auto itr = GS.begin(); itr != GS.end();)
         {
+            Edge *child = *itr;
             generateChildTriangulations(itr); // generating child triangulations recursively
+            itr = next(child->chordItrGS);
         }
 
         for (auto &chord : chords)

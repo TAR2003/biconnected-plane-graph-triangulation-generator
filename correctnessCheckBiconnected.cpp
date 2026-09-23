@@ -243,6 +243,7 @@ FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
 {
     vector<vector<long long>> faces = solve(filename);
 
+
     GraphTriangulation *gt = new GraphTriangulationBiconnectedCorrectness(faces);
     gt->getAllTriangulations();
     gt->sortTriangulations();
@@ -376,7 +377,7 @@ int main()
     string CSV_REPORT_FILENAME = "triangulation_search_report.csv";
     // =======================================================
 
-    string folder = "input";
+    string folder = "inputs";
     vector<FileMetrics> allMetrics;
 
     if (!fs::exists(folder))

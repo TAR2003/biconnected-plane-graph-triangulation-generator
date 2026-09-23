@@ -126,10 +126,12 @@ public:
 
         output();
 
-        for (; itrloop != VGS.end(); itrloop++)
+        for (; itrloop != VGS.end();)
         {
             // Recursively generate child triangulations for edges that can block the current edge
+            Edge *child = *itrloop;
             generateChildTriangulations(itrloop);
+            itrloop = next(child->chordItrVGS);
         }
         if (lastChordGS) // If the current edge was the last in the generating set
         {
@@ -188,9 +190,11 @@ public:
 
         // addTriangulation(); // adding the initial root triangulation
         output();
-        for (auto itr = VGS.begin(); itr != VGS.end(); itr++)
+        for (auto itr = VGS.begin(); itr != VGS.end();)
         {
+            Edge *child = *itr;
             generateChildTriangulations(itr); // generating child triangulations recursively
+            itr = next(child->chordItrVGS);
         }
 
         for (auto &chord : chords)

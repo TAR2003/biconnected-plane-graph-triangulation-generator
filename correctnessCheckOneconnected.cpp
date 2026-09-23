@@ -5,9 +5,9 @@ namespace fs = std::filesystem;
 
 #include "Edge.hpp"
 #include "pairHash.hpp"
-#include "TriangulationGeneratorOneconnected.hpp"
-#include "GenerateFaceTriangulationOneconnected.hpp"
-#include "TriangulationGeneratorTriconnected.hpp"
+#include "GraphTriangulation.hpp"
+#include "FaceTriangulationOneConnected.hpp"
+#include "GraphTriangulationTriconnected.hpp"
 
 // Structure to hold metrics for CSV reporting
 struct FileMetrics
@@ -27,7 +27,7 @@ struct FileMetrics
     bool isContained;
 };
 
-vector<vector<int>> solve(string filename)
+vector<vector<long long>> solve(string filename)
 {
     ifstream infile(filename);
     if (!infile.is_open())
@@ -35,17 +35,17 @@ vector<vector<int>> solve(string filename)
         cerr << "Error opening file: " << filename << endl;
         return {};
     }
-    vector<vector<int>> faces;
-    int faceno;
+    vector<vector<long long>> faces;
+    long long faceno;
     infile >> faceno;
-    for (int i = 0; i < faceno; i++)
+    for (long long i = 0; i < faceno; i++)
     {
-        int vertices;
+        long long vertices;
         infile >> vertices;
-        vector<int> face;
-        for (int j = 0; j < vertices; j++)
+        vector<long long> face;
+        for (long long j = 0; j < vertices; j++)
         {
-            int vertex;
+            long long vertex;
             infile >> vertex;
             face.push_back(vertex);
         }
@@ -54,12 +54,12 @@ vector<vector<int>> solve(string filename)
     return faces;
 }
 
-bool matchPairs(const pair<int, int> &p1, const pair<int, int> &p2)
+bool matchPairs(const pair<long long, long long> &p1, const pair<long long, long long> &p2)
 {
     return (p1.first == p2.first && p1.second == p2.second);
 }
 
-bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int, int>> &t2)
+bool matchTriangulations(const vector<pair<long long, long long>> &t1, const vector<pair<long long, long long>> &t2)
 {
     if (t1.size() != t2.size())
         return false;
@@ -72,8 +72,8 @@ bool matchTriangulations(const vector<pair<int, int>> &t1, const vector<pair<int
 }
 
 void compareAndPrintTriangulations(
-    vector<vector<pair<int, int>>> &triangulationsByAlgo,
-    vector<vector<pair<int, int>>> &triangulationsByTriconnectedBruteForce)
+    vector<vector<pair<long long, long long>>> &triangulationsByAlgo,
+    vector<vector<pair<long long, long long>>> &triangulationsByTriconnectedBruteForce)
 {
     // ANSI color codes for terminal output
     const string GREEN = "\033[32m";
@@ -93,7 +93,7 @@ void compareAndPrintTriangulations(
 
     sort(triangulationsByAlgo.begin(), triangulationsByAlgo.end());
 
-    multiset<vector<pair<int, int>>> bruteForceSet(
+    multiset<vector<pair<long long, long long>>> bruteForceSet(
         triangulationsByTriconnectedBruteForce.begin(),
         triangulationsByTriconnectedBruteForce.end());
 
@@ -136,8 +136,8 @@ void compareAndPrintTriangulations(
 }
 
 bool compareAndOutput(
-    vector<vector<pair<int, int>>> &triangulationsByAlgo,
-    vector<vector<pair<int, int>>> &triangulationsByTriconnectedBruteForce,
+    vector<vector<pair<long long, long long>>> &triangulationsByAlgo,
+    vector<vector<pair<long long, long long>>> &triangulationsByTriconnectedBruteForce,
     const string &filename,
     bool enableFileOutput)
 {
@@ -164,12 +164,12 @@ bool compareAndOutput(
 
     sort(triangulationsByAlgo.begin(), triangulationsByAlgo.end());
 
-    multiset<vector<pair<int, int>>> bruteForceSet(
+    multiset<vector<pair<long long, long long>>> bruteForceSet(
         triangulationsByTriconnectedBruteForce.begin(),
         triangulationsByTriconnectedBruteForce.end());
 
     // Evaluate containment status
-    multiset<vector<pair<int, int>>> checkSet = bruteForceSet;
+    multiset<vector<pair<long long, long long>>> checkSet = bruteForceSet;
     for (const auto &triangulation : triangulationsByAlgo)
     {
         auto it = checkSet.find(triangulation);
@@ -241,16 +241,24 @@ bool compareAndOutput(
 
 FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
 {
-    vector<vector<int>> faces = solve(filename);
+    vector<vector<long long>> faces = solve(filename);
 
-    Biconnected *bc = new Biconnected(faces);
-    bc->getAllTriangulations();
-    bc->sortTriangulations();
+   
 
-    Triconnected *tc = new Triconnected(faces);
+    GraphTriangulation *gt = new GraphTriangulationOneconnectedCorrectness(faces);
+    cout << "Starting triangulation search for biconnected component..." << endl;
+    gt->getAllTriangulations();
+    cout << "Triangulation search completed for biconnected component." << endl;
+    gt->sortTriangulations();
+
+    cout << "Total triangulations in biconnected component: " << gt->allTriangulations.size() << endl;
+
+    GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(faces);
     tc->getAllTriangulations();
     tc->refineTriangulations();
     tc->removeDuplicated();
+
+    cout << "Total triangulations in brute force triconnected component: " << tc->allTriangulations.size() << endl;
 
     string bareFilename = fs::path(filename).filename().string();
     string outFilePath = "output/" + bareFilename;
@@ -260,17 +268,17 @@ FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
         fs::create_directories("output");
     }
 
-    bool isContained = compareAndOutput(bc->allTriangulations, tc->allTriangulations, outFilePath, enableFileOutput);
+    bool isContained = compareAndOutput(gt->allTriangulations, tc->allTriangulations, outFilePath, enableFileOutput);
 
-    size_t algoCount = bc->allTriangulations.size();
+    size_t algoCount = gt->allTriangulations.size();
     size_t bruteForceCount = tc->allTriangulations.size();
     double ratio = (bruteForceCount > 0) ? static_cast<double>(algoCount) / bruteForceCount : 0.0;
 
     size_t successfulTraversals = algoCount;
-    size_t totalTraversals = bc->invalidTraversals + algoCount;
+    size_t totalTraversals = gt->invalidTraversals + algoCount;
 
-    double checkSuccessPercentage = (bc->totalChecks > 0)
-                                        ? (static_cast<double>(bc->successfulChecks) / bc->totalChecks) * 100.0
+    double checkSuccessPercentage = (gt->totalChecks > 0)
+                                        ? (static_cast<double>(gt->successfulChecks) / gt->totalChecks) * 100.0
                                         : 0.0;
 
     double traversalSuccessPercentage = (totalTraversals > 0)
@@ -284,14 +292,14 @@ FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
 
     cout << fixed << setprecision(2);
     cout << "\n================ Search Metrics ================" << endl;
-    cout << "Total Checks: " << bc->totalChecks << endl;
-    cout << "Successful Checks: " << bc->successfulChecks << endl;
-    cout << "Failed Checks: " << (bc->totalChecks - bc->successfulChecks) << endl;
+    cout << "Total Checks: " << gt->totalChecks << endl;
+    cout << "Successful Checks: " << gt->successfulChecks << endl;
+    cout << "Failed Checks: " << (gt->totalChecks - gt->successfulChecks) << endl;
     cout << "Check Success Rate: " << checkSuccessPercentage << "%" << endl;
     cout << "------------------------------------------------" << endl;
     cout << "Total Traversals: " << totalTraversals << endl;
     cout << "Successful Traversals: " << successfulTraversals << endl;
-    cout << "Invalid Traversals: " << bc->invalidTraversals << endl;
+    cout << "Invalid Traversals: " << gt->invalidTraversals << endl;
     cout << "Traversal Success Rate: " << traversalSuccessPercentage << "%" << endl;
     cout << "================================================" << endl;
 
@@ -317,17 +325,17 @@ FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
         algoCount,
         bruteForceCount,
         ratio,
-        bc->totalChecks,
-        bc->successfulChecks,
-        bc->totalChecks - bc->successfulChecks,
+        gt->totalChecks,
+        gt->successfulChecks,
+        gt->totalChecks - gt->successfulChecks,
         checkSuccessPercentage,
         static_cast<long long>(totalTraversals),
         static_cast<long long>(successfulTraversals),
-        static_cast<long long>(bc->invalidTraversals),
+        static_cast<long long>(gt->invalidTraversals),
         traversalSuccessPercentage,
         isContained};
 
-    delete bc;
+    delete gt;
     delete tc;
 
     return metrics;
@@ -376,7 +384,7 @@ int main()
     string CSV_REPORT_FILENAME = "triangulation_search_report.csv";
     // =======================================================
 
-    string folder = "input";
+    string folder = "inputs";
     vector<FileMetrics> allMetrics;
 
     if (!fs::exists(folder))

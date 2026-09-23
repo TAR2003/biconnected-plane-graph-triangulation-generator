@@ -54,8 +54,7 @@ public:
     }
     void printAllTriangulations()
     {
-
-        cout << "Total triangulations in biconnected component: " << allTriangulations.size() << endl;
+        cout << "Total triangulations in graph: " << allTriangulations.size() << endl;
         for (auto &triangulation : allTriangulations)
         {
             for (auto &chord : triangulation)
