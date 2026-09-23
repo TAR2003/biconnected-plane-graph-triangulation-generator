@@ -2,8 +2,8 @@
 using namespace std;
 #include "Edge.hpp"
 #include "pairHash.hpp"
-#include "biconnected.hpp"
-#include "FaceTriangulation.hpp"
+#include "TriangulationgeneratorOneconnected.hpp"
+#include "GenerateFaceTriangulationOneconnected.hpp"
 #include <filesystem>
 #include <chrono>
 #include <thread>

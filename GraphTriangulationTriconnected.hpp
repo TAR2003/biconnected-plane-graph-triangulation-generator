@@ -3,34 +3,34 @@ using namespace std;
 #pragma once
 #include "Edge.hpp"
 #include "PairHash.hpp"
-#include "FaceTriangulation.hpp"
 #include "ParvezRahmanNakano.hpp"
-#include "TriangulationHasher.hpp"
 
-class Triconnected
+class GraphTriangulationTriconnected
 {
 public:
-    vector<vector<int>> faces;
-    vector<vector<pair<int, int>>> allTriangulations;
-    vector<vector<vector<pair<int, int>>>> triangulation_per_face;
-    unordered_set<pair<int, int>, PairHash> present;
-    TriangulationRunStats *runStats = nullptr;
+    vector<vector<long long>> faces;
+    vector<vector<pair<long long, long long>>> allTriangulations;
+    vector<vector<vector<pair<long long, long long>>>> triangulation_per_face;
+    unordered_set<pair<long long, long long>, PairHash> present;
 
-    Triconnected(vector<vector<int>> &faces, TriangulationRunStats *stats = nullptr)
+    GraphTriangulationTriconnected(vector<vector<long long>> &faces)
     {
         this->faces = faces;
-        runStats = stats;
 
-        present = unordered_set<pair<int, int>, PairHash>();
+        present = unordered_set<pair<long long, long long>, PairHash>();
         initiatePresent();
-        triangulation_per_face = vector<vector<vector<pair<int, int>>>>(faces.size());
+        triangulation_per_face = vector<vector<vector<pair<long long, long long>>>>(faces.size());
+    }
+
+    ~GraphTriangulationTriconnected() {
+        
     }
 
     void initiatePresent()
     {
         for (auto face : faces)
         {
-            for (int i = 0; i < face.size() - 1; i++)
+            for (long long i = 0; i < face.size() - 1; i++)
             {
                 present.insert(make_pair(min(face[i], face[i + 1]), max(face[i], face[i + 1])));
             }
@@ -41,15 +41,15 @@ public:
     void getAllTriangulations()
     {
         ParvezRahmanNakano *ft;
-        int pos = 0;
+        long long pos = 0;
         for (auto &face : faces)
         {
-            int n = face.size();
+            long long n = face.size();
             ft = new ParvezRahmanNakano(n);
             ft->generateAllTriangulations();
             for (auto &triangulation : ft->allTriangulations)
             {
-                vector<pair<int, int>> mappedTriangulation;
+                vector<pair<long long, long long>> mappedTriangulation;
                 for (auto &chord : triangulation)
                 {
                     mappedTriangulation.push_back({min(face[chord.first], face[chord.second]), max(face[chord.first], face[chord.second])});
@@ -67,18 +67,18 @@ public:
     // incrementally instead of materializing the full cartesian product),
     // but left intact in case anything outside this class calls it directly.
     void combineTriangulations(
-        const vector<vector<vector<pair<int, int>>>> &triangulation_per_face,
-        int index,
-        vector<pair<int, int>> &current,
-        vector<vector<pair<int, int>>> &allTriangulations)
+        const vector<vector<vector<pair<long long, long long>>>> &triangulation_per_face,
+        long long index,
+        vector<pair<long long, long long>> &current,
+        vector<vector<pair<long long, long long>>> &allTriangulations)
     {
-        while (index < (int)triangulation_per_face.size() &&
+        while (index < (long long)triangulation_per_face.size() &&
                triangulation_per_face[index].empty())
         {
             index++;
         }
 
-        if (index == (int)triangulation_per_face.size())
+        if (index == (long long)triangulation_per_face.size())
         {
             allTriangulations.push_back(current);
             return;
@@ -107,16 +107,16 @@ public:
     // building everything and filtering afterwards.
     void removeDuplicated()
     {
-        vector<vector<pair<int, int>>> uniqueTriangulations;
-        int totalLength = allTriangulations[0].size();
+        vector<vector<pair<long long, long long>>> uniqueTriangulations;
+        long long totalLength = allTriangulations[0].size();
         for (auto &triangulation : allTriangulations)
         {
-            set<pair<int, int>> allPairsInsideThisTriangulation;
+            set<pair<long long, long long>> allPairsInsideThisTriangulation;
             bool arm = false;
             for (auto &p : triangulation)
             {
-                int a = min(p.first, p.second);
-                int b = max(p.first, p.second);
+                long long a = min(p.first, p.second);
+                long long b = max(p.first, p.second);
                 allPairsInsideThisTriangulation.insert({a, b});
                 if (present.find({a, b}) != present.end())
                 {
@@ -168,34 +168,28 @@ public:
     // or duplicate-chord combination is ever materialized in memory.
     // ------------------------------------------------------------------
     void combineTriangulationsDFS(
-        int faceIndex,
-        vector<pair<int, int>> &current,
-        unordered_set<pair<int, int>, PairHash> &usedChords)
+        long long faceIndex,
+        vector<pair<long long, long long>> &current,
+        unordered_set<pair<long long, long long>, PairHash> &usedChords)
     {
         // skip faces that produced no triangulations at all (mirrors the
         // original behaviour of combineTriangulations)
-        while (faceIndex < (int)triangulation_per_face.size() &&
+        while (faceIndex < (long long)triangulation_per_face.size() &&
                triangulation_per_face[faceIndex].empty())
         {
             faceIndex++;
         }
 
-        if (faceIndex == (int)triangulation_per_face.size())
+        if (faceIndex == (long long)triangulation_per_face.size())
         {
             // every face has contributed a validated, non-duplicate,
             // non-boundary set of chords -> this is a complete, valid
             // triangulation of the triconnected component
-            vector<pair<int, int>> canonical = current;
+            vector<pair<long long, long long>> canonical = current;
             sort(canonical.begin(), canonical.end());
-
-            if (runStats != nullptr)
-            {
-                runStats->recordTriangulation(canonical, &allTriangulations);
-            }
-            else
-            {
-                allTriangulations.push_back(canonical);
-            }
+            
+            allTriangulations.push_back(canonical);
+            
             return;
         }
 
@@ -206,8 +200,8 @@ public:
             bool valid = true;
             for (const auto &raw : tri)
             {
-                int a = min(raw.first, raw.second);
-                int b = max(raw.first, raw.second);
+                long long a = min(raw.first, raw.second);
+                long long b = max(raw.first, raw.second);
 
                 // reject: chord is actually a boundary edge of the
                 // triconnected component, not a valid internal diagonal
@@ -232,12 +226,12 @@ public:
             // face's own triangulation (shouldn't normally happen, but
             // keeps behaviour identical to the strict size check before)
             {
-                set<pair<int, int>> withinFace;
+                set<pair<long long, long long>> withinFace;
                 bool internalDup = false;
                 for (const auto &raw : tri)
                 {
-                    int a = min(raw.first, raw.second);
-                    int b = max(raw.first, raw.second);
+                    long long a = min(raw.first, raw.second);
+                    long long b = max(raw.first, raw.second);
                     if (!withinFace.insert({a, b}).second)
                     {
                         internalDup = true;
@@ -250,13 +244,13 @@ public:
 
             // --- commit: add this face's chords, recurse, then backtrack ---
             size_t oldSize = current.size();
-            vector<pair<int, int>> addedChords;
+            vector<pair<long long, long long>> addedChords;
             addedChords.reserve(tri.size());
 
             for (const auto &raw : tri)
             {
-                int a = min(raw.first, raw.second);
-                int b = max(raw.first, raw.second);
+                long long a = min(raw.first, raw.second);
+                long long b = max(raw.first, raw.second);
                 current.push_back({a, b});
                 usedChords.insert({a, b});
                 addedChords.push_back({a, b});
@@ -278,8 +272,8 @@ public:
         sortTriangulations();
         allTriangulations.clear();
 
-        vector<pair<int, int>> current;
-        unordered_set<pair<int, int>, PairHash> usedChords;
+        vector<pair<long long, long long>> current;
+        unordered_set<pair<long long, long long>, PairHash> usedChords;
         combineTriangulationsDFS(0, current, usedChords);
 
         // no post-hoc removeDuplicated() needed: the DFS above only ever
@@ -291,7 +285,7 @@ public:
 
     void printTriangulationsPerFace()
     {
-        int face_no = 0;
+        long long face_no = 0;
         for (auto &face_triangulations : triangulation_per_face)
         {
             cout << "Face " << face_no << " has " << face_triangulations.size() << " triangulations:" << endl;
