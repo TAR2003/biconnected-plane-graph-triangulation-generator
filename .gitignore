@@ -3,7 +3,7 @@ build/
 cmake-build-*/
 out/
 _deps/
-oldCodes/input
+dev/input
 
 *.exe
 *.o
