@@ -377,7 +377,7 @@ int main()
     string CSV_REPORT_FILENAME = "triangulation_search_report.csv";
     // =======================================================
 
-    string folder = "inputs";
+    string folder = "input/Biconnected";
     vector<FileMetrics> allMetrics;
 
     if (!fs::exists(folder))

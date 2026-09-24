@@ -109,12 +109,11 @@ inline void GraphTriangulation::output(long long serial)
 {
     if (crossedLimits())
     {
-        return;
+        cout << "Triangulation Limit already reached, still coming to this method shows bug in the code" << endl;
     }
     if (serial == faces.size() - 1)
     {
         totalTriangulations++;
-        
         storeTriangulation();
         
     }
