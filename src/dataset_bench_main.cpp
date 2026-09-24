@@ -24,6 +24,7 @@
 #include <windows.h>
 #else
 #include <csignal>
+#include <sched.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #endif
@@ -38,8 +39,9 @@ struct Options {
     std::string case_filter;
     bool list_cases = false;
     bool rerun_existing = false;
-    int64_t runs_per_case = 1;
+    int64_t runs_per_case = 3;
     int64_t timeout_seconds = 0;
+    int cpu = -1;
     std::string case_file;
 };
 struct InputCase { fs::path path; std::string category; long long vertices = 0; };
@@ -303,6 +305,10 @@ void parse_options(int* argc, char** argv) {
             options.runs_per_case = std::stoll(option_value(&index, *argc, argv, "--runs-per-case"));
             if (options.runs_per_case < 1) throw std::runtime_error("--runs-per-case must be at least 1");
         }
+        else if (argument == "--cpu" || argument.rfind("--cpu=", 0) == 0) {
+            options.cpu = std::stoi(option_value(&index, *argc, argv, "--cpu"));
+            if (options.cpu < 0) throw std::runtime_error("--cpu must be non-negative");
+        }
         else benchmark_args.push_back(argv[index]);
     }
     std::copy(benchmark_args.begin(), benchmark_args.end(), argv);
@@ -346,7 +352,10 @@ ChildResult run_child(const std::string& executable, const std::vector<std::stri
                         &startup, &process)) {
         throw std::runtime_error("cannot start benchmark child process");
     }
-    const DWORD wait_result = WaitForSingleObject(process.hProcess, static_cast<DWORD>(timeout.count() * 1000));
+    const DWORD wait_milliseconds = timeout.count() > 0
+        ? static_cast<DWORD>(timeout.count() * 1000)
+        : INFINITE;
+    const DWORD wait_result = WaitForSingleObject(process.hProcess, wait_milliseconds);
     ChildResult result;
     if (wait_result == WAIT_TIMEOUT) {
         result.timed_out = true;
@@ -363,6 +372,14 @@ ChildResult run_child(const std::string& executable, const std::vector<std::stri
     const pid_t child = fork();
     if (child < 0) throw std::runtime_error("cannot fork benchmark child process");
     if (child == 0) {
+#ifdef __linux__
+        if (options.cpu >= 0) {
+            cpu_set_t cpu_set;
+            CPU_ZERO(&cpu_set);
+            CPU_SET(options.cpu, &cpu_set);
+            if (sched_setaffinity(0, sizeof(cpu_set), &cpu_set) != 0) std::_Exit(126);
+        }
+#endif
         std::vector<char*> child_argv;
         child_argv.push_back(const_cast<char*>(executable.c_str()));
         std::vector<std::string> storage = arguments;
@@ -371,8 +388,12 @@ ChildResult run_child(const std::string& executable, const std::vector<std::stri
         execv(executable.c_str(), child_argv.data());
         std::_Exit(127);
     }
-    const auto deadline = std::chrono::steady_clock::now() + timeout;
     int status = 0;
+    if (timeout.count() == 0) {
+        waitpid(child, &status, 0);
+        return {false, WIFEXITED(status) ? WEXITSTATUS(status) : 1};
+    }
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
     while (waitpid(child, &status, WNOHANG) == 0) {
         if (std::chrono::steady_clock::now() >= deadline) {
             kill(child, SIGKILL);
@@ -390,24 +411,30 @@ int run_isolated_cases(const std::string& executable, int argc, char** argv) {
         "--algorithm=" + algorithm_name(),
         "--input-root=" + options.input_root.string(),
         "--output-dir=" + options.output_dir.string(),
-        "--runs-per-case=" + std::to_string(options.runs_per_case),
+        "--runs-per-case=1",
         "--rerun-existing"};
+    if (options.cpu >= 0) child_arguments.push_back("--cpu=" + std::to_string(options.cpu));
     for (int index = 1; index < argc; ++index) child_arguments.push_back(argv[index]);
 
     for (const auto& test_case : cases) {
         std::vector<std::string> arguments = child_arguments;
         arguments.push_back("--case-file=" + test_case.path.lexically_relative(options.input_root).generic_string());
-        std::cout << "[RUNNING] " << test_case.path.lexically_relative(options.input_root).generic_string()
-                  << " | timeout=" << options.timeout_seconds << " s" << std::endl;
-        const auto started = std::chrono::steady_clock::now();
-        const ChildResult result = run_child(executable, arguments, std::chrono::seconds(options.timeout_seconds));
-        const double elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
-        if (result.timed_out) {
-            append_timeout_csv(test_case, elapsed);
-            std::cout << "[TIMEOUT] " << test_case.path.lexically_relative(options.input_root).generic_string() << std::endl;
-        } else if (result.exit_code != 0) {
-            std::cerr << "[ERROR] " << test_case.path.lexically_relative(options.input_root).generic_string()
-                      << " | child exit=" << result.exit_code << std::endl;
+        for (int64_t run = 0; run < options.runs_per_case; ++run) {
+            std::error_code ec;
+            fs::remove(checkpoint_path(test_case), ec);
+            std::cout << "[RUNNING] " << test_case.path.lexically_relative(options.input_root).generic_string()
+                      << " | repetition=" << (run + 1) << '/' << options.runs_per_case
+                      << " | timeout=" << options.timeout_seconds << " s" << std::endl;
+            const auto started = std::chrono::steady_clock::now();
+            const ChildResult result = run_child(executable, arguments, std::chrono::seconds(options.timeout_seconds));
+            const double elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
+            if (result.timed_out) {
+                append_timeout_csv(test_case, elapsed);
+                std::cout << "[TIMEOUT] " << test_case.path.lexically_relative(options.input_root).generic_string() << std::endl;
+            } else if (result.exit_code != 0) {
+                std::cerr << "[ERROR] " << test_case.path.lexically_relative(options.input_root).generic_string()
+                          << " | child exit=" << result.exit_code << std::endl;
+            }
         }
     }
     return 0;
@@ -426,7 +453,7 @@ int main(int argc, char** argv) {
             for (const auto& test_case : cases) std::cout << benchmark_name(test_case) << '\n';
             return 0;
         }
-        if (options.timeout_seconds > 0 && options.case_file.empty()) {
+        if (options.case_file.empty()) {
             return run_isolated_cases(argv[0], argc, argv);
         }
         for (const auto& test_case : cases) register_case(test_case);

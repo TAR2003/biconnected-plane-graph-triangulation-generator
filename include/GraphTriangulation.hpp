@@ -19,21 +19,16 @@ public:
     long long totalChecks = 0;
     long long successfulChecks = 0;
     long long invalidTraversals = 0;
+    long long triangulationLimit;
 
     long long totalTriangulations = 0;
 
-    // Optional hook, called periodically (decided by the callback itself,
-    // e.g. every N triangulations) with a chance to persist current stats
-    // to disk BEFORE a possible SIGKILL. Defaults to a no-op so callers
-    // that don't need checkpointing (correctness_check, triangulate) pay
-    // zero overhead. See checkpoint.hpp for the actual writer.
-    std::function<void(const GraphTriangulation&)> onProgressTick = [](const GraphTriangulation&) {};
-
-    GraphTriangulation(vector<vector<long long>> &faces)
+    GraphTriangulation(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX)
     {
         this->faces = faces;
         present = unordered_multiset<pair<long long, long long>, PairHash>();
         initiatePresent();
+        this->triangulationLimit = triangulationLimit;
         faceTriangulations = vector<FaceTriangulation *>(faces.size(), nullptr);
     }
 
@@ -72,6 +67,10 @@ public:
             cout << endl;
         }
     }
+
+    bool crossedLimits() {
+        return totalTriangulations >= triangulationLimit;
+    }
 };
 
 // Include FaceTriangulation.hpp after class declaration to resolve circular dependency
@@ -93,6 +92,10 @@ inline void GraphTriangulation::storeTriangulation()
 
 inline void GraphTriangulation::getNextFaceTriangulation(long long serial)
 {
+    if (crossedLimits())
+    {
+        return;
+    }
     faceTriangulations[serial] = getFaceTriangulation(serial);
     faceTriangulations[serial]->generateAllTriangulations();
 }
@@ -104,11 +107,16 @@ inline void GraphTriangulation::getAllTriangulations()
 
 inline void GraphTriangulation::output(long long serial)
 {
+    if (crossedLimits())
+    {
+        return;
+    }
     if (serial == faces.size() - 1)
     {
         totalTriangulations++;
-        onProgressTick(*this); // no-op unless a checkpoint callback was set
+        
         storeTriangulation();
+        
     }
     else
     {
@@ -139,7 +147,7 @@ inline void GraphTriangulation::addTriangulation()
 class GraphTriangulationOneconnected : public GraphTriangulation
 {
 public:
-    GraphTriangulationOneconnected(vector<vector<long long>> &faces) : GraphTriangulation(faces){};
+    GraphTriangulationOneconnected(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulation(faces, triangulationLimit){};
     FaceTriangulation * getFaceTriangulation(long long serial) override;
 };
 
@@ -154,7 +162,7 @@ inline FaceTriangulation * GraphTriangulationOneconnected::getFaceTriangulation(
 class GraphTriangulationBiconnected : public GraphTriangulation
 {
 public:
-    GraphTriangulationBiconnected(vector<vector<long long>> &faces) : GraphTriangulation(faces){};
+    GraphTriangulationBiconnected(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulation(faces, triangulationLimit){};
     FaceTriangulation * getFaceTriangulation(long long serial) override;
 };
 
@@ -167,7 +175,7 @@ inline FaceTriangulation * GraphTriangulationBiconnected::getFaceTriangulation(l
 class GraphTriangulationBiconnectedPerformance : public GraphTriangulationBiconnected
 {
 public:
-    GraphTriangulationBiconnectedPerformance(vector<vector<long long>> &faces) : GraphTriangulationBiconnected(faces){};
+    GraphTriangulationBiconnectedPerformance(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationBiconnected(faces, triangulationLimit){};
     void storeTriangulation() override;
 };
 
@@ -179,7 +187,7 @@ inline void GraphTriangulationBiconnectedPerformance::storeTriangulation()
 class GraphTriangulationOneconnectedPerformance : public GraphTriangulationOneconnected
 {
 public:
-    GraphTriangulationOneconnectedPerformance(vector<vector<long long>> &faces) : GraphTriangulationOneconnected(faces){};
+    GraphTriangulationOneconnectedPerformance(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationOneconnected(faces, triangulationLimit){};
     void storeTriangulation() override;
 };
 
@@ -191,7 +199,7 @@ inline void GraphTriangulationOneconnectedPerformance::storeTriangulation()
 class GraphTriangulationBiconnectedCorrectness : public GraphTriangulationBiconnected
 {
 public:
-    GraphTriangulationBiconnectedCorrectness(vector<vector<long long>> &faces) : GraphTriangulationBiconnected(faces){};
+    GraphTriangulationBiconnectedCorrectness(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationBiconnected(faces, triangulationLimit){};
     void storeTriangulation() override;
 };
 
@@ -203,7 +211,7 @@ inline void GraphTriangulationBiconnectedCorrectness::storeTriangulation()
 class GraphTriangulationOneconnectedCorrectness : public GraphTriangulationOneconnected
 {
 public:
-    GraphTriangulationOneconnectedCorrectness(vector<vector<long long>> &faces) : GraphTriangulationOneconnected(faces){};
+    GraphTriangulationOneconnectedCorrectness(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationOneconnected(faces, triangulationLimit){};
     void storeTriangulation() override;
 };
 

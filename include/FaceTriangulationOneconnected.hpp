@@ -4,8 +4,6 @@
 #include "GraphTriangulation.hpp"
 using namespace std;
 
-
-
 class FaceTriangulationOneconnected : public FaceTriangulation
 {
 public:
@@ -18,12 +16,12 @@ public:
     {
         // cout << "Flipping edge: " << (*itrGS)->first << " " << (*itrGS)->second << endl;
         auto itrGS = iteratorToFlip; // Use the provided iterator directly
-        Edge *e = *itrGS; // Edge to be flipped
+        Edge *e = *itrGS;            // Edge to be flipped
 
         // Store the values BEFORE flipping
         pair<long long, long long> newChord = make_pair(e->opposite_first, e->opposite_second); // New chord after flip
         pair<long long, long long> oldChord = make_pair(e->first, e->second);                   // Old chord before flip
-        auto itr = e->chordItrGS;                                                   // Corresponding iterator in the generating set
+        auto itr = e->chordItrGS;                                                               // Corresponding iterator in the generating set
         // Update neighbors with the stored values
         if (next(itr) != GS.end())
         {
@@ -117,16 +115,16 @@ public:
             }
         }
 
-          GS.erase(itrGS); // Remove the current edge from the generating set
+        GS.erase(itrGS); // Remove the current edge from the generating set
 
-          output();
+        output();
 
-            for (; itrloop != GS.end();)
+        for (; itrloop != GS.end();)
         {
             // Recursively generate child triangulations for edges that can block the current edge
-                Edge *child = *itrloop;
+            Edge *child = *itrloop;
             generateChildTriangulations(itrloop);
-                itrloop = next(child->chordItrGS);
+            itrloop = next(child->chordItrGS);
         }
         if (lastChordGS) // If the current edge was the last in the generating set
         {
@@ -201,7 +199,6 @@ public:
         else
         {
             gt->invalidTraversals++;
-            gt->onProgressTick(*gt); // same optional checkpoint hook as the valid-triangulation path
         }
     }
 };

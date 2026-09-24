@@ -158,13 +158,30 @@ Windows:
 
 ### Repeat cases for statistics
 
-Google Benchmark can repeat each registered case multiple times and report aggregates:
+Dataset runs are isolated by default: every repetition is a fresh child process, so peak RSS starts at zero for each observation. The default is three repetitions; choose five for a larger sample:
 
 ```bash
-./triangulation_bench --benchmark_repetitions=10 --benchmark_report_aggregates_only=true
+./dataset_bench --runs-per-case=5 --timeout=300 --cpu=0
 ```
 
-### Minimum time per case (internal auto-repeat)
+`--timeout=300` kills a case after 300 seconds and records `timed_out_partial` when a checkpoint was written, or `timed_out_no_data` otherwise. Omit `--timeout` for an isolated run with no deadline. Do not use Google Benchmark's `--benchmark_min_time` for dataset measurements: each child is registered with exactly one manual iteration, so long enumerations are never auto-repeated.
+
+### Reproducible experimental environment
+
+Record the CPU model, base/boost frequency, RAM capacity/speed, L3 cache, OS/kernel, compiler version, CMake version, and the exact commit used for each experiment. Build the release binary with the explicit flags used by the paper:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DTRIANGULATION_NATIVE_ARCH=ON
+cmake --build build --target dataset_bench -j
+g++ --version
+cmake --version
+```
+
+On Linux, run on a quiet machine with the CPU governor set to `performance`, Turbo Boost disabled for the experiment, and a pinned core. For example, the benchmark command above uses core 0 through the portable harness option `--cpu=0` (equivalent in purpose to `taskset -c 0`). These controls are Linux-only; Windows results should report the scheduler and power-plan settings instead of claiming CPU pinning.
+
+Report wall-clock seconds, triangulations per second, check-success percentage, and peak RSS in MB. State the timeout and repetition count, and mark timed-out partial rows separately from completed rows in plots and tables.
+
+### Minimum time per case (not for dataset measurements)
 
 ```bash
 ./triangulation_bench --benchmark_min_time=2s
