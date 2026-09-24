@@ -230,7 +230,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=TriangulationTools
+CMAKE_PROJECT_NAME:STATIC=PlaneGraphTriangulationBenchmark
 
 //Value Computed by CMake
 CMAKE_PROJECT_SPDX_LICENSE:STATIC=
@@ -329,14 +329,14 @@ FETCHCONTENT_FULLY_DISCONNECTED:BOOL=OFF
 FETCHCONTENT_QUIET:BOOL=ON
 
 //When not empty, overrides where to find pre-populated content
-// for googlebenchmark
-FETCHCONTENT_SOURCE_DIR_GOOGLEBENCHMARK:PATH=
+// for benchmark
+FETCHCONTENT_SOURCE_DIR_BENCHMARK:PATH=
 
 //Enables UPDATE_DISCONNECTED behavior for all content population
 FETCHCONTENT_UPDATES_DISCONNECTED:BOOL=OFF
 
-//Enables UPDATE_DISCONNECTED behavior just for population of googlebenchmark
-FETCHCONTENT_UPDATES_DISCONNECTED_GOOGLEBENCHMARK:BOOL=OFF
+//Enables UPDATE_DISCONNECTED behavior just for population of benchmark
+FETCHCONTENT_UPDATES_DISCONNECTED_BENCHMARK:BOOL=OFF
 
 //Git command line client
 GIT_EXECUTABLE:FILEPATH=/usr/bin/git
@@ -345,22 +345,22 @@ GIT_EXECUTABLE:FILEPATH=/usr/bin/git
 LLVM_FILECHECK_EXE:FILEPATH=LLVM_FILECHECK_EXE-NOTFOUND
 
 //Value Computed by CMake
-TriangulationTools_BINARY_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build
+PlaneGraphTriangulationBenchmark_BINARY_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build
 
 //Value Computed by CMake
-TriangulationTools_IS_TOP_LEVEL:STATIC=ON
+PlaneGraphTriangulationBenchmark_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
-TriangulationTools_SOURCE_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator
+PlaneGraphTriangulationBenchmark_SOURCE_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator
 
 //Value Computed by CMake
-benchmark_BINARY_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-build
+benchmark_BINARY_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/benchmark-build
 
 //Value Computed by CMake
 benchmark_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
-benchmark_SOURCE_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/googlebenchmark-src
+benchmark_SOURCE_DIR:STATIC=/mnt/c/Users/TAWKIR/Documents/GitHub/biconnected-plane-graph-triangulation-generator/build/_deps/benchmark-src
 
 
 ########################

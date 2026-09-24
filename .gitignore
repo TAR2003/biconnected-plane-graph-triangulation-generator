@@ -4,6 +4,7 @@ cmake-build-*/
 out/
 _deps/
 dev/input
+benchmark-results/
 
 *.exe
 *.o

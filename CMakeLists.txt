@@ -1,50 +1,33 @@
 cmake_minimum_required(VERSION 3.16)
-project(TriangulationTools CXX)
+project(PlaneGraphTriangulationBenchmark LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(TRIANGULATION_NATIVE_ARCH "Enable -march=native for machine-specific benchmark binaries" OFF)
-
-if(NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release)
 endif()
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
-if(TRIANGULATION_NATIVE_ARCH AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  add_compile_options(-march=native)
-endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-
-# ---------------------------------------------------------------------
-# 1. correctness_check -- validate fast algorithm vs brute-force truth
-# ---------------------------------------------------------------------
-add_executable(correctness_check src/correctness_check.cpp)
-
-# ---------------------------------------------------------------------
-# 2. triangulate -- write all triangulations of one input to a text file
-# ---------------------------------------------------------------------
-add_executable(triangulate src/triangulate.cpp)
-
-# ---------------------------------------------------------------------
-# 3. dataset_bench -- Google-Benchmark-based timing/memory benchmark
-#    over your own input files, with CSV output and timeout support.
-#    Requires Google Benchmark -- fetched automatically.
-# ---------------------------------------------------------------------
+# --- Google Benchmark (pinned for reproducibility) ---------------------------
 include(FetchContent)
-FetchContent_Declare(
-  googlebenchmark
-  GIT_REPOSITORY https://github.com/google/benchmark.git
-  GIT_TAG v1.9.1
-)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
 set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googlebenchmark)
+FetchContent_Declare(benchmark
+  GIT_REPOSITORY https://github.com/google/benchmark.git
+  GIT_TAG v1.9.1
+  GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(benchmark)
 
-add_executable(dataset_bench src/dataset_bench_main.cpp src/memory_tracker.cpp)
-if(WIN32)
-  target_link_libraries(dataset_bench PRIVATE benchmark::benchmark)
-else()
-  target_link_libraries(dataset_bench PRIVATE benchmark::benchmark pthread dl)
-endif()
+# --- Shared harness (object library so the operator new/delete overrides are
+# always linked into the executables) --------------------------------------
+add_library(bench_common OBJECT bench/MemoryTracker.cpp)
+target_include_directories(bench_common PUBLIC ${CMAKE_SOURCE_DIR}/bench ${CMAKE_SOURCE_DIR}/include)
+target_compile_definitions(bench_common PUBLIC BENCH_PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
+target_link_libraries(bench_common PUBLIC benchmark::benchmark)
+
+# --- Executables --------------------------------------------------------------
+foreach(target bench_total bench_individual)
+  add_executable(${target} bench/${target}.cpp)
+  target_link_libraries(${target} PRIVATE bench_common)
+endforeach()
