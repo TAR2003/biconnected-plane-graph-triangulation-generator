@@ -132,6 +132,10 @@ public:
 
         for (; itrloop != VGS.end();)
         {
+            if(gt->crossedLimits())
+            {
+                break;
+            }
             // Recursively generate child triangulations for edges that can block the current edge
             Edge *child = *itrloop;
             generateChildTriangulations(itrloop);
@@ -198,7 +202,7 @@ public:
         {
             if (gt->crossedLimits())
             {
-                return;
+                break;
             }
             Edge *child = *itr;
             generateChildTriangulations(itr); // generating child triangulations recursively

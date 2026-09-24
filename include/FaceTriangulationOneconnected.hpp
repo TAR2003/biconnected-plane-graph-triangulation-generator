@@ -60,6 +60,10 @@ public:
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &iteratorToFlip)
     {
+        if (gt->crossedLimits())
+        {
+            return;
+        }
         auto itrGS = iteratorToFlip;
         gt->totalChecks++;
         auto oppositePair = getOppositePair(*itrGS);
@@ -121,6 +125,10 @@ public:
 
         for (; itrloop != GS.end();)
         {
+            if (gt->crossedLimits())
+            {
+                return;
+            }
             // Recursively generate child triangulations for edges that can block the current edge
             Edge *child = *itrloop;
             generateChildTriangulations(itrloop);
@@ -171,6 +179,10 @@ public:
 
         for (auto itr = GS.begin(); itr != GS.end();)
         {
+            if (gt->crossedLimits())
+            {
+                return;
+            }
             Edge *child = *itr;
             generateChildTriangulations(itr); // generating child triangulations recursively
             itr = next(child->chordItrGS);
