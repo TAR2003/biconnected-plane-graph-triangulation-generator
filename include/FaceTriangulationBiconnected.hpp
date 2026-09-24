@@ -75,6 +75,10 @@ public:
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &iteratorToFlip)
     {
+        if (gt->crossedLimits())
+        {
+            return;
+        }
         auto itrVGS = iteratorToFlip;
 
         flip(itrVGS); // Flip the edge at the current iterator, and update neighbors accordingly
@@ -192,6 +196,10 @@ public:
         output();
         for (auto itr = VGS.begin(); itr != VGS.end();)
         {
+            if (gt->crossedLimits())
+            {
+                return;
+            }
             Edge *child = *itr;
             generateChildTriangulations(itr); // generating child triangulations recursively
             itr = next(child->chordItrVGS);
