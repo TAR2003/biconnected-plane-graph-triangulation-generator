@@ -71,14 +71,25 @@ public:
         present.insert(getPair(e));
     }
 
+    void visitAllBranches(list<Edge *>::iterator &itr)
+    {
+        for (; itr != VGS.end();)
+        {
+            // Recursively generate child triangulations for edges that can block the current edge
+            if (gt->crossedLimits())
+            {
+                return;
+            }
+            Edge *child = *itr;
+            generateChildTriangulations(itr);
+            itr = next(child->chordItrVGS);
+        }
+    }
+
     /// @brief Generates child triangulations by flipping the edge pointed to by the iterator
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &iteratorToFlip)
     {
-        if (gt->crossedLimits())
-        {
-            return;
-        }
         auto itrVGS = iteratorToFlip;
 
         flip(itrVGS); // Flip the edge at the current iterator, and update neighbors accordingly
@@ -130,17 +141,8 @@ public:
 
         output();
 
-        for (; itrloop != VGS.end();)
-        {
-            if(gt->crossedLimits())
-            {
-                break;
-            }
-            // Recursively generate child triangulations for edges that can block the current edge
-            Edge *child = *itrloop;
-            generateChildTriangulations(itrloop);
-            itrloop = next(child->chordItrVGS);
-        }
+        visitAllBranches(itrloop); // Visit all branches recursively
+
         if (lastChordGS) // If the current edge was the last in the generating set
         {
             // cout << "last chord" << endl;
@@ -198,23 +200,11 @@ public:
 
         // addTriangulation(); // adding the initial root triangulation
         output();
-        for (auto itr = VGS.begin(); itr != VGS.end();)
-        {
-            if (gt->crossedLimits())
-            {
-                break;
-            }
-            Edge *child = *itr;
-            generateChildTriangulations(itr); // generating child triangulations recursively
-            itr = next(child->chordItrVGS);
-        }
+        
+        auto itr = VGS.begin();
+        visitAllBranches(itr); // Visit all branches recursively
 
-        for (auto &chord : chords)
-        {
-            // cout << "erasing the chords" << endl;
-            present.erase(getPair(chord)); // unmarking the edges after finishing
-            // cout << "we are done erasing the chords" << endl;
-        }
+        removeCurrentChordsFromPresent(); // unmarking the edges after finishing
     }
 
     void output()

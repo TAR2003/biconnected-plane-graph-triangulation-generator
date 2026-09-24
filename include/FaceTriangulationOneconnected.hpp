@@ -56,14 +56,25 @@ public:
         presentFace.insert(getPair(e));
     }
 
+    void visitAllBranches(list<Edge *>::iterator &itr)
+    {
+        for (; itr != GS.end();)
+        {
+            if (gt->crossedLimits())
+            {
+                return;
+            }
+            // Recursively generate child triangulations for edges that can block the current edge
+            Edge *child = *itr;
+            generateChildTriangulations(itr);
+            itr = next(child->chordItrGS);
+        }
+    }
+
     /// @brief Generates child triangulations by flipping the edge pointed to by the iterator
     /// @param itr Iterator pointing to the edge to be flipped
     void generateChildTriangulations(list<Edge *>::iterator &iteratorToFlip)
     {
-        if (gt->crossedLimits())
-        {
-            return;
-        }
         auto itrGS = iteratorToFlip;
         gt->totalChecks++;
         auto oppositePair = getOppositePair(*itrGS);
@@ -123,17 +134,8 @@ public:
 
         output();
 
-        for (; itrloop != GS.end();)
-        {
-            if (gt->crossedLimits())
-            {
-                return;
-            }
-            // Recursively generate child triangulations for edges that can block the current edge
-            Edge *child = *itrloop;
-            generateChildTriangulations(itrloop);
-            itrloop = next(child->chordItrGS);
-        }
+        visitAllBranches(itrloop); // Visit all branches recursively
+
         if (lastChordGS) // If the current edge was the last in the generating set
         {
             // cout << "last chord" << endl;
@@ -177,28 +179,10 @@ public:
 
         // printSet(GS);
 
-        for (auto itr = GS.begin(); itr != GS.end();)
-        {
-            if (gt->crossedLimits())
-            {
-                return;
-            }
-            Edge *child = *itr;
-            generateChildTriangulations(itr); // generating child triangulations recursively
-            itr = next(child->chordItrGS);
-        }
+        auto itr = GS.begin();
+        visitAllBranches(itr); // Visit all branches recursively
 
-        for (auto &chord : chords)
-        {
-            // cout << "erasing the chords" << endl;
-            auto it = present.find(getPair(chord));
-            if (it != present.end())
-                present.erase(it); // unmarking the edges after finishing
-            // cout << "we are done erasing the chords" << endl;
-            auto it2 = presentFace.find(getPair(chord));
-            if (it2 != presentFace.end())
-                presentFace.erase(it2);
-        }
+        removeCurrentChordsFromPresent(); // unmarking the edges after finishing
     }
 
     void output()

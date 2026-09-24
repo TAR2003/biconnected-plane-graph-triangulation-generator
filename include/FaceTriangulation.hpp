@@ -51,6 +51,8 @@ public:
         {
             delete chord; // free the memory allocated for each chord
         }
+        presentFace.clear(); // clear the set of present chords
+
     }
 
     void printSet(list<Edge *> &s)
@@ -183,6 +185,18 @@ public:
         allTriangulations.push_back(currentTriangulation);
     }
 
+    void removeCurrentChordsFromPresent()
+    {
+        for (auto &chord : chords)
+        {
+            auto it = present.find(getPair(chord));
+            if (it != present.end())
+                present.erase(it); // unmarking the edges after finishing
+        }
+    }
+
+    virtual void visitAllBranches(list<Edge *>::iterator &itr) = 0;
+
     /// @brief Outputs the current triangulation
     virtual void output() = 0;
 
@@ -195,7 +209,7 @@ public:
     virtual void generateChildTriangulations(list<Edge *>::iterator &itrGS) = 0;
 
     /// @brief generates all triangulations of the cycle
-    virtual void generateAllTriangulations() =0;
+    virtual void generateAllTriangulations() = 0;
 };
 
 
