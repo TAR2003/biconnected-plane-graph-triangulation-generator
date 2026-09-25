@@ -384,7 +384,7 @@ int main()
     string CSV_REPORT_FILENAME = "triangulation_search_report.csv";
     // =======================================================
 
-    string folder = "input/Oneconnected";
+    string folder = "input/Oneconnected/02_star";
     vector<FileMetrics> allMetrics;
 
     if (!fs::exists(folder))

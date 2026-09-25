@@ -113,6 +113,7 @@ public:
         {
             set<pair<long long, long long>> allPairsInsideThisTriangulation;
             bool arm = false;
+            bool selfLoop = false;
             for (auto &p : triangulation)
             {
                 long long a = min(p.first, p.second);
@@ -123,12 +124,17 @@ public:
                     arm = true;
                     break;
                 }
+                if(a == b)
+                {
+                    selfLoop = true;
+                    break;
+                }
             }
             if (allPairsInsideThisTriangulation.size() != totalLength)
             {
                 continue;
             }
-            if (arm)
+            if (arm || selfLoop)
             {
                 continue;
             }

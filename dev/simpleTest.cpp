@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 #include "GraphTriangulation.hpp"
+#include "GraphTriangulationTriconnected.hpp"
 
 vector<vector<long long>> readInput(const string &filename)
 {
@@ -33,7 +34,7 @@ vector<vector<long long>> readInput(const string &filename)
 
 int main ()
 {
-    vector<vector<long long>> faces = readInput("input/Oneconnected/02_star/star_15.txt");
+    vector<vector<long long>> faces = readInput("input/Oneconnected/02_star/star_03.txt");
     // for(auto &face : faces)
     // {
     //     for(auto &vertex : face)
@@ -42,8 +43,14 @@ int main ()
     //     }
     //     cout << endl;
     // }
-    GraphTriangulation *gt = new GraphTriangulationOneconnectedPerformance(faces, 10000000);
+    GraphTriangulation *gt = new GraphTriangulationOneconnectedCorrectness(faces, 10000000);
     gt->getAllTriangulations();
+    gt->printAllTriangulations();
+    GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(faces);
+    tc->getAllTriangulations();
+    tc->refineTriangulations();
+    tc->removeDuplicated();
+    tc->printAllTriangulations();
     cout << "Total triangulations: " << gt->totalTriangulations << endl;
     delete gt;
 }
