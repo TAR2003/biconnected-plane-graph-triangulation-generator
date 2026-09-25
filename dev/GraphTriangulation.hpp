@@ -72,6 +72,16 @@ public:
     {
         return totalTriangulations >= triangulationLimit;
     }
+
+    void printPresent()
+    {
+        cout << "Printing the present set" << endl;
+        for (auto &edge : present)
+        {
+            cout << "(" << edge.first << ", " << edge.second << ") , ";
+        }
+        cout << endl;
+    }
 };
 
 // Include FaceTriangulation.hpp after class declaration to resolve circular dependency

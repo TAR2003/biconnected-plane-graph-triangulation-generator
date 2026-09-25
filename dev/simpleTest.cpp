@@ -32,9 +32,9 @@ vector<vector<long long>> readInput(const string &filename)
     return faces;
 }
 
-int main ()
+void runCase(string filename)
 {
-    vector<vector<long long>> faces = readInput("input/Oneconnected/02_star/star_03.txt");
+    vector<vector<long long>> faces = readInput(filename);
     // for(auto &face : faces)
     // {
     //     for(auto &vertex : face)
@@ -51,6 +51,17 @@ int main ()
     tc->refineTriangulations();
     tc->removeDuplicated();
     tc->printAllTriangulations();
-    cout << "Total triangulations: " << gt->totalTriangulations << endl;
+    cout << "Total triangulations for : " << filename << " : " << gt->totalTriangulations << endl;
+    cout << "invalid traversals for : " << filename << " : " << gt->invalidTraversals << endl;
+    cout << "success percentage for traversal : " << filename << " : " << (double)(gt->totalTriangulations) / (double)(gt->totalTriangulations + gt->invalidTraversals) * 100.0 << endl;
+    delete tc;
     delete gt;
+}
+
+int main ()
+{
+    runCase("input/Oneconnected/02_star/star_05.txt");
+    runCase("input/Oneconnected/02_star/star_06.txt");
+    return 0;
+
 }

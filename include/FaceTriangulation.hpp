@@ -106,7 +106,7 @@ public:
         long long endIndex = n - 2;
         while (startIndex < endIndex - 1)
         {
-            if (present.find({elements[startIndex], elements[endIndex]}) != present.end() || present.find({elements[endIndex], elements[startIndex]}) != present.end())
+            if (present.find({elements[startIndex], elements[endIndex]}) != present.end() || present.find({elements[endIndex], elements[startIndex]}) != present.end() || elements[startIndex] == elements[endIndex])
             {
                 startIndex++;
             }

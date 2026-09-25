@@ -190,10 +190,15 @@ public:
         // cout << "Problems: " << problems << endl;
         if (problems == 0)
         {
+            cout << "Valid Triangulation: " << endl;
+            gt->printPresent();
             gt->output(serial);
+
         }
         else
         {
+            cout << "Invalid Triangulation: " << endl;
+            gt->printPresent();
             gt->invalidTraversals++;
         }
     }
