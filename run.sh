@@ -11,4 +11,4 @@
 ./build/bench_individual --algo=oneconnected --limit=5000
 
 # Per-triangulation timing, Oneconnected algorithm, all inputs, 5k limit
-./build/bench_individual --algo=biconnected --limit=5000
+./build/bench_individual --algo=biconnected --cases=biconnected --limit=5000
