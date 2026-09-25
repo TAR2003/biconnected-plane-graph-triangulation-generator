@@ -2,15 +2,48 @@
 using namespace std;
 #include "GraphTriangulation.hpp"
 
+vector<vector<long long>> readInput(const string &filename)
+{
+    ifstream infile(filename);
+    if (!infile.is_open())
+    {
+        cerr << "Error opening file: " << filename << endl;
+        return {};
+    }
+    vector<vector<long long>> faces;
+    unordered_set<long long> uniqueVertices;
+    long long faceno;
+    infile >> faceno;
+    for (long long i = 0; i < faceno; i++)
+    {
+        long long vertices;
+        infile >> vertices;
+        vector<long long> face;
+        for (long long j = 0; j < vertices; j++)
+        {
+            long long vertex;
+            infile >> vertex;
+            face.push_back(vertex);
+            uniqueVertices.insert(vertex);
+        }
+        faces.push_back(face);
+    }
+    return faces;
+}
 
 int main ()
 {
-    vector<vector<long long>> faces = {
-        {0, 7, 8, 9, 1, 10, 11, 12, 2, 6, 5, 4},
-        {0, 4, 5, 6, 2, 16, 17, 18, 3, 15, 14, 13, 1, 9, 8, 7},
-        {1, 13, 14, 15, 3, 18, 17, 16, 2, 12, 11, 10}
-
-    };
-    GraphTriangulation *gt = new GraphTriangulationBiconnectedPerformance(faces, 10000000);
+    vector<vector<long long>> faces = readInput("input/Oneconnected/02_star/star_15.txt");
+    // for(auto &face : faces)
+    // {
+    //     for(auto &vertex : face)
+    //     {
+    //         cout << vertex << " ";
+    //     }
+    //     cout << endl;
+    // }
+    GraphTriangulation *gt = new GraphTriangulationOneconnectedPerformance(faces, 10000000);
     gt->getAllTriangulations();
+    cout << "Total triangulations: " << gt->totalTriangulations << endl;
+    delete gt;
 }

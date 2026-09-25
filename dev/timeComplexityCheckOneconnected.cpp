@@ -21,7 +21,7 @@ static const long long triangulationLimit = 10000000; // 10 million
 // ============================================================================
 // CONFIG: time limit (in seconds) for a single run. Change this value to adjust.
 // ============================================================================
-static const double TIME_LIMIT_SECONDS = 300.0;
+static const double TIME_LIMIT_SECONDS = 30.0;
 
 // The root folder containing one subfolder per category.
 static const string INPUT_ROOT = "input/Oneconnected";
