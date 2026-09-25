@@ -46,22 +46,23 @@ void runCase(string filename)
     GraphTriangulation *gt = new GraphTriangulationOneconnectedCorrectness(faces, 10000000);
     gt->getAllTriangulations();
     gt->printAllTriangulations();
-    GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(faces);
-    tc->getAllTriangulations();
-    tc->refineTriangulations();
-    tc->removeDuplicated();
-    tc->printAllTriangulations();
+    // GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(faces);
+    // tc->getAllTriangulations();
+    // tc->refineTriangulations();
+    // tc->removeDuplicated();
+    // tc->printAllTriangulations(); 
+    // delete tc;
     cout << "Total triangulations for : " << filename << " : " << gt->totalTriangulations << endl;
     cout << "invalid traversals for : " << filename << " : " << gt->invalidTraversals << endl;
     cout << "success percentage for traversal : " << filename << " : " << (double)(gt->totalTriangulations) / (double)(gt->totalTriangulations + gt->invalidTraversals) * 100.0 << endl;
-    delete tc;
+   
     delete gt;
 }
 
 int main ()
 {
-    runCase("input/Oneconnected/02_star/star_05.txt");
-    runCase("input/Oneconnected/02_star/star_06.txt");
+    runCase("input/Oneconnected/02_star/star_12.txt");
+    runCase("input/Oneconnected/02_star/star_13.txt");
     return 0;
 
 }
