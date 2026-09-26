@@ -5,7 +5,7 @@ out/
 _deps/
 dev/input
 benchmark-results/
-analyze-info/benchmark_results/
+analyze-info/benchmark-results/
 
 *.exe
 *.o
