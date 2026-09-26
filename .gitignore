@@ -6,6 +6,7 @@ _deps/
 dev/input
 benchmark-results/
 analyze-info/benchmark-results/
+graph*/
 
 *.exe
 *.o
