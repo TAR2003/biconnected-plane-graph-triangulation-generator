@@ -5,6 +5,7 @@ out/
 _deps/
 dev/input
 dev/new-input
+dev/output-images
 benchmark-results/
 analyze-info/benchmark-results/
 graph*/
