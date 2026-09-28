@@ -505,7 +505,7 @@ def draw_graph(G, pos, out_path: Path, title: str):
 # ----------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--input", default="new-input")
+    ap.add_argument("--input", default="input")
     ap.add_argument("--output", default="output-images")
     ap.add_argument("--ext", default=".txt")
     ap.add_argument("--format", default="png", choices=["png", "svg", "pdf"])

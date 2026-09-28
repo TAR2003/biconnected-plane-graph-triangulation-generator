@@ -127,8 +127,8 @@ void processFile(const fs::path &input_filepath, const fs::path &output_filepath
 
 int main()
 {
-    fs::path input_root = "input";
-    fs::path output_root = "new-input";
+    fs::path input_root = "previnput";
+    fs::path output_root = "input";
 
     if (!fs::exists(input_root))
     {

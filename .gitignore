@@ -4,7 +4,7 @@ cmake-build-*/
 out/
 _deps/
 dev/input
-dev/new-input
+dev/previnput
 dev/output-images
 benchmark-results/
 analyze-info/benchmark-results/
