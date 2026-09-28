@@ -8,7 +8,6 @@ using namespace std;
 // Forward declaration to avoid circular dependency
 class FaceTriangulation;
 
-
 class GraphTriangulation
 {
 public:
@@ -47,7 +46,7 @@ public:
     }
     void getNextFaceTriangulation(long long serial);
     virtual void storeTriangulation() = 0;
-    virtual FaceTriangulation * getFaceTriangulation(long long serial) = 0;
+    virtual FaceTriangulation *getFaceTriangulation(long long serial) = 0;
     void getAllTriangulations();
     void output(long long serial);
     void addTriangulation();
@@ -71,16 +70,6 @@ public:
     bool crossedLimits()
     {
         return totalTriangulations >= triangulationLimit;
-    }
-
-    void printPresent()
-    {
-        cout << "Printing the present set" << endl;
-        for (auto &edge : present)
-        {
-            cout << "(" << edge.first << ", " << edge.second << ") , ";
-        }
-        cout << endl;
     }
 };
 
@@ -113,14 +102,11 @@ inline void GraphTriangulation::getNextFaceTriangulation(long long serial)
 
 inline void GraphTriangulation::getAllTriangulations()
 {
-    cout << "starting all triangulatioons" << endl;
     getNextFaceTriangulation(0);
-    cout << "ended all triangulations" << endl;
 }
 
 inline void GraphTriangulation::output(long long serial)
 {
-    // cout << "Total triangulation number: " << totalTriangulations << endl;
     if (crossedLimits())
     {
         cout << "Triangulation Limit already reached, still coming to this method shows bug in the code" << endl;
@@ -217,7 +203,7 @@ inline void GraphTriangulationBiconnectedCorrectness::storeTriangulation()
 class GraphTriangulationOneconnectedCorrectness : public GraphTriangulationOneconnected
 {
 public:
-    GraphTriangulationOneconnectedCorrectness(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationOneconnected(faces, triangulationLimit){};
+    GraphTriangulationOneconnectedCorrectness(vector<vector<long long>> &faces, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationOneconnected(faces, triangulationLimit) {};
     void storeTriangulation() override;
 };
 

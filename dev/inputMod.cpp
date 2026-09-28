@@ -10,71 +10,70 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-// Reconstructs rotation system (adj) from faces representation
+// Reconstructs rotation system (adj) from Face-List representation
 void convertFaceListToRotationSystem(int num_faces, const vector<vector<int>> &faces, int &N, vector<vector<int>> &adj)
 {
-    map<pair<int, int>, int> next_in_face;
-    set<int> vertex_set;
-
-    // Map each directed edge u -> v to its next vertex w in the face boundary sequence
+    // 1. Collect all unique vertices present in the input
+    set<int> unique_vertices;
     for (const auto &face : faces)
     {
-        int k = face.size();
-        for (int i = 0; i < k; ++i)
+        for (int v : face)
         {
-            int u = face[i];
-            int v = face[(i + 1) % k];
-            int w = face[(i + 2) % k];
-
-            next_in_face[{u, v}] = w;
-            vertex_set.insert(u);
-            vertex_set.insert(v);
+            unique_vertices.insert(v);
         }
     }
 
-    N = vertex_set.empty() ? 0 : (*vertex_set.rbegin() + 1);
-    adj.assign(N, vector<int>());
-
-    // For each directed edge (u -> v), the successor edge exiting u in CCW order
-    // is (u -> w) where w is the predecessor of u along the face sharing twin edge (v -> u).
-    for (int u = 0; u < N; ++u)
+    if (unique_vertices.empty())
     {
-        // Find all outgoing neighbors of u
-        set<int> neighbors;
-        for (auto const &[edge, next_v] : next_in_face)
-        {
-            if (edge.first == u)
-            {
-                neighbors.insert(edge.second);
-            }
-        }
+        N = 0;
+        adj.clear();
+        return;
+    }
 
-        if (neighbors.empty())
+    // 2. Map original vertex labels to contiguous 0..N-1 indices
+    map<int, int> orig_to_idx;
+    vector<int> idx_to_orig;
+
+    int idx = 0;
+    for (int v : unique_vertices)
+    {
+        orig_to_idx[v] = idx++;
+        idx_to_orig.push_back(v);
+    }
+
+    N = idx_to_orig.size(); // N is exact count of unique vertices
+    vector<vector<int>> raw_succ(N);
+
+    // 3. Extract ordering steps per vertex from face walks
+    for (const auto &face : faces)
+    {
+        int k = face.size();
+        if (k < 2)
             continue;
 
-        // Reconstruct order around vertex u
-        vector<int> ordered_neighbors;
-        int start_v = *neighbors.begin();
-        int curr_v = start_v;
-
-        set<int> visited_nbrs;
-        while (visited_nbrs.find(curr_v) == visited_nbrs.end())
+        for (int i = 0; i < k; ++i)
         {
-            ordered_neighbors.push_back(curr_v);
-            visited_nbrs.insert(curr_v);
+            int u = orig_to_idx[face[i]];
+            int v = orig_to_idx[face[(i + 1) % k]];
 
-            // Move to opposite face along (curr_v -> u)
-            if (next_in_face.count({curr_v, u}))
+            raw_succ[u].push_back(v);
+        }
+    }
+
+    // 4. Construct contiguous adjacency list
+    adj.assign(N, vector<int>());
+    for (int u = 0; u < N; ++u)
+    {
+        set<int> seen;
+        for (int v : raw_succ[u])
+        {
+            if (seen.find(v) == seen.end())
             {
-                curr_v = next_in_face[{curr_v, u}];
-            }
-            else
-            {
-                break;
+                seen.insert(v);
+                // Map internal index back to original vertex label
+                adj[u].push_back(idx_to_orig[v]);
             }
         }
-
-        adj[u] = ordered_neighbors;
     }
 }
 
@@ -142,7 +141,6 @@ int main()
     {
         if (entry.is_regular_file() && entry.path().extension() == ".txt")
         {
-            // Compute relative path to preserve directory structure
             fs::path relative_path = fs::relative(entry.path(), input_root);
             fs::path target_path = output_root / relative_path;
 

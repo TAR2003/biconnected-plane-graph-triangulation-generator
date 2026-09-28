@@ -22,8 +22,8 @@ public:
         triangulation_per_face = vector<vector<vector<pair<long long, long long>>>>(faces.size());
     }
 
-    ~GraphTriangulationTriconnected() {
-        
+    ~GraphTriangulationTriconnected()
+    {
     }
 
     void initiatePresent()
@@ -124,7 +124,7 @@ public:
                     arm = true;
                     break;
                 }
-                if(a == b)
+                if (a == b)
                 {
                     selfLoop = true;
                     break;
@@ -193,9 +193,9 @@ public:
             // triangulation of the triconnected component
             vector<pair<long long, long long>> canonical = current;
             sort(canonical.begin(), canonical.end());
-            
+
             allTriangulations.push_back(canonical);
-            
+
             return;
         }
 
