@@ -4,6 +4,7 @@ cmake-build-*/
 out/
 _deps/
 dev/input
+dev/new-input
 benchmark-results/
 analyze-info/benchmark-results/
 graph*/
