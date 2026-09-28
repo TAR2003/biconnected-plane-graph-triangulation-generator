@@ -13,7 +13,7 @@ using namespace std;
 // Reconstructs rotation system (adj) from Face-List representation
 void convertFaceListToRotationSystem(int num_faces, const vector<vector<int>> &faces, int &N, vector<vector<int>> &adj)
 {
-    // 1. Collect all unique vertices present in the input
+    // 1. Collect all unique original vertex labels
     set<int> unique_vertices;
     for (const auto &face : faces)
     {
@@ -30,21 +30,21 @@ void convertFaceListToRotationSystem(int num_faces, const vector<vector<int>> &f
         return;
     }
 
-    // 2. Map original vertex labels to contiguous 0..N-1 indices
-    map<int, int> orig_to_idx;
-    vector<int> idx_to_orig;
+    // Determine max vertex ID to establish contiguous indexing [0 .. max_v]
+    int max_v = *unique_vertices.rbegin();
+    int min_v = *unique_vertices.begin();
 
-    int idx = 0;
-    for (int v : unique_vertices)
-    {
-        orig_to_idx[v] = idx++;
-        idx_to_orig.push_back(v);
-    }
+    // Check if 1-based indexing is used (min_v == 1 and 0 is missing)
+    bool is_one_based = (min_v == 1 && unique_vertices.find(0) == unique_vertices.end());
 
-    N = idx_to_orig.size(); // N is exact count of unique vertices
-    vector<vector<int>> raw_succ(N);
+    N = is_one_based ? max_v + 1 : max_v + 1;
+    adj.assign(N, vector<int>());
 
-    // 3. Extract ordering steps per vertex from face walks
+    // Map directed edges (u -> v) to their predecessor in face sequence
+    // If face is ... -> w -> u -> v -> ..., then entering u from w means exiting to v.
+    // In CCW rotation around u, the edge following (u -> w) is (u -> v).
+    map<pair<int, int>, int> next_out;
+
     for (const auto &face : faces)
     {
         int k = face.size();
@@ -53,27 +53,79 @@ void convertFaceListToRotationSystem(int num_faces, const vector<vector<int>> &f
 
         for (int i = 0; i < k; ++i)
         {
-            int u = orig_to_idx[face[i]];
-            int v = orig_to_idx[face[(i + 1) % k]];
+            int w = face[i];
+            int u = face[(i + 1) % k];
+            int v = face[(i + 2) % k];
 
-            raw_succ[u].push_back(v);
+            // Normalize 1-based indices to 0-based if necessary
+            if (is_one_based)
+            {
+                w--;
+                u--;
+                v--;
+            }
+
+            // In face walk w -> u -> v:
+            // Traversing edge (w -> u) into u means the next outgoing edge from u in CCW order is (u -> v)
+            next_out[{u, w}] = v;
         }
     }
 
-    // 4. Construct contiguous adjacency list
-    adj.assign(N, vector<int>());
+    // 2. Reconstruct rotation system for each vertex u
     for (int u = 0; u < N; ++u)
     {
-        set<int> seen;
-        for (int v : raw_succ[u])
+        // Find all incoming half-edges into u
+        set<int> incoming_neighbors;
+        for (const auto &[edge, v] : next_out)
         {
-            if (seen.find(v) == seen.end())
+            if (edge.first == u)
             {
-                seen.insert(v);
-                // Map internal index back to original vertex label
-                adj[u].push_back(idx_to_orig[v]);
+                incoming_neighbors.insert(edge.second);
             }
         }
+
+        if (incoming_neighbors.empty())
+            continue;
+
+        vector<int> ccw_order;
+        set<int> visited;
+
+        int start_w = *incoming_neighbors.begin();
+        int curr_w = start_w;
+
+        while (visited.find(curr_w) == visited.end())
+        {
+            visited.insert(curr_w);
+
+            // Get next outgoing neighbor v around u after w
+            if (next_out.count({u, curr_w}))
+            {
+                int next_v = next_out[{u, curr_w}];
+
+                // Convert back to original 1-based label if needed
+                int display_v = is_one_based ? (next_v + 1) : next_v;
+                ccw_order.push_back(display_v);
+
+                curr_w = next_v;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        adj[u] = ccw_order;
+    }
+
+    // If 1-based input was used, shift the adjacency array down by 1 so vertex 1 maps to row 0
+    if (is_one_based)
+    {
+        N = max_v;
+        for (int i = 0; i < N; ++i)
+        {
+            adj[i] = adj[i + 1];
+        }
+        adj.resize(N);
     }
 }
 
@@ -132,7 +184,7 @@ int main()
 
     if (!fs::exists(input_root))
     {
-        cerr << "Input directory 'input' does not exist!" << endl;
+        cerr << "Input directory '" << input_root << "' does not exist!" << endl;
         return 1;
     }
 
