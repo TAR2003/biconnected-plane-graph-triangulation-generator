@@ -60,6 +60,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from scipy import stats as scipy_stats
 
 warnings.filterwarnings("ignore")
 
@@ -92,6 +93,45 @@ def savefig(fig, path):
     fig.savefig(path)
     plt.close(fig)
     print(f"  wrote {path}")
+
+
+def linreg(x, y):
+    """Simple linear regression wrapper. Returns dict or None if insufficient data."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    mask = np.isfinite(x) & np.isfinite(y)
+    x, y = x[mask], y[mask]
+    if len(x) < 2 or np.all(x == x[0]):
+        return None
+    res = scipy_stats.linregress(x, y)
+    return {
+        "slope": res.slope, "intercept": res.intercept,
+        "r2": res.rvalue ** 2, "x": x, "y": y,
+    }
+
+
+def loglog_reg(x, y):
+    """Linear regression in log-log space (fits y = a * x^b). Returns dict w/ slope=b, or None."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    mask = np.isfinite(x) & np.isfinite(y) & (x > 0) & (y > 0)
+    x, y = x[mask], y[mask]
+    if len(x) < 2 or np.all(x == x[0]):
+        return None
+    res = scipy_stats.linregress(np.log10(x), np.log10(y))
+    return {
+        "slope": res.slope, "intercept": res.intercept,
+        "r2": res.rvalue ** 2, "x": x, "y": y,
+    }
+
+
+def rolling_median_iqr(series, window):
+    """Return (rolling_median, q25, q75) as pandas Series aligned to input."""
+    roll = series.rolling(window, min_periods=max(3, window // 4), center=True)
+    med = roll.median()
+    q25 = roll.quantile(0.25)
+    q75 = roll.quantile(0.75)
+    return med, q25, q75
 
 
 # ----------------------------------------------------------------------------
@@ -207,6 +247,47 @@ def add_derived_columns(totals_df):
     df = totals_df.copy()
     df["avgTimePerTriangulation"] = df["timeSeconds"] / df["triangulations"].replace(0, np.nan)
     df["unsuccessfulCheckRate"] = 100.0 - df["checkSuccessRate"]
+
+    # checks / traversals normalized per triangulation
+    tri_safe = df["triangulations"].replace(0, np.nan)
+    df["checksPerTriangulation"] = df["totalChecks"] / tri_safe
+    df["failedChecksPerTriangulation"] = df["failedChecks"] / tri_safe
+    df["traversalsPerTriangulation"] = df["totalTraversalsExtended"] / tri_safe
+
+    # invalid traversal rate
+    trav_safe = df["totalTraversalsExtended"].replace(0, np.nan)
+    df["invalidTraversalRate"] = 100.0 * df["invalidTraversals"] / trav_safe
+
+    # time per check / per traversal (overhead)
+    checks_safe = df["totalChecks"].replace(0, np.nan)
+    df["timePerCheck"] = df["timeSeconds"] / checks_safe
+    df["timePerTraversal"] = df["timeSeconds"] / trav_safe
+
+    # recomputed successful traversals from stored rate, for stacked breakdowns
+    df["successfulTraversalsComputed"] = (
+        df["totalTraversalsExtended"] * df["traversalSuccessRate"] / 100.0
+    )
+
+    # wall-clock duration from startTime/endTime, compared to reported timeSeconds
+    try:
+        start = pd.to_datetime(df["startTime"], errors="coerce")
+        end = pd.to_datetime(df["endTime"], errors="coerce")
+        df["wallDurationSeconds"] = (end - start).dt.total_seconds()
+        # avoid div-by-zero / negative noise (many runs complete within the same
+        # second, so wallDurationSeconds is often 0 -> ratio undefined, which is fine)
+        df["timeSecondsToWallRatio"] = df["timeSeconds"] / df["wallDurationSeconds"].replace(0, np.nan)
+    except Exception:
+        df["wallDurationSeconds"] = np.nan
+        df["timeSecondsToWallRatio"] = np.nan
+
+    # sanity-check / identity-check derived columns
+    df["memoryPerVertexRecomputed"] = df["peakMemoryBytes"] / df["vertices"].replace(0, np.nan)
+    df["memoryIdentityDiff"] = df["memoryPerVertexRecomputed"] - df["memoryPerVertex"]
+
+    total_checks_safe = df["totalChecks"].replace(0, np.nan)
+    df["checkSuccessRateRecomputed"] = 100.0 * df["successfulChecks"] / total_checks_safe
+    df["checkSuccessRateIdentityDiff"] = df["checkSuccessRateRecomputed"] - df["checkSuccessRate"]
+
     return df
 
 
@@ -470,6 +551,496 @@ def plot_overall(totals_df, individuals, outdir):
         ax.legend()
     savefig(fig, os.path.join(od, "checks_breakdown_vs_vertices.png"))
 
+    # 15. Peak memory vs vertices WITH linear fit + R^2 (direct evidence for "linear memory")
+    fig, ax = plt.subplots()
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo]
+        if sub.empty:
+            continue
+        ax.scatter(sub.vertices, sub.peakMemoryBytes, color=ALGO_COLORS[algo],
+                   alpha=0.5, s=20, label=f"{algo} (data)")
+        fit = linreg(sub.vertices, sub.peakMemoryBytes)
+        if fit:
+            xs = np.linspace(sub.vertices.min(), sub.vertices.max(), 100)
+            ys = fit["slope"] * xs + fit["intercept"]
+            ax.plot(xs, ys, "--", color=ALGO_COLORS[algo], lw=2,
+                    label=f"{algo} fit: y={fit['slope']:.1f}x+{fit['intercept']:.0f}, R\u00b2={fit['r2']:.3f}")
+    ax.set_xlabel("Number of vertices")
+    ax.set_ylabel("Peak memory (bytes)")
+    ax.set_title("Peak Memory vs Vertices — Linear Fit (evidence for O(n) memory)")
+    ax.legend(fontsize=8)
+    savefig(fig, os.path.join(od, "memory_vs_vertices_linear_fit.png"))
+
+    # 15b. Residuals of the linear memory fit (should look like random scatter around 0)
+    fig, ax = plt.subplots()
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo]
+        if sub.empty:
+            continue
+        fit = linreg(sub.vertices, sub.peakMemoryBytes)
+        if fit:
+            pred = fit["slope"] * fit["x"] + fit["intercept"]
+            resid = fit["y"] - pred
+            ax.scatter(fit["x"], resid, color=ALGO_COLORS[algo], alpha=0.6, s=20, label=algo)
+    ax.axhline(0, color="gray", linestyle="--", lw=1)
+    ax.set_xlabel("Number of vertices")
+    ax.set_ylabel("Residual (actual - fitted memory, bytes)")
+    ax.set_title("Residuals of Linear Memory Fit")
+    ax.legend()
+    savefig(fig, os.path.join(od, "memory_vs_vertices_residuals.png"))
+
+    # 16. Log-log peak memory vs vertices WITH fitted slope (slope ~1 => linear scaling)
+    fig, ax = plt.subplots()
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo]
+        if sub.empty:
+            continue
+        ax.scatter(sub.vertices, sub.peakMemoryBytes, color=ALGO_COLORS[algo],
+                   alpha=0.5, s=20, label=f"{algo} (data)")
+        fit = loglog_reg(sub.vertices, sub.peakMemoryBytes)
+        if fit:
+            xs = np.logspace(np.log10(fit["x"].min()), np.log10(fit["x"].max()), 100)
+            ys = (10 ** fit["intercept"]) * xs ** fit["slope"]
+            ax.plot(xs, ys, "--", color=ALGO_COLORS[algo], lw=2,
+                    label=f"{algo} slope={fit['slope']:.2f}, R\u00b2={fit['r2']:.3f}")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Vertices (log)")
+    ax.set_ylabel("Peak memory (bytes, log)")
+    ax.set_title("Log-Log Memory vs Vertices (slope \u2248 1 \u21d2 linear memory)")
+    ax.legend(fontsize=8)
+    savefig(fig, os.path.join(od, "loglog_memory_vs_vertices_with_slope.png"))
+
+    # 17. Memory per vertex distribution (boxplot) per algo
+    fig, ax = plt.subplots()
+    data = [df[df.algo == a]["memoryPerVertex"].dropna() for a in ALGO_ORDER]
+    bp = ax.boxplot(data, labels=ALGO_ORDER, patch_artist=True)
+    for patch, algo in zip(bp["boxes"], ALGO_ORDER):
+        patch.set_facecolor(ALGO_COLORS[algo])
+        patch.set_alpha(0.6)
+    ax.set_ylabel("Memory per vertex (bytes)")
+    ax.set_title("Memory-per-Vertex Distribution by Algorithm\n(flat/constant = linear memory)")
+    savefig(fig, os.path.join(od, "boxplot_memory_per_vertex.png"))
+
+    # 18. Regression slope summary: time vs triangulations, and time vs vertices
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo]
+        if sub.empty:
+            continue
+        fit1 = linreg(sub.triangulations, sub.timeSeconds)
+        axes[0].scatter(sub.triangulations, sub.timeSeconds, color=ALGO_COLORS[algo], alpha=0.4, s=15)
+        if fit1:
+            xs = np.linspace(sub.triangulations.min(), sub.triangulations.max(), 100)
+            axes[0].plot(xs, fit1["slope"] * xs + fit1["intercept"], "--", color=ALGO_COLORS[algo], lw=2,
+                         label=f"{algo}: slope={fit1['slope']:.2e} s/tri, R\u00b2={fit1['r2']:.3f}")
+        fit2 = linreg(sub.vertices, sub.timeSeconds)
+        axes[1].scatter(sub.vertices, sub.timeSeconds, color=ALGO_COLORS[algo], alpha=0.4, s=15)
+        if fit2:
+            xs = np.linspace(sub.vertices.min(), sub.vertices.max(), 100)
+            axes[1].plot(xs, fit2["slope"] * xs + fit2["intercept"], "--", color=ALGO_COLORS[algo], lw=2,
+                         label=f"{algo}: slope={fit2['slope']:.2e} s/vertex, R\u00b2={fit2['r2']:.3f}")
+    axes[0].set_xlabel("Triangulations")
+    axes[0].set_ylabel("Total time (s)")
+    axes[0].set_title("Time vs Triangulations (fit)")
+    axes[0].legend(fontsize=8)
+    axes[1].set_xlabel("Vertices")
+    axes[1].set_ylabel("Total time (s)")
+    axes[1].set_title("Time vs Vertices (fit)")
+    axes[1].legend(fontsize=8)
+    savefig(fig, os.path.join(od, "regression_slopes_time.png"))
+
+    # 19. Avg time per triangulation vs vertices, LOG-LOG (flat = amortized constant across scales)
+    fig, ax = plt.subplots()
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo].sort_values("vertices")
+        if sub.empty:
+            continue
+        grp = sub.groupby("vertices")["avgTimePerTriangulation"].mean().reset_index()
+        ax.plot(grp.vertices, grp.avgTimePerTriangulation, "o-", label=algo, color=ALGO_COLORS[algo])
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlabel("Vertices (log)")
+    ax.set_ylabel("Avg time per triangulation (s, log)")
+    ax.set_title("Log-Log Amortized Time per Triangulation vs Vertices")
+    ax.legend()
+    savefig(fig, os.path.join(od, "loglog_avg_time_per_triangulation_vs_vertices.png"))
+
+    # 20. Avg time per triangulation vs triangulations (should be flat if time depends on
+    #     triangulation count alone, not vertex count)
+    fig, ax = plt.subplots()
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo]
+        if sub.empty:
+            continue
+        ax.scatter(sub.triangulations, sub.avgTimePerTriangulation, color=ALGO_COLORS[algo],
+                   alpha=0.5, s=20, label=algo)
+    ax.set_xscale("log")
+    ax.set_xlabel("Triangulations (log)")
+    ax.set_ylabel("Avg time per triangulation (s)")
+    ax.set_title("Avg Time per Triangulation vs Total Triangulations")
+    ax.legend()
+    savefig(fig, os.path.join(od, "avg_time_per_triangulation_vs_triangulations.png"))
+
+    # 21. Checks / traversals per triangulation vs vertices
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo].sort_values("vertices")
+        if sub.empty:
+            continue
+        grp = sub.groupby("vertices")[["checksPerTriangulation", "traversalsPerTriangulation"]].mean().reset_index()
+        axes[0].plot(grp.vertices, grp.checksPerTriangulation, "o-", label=algo, color=ALGO_COLORS[algo])
+        axes[1].plot(grp.vertices, grp.traversalsPerTriangulation, "o-", label=algo, color=ALGO_COLORS[algo])
+    axes[0].set_xlabel("Vertices")
+    axes[0].set_ylabel("Checks per triangulation")
+    axes[0].set_title("Checks per Triangulation vs Vertices")
+    axes[0].legend()
+    axes[1].set_xlabel("Vertices")
+    axes[1].set_ylabel("Traversals per triangulation")
+    axes[1].set_title("Traversals per Triangulation vs Vertices")
+    axes[1].legend()
+    savefig(fig, os.path.join(od, "checks_traversals_per_triangulation_vs_vertices.png"))
+
+    # 22. Invalid traversal rate vs vertices
+    fig, ax = plt.subplots()
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo].sort_values("vertices")
+        if sub.empty:
+            continue
+        grp = sub.groupby("vertices")["invalidTraversalRate"].mean().reset_index()
+        ax.plot(grp.vertices, grp.invalidTraversalRate, "o-", label=algo, color=ALGO_COLORS[algo])
+    ax.set_xlabel("Vertices")
+    ax.set_ylabel("Invalid traversal rate (%)")
+    ax.set_title("Invalid Traversal Rate vs Vertices")
+    ax.legend()
+    savefig(fig, os.path.join(od, "invalid_traversal_rate_vs_vertices.png"))
+
+    # 23. Time per check and time per traversal vs vertices (stable overhead check)
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo].sort_values("vertices")
+        if sub.empty:
+            continue
+        grp = sub.groupby("vertices")[["timePerCheck", "timePerTraversal"]].mean().reset_index()
+        axes[0].plot(grp.vertices, grp.timePerCheck, "o-", label=algo, color=ALGO_COLORS[algo])
+        axes[1].plot(grp.vertices, grp.timePerTraversal, "o-", label=algo, color=ALGO_COLORS[algo])
+    axes[0].set_xlabel("Vertices")
+    axes[0].set_ylabel("Time per check (s)")
+    axes[0].set_title("Time per Check vs Vertices")
+    axes[0].legend()
+    axes[1].set_xlabel("Vertices")
+    axes[1].set_ylabel("Time per traversal (s)")
+    axes[1].set_title("Time per Traversal vs Vertices")
+    axes[1].legend()
+    savefig(fig, os.path.join(od, "time_per_check_and_traversal_vs_vertices.png"))
+
+    # 24. checkSuccessRate vs traversalSuccessRate scatter (do correctness metrics correlate?)
+    fig, ax = plt.subplots()
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo]
+        if sub.empty:
+            continue
+        ax.scatter(sub.checkSuccessRate, sub.traversalSuccessRate, color=ALGO_COLORS[algo],
+                   alpha=0.5, s=20, label=algo)
+    ax.set_xlabel("Check success rate (%)")
+    ax.set_ylabel("Traversal success rate (%)")
+    ax.set_title("Check Success Rate vs Traversal Success Rate")
+    ax.legend()
+    savefig(fig, os.path.join(od, "check_vs_traversal_success_rate.png"))
+
+    # 25. Status distribution per algo
+    if "status" in df.columns:
+        fig, ax = plt.subplots()
+        statuses = sorted(df.status.dropna().unique())
+        x = np.arange(len(statuses))
+        width = 0.35
+        for i, algo in enumerate(ALGO_ORDER):
+            counts = [len(df[(df.algo == algo) & (df.status == s)]) for s in statuses]
+            ax.bar(x + (i - 0.5) * width, counts, width, label=algo, color=ALGO_COLORS[algo])
+        ax.set_xticks(x)
+        ax.set_xticklabels(statuses, rotation=20, ha="right")
+        ax.set_ylabel("Run count")
+        ax.set_title("Run Status Distribution by Algorithm")
+        ax.legend()
+        savefig(fig, os.path.join(od, "status_distribution.png"))
+
+    # 26. Data-quality identity checks: memoryPerVertex recompute, checkSuccessRate recompute
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+    for algo in ALGO_ORDER:
+        sub = df[df.algo == algo]
+        if sub.empty:
+            continue
+        axes[0].scatter(sub.vertices, sub.memoryIdentityDiff, color=ALGO_COLORS[algo],
+                        alpha=0.5, s=15, label=algo)
+        axes[1].scatter(sub.vertices, sub.checkSuccessRateIdentityDiff, color=ALGO_COLORS[algo],
+                        alpha=0.5, s=15, label=algo)
+    axes[0].axhline(0, color="gray", linestyle="--", lw=1)
+    axes[0].set_xlabel("Vertices")
+    axes[0].set_ylabel("Recomputed - stored memoryPerVertex")
+    axes[0].set_title("Data-Quality Check: memoryPerVertex")
+    axes[0].legend()
+    axes[1].axhline(0, color="gray", linestyle="--", lw=1)
+    axes[1].set_xlabel("Vertices")
+    axes[1].set_ylabel("Recomputed - stored checkSuccessRate (%)")
+    axes[1].set_title("Data-Quality Check: checkSuccessRate")
+    axes[1].legend()
+    savefig(fig, os.path.join(od, "identity_sanity_checks.png"))
+
+    # 27. timeSeconds vs wall-clock duration ratio (CPU time vs wall time sanity check)
+    valid_wall = df[df.wallDurationSeconds.notna() & (df.wallDurationSeconds > 0)]
+    if not valid_wall.empty:
+        fig, ax = plt.subplots()
+        for algo in ALGO_ORDER:
+            sub = valid_wall[valid_wall.algo == algo]
+            if sub.empty:
+                continue
+            ax.scatter(sub.vertices, sub.timeSecondsToWallRatio, color=ALGO_COLORS[algo],
+                       alpha=0.5, s=20, label=algo)
+        ax.axhline(1.0, color="gray", linestyle="--", lw=1)
+        ax.set_xlabel("Vertices")
+        ax.set_ylabel("timeSeconds / wall-clock duration")
+        ax.set_title("Reported Time vs Wall-Clock Duration Ratio")
+        ax.legend()
+        savefig(fig, os.path.join(od, "time_vs_wallclock_ratio.png"))
+    else:
+        print("  [info] startTime/endTime give zero or invalid duration for all rows "
+              "(likely sub-second runs); skipping time_vs_wallclock_ratio.png")
+
+    # 28. Correlation heatmap of numeric columns, per algo
+    numeric_cols = ["vertices", "triangulations", "timeSeconds", "peakMemoryBytes",
+                     "memoryPerVertex", "totalChecks", "successfulChecks", "failedChecks",
+                     "checkSuccessRate", "invalidTraversals", "totalTraversalsExtended",
+                     "traversalSuccessRate"]
+    numeric_cols = [c for c in numeric_cols if c in df.columns]
+    fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+    for ax, algo in zip(axes, ALGO_ORDER):
+        sub = df[df.algo == algo][numeric_cols]
+        if sub.empty or len(sub) < 2:
+            ax.set_title(f"{algo} (insufficient data)")
+            continue
+        corr = sub.corr()
+        im = ax.imshow(corr.values, cmap="coolwarm", vmin=-1, vmax=1)
+        ax.set_xticks(range(len(numeric_cols)))
+        ax.set_xticklabels(numeric_cols, rotation=90, fontsize=7)
+        ax.set_yticks(range(len(numeric_cols)))
+        ax.set_yticklabels(numeric_cols, fontsize=7)
+        ax.set_title(f"Correlation Heatmap — {algo}")
+        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    savefig(fig, os.path.join(od, "correlation_heatmap.png"))
+
+    # 29. Paired scatter: Oneconnected vs Biconnected for matched (category, case) —
+    #     time, memory, checks, traversals, with identity line
+    pivot_cols = ["timeSeconds", "peakMemoryBytes", "totalChecks", "totalTraversalsExtended"]
+    merged = None
+    bi = df[df.algo == "Biconnected"].groupby(["category", "case"])[pivot_cols].mean().reset_index()
+    one = df[df.algo == "Oneconnected"].groupby(["category", "case"])[pivot_cols].mean().reset_index()
+    merged = bi.merge(one, on=["category", "case"], suffixes=("_bi", "_one"))
+    if not merged.empty:
+        fig, axes = plt.subplots(2, 2, figsize=(12, 11))
+        titles = ["Total time (s)", "Peak memory (bytes)", "Total checks", "Total traversals"]
+        for ax, col, title in zip(axes.flat, pivot_cols, titles):
+            xb, yo = merged[f"{col}_bi"], merged[f"{col}_one"]
+            ax.scatter(xb, yo, alpha=0.6, s=25, color="#6A4C93")
+            lim = [min(xb.min(), yo.min()), max(xb.max(), yo.max())]
+            ax.plot(lim, lim, "--", color="gray", lw=1, label="identity (y=x)")
+            ax.set_xlabel(f"Biconnected {title}")
+            ax.set_ylabel(f"Oneconnected {title}")
+            ax.set_title(title)
+            ax.legend(fontsize=8)
+        fig.suptitle("Paired Comparison: Oneconnected vs Biconnected (matched cases)", fontweight="bold")
+        savefig(fig, os.path.join(od, "paired_scatter_oneconnected_vs_biconnected.png"))
+
+        # 29b. Bland-Altman style difference plots for the same paired metrics
+        fig, axes = plt.subplots(2, 2, figsize=(12, 11))
+        for ax, col, title in zip(axes.flat, pivot_cols, titles):
+            xb, yo = merged[f"{col}_bi"], merged[f"{col}_one"]
+            mean = (xb + yo) / 2
+            diff = yo - xb
+            ax.scatter(mean, diff, alpha=0.6, s=25, color="#F4A261")
+            mdiff = diff.mean()
+            sdiff = diff.std()
+            ax.axhline(mdiff, color="black", lw=1, label=f"mean diff={mdiff:.3g}")
+            ax.axhline(mdiff + 1.96 * sdiff, color="gray", linestyle="--", lw=1)
+            ax.axhline(mdiff - 1.96 * sdiff, color="gray", linestyle="--", lw=1)
+            ax.set_xlabel(f"Mean of Bi/One {title}")
+            ax.set_ylabel(f"Oneconnected - Biconnected {title}")
+            ax.set_title(title)
+            ax.legend(fontsize=8)
+        fig.suptitle("Bland\u2013Altman: Agreement Between Oneconnected and Biconnected", fontweight="bold")
+        savefig(fig, os.path.join(od, "bland_altman_oneconnected_vs_biconnected.png"))
+
+    # 30. Triangulation count ratio per case (Oneconnected / Biconnected) — should be
+    #     ~1 if both algos generate the same set of triangulations
+    tri_pivot = df.groupby(["category", "case", "algo"])["triangulations"].mean().unstack()
+    if "Biconnected" in tri_pivot.columns and "Oneconnected" in tri_pivot.columns:
+        tp = tri_pivot.dropna()
+        ratio = tp["Oneconnected"] / tp["Biconnected"]
+        fig, ax = plt.subplots(figsize=(max(10, len(ratio) * 0.3), 6))
+        colors = ["#E76F51" if abs(r - 1) > 0.01 else "#2E86AB" for r in ratio.values]
+        ax.bar(range(len(ratio)), ratio.values, color=colors)
+        ax.axhline(1.0, color="gray", linestyle="--", lw=1, label="ratio = 1 (identical count)")
+        labels = [f"{c}/{k}" for c, k in ratio.index]
+        ax.set_xticks(range(len(ratio)))
+        ax.set_xticklabels(labels, rotation=75, ha="right", fontsize=6)
+        ax.set_ylabel("Oneconnected triangulations / Biconnected triangulations")
+        ax.set_title("Triangulation Count Ratio per Case\n(deviation from 1 = coverage mismatch)")
+        ax.legend()
+        savefig(fig, os.path.join(od, "triangulation_count_ratio_per_case.png"))
+
+    # 31. Run-to-run variability: timeSeconds vs runIndex, aggregated across all cases
+    if "runIndex" in df.columns:
+        fig, ax = plt.subplots()
+        for algo in ALGO_ORDER:
+            sub = df[df.algo == algo]
+            if sub.empty:
+                continue
+            grp = sub.groupby("runIndex")["timeSeconds"].mean().reset_index()
+            ax.plot(grp.runIndex, grp.timeSeconds, "o-", label=algo, color=ALGO_COLORS[algo])
+        ax.set_xlabel("Run index")
+        ax.set_ylabel("Mean total time (s)")
+        ax.set_title("Time vs Run Index (warmup / caching effects)")
+        ax.legend()
+        savefig(fig, os.path.join(od, "time_vs_run_index.png"))
+
+    # 32. Total time and total triangulations and peak memory per category per algo
+    #     (grouped bars, in addition to the existing avg-time-per-triangulation bar)
+    cats_sorted = sorted(df.category.unique())
+    x = np.arange(len(cats_sorted))
+    width = 0.35
+    for metric, ylabel, fname in [
+        ("timeSeconds", "Total time (s)", "bar_total_time_by_category.png"),
+        ("triangulations", "Total triangulations", "bar_total_triangulations_by_category.png"),
+        ("peakMemoryBytes", "Peak memory (bytes)", "bar_peak_memory_by_category.png"),
+    ]:
+        fig, ax = plt.subplots(figsize=(12, 6))
+        for i, algo in enumerate(ALGO_ORDER):
+            means, stds = [], []
+            for c in cats_sorted:
+                sub = df[(df.algo == algo) & (df.category == c)][metric]
+                means.append(sub.mean() if not sub.empty else 0)
+                stds.append(sub.std() if not sub.empty else 0)
+            ax.bar(x + (i - 0.5) * width, means, width, yerr=stds, capsize=3,
+                   label=algo, color=ALGO_COLORS[algo])
+        ax.set_xticks(x)
+        ax.set_xticklabels(cats_sorted, rotation=40, ha="right")
+        ax.set_ylabel(ylabel)
+        ax.set_title(f"{ylabel} by Category (mean \u00b1 std)")
+        ax.legend()
+        savefig(fig, os.path.join(od, fname))
+
+    # 33. Boxplots/violins of avgTimePerTriangulation and memoryPerVertex, overall
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.5))
+    data_t = [df[df.algo == a]["avgTimePerTriangulation"].dropna() for a in ALGO_ORDER]
+    bp = axes[0].boxplot(data_t, labels=ALGO_ORDER, patch_artist=True)
+    for patch, algo in zip(bp["boxes"], ALGO_ORDER):
+        patch.set_facecolor(ALGO_COLORS[algo])
+        patch.set_alpha(0.6)
+    axes[0].set_ylabel("Avg time per triangulation (s)")
+    axes[0].set_title("Distribution: Avg Time per Triangulation")
+
+    data_m = [df[df.algo == a]["memoryPerVertex"].dropna() for a in ALGO_ORDER]
+    bp2 = axes[1].boxplot(data_m, labels=ALGO_ORDER, patch_artist=True)
+    for patch, algo in zip(bp2["boxes"], ALGO_ORDER):
+        patch.set_facecolor(ALGO_COLORS[algo])
+        patch.set_alpha(0.6)
+    axes[1].set_ylabel("Memory per vertex (bytes)")
+    axes[1].set_title("Distribution: Memory per Vertex")
+    savefig(fig, os.path.join(od, "boxplots_time_memory_distributions.png"))
+
+    # 34. Heatmap of category x metric, normalized per algo (executive summary view)
+    metrics_for_heatmap = ["timeSeconds", "avgTimePerTriangulation", "peakMemoryBytes",
+                            "checkSuccessRate", "traversalSuccessRate"]
+    fig, axes = plt.subplots(1, 2, figsize=(11, max(4, len(cats_sorted) * 0.5)))
+    for ax, algo in zip(axes, ALGO_ORDER):
+        sub = df[df.algo == algo]
+        if sub.empty:
+            ax.set_title(f"{algo} (no data)")
+            continue
+        pivot = sub.groupby("category")[metrics_for_heatmap].mean().reindex(cats_sorted)
+        # normalize each column 0-1 for comparability
+        normed = (pivot - pivot.min()) / (pivot.max() - pivot.min()).replace(0, 1)
+        im = ax.imshow(normed.values, cmap="viridis", aspect="auto")
+        ax.set_xticks(range(len(metrics_for_heatmap)))
+        ax.set_xticklabels(metrics_for_heatmap, rotation=45, ha="right", fontsize=7)
+        ax.set_yticks(range(len(cats_sorted)))
+        ax.set_yticklabels(cats_sorted, fontsize=7)
+        ax.set_title(f"{algo}: Category \u00d7 Metric (normalized)")
+        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    savefig(fig, os.path.join(od, "heatmap_category_metric.png"))
+
+
+# ----------------------------------------------------------------------------
+# ALGO-SCOPE LOG-LOG GRAPHS
+# One plot per algorithm ("all Biconnected inputs" / "all Oneconnected inputs"),
+# each showing points from BOTH algorithms (differently colored) so you can see
+# how one algorithm's whole input set compares against the other's, all at once.
+# ----------------------------------------------------------------------------
+
+def plot_algo_scope_loglog(totals_df, outdir):
+    print("\n[algo_scope] generating per-algorithm 'all inputs' log-log overlays...")
+    od = os.path.join(outdir, "overall")
+
+    if totals_df.empty:
+        print("  [warn] no total data loaded, skipping algo-scope graphs")
+        return
+
+    df = totals_df
+
+    # metric pairs we show as log-log scatter: (x, y, xlabel, ylabel, fname_suffix)
+    metric_pairs = [
+        ("vertices", "timeSeconds", "Vertices", "Total time (s)", "time_vs_vertices"),
+        ("vertices", "peakMemoryBytes", "Vertices", "Peak memory (bytes)", "memory_vs_vertices"),
+        ("triangulations", "timeSeconds", "Triangulations", "Total time (s)", "time_vs_triangulations"),
+        ("vertices", "avgTimePerTriangulation", "Vertices", "Avg time per triangulation (s)", "avgtime_vs_vertices"),
+    ]
+
+    # For each "focus" algo, plot ALL points from BOTH algos (different colors),
+    # but title/name the file after the focus algo, and draw the focus algo's
+    # points on top / with fuller opacity so it reads as "this algo's full input set,
+    # with the other algo shown for context".
+    for focus_algo in ALGO_ORDER:
+        other_algo = [a for a in ALGO_ORDER if a != focus_algo][0]
+        focus_od = os.path.join(od, f"{focus_algo.lower()}_all_inputs")
+
+        for xcol, ycol, xlabel, ylabel, suffix in metric_pairs:
+            fig, ax = plt.subplots()
+            # background: other algo, lower alpha
+            sub_other = df[df.algo == other_algo]
+            if not sub_other.empty:
+                ax.scatter(sub_other[xcol], sub_other[ycol], color=ALGO_COLORS[other_algo],
+                           alpha=0.25, s=18, label=f"{other_algo} (context)")
+            # foreground: focus algo, full alpha, every input point across every category/case
+            sub_focus = df[df.algo == focus_algo]
+            if not sub_focus.empty:
+                ax.scatter(sub_focus[xcol], sub_focus[ycol], color=ALGO_COLORS[focus_algo],
+                           alpha=0.75, s=22, label=f"{focus_algo} (all inputs)")
+            ax.set_xscale("log")
+            ax.set_yscale("log")
+            ax.set_xlabel(f"{xlabel} (log)")
+            ax.set_ylabel(f"{ylabel} (log)")
+            ax.set_title(f"All {focus_algo} Inputs — {ylabel} vs {xlabel} (log-log)\n"
+                         f"({other_algo} shown for context)")
+            ax.legend()
+            savefig(fig, os.path.join(focus_od, f"{focus_algo.lower()}_all_inputs_loglog_{suffix}.png"))
+
+    # Also produce one "both fully overlaid, equal weight" version per metric pair,
+    # living directly under overall/ — this is the direct "overall biconnected inputs
+    # and overall oneconnected inputs, same plot, different colors" view.
+    for xcol, ycol, xlabel, ylabel, suffix in metric_pairs:
+        fig, ax = plt.subplots()
+        for algo in ALGO_ORDER:
+            sub = df[df.algo == algo]
+            if sub.empty:
+                continue
+            ax.scatter(sub[xcol], sub[ycol], color=ALGO_COLORS[algo], alpha=0.55, s=20, label=algo)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlabel(f"{xlabel} (log)")
+        ax.set_ylabel(f"{ylabel} (log)")
+        ax.set_title(f"All Inputs, Both Algorithms — {ylabel} vs {xlabel} (log-log)")
+        ax.legend()
+        savefig(fig, os.path.join(od, f"both_algos_all_inputs_loglog_{suffix}.png"))
+
 
 # ----------------------------------------------------------------------------
 # PER-CATEGORY GRAPHS (all cases of a category in one plot, algo comparison)
@@ -601,6 +1172,87 @@ def plot_per_category(totals_df, individuals, categories, outdir):
         ax.legend()
         savefig(fig, os.path.join(od, f"{category}_loglog_time_vs_triangulations.png"))
 
+        # 8. Small multiples: scaling relationships WITHIN this category (per doc section 6)
+        #    Using per-run rows (vertices vary within a category across cases), so these
+        #    show whether the claims hold when isolated to this category's vertex range.
+        scaling_metrics = [
+            ("peakMemoryBytes", "Peak memory (bytes)", "memory_vs_vertices", False),
+            ("timeSeconds", "Total time (s)", "time_vs_vertices", False),
+            ("avgTimePerTriangulation", "Avg time per triangulation (s)", "avgtime_vs_vertices", False),
+            ("totalChecks", "Total checks", "checks_vs_vertices", False),
+            ("failedChecks", "Failed checks", "failedchecks_vs_vertices", False),
+            ("invalidTraversals", "Invalid traversals", "invalidtrav_vs_vertices", False),
+        ]
+        fig, axes = plt.subplots(2, 3, figsize=(16, 9))
+        for ax, (col, ylabel, _, _) in zip(axes.flat, scaling_metrics):
+            for algo in ALGO_ORDER:
+                sub = cat_df[cat_df.algo == algo].sort_values("vertices")
+                if sub.empty:
+                    continue
+                grp = sub.groupby("vertices")[col].mean().reset_index()
+                ax.plot(grp.vertices, grp[col], "o-", label=algo, color=ALGO_COLORS[algo])
+            ax.set_xlabel("Vertices")
+            ax.set_ylabel(ylabel)
+            ax.set_title(ylabel)
+            ax.legend(fontsize=8)
+        fig.suptitle(f"[{category}] Scaling Relationships vs Vertices (within-category)", fontweight="bold")
+        savefig(fig, os.path.join(od, f"{category}_scaling_small_multiples.png"))
+
+        # 9. Log-log peak memory vs vertices, within this category (slope ~1 check per category)
+        fig, ax = plt.subplots()
+        for algo in ALGO_ORDER:
+            sub = cat_df[cat_df.algo == algo]
+            if sub.empty:
+                continue
+            ax.scatter(sub.vertices, sub.peakMemoryBytes, color=ALGO_COLORS[algo], alpha=0.5, s=20)
+            fit = loglog_reg(sub.vertices, sub.peakMemoryBytes)
+            if fit:
+                xs = np.logspace(np.log10(fit["x"].min()), np.log10(max(fit["x"].max(), fit["x"].min()*1.01)), 50)
+                ys = (10 ** fit["intercept"]) * xs ** fit["slope"]
+                ax.plot(xs, ys, "--", color=ALGO_COLORS[algo], lw=2,
+                        label=f"{algo} slope={fit['slope']:.2f}")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlabel("Vertices (log)")
+        ax.set_ylabel("Peak memory (bytes, log)")
+        ax.set_title(f"[{category}] Log-Log Memory vs Vertices")
+        ax.legend(fontsize=8)
+        savefig(fig, os.path.join(od, f"{category}_loglog_memory_vs_vertices.png"))
+
+        # 10. Run-to-run variability within this category: boxplot of timeSeconds per case
+        fig, ax = plt.subplots(figsize=(max(10, len(cases) * 0.5), 6))
+        positions = []
+        box_data = []
+        box_colors = []
+        pos = 0
+        tick_pos = []
+        tick_labels = []
+        for c in cases:
+            group_start = pos
+            for algo in ALGO_ORDER:
+                sub = cat_df[(cat_df.algo == algo) & (cat_df.case == c)]["timeSeconds"].dropna()
+                if sub.empty:
+                    continue
+                box_data.append(sub.values)
+                positions.append(pos)
+                box_colors.append(ALGO_COLORS[algo])
+                pos += 1
+            tick_pos.append((group_start + pos - 1) / 2)
+            tick_labels.append(c)
+            pos += 1  # gap between cases
+        if box_data:
+            bp = ax.boxplot(box_data, positions=positions, widths=0.7, patch_artist=True)
+            for patch, color in zip(bp["boxes"], box_colors):
+                patch.set_facecolor(color)
+                patch.set_alpha(0.6)
+            ax.set_xticks(tick_pos)
+            ax.set_xticklabels(tick_labels, rotation=60, ha="right", fontsize=7)
+            ax.set_ylabel("Total time per run (s)")
+            ax.set_title(f"[{category}] Run-to-Run Time Variability per Case\n(blue=Biconnected, orange=Oneconnected)")
+            savefig(fig, os.path.join(od, f"{category}_run_variability_boxplot.png"))
+        else:
+            plt.close(fig)
+
 
 # ----------------------------------------------------------------------------
 # PER-CASE GRAPHS (individual run data: one graph per case, both algos overlaid)
@@ -643,6 +1295,32 @@ def plot_per_case(individuals, outdir):
         else:
             plt.close(fig)
 
+        # A2) SAME plot as above, but log-log (as requested): makes it clear whether
+        #     the curve is truly flat (amortized constant) across orders of magnitude.
+        fig, ax = plt.subplots()
+        any_data = False
+        for algo in ALGO_ORDER:
+            if algo not in algo_dfs:
+                continue
+            df = algo_dfs[algo]
+            grp = df.groupby("triangulation")["avgNsPerTri"].mean().reset_index()
+            grp = grp[(grp.triangulation > 0) & (grp.avgNsPerTri > 0)]
+            if grp.empty:
+                continue
+            ax.plot(grp.triangulation, grp.avgNsPerTri / 1000.0, "-", lw=1.2,
+                    label=algo, color=ALGO_COLORS[algo])
+            any_data = True
+        if any_data:
+            ax.set_xscale("log")
+            ax.set_yscale("log")
+            ax.set_xlabel("Triangulation number (n, log)")
+            ax.set_ylabel("Avg time per triangulation up to n (\u00b5s, log)")
+            ax.set_title(f"[{category}/{case}] Log-Log: Avg Time at Nth Triangulation")
+            ax.legend()
+            savefig(fig, os.path.join(od, f"{case}_loglog_avg_time_per_nth_triangulation.png"))
+        else:
+            plt.close(fig)
+
         # B) delta time (per-step cost) vs triangulation number (both algos)
         fig, ax = plt.subplots()
         any_data = False
@@ -662,6 +1340,56 @@ def plot_per_case(individuals, outdir):
             ax.set_title(f"[{category}/{case}] Per-Step (Delta) Time vs Triangulation Number")
             ax.legend()
             savefig(fig, os.path.join(od, f"{case}_delta_time_per_step.png"))
+        else:
+            plt.close(fig)
+
+        # B2) delta time with rolling median + shaded IQR band (stability of per-step cost)
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5.5), sharey=False)
+        any_data = False
+        for ax, algo in zip(axes, ALGO_ORDER):
+            if algo not in algo_dfs:
+                ax.set_title(f"{algo} (no data)")
+                continue
+            df = algo_dfs[algo]
+            grp = df.groupby("triangulation")["deltaNs"].mean().sort_index()
+            if grp.empty:
+                continue
+            window = max(5, len(grp) // 20)
+            med, q25, q75 = rolling_median_iqr(grp, window)
+            ax.plot(grp.index, grp.values / 1000.0, color=ALGO_COLORS[algo], alpha=0.25, lw=0.6,
+                    label="raw delta")
+            ax.plot(grp.index, med / 1000.0, color=ALGO_COLORS[algo], lw=1.8, label="rolling median")
+            ax.fill_between(grp.index, q25 / 1000.0, q75 / 1000.0, color=ALGO_COLORS[algo], alpha=0.2,
+                            label="IQR band")
+            ax.set_xlabel("Triangulation number (n)")
+            ax.set_ylabel("Delta time (\u00b5s)")
+            ax.set_title(algo)
+            ax.legend(fontsize=8)
+            any_data = True
+        if any_data:
+            fig.suptitle(f"[{category}/{case}] Delta-Time Stability (rolling median \u00b1 IQR)", fontweight="bold")
+            savefig(fig, os.path.join(od, f"{case}_delta_time_rolling_iqr.png"))
+        else:
+            plt.close(fig)
+
+        # B3) delta time histogram per algo (stable distribution = amortized constant)
+        fig, ax = plt.subplots()
+        any_data = False
+        for algo in ALGO_ORDER:
+            if algo not in algo_dfs:
+                continue
+            df = algo_dfs[algo]
+            vals = (df["deltaNs"] / 1000.0).dropna()
+            if vals.empty:
+                continue
+            ax.hist(vals, bins=40, alpha=0.5, label=algo, color=ALGO_COLORS[algo], density=True)
+            any_data = True
+        if any_data:
+            ax.set_xlabel("Delta time per step (\u00b5s)")
+            ax.set_ylabel("Density")
+            ax.set_title(f"[{category}/{case}] Delta-Time Distribution")
+            ax.legend()
+            savefig(fig, os.path.join(od, f"{case}_delta_time_histogram.png"))
         else:
             plt.close(fig)
 
@@ -687,6 +1415,62 @@ def plot_per_case(individuals, outdir):
             ax.set_title(f"[{category}/{case}] Log-Log Cumulative Time vs Triangulation Number")
             ax.legend()
             savefig(fig, os.path.join(od, f"{case}_loglog_cumulative_time.png"))
+        else:
+            plt.close(fig)
+
+        # C2) Spaghetti plot: every individual run's cumulativeNs vs triangulation,
+        #     with the mean overlaid, per algo (run-to-run stability, doc section 5)
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5.5), sharey=False)
+        any_data = False
+        for ax, algo in zip(axes, ALGO_ORDER):
+            if algo not in algo_dfs:
+                ax.set_title(f"{algo} (no data)")
+                continue
+            df = algo_dfs[algo]
+            for run_id, run_df in df.groupby("run"):
+                run_df = run_df.sort_values("triangulation")
+                ax.plot(run_df.triangulation, run_df.cumulativeNs / 1000.0,
+                        color=ALGO_COLORS[algo], alpha=0.25, lw=0.8)
+            mean_line = df.groupby("triangulation")["cumulativeNs"].mean().reset_index()
+            ax.plot(mean_line.triangulation, mean_line.cumulativeNs / 1000.0,
+                    color="black", lw=1.8, label="mean across runs")
+            ax.set_xlabel("Triangulation number (n)")
+            ax.set_ylabel("Cumulative time (\u00b5s)")
+            ax.set_title(algo)
+            ax.legend(fontsize=8)
+            any_data = True
+        if any_data:
+            fig.suptitle(f"[{category}/{case}] Run-to-Run Spaghetti Plot (cumulative time)", fontweight="bold")
+            savefig(fig, os.path.join(od, f"{case}_spaghetti_runs_cumulative_time.png"))
+        else:
+            plt.close(fig)
+
+        # C3) Cumulative time vs n, LINEAR axes, with fitted line (slope + intercept summary)
+        fig, ax = plt.subplots()
+        any_data = False
+        for algo in ALGO_ORDER:
+            if algo not in algo_dfs:
+                continue
+            df = algo_dfs[algo]
+            grp = df.groupby("triangulation")["cumulativeNs"].mean().reset_index()
+            if grp.empty:
+                continue
+            ax.plot(grp.triangulation, grp.cumulativeNs, ".", color=ALGO_COLORS[algo],
+                    alpha=0.4, ms=3)
+            fit = linreg(grp.triangulation, grp.cumulativeNs)
+            if fit:
+                xs = np.linspace(grp.triangulation.min(), grp.triangulation.max(), 50)
+                ys = fit["slope"] * xs + fit["intercept"]
+                ax.plot(xs, ys, "-", lw=2, color=ALGO_COLORS[algo],
+                        label=f"{algo}: {fit['slope']:.1f} ns/tri, intercept={fit['intercept']:.0f}, "
+                              f"R\u00b2={fit['r2']:.3f}")
+            any_data = True
+        if any_data:
+            ax.set_xlabel("Triangulation number (n)")
+            ax.set_ylabel("Cumulative time (ns)")
+            ax.set_title(f"[{category}/{case}] Cumulative Time vs n (linear fit)")
+            ax.legend(fontsize=8)
+            savefig(fig, os.path.join(od, f"{case}_cumulative_time_linear_fit.png"))
         else:
             plt.close(fig)
 
@@ -748,6 +1532,7 @@ def main():
     os.makedirs(outdir, exist_ok=True)
 
     plot_overall(totals_df, individuals, outdir)
+    plot_algo_scope_loglog(totals_df, outdir)
     plot_per_category(totals_df, individuals, categories, outdir)
     plot_per_case(individuals, outdir)
 

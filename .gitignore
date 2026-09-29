@@ -6,7 +6,7 @@ _deps/
 dev/input
 dev/previnput
 dev/output-images
-benchmark-results/
+benchmark-results*/
 analyze-info/benchmark-results/
 graph*/
 
