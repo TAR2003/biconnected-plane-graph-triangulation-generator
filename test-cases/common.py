@@ -117,22 +117,25 @@ def validate_graph(G, constraints: Constraints):
     return True, faces, "ok"
 
 
-def write_test_case(filepath, faces):
-    """
-    Write in the required format:
+def write_test_case(filepath, graph):
+    """Write a graph as N followed by its cyclic adjacency rows."""
+    is_planar, embedding = nx.check_planarity(graph, counterexample=False)
+    if not is_planar:
+        raise ValueError("cannot write a non-planar graph as a rotation system")
 
-        Total_Face_number
-        vertex count of first face
-        vertices of 1st face
-        vertex count of 2nd face
-        vertices of 2nd face
-        ...
-    """
+    vertices = sorted(graph.nodes())
+    expected_vertices = list(range(len(vertices)))
+    if vertices != expected_vertices:
+        raise ValueError("graph vertices must be labeled consecutively from 0")
+
     with open(filepath, "w") as f:
-        f.write(f"{len(faces)}\n")
-        for face in faces:
-            f.write(f"{len(face)}\n")
-            f.write(" ".join(str(v) for v in face) + "\n")
+        f.write(f"{len(vertices)}\n")
+        for vertex in vertices:
+            neighbors = list(embedding.neighbors_cw_order(vertex))
+            f.write(f"{len(neighbors)}")
+            if neighbors:
+                f.write(" " + " ".join(str(neighbor) for neighbor in neighbors))
+            f.write("\n")
 
 
 def save_sorted_instances(instances, out_dir, prefix):
@@ -160,7 +163,7 @@ def save_sorted_instances(instances, out_dir, prefix):
         for i, inst in enumerate(instances_sorted, start=1):
             fname = f"{prefix}_{i:03d}.txt"
             fpath = os.path.join(out_dir, fname)
-            write_test_case(fpath, inst["faces"])
+            write_test_case(fpath, inst["graph"])
 
             n_faces = len(inst["faces"])
             max_face = max((len(f) for f in inst["faces"]), default=0)
