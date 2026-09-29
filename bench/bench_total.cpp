@@ -20,11 +20,11 @@ namespace
         "startTime,endTime,status,totalChecks,successfulChecks,failedChecks,checkSuccessRate,"
         "invalidTraversals,totalTraversalsExtended,traversalSuccessRate\n";
 
-    std::unique_ptr<GraphTriangulation> makeGraph(Family algo, Faces &faces, long long limit)
+    std::unique_ptr<GraphTriangulation> makeGraph(Family algo, long long vertices, const Adjacency &adjacency, long long limit)
     {
         if (algo == Family::Biconnected)
-            return std::make_unique<GraphTriangulationBiconnectedPerformance>(faces, limit);
-        return std::make_unique<GraphTriangulationOneconnectedPerformance>(faces, limit);
+            return std::make_unique<GraphTriangulationBiconnectedPerformance>(vertices, adjacency, limit);
+        return std::make_unique<GraphTriangulationOneconnectedPerformance>(vertices, adjacency, limit);
     }
 
     int completedRuns(const fs::path &csv, const Case &c)
@@ -42,9 +42,9 @@ namespace
 
     void runTotal(benchmark::State &state, const Case &c, const fs::path &csv, const Config &cfg)
     {
-        Faces faces;
+        Adjacency adjacency;
         long long vertices = 0;
-        if (!readFaces(c.file, faces, vertices))
+        if (!readAdjacency(c.file, adjacency, vertices))
         {
             state.SkipWithError(("cannot read " + c.display).c_str());
             return;
@@ -56,7 +56,7 @@ namespace
             const std::string startTs = timestamp();
 
             memtrack::beginWindow(); // window covers graph construction + enumeration
-            auto graph = makeGraph(cfg.algo, faces, cfg.limit);
+            auto graph = makeGraph(cfg.algo, vertices, adjacency, cfg.limit);
 
             const auto t0 = Clock::now();
             graph->getAllTriangulations();

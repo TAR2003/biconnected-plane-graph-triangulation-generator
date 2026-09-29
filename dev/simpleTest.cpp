@@ -3,38 +3,42 @@ using namespace std;
 #include "GraphTriangulation.hpp"
 #include "GraphTriangulationTriconnected.hpp"
 
-vector<vector<long long>> readInput(const string &filename)
+struct InputGraph
+{
+    long long vertexCount;
+    vector<vector<long long>> adjacency;
+};
+
+InputGraph readInput(const string &filename)
 {
     ifstream infile(filename);
     if (!infile.is_open())
     {
         cerr << "Error opening file: " << filename << endl;
-        return {};
+        return {0, {}};
     }
-    vector<vector<long long>> faces;
-    unordered_set<long long> uniqueVertices;
-    long long faceno;
-    infile >> faceno;
-    for (long long i = 0; i < faceno; i++)
+    InputGraph graph;
+    if (!(infile >> graph.vertexCount) || graph.vertexCount <= 0)
+        return {0, {}};
+    graph.adjacency.resize(graph.vertexCount);
+    for (auto &neighbors : graph.adjacency)
     {
-        long long vertices;
-        infile >> vertices;
-        vector<long long> face;
-        for (long long j = 0; j < vertices; j++)
+        long long degree;
+        if (!(infile >> degree) || degree < 0)
+            return {0, {}};
+        neighbors.resize(degree);
+        for (auto &vertex : neighbors)
         {
-            long long vertex;
-            infile >> vertex;
-            face.push_back(vertex);
-            uniqueVertices.insert(vertex);
+            if (!(infile >> vertex))
+                return {0, {}};
         }
-        faces.push_back(face);
     }
-    return faces;
+    return graph;
 }
 
 void runCase(string filename)
 {
-    vector<vector<long long>> faces = readInput(filename);
+    InputGraph graph = readInput(filename);
     // for(auto &face : faces)
     // {
     //     for(auto &vertex : face)
@@ -43,10 +47,10 @@ void runCase(string filename)
     //     }
     //     cout << endl;
     // }
-    GraphTriangulation *gt = new GraphTriangulationOneconnectedCorrectness(faces, 10000000);
+    GraphTriangulation *gt = new GraphTriangulationOneconnectedCorrectness(graph.vertexCount, graph.adjacency, 10000000);
     gt->getAllTriangulations();
     gt->printAllTriangulations();
-    // GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(faces);
+    // GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(graph.vertexCount, graph.adjacency);
     // tc->getAllTriangulations();
     // tc->refineTriangulations();
     // tc->removeDuplicated();

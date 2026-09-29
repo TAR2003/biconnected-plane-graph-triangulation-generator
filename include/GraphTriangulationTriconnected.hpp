@@ -3,6 +3,7 @@ using namespace std;
 #pragma once
 #include "Edge.hpp"
 #include "PairHash.hpp"
+#include "RotationSystem.hpp"
 #include "ParvezRahmanNakano.hpp"
 
 class GraphTriangulationTriconnected
@@ -13,13 +14,13 @@ public:
     vector<vector<vector<pair<long long, long long>>>> triangulation_per_face;
     unordered_set<pair<long long, long long>, PairHash> present;
 
-    GraphTriangulationTriconnected(vector<vector<long long>> &faces)
+    GraphTriangulationTriconnected(long long totalNodes, const vector<vector<long long>> &adjacency)
     {
-        this->faces = faces;
+        this->faces = rotationSystemToFaces(totalNodes, adjacency);
 
         present = unordered_set<pair<long long, long long>, PairHash>();
         initiatePresent();
-        triangulation_per_face = vector<vector<vector<pair<long long, long long>>>>(faces.size());
+        triangulation_per_face = vector<vector<vector<pair<long long, long long>>>>(this->faces.size());
     }
 
     ~GraphTriangulationTriconnected()

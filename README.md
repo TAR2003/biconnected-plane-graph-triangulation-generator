@@ -63,22 +63,25 @@ The same commands are in `build.sh`. CMake builds `bench_total` and `bench_indiv
 
 ## Input format
 
-Each graph is represented by its faces. The first line is the number of faces. Each following line contains the number of vertices on that face followed by its vertex IDs in boundary order:
+Each graph is represented by a rotation system. The first line is the number of vertices. Each following row contains the degree of one vertex followed by its neighboring vertex IDs in cyclic order:
 
 ```text
-<number of faces>
-<face size> <v0> <v1> ... <v_k-1>
+<number of vertices>
+<degree> <neighbor0> <neighbor1> ... <neighbor_degree-1>
 ```
 
 Example:
 
 ```text
-2
-3 0 1 2
-4 0 2 3 4
+5
+2 1 4
+3 0 2 3
+2 1 3
+2 1 2
+2 0 3
 ```
 
-Vertex IDs are integers. The benchmark counts distinct IDs to report the graph's vertex count and expects a valid plane-face description.
+Vertex IDs are integers. Neighbor order is significant and must describe the embedding around each vertex. The graph classes derive the face list internally using the same half-edge traversal as `modifyInput.cpp`.
 
 The standard dataset root is `test-cases/input/`:
 

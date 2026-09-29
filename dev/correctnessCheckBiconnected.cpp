@@ -27,31 +27,37 @@ struct FileMetrics
     bool isContained;
 };
 
-vector<vector<long long>> solve(string filename)
+struct InputGraph
+{
+    long long vertexCount;
+    vector<vector<long long>> adjacency;
+};
+
+InputGraph solve(string filename)
 {
     ifstream infile(filename);
     if (!infile.is_open())
     {
         cerr << "Error opening file: " << filename << endl;
-        return {};
+        return {0, {}};
     }
-    vector<vector<long long>> faces;
-    long long faceno;
-    infile >> faceno;
-    for (long long i = 0; i < faceno; i++)
+    InputGraph graph;
+    if (!(infile >> graph.vertexCount) || graph.vertexCount <= 0)
+        return {0, {}};
+    graph.adjacency.resize(graph.vertexCount);
+    for (auto &neighbors : graph.adjacency)
     {
-        long long vertices;
-        infile >> vertices;
-        vector<long long> face;
-        for (long long j = 0; j < vertices; j++)
+        long long degree;
+        if (!(infile >> degree) || degree < 0)
+            return {0, {}};
+        neighbors.resize(degree);
+        for (auto &vertex : neighbors)
         {
-            long long vertex;
-            infile >> vertex;
-            face.push_back(vertex);
+            if (!(infile >> vertex))
+                return {0, {}};
         }
-        faces.push_back(face);
     }
-    return faces;
+    return graph;
 }
 
 bool matchPairs(const pair<long long, long long> &p1, const pair<long long, long long> &p2)
@@ -241,14 +247,15 @@ bool compareAndOutput(
 
 FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
 {
-    vector<vector<long long>> faces = solve(filename);
+    InputGraph graph = solve(filename);
+    if (graph.vertexCount == 0)
+        return {};
 
-
-    GraphTriangulation *gt = new GraphTriangulationBiconnectedCorrectness(faces);
+    GraphTriangulation *gt = new GraphTriangulationBiconnectedCorrectness(graph.vertexCount, graph.adjacency);
     gt->getAllTriangulations();
     gt->sortTriangulations();
     
-    GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(faces);
+    GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(graph.vertexCount, graph.adjacency);
     tc->getAllTriangulations();
     tc->refineTriangulations();
     tc->removeDuplicated();

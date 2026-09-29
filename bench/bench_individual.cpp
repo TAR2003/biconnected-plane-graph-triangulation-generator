@@ -19,15 +19,15 @@ namespace
         GenerationTimeline *timeline;
     };
 
-    TimedGraph makeGraph(Family algo, Faces &faces, long long limit)
+    TimedGraph makeGraph(Family algo, long long vertices, const Adjacency &adjacency, long long limit)
     {
         if (algo == Family::Biconnected)
         {
-            auto g = std::make_unique<GraphTriangulationBiconnectedIndividualPerformance>(faces, limit);
+            auto g = std::make_unique<GraphTriangulationBiconnectedIndividualPerformance>(vertices, adjacency, limit);
             auto *t = &g->timeline;
             return {std::move(g), t};
         }
-        auto g = std::make_unique<GraphTriangulationOneconnectedIndividualPerformance>(faces, limit);
+        auto g = std::make_unique<GraphTriangulationOneconnectedIndividualPerformance>(vertices, adjacency, limit);
         auto *t = &g->timeline;
         return {std::move(g), t};
     }
@@ -51,9 +51,9 @@ namespace
 
     void runIndividual(benchmark::State &state, const Case &c, const fs::path &csv, const Config &cfg)
     {
-        Faces faces;
+        Adjacency adjacency;
         long long vertices = 0;
-        if (!readFaces(c.file, faces, vertices))
+        if (!readAdjacency(c.file, adjacency, vertices))
         {
             state.SkipWithError(("cannot read " + c.display).c_str());
             return;
@@ -62,7 +62,7 @@ namespace
         for (auto _ : state)
         {
             const int runIndex = completedRuns(csv, c) + 1;
-            auto [graph, timeline] = makeGraph(cfg.algo, faces, cfg.limit);
+            auto [graph, timeline] = makeGraph(cfg.algo, vertices, adjacency, cfg.limit);
 
             timeline->start(cfg.limit);
             const auto t0 = Clock::now();

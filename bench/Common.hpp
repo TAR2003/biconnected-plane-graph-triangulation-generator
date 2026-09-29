@@ -20,6 +20,7 @@ namespace bench
     namespace fs = std::filesystem;
     using Clock = std::chrono::steady_clock;
     using Faces = std::vector<std::vector<long long>>;
+    using Adjacency = std::vector<std::vector<long long>>;
 
     // ------------------------------------------------------------------------
     // Configuration. Defaults live in each main(); every field can be
@@ -153,29 +154,25 @@ namespace bench
         return cases;
     }
 
-    // Input format: F, then for each face: k v1 ... vk.
-    inline bool readFaces(const fs::path &file, Faces &faces, long long &vertices)
+    // Input format: N, then for each vertex: degree followed by neighbors.
+    inline bool readAdjacency(const fs::path &file, Adjacency &adjacency, long long &vertices)
     {
         std::ifstream in(file);
-        long long faceCount = 0;
-        if (!(in >> faceCount) || faceCount <= 0)
+        if (!(in >> vertices) || vertices <= 0)
             return false;
-        std::unordered_set<long long> distinct;
-        faces.assign((size_t)faceCount, {});
-        for (auto &face : faces)
+        adjacency.assign((size_t)vertices, {});
+        for (auto &neighbors : adjacency)
         {
-            long long k = 0;
-            if (!(in >> k) || k <= 0)
+            long long degree = 0;
+            if (!(in >> degree) || degree < 0)
                 return false;
-            face.resize((size_t)k);
-            for (auto &v : face)
+            neighbors.resize((size_t)degree);
+            for (auto &v : neighbors)
             {
                 if (!(in >> v))
                     return false;
-                distinct.insert(v);
             }
         }
-        vertices = (long long)distinct.size();
         return true;
     }
 

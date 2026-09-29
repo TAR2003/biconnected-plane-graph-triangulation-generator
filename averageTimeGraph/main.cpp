@@ -4,6 +4,7 @@ using namespace std;
 #include "pairHash.hpp"
 #include "biconnected.hpp"
 #include "FaceTriangulation.hpp"
+#include "../include/RotationSystem.hpp"
 #include <filesystem>
 #include <chrono>
 
@@ -22,25 +23,39 @@ vector<vector<int>> readInput(const string &filename, int &distinctVertices)
         distinctVertices = 0;
         return {};
     }
-    vector<vector<int>> faces;
-    unordered_set<int> uniqueVertices;
-    int faceno;
-    infile >> faceno;
-    for (int i = 0; i < faceno; i++)
+    int vertexCount;
+    if (!(infile >> vertexCount) || vertexCount <= 0)
     {
-        int vertices;
-        infile >> vertices;
-        vector<int> face;
-        for (int j = 0; j < vertices; j++)
-        {
-            int vertex;
-            infile >> vertex;
-            face.push_back(vertex);
-            uniqueVertices.insert(vertex);
-        }
-        faces.push_back(face);
+        distinctVertices = 0;
+        return {};
     }
-    distinctVertices = uniqueVertices.size();
+    vector<vector<long long>> adjacency(vertexCount);
+    for (auto &neighbors : adjacency)
+    {
+        int degree;
+        if (!(infile >> degree) || degree < 0)
+        {
+            distinctVertices = 0;
+            return {};
+        }
+        neighbors.resize(degree);
+        for (auto &vertex : neighbors)
+        {
+            if (!(infile >> vertex))
+            {
+                distinctVertices = 0;
+                return {};
+            }
+        }
+    }
+    const auto graphFaces = rotationSystemToFaces(vertexCount, adjacency);
+    vector<vector<int>> faces;
+    faces.reserve(graphFaces.size());
+    for (const auto &face : graphFaces)
+    {
+        faces.emplace_back(face.begin(), face.end());
+    }
+    distinctVertices = vertexCount;
     return faces;
 }
 

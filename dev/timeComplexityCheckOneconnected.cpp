@@ -143,35 +143,37 @@ size_t getCurrentMemoryUsage()
 // ============================================================================
 // Input Reader
 // ============================================================================
-vector<vector<long long>> readInput(const string &filename, long long &distinctVertices)
+struct InputGraph
+{
+    long long vertexCount;
+    vector<vector<long long>> adjacency;
+};
+
+InputGraph readInput(const string &filename)
 {
     ifstream infile(filename);
     if (!infile.is_open())
     {
         cerr << "Error opening file: " << filename << endl;
-        distinctVertices = 0;
-        return {};
+        return {0, {}};
     }
-    vector<vector<long long>> faces;
-    unordered_set<long long> uniqueVertices;
-    long long faceno;
-    infile >> faceno;
-    for (long long i = 0; i < faceno; i++)
+    InputGraph graph;
+    if (!(infile >> graph.vertexCount) || graph.vertexCount <= 0)
+        return {0, {}};
+    graph.adjacency.resize(graph.vertexCount);
+    for (auto &neighbors : graph.adjacency)
     {
-        long long vertices;
-        infile >> vertices;
-        vector<long long> face;
-        for (long long j = 0; j < vertices; j++)
+        long long degree;
+        if (!(infile >> degree) || degree < 0)
+            return {0, {}};
+        neighbors.resize(degree);
+        for (auto &vertex : neighbors)
         {
-            long long vertex;
-            infile >> vertex;
-            face.push_back(vertex);
-            uniqueVertices.insert(vertex);
+            if (!(infile >> vertex))
+                return {0, {}};
         }
-        faces.push_back(face);
     }
-    distinctVertices = uniqueVertices.size();
-    return faces;
+    return graph;
 }
 
 // ============================================================================
@@ -523,15 +525,14 @@ static int runInSubprocess(const string &inputPath,
 // ============================================================================
 static int runWorkerMode(const char *inputPath, const char *resultPath, const char *progressPath)
 {
-    long long distinctVertices = 0;
-    vector<vector<long long>> faces = readInput(inputPath, distinctVertices);
-    if (faces.empty())
+    InputGraph graph = readInput(inputPath);
+    if (graph.vertexCount == 0)
         return 1;
 
     string startTs = currentTimeString();
     size_t memBefore = getCurrentMemoryUsage();
 
-    GraphTriangulation *gt = new GraphTriangulationOneconnectedPerformance(faces, triangulationLimit);
+    GraphTriangulation *gt = new GraphTriangulationOneconnectedPerformance(graph.vertexCount, graph.adjacency, triangulationLimit);
 
     std::atomic<bool> stopProgress{false};
 
@@ -629,9 +630,8 @@ static void runCategory(const string &category)
         cout << "  " << filename << ": Found " << alreadyDone << " run(s) in CSV. Need "
              << remaining << " more run(s).\n";
 
-        long long distinctVertices = 0;
-        vector<vector<long long>> faces = readInput(fullPath, distinctVertices);
-        if (faces.empty())
+        InputGraph graph = readInput(fullPath);
+        if (graph.vertexCount == 0)
         {
             cerr << "    Warning: skipping empty/invalid file: " << filename << "\n";
             continue;
@@ -666,7 +666,7 @@ static void runCategory(const string &category)
             RunRecord rec;
             rec.filename = filename;
             rec.runIndex = globalRunIndex;
-            rec.distinctVertices = distinctVertices;
+            rec.distinctVertices = graph.vertexCount;
             rec.startTime = startTs;
             rec.endTime = endTs;
 
@@ -784,7 +784,7 @@ static void runCategory(const string &category)
                 cout << " ERROR: failed to spawn or wait on worker process (end " << endTs << ")\n";
             }
 
-            rec.memoryPerVertex = (distinctVertices > 0) ? (double)rec.peakMemory / distinctVertices : 0.0;
+            rec.memoryPerVertex = (graph.vertexCount > 0) ? (double)rec.peakMemory / graph.vertexCount : 0.0;
             appendRunCSV(csvPath, rec);
 
             error_code ec;
