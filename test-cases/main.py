@@ -156,7 +156,7 @@ def main():
                               "(default: config.json in the current directory; "
                               "if missing, falls back to CLI flags / built-in defaults)")
     parser.add_argument("--count", type=int, default=100, help="global default: graphs per category")
-    parser.add_argument("--out", type=str, default="input", help="input root folder")
+    parser.add_argument("--out", type=str, default="input/Biconnected", help="input root folder")
     parser.add_argument("--max-faces", type=int, default=15, help="global default: max faces incl. outer face")
     parser.add_argument("--max-face-vertices", type=int, default=40, help="global default: max vertices in any single face")
     parser.add_argument("--max-vertices", type=int, default=200, help="global default: max total vertices in graph")
