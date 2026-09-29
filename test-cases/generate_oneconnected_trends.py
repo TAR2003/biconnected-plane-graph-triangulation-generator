@@ -34,8 +34,8 @@ def tree_face(vertex_count: int) -> list[int]:
 
 
 def main() -> None:
-    star_dir = ROOT / "02_star"
-    tree_dir = ROOT / "03_tree"
+    star_dir = ROOT / "Oneconnected_02_star"
+    tree_dir = ROOT / "Oneconnected_03_tree"
     star_dir.mkdir(parents=True, exist_ok=True)
     tree_dir.mkdir(parents=True, exist_ok=True)
 

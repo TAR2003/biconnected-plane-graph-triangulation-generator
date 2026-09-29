@@ -131,7 +131,8 @@ def run(kind, gens, argv=None):
     rows, total = [], 0
     for fam in fams:
         for n in a.sizes:
-            d = out / fam / f"n{n}"
+            category = f"{kind.capitalize()}_{fam}"
+            d = out / category / f"n{n}"
             made = 0
             for i in range(a.count):
                 rng = random.Random(f"{a.seed}/{fam}/{n}/{i}")
@@ -159,7 +160,7 @@ def run(kind, gens, argv=None):
                 p = d / f"{fam}_n{n}_{i:04d}.txt"
                 write_graph(rot, p, a.base)
                 degs = [len(r) for r in rot.values()]
-                rows.append([str(p.relative_to(out)), fam, n, m, 2 - n + m, min(degs), max(degs), ori, a.seed])
+                rows.append([str(p.relative_to(out)), category, n, m, 2 - n + m, min(degs), max(degs), ori, a.seed])
                 made += 1
             total += made
             print(f"{fam:24s} n={n:<6d} {'skipped (size unsupported)' if made == 0 else f'{made} files'}")

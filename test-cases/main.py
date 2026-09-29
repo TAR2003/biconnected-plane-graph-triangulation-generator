@@ -141,7 +141,7 @@ def run_category(name, settings, out_root):
     else:
         raise ValueError(f"Unknown category: {name}")
 
-    save_sorted_instances(inst, os.path.join(out_root, name), "case")
+    save_sorted_instances(inst, os.path.join(out_root, f"Biconnected_{name}"), "case")
     print(f"  saved {len(inst)} graphs (requested {count})\n")
     return len(inst)
 

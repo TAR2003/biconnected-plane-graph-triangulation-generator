@@ -46,7 +46,11 @@ if __name__ == "__main__":
     ap.add_argument("--out", default="input/plantri"); ap.add_argument("--base", type=int, default=0, choices=[0, 1])
     ap.add_argument("--orientation", choices=["cw", "ccw", "mixed"], default="mixed")
     ap.add_argument("--seed", type=int, default=1); ap.add_argument("--max-files", type=int, default=10**9)
-    a = ap.parse_args(); out = Path(a.out)
+    a = ap.parse_args()
+    out = Path(a.out)
+    category_prefix = f"{a.kind.capitalize()}_"
+    if not out.name.startswith(category_prefix):
+        out = out.parent / f"{category_prefix}{out.name}"
     if a.stdin:
         print(convert(sys.stdin, a.kind, out / "stdin", 0, a.base, a.orientation, a.seed, a.max_files)); sys.exit()
     flags = "-pc2m2a" if a.kind == "biconnected" else "-pc1m1a"     # -p planar, -c conn., -m min degree, -a ascii
