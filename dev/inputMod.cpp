@@ -10,10 +10,11 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-// Reconstructs rotation system (adj) from Face-List representation
+// Reconstructs rotation system (adj) from Face-List representation reliably
+// Works for Biconnected Graphs, 1-Connected Graphs, and Trees.
 void convertFaceListToRotationSystem(int num_faces, const vector<vector<int>> &faces, int &N, vector<vector<int>> &adj)
 {
-    // 1. Collect all unique vertex labels in the input faces
+    // 1. Collect all unique original vertex labels
     set<int> unique_vertices;
     for (const auto &face : faces)
     {
@@ -30,7 +31,7 @@ void convertFaceListToRotationSystem(int num_faces, const vector<vector<int>> &f
         return;
     }
 
-    // 2. Map original vertex labels to contiguous internal IDs [0 .. N-1]
+    // 2. Map original labels to contiguous internal indices [0 .. N-1]
     map<int, int> orig_to_idx;
     vector<int> idx_to_orig;
     int idx = 0;
@@ -40,12 +41,14 @@ void convertFaceListToRotationSystem(int num_faces, const vector<vector<int>> &f
         idx_to_orig.push_back(v);
     }
 
-    N = idx_to_orig.size(); // Total count of distinct vertices
-    vector<vector<int>> raw_succ(N);
+    N = idx_to_orig.size();
 
-    // 3. Extract CCW successor steps around each vertex
-    // In a face boundary walk ... -> w -> u -> v -> ...,
-    // entering u along (w -> u) means the next outgoing edge from u in CCW order is (u -> v).
+    // Map half-edge transition: entering u from w means exiting u towards v
+    // key: (u, w) -> list of outgoing neighbors v
+    map<pair<int, int>, vector<int>> next_out;
+    vector<set<int>> incoming_edges(N);
+
+    // 3. Populate half-edge transition map from faces
     for (const auto &face : faces)
     {
         int k = face.size();
@@ -58,31 +61,71 @@ void convertFaceListToRotationSystem(int num_faces, const vector<vector<int>> &f
             int u = orig_to_idx[face[(i + 1) % k]];
             int v = orig_to_idx[face[(i + 2) % k]];
 
-            // Record v as a successor of w around u
-            raw_succ[u].push_back(v);
+            next_out[{u, w}].push_back(v);
+            incoming_edges[u].insert(w);
         }
     }
 
-    // 4. Construct rotation system per vertex while preserving cyclic order and removing duplicate steps
+    // 4. Reconstruct cyclic CCW order per vertex
     adj.assign(N, vector<int>());
+
     for (int u = 0; u < N; ++u)
     {
-        if (raw_succ[u].empty())
+        if (incoming_edges[u].empty())
             continue;
 
-        vector<int> ordered;
-        set<int> seen;
+        vector<int> order;
+        set<int> in_order;
+        set<pair<int, int>> visited_halfedges; // tracks (u, w)
 
-        for (int v : raw_succ[u])
+        for (int start_w : incoming_edges[u])
         {
-            if (seen.find(v) == seen.end())
+            if (visited_halfedges.count({u, start_w}))
+                continue;
+
+            int curr_w = start_w;
+            while (!visited_halfedges.count({u, curr_w}))
             {
-                seen.insert(v);
-                ordered.push_back(v);
+                visited_halfedges.insert({u, curr_w});
+
+                if (next_out.count({u, curr_w}) && !next_out[{u, curr_w}].empty())
+                {
+                    // Correct successor: edge leaving u towards next_v
+                    int next_v = next_out[{u, curr_w}].front();
+
+                    if (in_order.find(next_v) == in_order.end())
+                    {
+                        order.push_back(next_v);
+                        in_order.insert(next_v);
+                    }
+
+                    if (next_out[{u, curr_w}].size() > 1)
+                    {
+                        next_out[{u, curr_w}].erase(next_out[{u, curr_w}].begin());
+                    }
+                    curr_w = next_v;
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
-        adj[u] = ordered;
+        adj[u] = order;
+    }
+
+    // 5. Enforce bidirectional symmetry for graph topology
+    for (int u = 0; u < N; ++u)
+    {
+        for (int v : adj[u])
+        {
+            auto it = find(adj[v].begin(), adj[v].end(), u);
+            if (it == adj[v].end())
+            {
+                adj[v].push_back(u);
+            }
+        }
     }
 }
 
@@ -113,14 +156,13 @@ void processFile(const fs::path &input_filepath, const fs::path &output_filepath
     vector<vector<int>> adj;
     convertFaceListToRotationSystem(num_faces, faces, N, adj);
 
-    // Create parent directory for target output path if it doesn't exist
     fs::create_directories(output_filepath.parent_path());
 
     ofstream fout(output_filepath);
     if (!fout.is_open())
         return;
 
-    // Write standard Rotation System format: N lines / adjacency structure
+    // Output format: N followed by N lines of adjacency lists
     fout << N << "\n";
     for (int i = 0; i < N; ++i)
     {
@@ -145,7 +187,6 @@ int main()
         return 1;
     }
 
-    // Traverse recursively through subdirectories
     for (const auto &entry : fs::recursive_directory_iterator(input_root))
     {
         if (entry.is_regular_file() && entry.path().extension() == ".txt")
