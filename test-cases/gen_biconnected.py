@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Biconnected plane-graph generator.  Every graph is validated: simple, planar
 (Euler V-E+F=2 on the emitted rotation system) and 2-connected.
-Usage: python gen_biconnected.py --out inputs/biconnected --sizes 10 100 1000 --count 20 --seed 1
+Usage: python gen_biconnected.py --out input/Biconnected --sizes 10 100 1000 --count 20 --seed 1
        python gen_biconnected.py --list
 """
 import math

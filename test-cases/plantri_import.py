@@ -43,7 +43,7 @@ if __name__ == "__main__":
     ap.add_argument("--plantri", default="plantri"); ap.add_argument("--stdin", action="store_true")
     ap.add_argument("--kind", choices=["biconnected", "oneconnected"], required=True)
     ap.add_argument("--nmin", type=int, default=4); ap.add_argument("--nmax", type=int, default=10)
-    ap.add_argument("--out", default="inputs/plantri"); ap.add_argument("--base", type=int, default=0, choices=[0, 1])
+    ap.add_argument("--out", default="input/plantri"); ap.add_argument("--base", type=int, default=0, choices=[0, 1])
     ap.add_argument("--orientation", choices=["cw", "ccw", "mixed"], default="mixed")
     ap.add_argument("--seed", type=int, default=1); ap.add_argument("--max-files", type=int, default=10**9)
     a = ap.parse_args(); out = Path(a.out)
