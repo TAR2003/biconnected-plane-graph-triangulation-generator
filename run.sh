@@ -16,5 +16,5 @@
 # Per-triangulation timing, Oneconnected algorithm, all inputs, 5k limit
 ./build/bench_individual --algo=biconnected --cases=biconnected
 
-# Per-triangulation timing, BiconnectedWithoutVGS algorithm, Biconnected inputs, 5k limit
-./build/bench_individual --algo=biconnected-without-vgs --cases=biconnected --limit=5000
+# Per-triangulation timing, BiconnectedWithoutVGS algorithm, Biconnected inputs
+./build/bench_individual --algo=biconnected-without-vgs --cases=biconnected 
