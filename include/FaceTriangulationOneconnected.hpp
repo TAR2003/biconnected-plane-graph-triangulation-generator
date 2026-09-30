@@ -7,8 +7,21 @@ using namespace std;
 class FaceTriangulationOneconnected : public FaceTriangulation
 {
 public:
+    /// @brief set of all present chords in the current face, need to keep track for the root triangulation multi edge conflict
+    unordered_multiset<pair<long long, long long>, PairHash> presentFace;
+
+    /// @brief the number of problems in the current triangulation
+    long long problems;
+
     FaceTriangulationOneconnected(long long n, vector<long long> &elements, unordered_multiset<pair<long long, long long>, PairHash> &present, long long serial, GraphTriangulation *gt)
-        : FaceTriangulation(n, elements, present, serial, gt) {}
+        : FaceTriangulation(n, elements, present, serial, gt) {
+            problems = 0;
+        }
+    
+    ~FaceTriangulationOneconnected()
+    {
+        presentFace.clear(); // clear the set of present chords
+    }
 
     /// @brief Flips the edge pointed to by the iterator in the generating set
     /// @param itrVGS Iterator pointing to the edge to be flipped

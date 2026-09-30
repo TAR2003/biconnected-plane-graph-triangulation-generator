@@ -4,11 +4,12 @@
 #include "GraphTriangulation.hpp"
 using namespace std;
 
-
-
 class FaceTriangulationBiconnected : public FaceTriangulation
 {
 public:
+    /// @brief the list of all edges in the cycle (for memory management)
+    list<Edge *> VGS;
+    
     FaceTriangulationBiconnected(long long n, vector<long long> &elements, unordered_multiset<pair<long long, long long>, PairHash> &present, long long serial, GraphTriangulation *gt)
         : FaceTriangulation(n, elements, present, serial, gt) {}
 
@@ -17,12 +18,12 @@ public:
     void flip(list<Edge *>::iterator iteratorToFlip)
     {
         auto itrVGS = iteratorToFlip; // Use the provided iterator directly
-        Edge *e = *itrVGS; // Edge to be flipped
+        Edge *e = *itrVGS;            // Edge to be flipped
 
         // Store the values BEFORE flipping
         pair<long long, long long> newChord = make_pair(e->opposite_first, e->opposite_second); // New chord after flip
         pair<long long, long long> oldChord = make_pair(e->first, e->second);                   // Old chord before flip
-        auto itr = e->chordItrGS;                                                   // Corresponding iterator in the generating set
+        auto itr = e->chordItrGS;                                                               // Corresponding iterator in the generating set
         // Update neighbors with the stored values
         if (next(itr) != GS.end())
         {
@@ -200,7 +201,7 @@ public:
 
         // addTriangulation(); // adding the initial root triangulation
         output();
-        
+
         auto itr = VGS.begin();
         visitAllBranches(itr); // Visit all branches recursively
 

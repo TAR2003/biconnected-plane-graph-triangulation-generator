@@ -15,20 +15,13 @@ public:
     list<Edge *> chords;
     /// @brief the generating set of the cycle
     list<Edge *> GS;
-    /// @brief the list of all edges in the cycle (for memory management)
-    list<Edge *> VGS;
     /// @brief the vertex number of the cycle
     long long n;
     /// @brief set of all present chords in the original graph (reference to shared set)
     unordered_multiset<pair<long long, long long>, PairHash> &present;
-    /// @brief set of all present chords in the current face, need to keep track for the root triangulation multi edge conflict
-    unordered_multiset<pair<long long, long long>, PairHash> presentFace;
-    /// @brief all the triangulations generated
-    vector<vector<pair<long long, long long>>> allTriangulations;
     vector<long long> positions; // vector to store the positions of the vertices in the cycle
     vector<long long> elements;  // vector to store the elements of the cycle
 
-    long long problems;
     GraphTriangulation *gt;
     long long serial;
 
@@ -39,7 +32,7 @@ public:
     /// @param serial the serial number of the face
     /// @param gt pointer to the GraphTriangulation class
     FaceTriangulation(long long n, vector<long long> &elements, unordered_multiset<pair<long long, long long>, PairHash> &present, long long serial, GraphTriangulation *gt)
-        : n(n), elements(elements), present(present),  serial(serial), gt(gt), positions(n, -1), problems(0)
+        : n(n), elements(elements), present(present),  serial(serial), gt(gt), positions(n, -1)
     {
         findSafeRoot();
     }
@@ -51,8 +44,6 @@ public:
         {
             delete chord; // free the memory allocated for each chord
         }
-        presentFace.clear(); // clear the set of present chords
-
     }
 
     void printSet(list<Edge *> &s)
@@ -122,19 +113,6 @@ public:
         }
     }
 
-    /// @brief printing all the triangulations after finishing the complete task
-    void printAllTriangulations()
-    {
-        cout << "Total triangulations: " << allTriangulations.size() << endl;
-        for (auto &triangulation : allTriangulations)
-        {
-            for (auto &chord : triangulation)
-            {
-                cout << "(" << chord.first << ", " << chord.second << ") , ";
-            }
-            cout << endl;
-        }
-    }
 
     /// @brief Updates the opposite endpoints of the edge pointed to by itr_other based on the flip operation
     /// @param itr Iterator pointing to the current edge
@@ -171,19 +149,6 @@ public:
         }
     }
 
-
-
-    /// @brief adds the current triangulation to the list of all triangulations
-    void addTriangulation()
-    {
-        vector<pair<long long, long long>> currentTriangulation;
-        for (auto &chord : chords)
-        {
-            currentTriangulation.push_back(getPair(chord));
-        }
-
-        allTriangulations.push_back(currentTriangulation);
-    }
 
     void removeCurrentChordsFromPresent()
     {

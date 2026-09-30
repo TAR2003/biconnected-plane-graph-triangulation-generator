@@ -213,6 +213,45 @@ inline void GraphTriangulationOneconnectedCorrectness::storeTriangulation()
     addTriangulation();
 }
 
+
+#include "FaceTriangulationBiconnectedWithoutVGS.hpp"
+
+class GraphTriangulationBiconnectedWithoutVGS : public GraphTriangulationBiconnected
+{
+public:
+    GraphTriangulationBiconnectedWithoutVGS(long long totalNodes, const vector<vector<long long>> &adjacency, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationBiconnected(totalNodes, adjacency, triangulationLimit) {};
+    FaceTriangulation *getFaceTriangulation(long long serial) override;
+};
+
+inline FaceTriangulation *GraphTriangulationBiconnectedWithoutVGS::getFaceTriangulation(long long serial)
+{
+    return new FaceTriangulationBiconnectedWithoutVGS(faces[serial].size(), faces[serial], present, serial, this);
+}
+
+
+class GraphTriangulationBiconnectedWithoutVGSPerformance : public GraphTriangulationBiconnectedWithoutVGS
+{
+public:
+    GraphTriangulationBiconnectedWithoutVGSPerformance(long long totalNodes, const vector<vector<long long>> &adjacency, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationBiconnectedWithoutVGS(totalNodes, adjacency, triangulationLimit) {};
+    void storeTriangulation() override;
+};
+
+inline void GraphTriangulationBiconnectedWithoutVGSPerformance::storeTriangulation()
+{
+}
+
+class GraphTriangulationBiconnectedWithoutVGSCorrectness : public GraphTriangulationBiconnectedWithoutVGS
+{
+public:
+    GraphTriangulationBiconnectedWithoutVGSCorrectness(long long totalNodes, const vector<vector<long long>> &adjacency, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationBiconnectedWithoutVGS(totalNodes, adjacency, triangulationLimit) {};
+    void storeTriangulation() override;
+};
+
+inline void GraphTriangulationBiconnectedWithoutVGSCorrectness::storeTriangulation()
+{
+    addTriangulation();
+}
+
 // ============================================================================
 // Per-triangulation timing (used by the "individual" benchmark)
 // ============================================================================
@@ -268,3 +307,4 @@ inline void GraphTriangulationOneconnectedIndividualPerformance::storeTriangulat
 {
     timeline.record();
 }
+
