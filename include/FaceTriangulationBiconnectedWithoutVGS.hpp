@@ -54,6 +54,13 @@ public:
     void generateChildTriangulations(list<Edge *>::iterator &iteratorToFlip)
     {
         auto itrGS = iteratorToFlip;
+        gt->totalChecks++;
+        auto oppositePair = getOppositePair(*itrGS);
+        if (present.find(oppositePair) != present.end())
+        {
+            return;
+        }
+        gt->successfulChecks++;
 
         flip(itrGS); // Flip the edge at the current iterator, and update neighbors accordingly
 
