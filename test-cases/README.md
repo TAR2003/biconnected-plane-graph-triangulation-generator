@@ -1,7 +1,8 @@
 # Plane-graph input generators for the triangulation benchmark
 
 Generators for the input files of the Google Benchmark harness (`bench_total.cpp`), which times
-`GraphTriangulationBiconnectedPerformance` and `GraphTriangulationOneconnectedPerformance`.
+`GraphTriangulationBiconnectedPerformance`, `GraphTriangulationBiconnectedWithoutVGSPerformance`,
+and `GraphTriangulationOneconnectedPerformance`.
 
 | File | Purpose |
 |---|---|

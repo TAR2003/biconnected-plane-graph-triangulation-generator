@@ -254,6 +254,10 @@ FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
     GraphTriangulation *gt = new GraphTriangulationBiconnectedCorrectness(graph.vertexCount, graph.adjacency);
     gt->getAllTriangulations();
     gt->sortTriangulations();
+
+    GraphTriangulation *gtWithoutVGS = new GraphTriangulationBiconnectedWithoutVGSCorrectness(graph.vertexCount, graph.adjacency);
+    gtWithoutVGS->getAllTriangulations();
+    gtWithoutVGS->sortTriangulations();
     
     GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(graph.vertexCount, graph.adjacency);
     tc->getAllTriangulations();
@@ -269,6 +273,14 @@ FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
     }
 
     bool isContained = compareAndOutput(gt->allTriangulations, tc->allTriangulations, outFilePath, enableFileOutput);
+        const string withoutVGSOutputPath = "output/" + bareFilename + ".without-vgs";
+        bool withoutVGSContained = compareAndOutput(gtWithoutVGS->allTriangulations, tc->allTriangulations,
+                                           withoutVGSOutputPath, enableFileOutput);
+
+        cout << "BiconnectedWithoutVGS: "
+            << (withoutVGSContained ? "MATCHED" : "MISMATCHED")
+            << " (" << gtWithoutVGS->allTriangulations.size()
+            << " triangulations vs " << tc->allTriangulations.size() << " reference)" << endl;
 
     size_t algoCount = gt->allTriangulations.size();
     size_t bruteForceCount = tc->allTriangulations.size();
@@ -336,6 +348,7 @@ FileMetrics matchTwoAlgorithms(string filename, bool enableFileOutput)
         isContained};
 
     delete gt;
+    delete gtWithoutVGS;
     delete tc;
 
     return metrics;

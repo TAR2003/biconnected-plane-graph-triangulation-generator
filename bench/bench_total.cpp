@@ -24,6 +24,8 @@ namespace
     {
         if (algo == Family::Biconnected)
             return std::make_unique<GraphTriangulationBiconnectedPerformance>(vertices, adjacency, limit);
+        if (algo == Family::BiconnectedWithoutVGS)
+            return std::make_unique<GraphTriangulationBiconnectedWithoutVGSPerformance>(vertices, adjacency, limit);
         return std::make_unique<GraphTriangulationOneconnectedPerformance>(vertices, adjacency, limit);
     }
 

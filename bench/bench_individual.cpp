@@ -27,6 +27,12 @@ namespace
             auto *t = &g->timeline;
             return {std::move(g), t};
         }
+        if (algo == Family::BiconnectedWithoutVGS)
+        {
+            auto g = std::make_unique<GraphTriangulationBiconnectedWithoutVGSIndividualPerformance>(vertices, adjacency, limit);
+            auto *t = &g->timeline;
+            return {std::move(g), t};
+        }
         auto g = std::make_unique<GraphTriangulationOneconnectedIndividualPerformance>(vertices, adjacency, limit);
         auto *t = &g->timeline;
         return {std::move(g), t};

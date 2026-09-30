@@ -295,6 +295,19 @@ inline void GraphTriangulationBiconnectedIndividualPerformance::storeTriangulati
     timeline.record();
 }
 
+class GraphTriangulationBiconnectedWithoutVGSIndividualPerformance : public GraphTriangulationBiconnectedWithoutVGSPerformance
+{
+public:
+    GenerationTimeline timeline;
+    GraphTriangulationBiconnectedWithoutVGSIndividualPerformance(long long totalNodes, const vector<vector<long long>> &adjacency, long long triangulationLimit = LONG_LONG_MAX) : GraphTriangulationBiconnectedWithoutVGSPerformance(totalNodes, adjacency, triangulationLimit) {};
+    void storeTriangulation() override;
+};
+
+inline void GraphTriangulationBiconnectedWithoutVGSIndividualPerformance::storeTriangulation()
+{
+    timeline.record();
+}
+
 class GraphTriangulationOneconnectedIndividualPerformance : public GraphTriangulationOneconnectedPerformance
 {
 public:

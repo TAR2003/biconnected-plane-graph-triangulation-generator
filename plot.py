@@ -2,8 +2,8 @@
 """
 generate_graphs.py
 
-Generates a full suite of comparison graphs (Biconnected vs Oneconnected
-triangulation algorithms) from benchmark CSV output.
+Generates a full suite of comparison graphs for all triangulation algorithms
+found in benchmark CSV output.
 
 EXPECTED FOLDER LAYOUT (relative to this script, or pass --root):
 
@@ -54,6 +54,7 @@ import sys
 import glob
 import warnings
 from collections import defaultdict
+from itertools import combinations
 
 import numpy as np
 import pandas as pd
@@ -70,9 +71,10 @@ warnings.filterwarnings("ignore")
 
 ALGO_COLORS = {
     "Biconnected": "#2E86AB",
+    "BiconnectedWithoutVGS": "#6A4C93",
     "Oneconnected": "#E76F51",
 }
-ALGO_ORDER = ["Biconnected", "Oneconnected"]
+ALGO_ORDER = ["Biconnected", "BiconnectedWithoutVGS", "Oneconnected"]
 
 plt.rcParams.update({
     "figure.figsize": (10, 6),
@@ -410,13 +412,13 @@ def plot_overall(totals_df, individuals, outdir):
     fig, ax = plt.subplots(figsize=(12, 6))
     cats = sorted(df.category.unique())
     x = np.arange(len(cats))
-    width = 0.35
+    width = 0.8 / len(ALGO_ORDER)
     for i, algo in enumerate(ALGO_ORDER):
         vals = []
         for c in cats:
             sub = df[(df.algo == algo) & (df.category == c)]
             vals.append(sub.avgTimePerTriangulation.mean() if not sub.empty else 0)
-        ax.bar(x + (i - 0.5) * width, vals, width, label=algo, color=ALGO_COLORS[algo])
+        ax.bar(x + (i - (len(ALGO_ORDER) - 1) / 2) * width, vals, width, label=algo, color=ALGO_COLORS[algo])
     ax.set_xticks(x)
     ax.set_xticklabels(cats, rotation=40, ha="right")
     ax.set_ylabel("Avg time per triangulation (s)")
@@ -431,7 +433,7 @@ def plot_overall(totals_df, individuals, outdir):
         for c in cats:
             sub = df[(df.algo == algo) & (df.category == c)]
             vals.append(sub.checkSuccessRate.mean() if not sub.empty else 0)
-        ax.bar(x + (i - 0.5) * width, vals, width, label=algo, color=ALGO_COLORS[algo])
+        ax.bar(x + (i - (len(ALGO_ORDER) - 1) / 2) * width, vals, width, label=algo, color=ALGO_COLORS[algo])
     ax.set_xticks(x)
     ax.set_xticklabels(cats, rotation=40, ha="right")
     ax.set_ylabel("Check success rate (%)")
@@ -446,7 +448,7 @@ def plot_overall(totals_df, individuals, outdir):
         for c in cats:
             sub = df[(df.algo == algo) & (df.category == c)]
             vals.append(sub.traversalSuccessRate.mean() if not sub.empty else 0)
-        ax.bar(x + (i - 0.5) * width, vals, width, label=algo, color=ALGO_COLORS[algo])
+        ax.bar(x + (i - (len(ALGO_ORDER) - 1) / 2) * width, vals, width, label=algo, color=ALGO_COLORS[algo])
     ax.set_xticks(x)
     ax.set_xticklabels(cats, rotation=40, ha="right")
     ax.set_ylabel("Traversal success rate (%)")
@@ -519,24 +521,25 @@ def plot_overall(totals_df, individuals, outdir):
     ax.legend()
     savefig(fig, os.path.join(od, "invalid_traversals_vs_vertices.png"))
 
-    # 13. Speed ratio (Oneconnected time / Biconnected time) per category
+    # 13. Speed ratio for every algorithm pair per category.
     pivot = df.groupby(["category", "algo"])["timeSeconds"].mean().unstack()
-    if "Biconnected" in pivot.columns and "Oneconnected" in pivot.columns:
-        pivot = pivot.dropna()
-        ratio = pivot["Oneconnected"] / pivot["Biconnected"]
-        fig, ax = plt.subplots(figsize=(12, 6))
-        colors = ["#E76F51" if r > 1 else "#2E86AB" for r in ratio.values]
-        ax.bar(range(len(ratio)), ratio.values, color=colors)
-        ax.axhline(1.0, color="gray", linestyle="--", linewidth=1)
-        ax.set_xticks(range(len(ratio)))
-        ax.set_xticklabels(ratio.index, rotation=40, ha="right")
-        ax.set_ylabel("Oneconnected time / Biconnected time")
-        ax.set_title("Relative Slowdown of Oneconnected vs Biconnected by Category\n"
-                      "(>1 = Oneconnected slower)")
-        savefig(fig, os.path.join(od, "speed_ratio_oneconnected_vs_biconnected.png"))
+    for left_algo, right_algo in combinations(ALGO_ORDER, 2):
+        if left_algo in pivot.columns and right_algo in pivot.columns:
+            pair_pivot = pivot[[left_algo, right_algo]].dropna()
+            ratio = pair_pivot[right_algo] / pair_pivot[left_algo]
+            fig, ax = plt.subplots(figsize=(12, 6))
+            colors = [ALGO_COLORS[right_algo] if r > 1 else ALGO_COLORS[left_algo] for r in ratio.values]
+            ax.bar(range(len(ratio)), ratio.values, color=colors)
+            ax.axhline(1.0, color="gray", linestyle="--", linewidth=1)
+            ax.set_xticks(range(len(ratio)))
+            ax.set_xticklabels(ratio.index, rotation=40, ha="right")
+            ax.set_ylabel(f"{right_algo} time / {left_algo} time")
+            ax.set_title(f"Relative Slowdown of {right_algo} vs {left_algo} by Category\n"
+                         "(>1 = right-hand algorithm slower)")
+            savefig(fig, os.path.join(od, f"speed_ratio_{right_algo.lower()}_vs_{left_algo.lower()}.png"))
 
     # 14. Total checks / successfulChecks / failedChecks stacked view vs vertices
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharey=False)
+    fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(7 * len(ALGO_ORDER), 6), sharey=False)
     for ax, algo in zip(axes, ALGO_ORDER):
         sub = df[df.algo == algo].sort_values("vertices")
         if sub.empty:
@@ -623,7 +626,7 @@ def plot_overall(totals_df, individuals, outdir):
     savefig(fig, os.path.join(od, "boxplot_memory_per_vertex.png"))
 
     # 18. Regression slope summary: time vs triangulations, and time vs vertices
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+    fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(6.5 * len(ALGO_ORDER), 5.5))
     for algo in ALGO_ORDER:
         sub = df[df.algo == algo]
         if sub.empty:
@@ -683,7 +686,7 @@ def plot_overall(totals_df, individuals, outdir):
     savefig(fig, os.path.join(od, "avg_time_per_triangulation_vs_triangulations.png"))
 
     # 21. Checks / traversals per triangulation vs vertices
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+    fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(6.5 * len(ALGO_ORDER), 5.5))
     for algo in ALGO_ORDER:
         sub = df[df.algo == algo].sort_values("vertices")
         if sub.empty:
@@ -716,7 +719,7 @@ def plot_overall(totals_df, individuals, outdir):
     savefig(fig, os.path.join(od, "invalid_traversal_rate_vs_vertices.png"))
 
     # 23. Time per check and time per traversal vs vertices (stable overhead check)
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+    fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(6.5 * len(ALGO_ORDER), 5.5))
     for algo in ALGO_ORDER:
         sub = df[df.algo == algo].sort_values("vertices")
         if sub.empty:
@@ -753,10 +756,10 @@ def plot_overall(totals_df, individuals, outdir):
         fig, ax = plt.subplots()
         statuses = sorted(df.status.dropna().unique())
         x = np.arange(len(statuses))
-        width = 0.35
+        width = 0.8 / len(ALGO_ORDER)
         for i, algo in enumerate(ALGO_ORDER):
             counts = [len(df[(df.algo == algo) & (df.status == s)]) for s in statuses]
-            ax.bar(x + (i - 0.5) * width, counts, width, label=algo, color=ALGO_COLORS[algo])
+            ax.bar(x + (i - (len(ALGO_ORDER) - 1) / 2) * width, counts, width, label=algo, color=ALGO_COLORS[algo])
         ax.set_xticks(x)
         ax.set_xticklabels(statuses, rotation=20, ha="right")
         ax.set_ylabel("Run count")
@@ -765,7 +768,7 @@ def plot_overall(totals_df, individuals, outdir):
         savefig(fig, os.path.join(od, "status_distribution.png"))
 
     # 26. Data-quality identity checks: memoryPerVertex recompute, checkSuccessRate recompute
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
+    fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(6.5 * len(ALGO_ORDER), 5.5))
     for algo in ALGO_ORDER:
         sub = df[df.algo == algo]
         if sub.empty:
@@ -812,7 +815,7 @@ def plot_overall(totals_df, individuals, outdir):
                      "checkSuccessRate", "invalidTraversals", "totalTraversalsExtended",
                      "traversalSuccessRate"]
     numeric_cols = [c for c in numeric_cols if c in df.columns]
-    fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+    fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(6 * len(ALGO_ORDER), 7))
     for ax, algo in zip(axes, ALGO_ORDER):
         sub = df[df.algo == algo][numeric_cols]
         if sub.empty or len(sub) < 2:
@@ -828,64 +831,64 @@ def plot_overall(totals_df, individuals, outdir):
         fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
     savefig(fig, os.path.join(od, "correlation_heatmap.png"))
 
-    # 29. Paired scatter: Oneconnected vs Biconnected for matched (category, case) —
-    #     time, memory, checks, traversals, with identity line
+    # 29. Pairwise comparisons for every algorithm pair on matched cases.
     pivot_cols = ["timeSeconds", "peakMemoryBytes", "totalChecks", "totalTraversalsExtended"]
-    merged = None
-    bi = df[df.algo == "Biconnected"].groupby(["category", "case"])[pivot_cols].mean().reset_index()
-    one = df[df.algo == "Oneconnected"].groupby(["category", "case"])[pivot_cols].mean().reset_index()
-    merged = bi.merge(one, on=["category", "case"], suffixes=("_bi", "_one"))
-    if not merged.empty:
+    titles = ["Total time (s)", "Peak memory (bytes)", "Total checks", "Total traversals"]
+    for left_algo, right_algo in combinations(ALGO_ORDER, 2):
+        left = df[df.algo == left_algo].groupby(["category", "case"])[pivot_cols].mean().reset_index()
+        right = df[df.algo == right_algo].groupby(["category", "case"])[pivot_cols].mean().reset_index()
+        merged = left.merge(right, on=["category", "case"], suffixes=("_left", "_right"))
+        if merged.empty:
+            continue
+        pair_slug = f"{left_algo.lower()}_vs_{right_algo.lower()}"
         fig, axes = plt.subplots(2, 2, figsize=(12, 11))
-        titles = ["Total time (s)", "Peak memory (bytes)", "Total checks", "Total traversals"]
         for ax, col, title in zip(axes.flat, pivot_cols, titles):
-            xb, yo = merged[f"{col}_bi"], merged[f"{col}_one"]
-            ax.scatter(xb, yo, alpha=0.6, s=25, color="#6A4C93")
-            lim = [min(xb.min(), yo.min()), max(xb.max(), yo.max())]
+            xl, yr = merged[f"{col}_left"], merged[f"{col}_right"]
+            ax.scatter(xl, yr, alpha=0.6, s=25, color=ALGO_COLORS[right_algo])
+            lim = [min(xl.min(), yr.min()), max(xl.max(), yr.max())]
             ax.plot(lim, lim, "--", color="gray", lw=1, label="identity (y=x)")
-            ax.set_xlabel(f"Biconnected {title}")
-            ax.set_ylabel(f"Oneconnected {title}")
+            ax.set_xlabel(f"{left_algo} {title}")
+            ax.set_ylabel(f"{right_algo} {title}")
             ax.set_title(title)
             ax.legend(fontsize=8)
-        fig.suptitle("Paired Comparison: Oneconnected vs Biconnected (matched cases)", fontweight="bold")
-        savefig(fig, os.path.join(od, "paired_scatter_oneconnected_vs_biconnected.png"))
+        fig.suptitle(f"Paired Comparison: {right_algo} vs {left_algo} (matched cases)", fontweight="bold")
+        savefig(fig, os.path.join(od, f"paired_scatter_{pair_slug}.png"))
 
-        # 29b. Bland-Altman style difference plots for the same paired metrics
         fig, axes = plt.subplots(2, 2, figsize=(12, 11))
         for ax, col, title in zip(axes.flat, pivot_cols, titles):
-            xb, yo = merged[f"{col}_bi"], merged[f"{col}_one"]
-            mean = (xb + yo) / 2
-            diff = yo - xb
-            ax.scatter(mean, diff, alpha=0.6, s=25, color="#F4A261")
-            mdiff = diff.mean()
-            sdiff = diff.std()
+            xl, yr = merged[f"{col}_left"], merged[f"{col}_right"]
+            mean = (xl + yr) / 2
+            diff = yr - xl
+            ax.scatter(mean, diff, alpha=0.6, s=25, color=ALGO_COLORS[right_algo])
+            mdiff, sdiff = diff.mean(), diff.std()
             ax.axhline(mdiff, color="black", lw=1, label=f"mean diff={mdiff:.3g}")
             ax.axhline(mdiff + 1.96 * sdiff, color="gray", linestyle="--", lw=1)
             ax.axhline(mdiff - 1.96 * sdiff, color="gray", linestyle="--", lw=1)
-            ax.set_xlabel(f"Mean of Bi/One {title}")
-            ax.set_ylabel(f"Oneconnected - Biconnected {title}")
+            ax.set_xlabel(f"Mean of {left_algo}/{right_algo} {title}")
+            ax.set_ylabel(f"{right_algo} - {left_algo} {title}")
             ax.set_title(title)
             ax.legend(fontsize=8)
-        fig.suptitle("Bland\u2013Altman: Agreement Between Oneconnected and Biconnected", fontweight="bold")
-        savefig(fig, os.path.join(od, "bland_altman_oneconnected_vs_biconnected.png"))
+        fig.suptitle(f"Bland\u2013Altman: Agreement Between {right_algo} and {left_algo}", fontweight="bold")
+        savefig(fig, os.path.join(od, f"bland_altman_{pair_slug}.png"))
 
-    # 30. Triangulation count ratio per case (Oneconnected / Biconnected) — should be
-    #     ~1 if both algos generate the same set of triangulations
+    # 30. Triangulation count ratios per algorithm pair and matched case.
     tri_pivot = df.groupby(["category", "case", "algo"])["triangulations"].mean().unstack()
-    if "Biconnected" in tri_pivot.columns and "Oneconnected" in tri_pivot.columns:
-        tp = tri_pivot.dropna()
-        ratio = tp["Oneconnected"] / tp["Biconnected"]
+    for left_algo, right_algo in combinations(ALGO_ORDER, 2):
+        if left_algo not in tri_pivot.columns or right_algo not in tri_pivot.columns:
+            continue
+        tp = tri_pivot[[left_algo, right_algo]].dropna()
+        ratio = tp[right_algo] / tp[left_algo]
         fig, ax = plt.subplots(figsize=(max(10, len(ratio) * 0.3), 6))
-        colors = ["#E76F51" if abs(r - 1) > 0.01 else "#2E86AB" for r in ratio.values]
+        colors = [ALGO_COLORS[right_algo] if abs(r - 1) > 0.01 else ALGO_COLORS[left_algo] for r in ratio.values]
         ax.bar(range(len(ratio)), ratio.values, color=colors)
         ax.axhline(1.0, color="gray", linestyle="--", lw=1, label="ratio = 1 (identical count)")
         labels = [f"{c}/{k}" for c, k in ratio.index]
         ax.set_xticks(range(len(ratio)))
         ax.set_xticklabels(labels, rotation=75, ha="right", fontsize=6)
-        ax.set_ylabel("Oneconnected triangulations / Biconnected triangulations")
-        ax.set_title("Triangulation Count Ratio per Case\n(deviation from 1 = coverage mismatch)")
+        ax.set_ylabel(f"{right_algo} / {left_algo} triangulations")
+        ax.set_title(f"Triangulation Count Ratio: {right_algo} / {left_algo}\n(deviation from 1 = coverage mismatch)")
         ax.legend()
-        savefig(fig, os.path.join(od, "triangulation_count_ratio_per_case.png"))
+        savefig(fig, os.path.join(od, f"triangulation_count_ratio_{right_algo.lower()}_vs_{left_algo.lower()}.png"))
 
     # 31. Run-to-run variability: timeSeconds vs runIndex, aggregated across all cases
     if "runIndex" in df.columns:
@@ -906,7 +909,7 @@ def plot_overall(totals_df, individuals, outdir):
     #     (grouped bars, in addition to the existing avg-time-per-triangulation bar)
     cats_sorted = sorted(df.category.unique())
     x = np.arange(len(cats_sorted))
-    width = 0.35
+    width = 0.8 / len(ALGO_ORDER)
     for metric, ylabel, fname in [
         ("timeSeconds", "Total time (s)", "bar_total_time_by_category.png"),
         ("triangulations", "Total triangulations", "bar_total_triangulations_by_category.png"),
@@ -919,7 +922,7 @@ def plot_overall(totals_df, individuals, outdir):
                 sub = df[(df.algo == algo) & (df.category == c)][metric]
                 means.append(sub.mean() if not sub.empty else 0)
                 stds.append(sub.std() if not sub.empty else 0)
-            ax.bar(x + (i - 0.5) * width, means, width, yerr=stds, capsize=3,
+            ax.bar(x + (i - (len(ALGO_ORDER) - 1) / 2) * width, means, width, yerr=stds, capsize=3,
                    label=algo, color=ALGO_COLORS[algo])
         ax.set_xticks(x)
         ax.set_xticklabels(cats_sorted, rotation=40, ha="right")
@@ -950,7 +953,7 @@ def plot_overall(totals_df, individuals, outdir):
     # 34. Heatmap of category x metric, normalized per algo (executive summary view)
     metrics_for_heatmap = ["timeSeconds", "avgTimePerTriangulation", "peakMemoryBytes",
                             "checkSuccessRate", "traversalSuccessRate"]
-    fig, axes = plt.subplots(1, 2, figsize=(11, max(4, len(cats_sorted) * 0.5)))
+    fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(5.5 * len(ALGO_ORDER), max(4, len(cats_sorted) * 0.5)))
     for ax, algo in zip(axes, ALGO_ORDER):
         sub = df[df.algo == algo]
         if sub.empty:
@@ -971,8 +974,8 @@ def plot_overall(totals_df, individuals, outdir):
 
 # ----------------------------------------------------------------------------
 # ALGO-SCOPE LOG-LOG GRAPHS
-# One plot per algorithm ("all Biconnected inputs" / "all Oneconnected inputs"),
-# each showing points from BOTH algorithms (differently colored) so you can see
+    # One plot per algorithm ("all <algorithm> inputs"),
+# each showing points from every algorithm (differently colored) so you can see
 # how one algorithm's whole input set compares against the other's, all at once.
 # ----------------------------------------------------------------------------
 
@@ -994,21 +997,23 @@ def plot_algo_scope_loglog(totals_df, outdir):
         ("vertices", "avgTimePerTriangulation", "Vertices", "Avg time per triangulation (s)", "avgtime_vs_vertices"),
     ]
 
-    # For each "focus" algo, plot ALL points from BOTH algos (different colors),
+    # For each "focus" algo, plot ALL points from every algorithm (different colors),
     # but title/name the file after the focus algo, and draw the focus algo's
     # points on top / with fuller opacity so it reads as "this algo's full input set,
     # with the other algo shown for context".
     for focus_algo in ALGO_ORDER:
-        other_algo = [a for a in ALGO_ORDER if a != focus_algo][0]
         focus_od = os.path.join(od, f"{focus_algo.lower()}_all_inputs")
 
         for xcol, ycol, xlabel, ylabel, suffix in metric_pairs:
             fig, ax = plt.subplots()
-            # background: other algo, lower alpha
-            sub_other = df[df.algo == other_algo]
-            if not sub_other.empty:
-                ax.scatter(sub_other[xcol], sub_other[ycol], color=ALGO_COLORS[other_algo],
-                           alpha=0.25, s=18, label=f"{other_algo} (context)")
+            # background: all other algorithms, lower alpha
+            for other_algo in ALGO_ORDER:
+                if other_algo == focus_algo:
+                    continue
+                sub_other = df[df.algo == other_algo]
+                if not sub_other.empty:
+                    ax.scatter(sub_other[xcol], sub_other[ycol], color=ALGO_COLORS[other_algo],
+                               alpha=0.2, s=18, label=f"{other_algo} (context)")
             # foreground: focus algo, full alpha, every input point across every category/case
             sub_focus = df[df.algo == focus_algo]
             if not sub_focus.empty:
@@ -1019,7 +1024,7 @@ def plot_algo_scope_loglog(totals_df, outdir):
             ax.set_xlabel(f"{xlabel} (log)")
             ax.set_ylabel(f"{ylabel} (log)")
             ax.set_title(f"All {focus_algo} Inputs — {ylabel} vs {xlabel} (log-log)\n"
-                         f"({other_algo} shown for context)")
+                         "(all other algorithms shown for context)")
             ax.legend()
             savefig(fig, os.path.join(focus_od, f"{focus_algo.lower()}_all_inputs_loglog_{suffix}.png"))
 
@@ -1066,13 +1071,13 @@ def plot_per_category(totals_df, individuals, categories, outdir):
         # 1. Per test case (x) vs total time (y), both algos
         fig, ax = plt.subplots(figsize=(max(10, len(cases) * 0.5), 6))
         x = np.arange(len(cases))
-        width = 0.35
+        width = 0.8 / len(ALGO_ORDER)
         for i, algo in enumerate(ALGO_ORDER):
             vals = []
             for c in cases:
                 sub = cat_df[(cat_df.algo == algo) & (cat_df.case == c)]
                 vals.append(sub.timeSeconds.mean() if not sub.empty else np.nan)
-            ax.bar(x + (i - 0.5) * width, vals, width, label=algo, color=ALGO_COLORS[algo])
+            ax.bar(x + (i - (len(ALGO_ORDER) - 1) / 2) * width, vals, width, label=algo, color=ALGO_COLORS[algo])
         ax.set_xticks(x)
         ax.set_xticklabels(cases, rotation=60, ha="right", fontsize=7)
         ax.set_ylabel("Total time (s)")
@@ -1248,7 +1253,7 @@ def plot_per_category(totals_df, individuals, categories, outdir):
             ax.set_xticks(tick_pos)
             ax.set_xticklabels(tick_labels, rotation=60, ha="right", fontsize=7)
             ax.set_ylabel("Total time per run (s)")
-            ax.set_title(f"[{category}] Run-to-Run Time Variability per Case\n(blue=Biconnected, orange=Oneconnected)")
+            ax.set_title(f"[{category}] Run-to-Run Time Variability per Case")
             savefig(fig, os.path.join(od, f"{category}_run_variability_boxplot.png"))
         else:
             plt.close(fig)
@@ -1344,7 +1349,7 @@ def plot_per_case(individuals, outdir):
             plt.close(fig)
 
         # B2) delta time with rolling median + shaded IQR band (stability of per-step cost)
-        fig, axes = plt.subplots(1, 2, figsize=(14, 5.5), sharey=False)
+        fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(7 * len(ALGO_ORDER), 5.5), sharey=False)
         any_data = False
         for ax, algo in zip(axes, ALGO_ORDER):
             if algo not in algo_dfs:
@@ -1420,7 +1425,7 @@ def plot_per_case(individuals, outdir):
 
         # C2) Spaghetti plot: every individual run's cumulativeNs vs triangulation,
         #     with the mean overlaid, per algo (run-to-run stability, doc section 5)
-        fig, axes = plt.subplots(1, 2, figsize=(14, 5.5), sharey=False)
+        fig, axes = plt.subplots(1, len(ALGO_ORDER), figsize=(7 * len(ALGO_ORDER), 5.5), sharey=False)
         any_data = False
         for ax, algo in zip(axes, ALGO_ORDER):
             if algo not in algo_dfs:
@@ -1504,7 +1509,7 @@ def plot_per_case(individuals, outdir):
 # ----------------------------------------------------------------------------
 
 def main():
-    ap = argparse.ArgumentParser(description="Generate Biconnected vs Oneconnected benchmark graphs.")
+    ap = argparse.ArgumentParser(description="Generate comparison graphs for all triangulation benchmark algorithms.")
     ap.add_argument("--root", default="./benchmark-results",
                      help="Path to the benchmark-results root folder")
     ap.add_argument("--outdir", default="./graphs_output",

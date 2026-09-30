@@ -29,10 +29,23 @@ namespace bench
     enum class Family
     {
         Biconnected,
+        BiconnectedWithoutVGS,
         Oneconnected
     };
 
-    inline const char *familyName(Family f) { return f == Family::Biconnected ? "Biconnected" : "Oneconnected"; }
+    inline const char *familyName(Family f)
+    {
+        switch (f)
+        {
+        case Family::Biconnected:
+            return "Biconnected";
+        case Family::BiconnectedWithoutVGS:
+            return "BiconnectedWithoutVGS";
+        case Family::Oneconnected:
+            return "Oneconnected";
+        }
+        return "Unknown";
+    }
 
     struct Config
     {
@@ -56,6 +69,8 @@ namespace bench
             out = Family::Biconnected;
         else if (v == "oneconnected")
             out = Family::Oneconnected;
+        else if (v == "biconnected-without-vgs" || v == "biconnected_without_vgs" || v == "biconnectedWithoutVGS")
+            out = Family::BiconnectedWithoutVGS;
         else
             return false;
         return true;
@@ -83,7 +98,7 @@ namespace bench
                 else if (key == "--algo")
                 {
                     if (!parseFamily(val, cfg.algo))
-                        throw std::invalid_argument("--algo must be biconnected or oneconnected");
+                        throw std::invalid_argument("--algo must be biconnected, biconnected-without-vgs, or oneconnected");
                     cfg.algoGiven = true;
                 }
                 else if (key == "--cases")
@@ -97,13 +112,13 @@ namespace bench
                     throw std::invalid_argument("unknown argument '" + arg + "'");
             }
             if (!cfg.algoGiven)
-                throw std::invalid_argument("--algo=biconnected|oneconnected is required");
+                throw std::invalid_argument("--algo=biconnected|biconnected-without-vgs|oneconnected is required");
             return true;
         }
         catch (const std::exception &e)
         {
             std::cerr << "Error: " << e.what()
-                      << "\nUsage: --algo=biconnected|oneconnected [--cases=biconnected|oneconnected|all]\n"
+                      << "\nUsage: --algo=biconnected|biconnected-without-vgs|oneconnected [--cases=biconnected|oneconnected|all]\n"
                          "       [--runs=N] [--limit=N] [--input=DIR] [--output=DIR] [--benchmark_* flags]\n";
             return false;
         }
