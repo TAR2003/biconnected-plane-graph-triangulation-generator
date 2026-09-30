@@ -13,7 +13,7 @@ using namespace bench;
 namespace
 {
     constexpr int kDefaultRuns = 3;
-    constexpr long long kDefaultLimit = 10'000'000;
+    constexpr long long kDefaultLimit = 1'000'000;
 
     constexpr const char *kHeader =
         "filename,runIndex,vertices,triangulations,timeSeconds,peakMemoryBytes,memoryPerVertex,"
