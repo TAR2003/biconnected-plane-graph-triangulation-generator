@@ -59,7 +59,7 @@ CATEGORY_LABELS = {
     "4_halin": "Category 4: Halin graphs (random tree + leaf cycle)",
     "5_cycles": "Category 5: Cycles C_n, n = 3..15",
     "6_cycle_union": "Category 6: Union of k cycles (k=2..4, sizes 4..12)",
-    "7_snowflake": "Category 7: Snowflake graphs (maximal outerplanar / fully-triangulated-except-outer-face)",
+    "7_snowflake": "Category 7: Snowflake graphs (edge-apex transformation / fully triangulated)",
     "8_chord_sequence": "Category 8: Incremental chord-triangulation sequences (fixed n-cycle, one chord added at a time until fully triangulated)",
 }
 
