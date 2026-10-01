@@ -32,8 +32,8 @@ def convert(lines, kind, out, n, base, orientation, seed, max_files):
             skipped += 1          # e.g. -pc1 output includes graphs that are actually biconnected
             continue
         if orientation == "ccw" or (orientation == "mixed" and rng.random() < .5): rot = mirror(rot)
-        d = out / f"n{len(rot)}"; d.mkdir(parents=True, exist_ok=True)
-        write_graph(rot, d / f"plantri_n{len(rot)}_{made:07d}.txt", base); made += 1
+        out.mkdir(parents=True, exist_ok=True)
+        write_graph(rot, out / f"plantri_n{len(rot)}_{made:07d}.txt", base); made += 1
         if made >= max_files: break
     return made, skipped
 
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     if not out.name.startswith(category_prefix):
         out = out.parent / f"{category_prefix}{out.name}"
     if a.stdin:
-        print(convert(sys.stdin, a.kind, out / "stdin", 0, a.base, a.orientation, a.seed, a.max_files)); sys.exit()
+        print(convert(sys.stdin, a.kind, out, 0, a.base, a.orientation, a.seed, a.max_files)); sys.exit()
     flags = "-pc2m2a" if a.kind == "biconnected" else "-pc1m1a"     # -p planar, -c conn., -m min degree, -a ascii
     for n in range(a.nmin, a.nmax + 1):
         p = subprocess.run([a.plantri, flags, str(n)], capture_output=True, text=True)

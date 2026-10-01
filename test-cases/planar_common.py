@@ -132,7 +132,7 @@ def run(kind, gens, argv=None):
     for fam in fams:
         for n in a.sizes:
             category = f"{kind.capitalize()}_{fam}"
-            d = out / category / f"n{n}"
+            d = out / category
             made = 0
             for i in range(a.count):
                 rng = random.Random(f"{a.seed}/{fam}/{n}/{i}")

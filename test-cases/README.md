@@ -17,7 +17,7 @@ and `GraphTriangulationOneconnectedPerformance`.
 
 ```bash
 pip install networkx scipy numpy          # scipy is only needed for the Delaunay families
-<out>/<Kind>_<family>/n<N>/<family>_n<N>_<i>.txt
+<out>/<Kind>_<family>/<family>_n<N>_<i>.txt
 ```
 
 
@@ -63,7 +63,7 @@ comes from construction.
 For example, biconnected wheel cases are stored under
 `input/Biconnected/Biconnected_wheel/`, while one-connected tree-path cases are stored under
 `input/Oneconnected/Oneconnected_tree_path/`. This matches the `<InputFamily>__<sub>` folder
-ids in your harness (`c.folderId`), so each family/size folder becomes one CSV in
+ids in your harness (`c.folderId`), so each family folder becomes one CSV in
 `<output>/<Algo>/total/`. Adjust the layout if your `registerCases` expects a different folder depth.
 
 ---
