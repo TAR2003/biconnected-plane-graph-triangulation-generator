@@ -11,6 +11,7 @@ analyze-info/benchmark-results/
 graph*/
 test-cases/input/
 test-cases/output-images/
+test-cases/plantri
 
 
 *.exe

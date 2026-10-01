@@ -117,11 +117,18 @@ def validate_graph(G, constraints: Constraints):
     return True, faces, "ok"
 
 
-def write_test_case(filepath, graph):
-    """Write a graph as N followed by its cyclic adjacency rows."""
-    is_planar, embedding = nx.check_planarity(graph, counterexample=False)
-    if not is_planar:
-        raise ValueError("cannot write a non-planar graph as a rotation system")
+def write_test_case(filepath, graph, rotation=None):
+    """Write a graph as N followed by its cyclic adjacency rows.
+
+    rotation (optional): dict vertex -> list of neighbours in CLOCKWISE
+    order. If given, that exact embedding is written; otherwise networkx
+    picks an embedding via check_planarity.
+    """
+    embedding = None
+    if rotation is None:
+        is_planar, embedding = nx.check_planarity(graph, counterexample=False)
+        if not is_planar:
+            raise ValueError("cannot write a non-planar graph as a rotation system")
 
     vertices = sorted(graph.nodes())
     expected_vertices = list(range(len(vertices)))
@@ -131,7 +138,10 @@ def write_test_case(filepath, graph):
     with open(filepath, "w") as f:
         f.write(f"{len(vertices)}\n")
         for vertex in vertices:
-            neighbors = list(embedding.neighbors_cw_order(vertex))
+            if rotation is not None:
+                neighbors = list(rotation[vertex])
+            else:
+                neighbors = list(embedding.neighbors_cw_order(vertex))
             f.write(f"{len(neighbors)}")
             if neighbors:
                 f.write(" " + " ".join(str(neighbor) for neighbor in neighbors))
@@ -163,7 +173,7 @@ def save_sorted_instances(instances, out_dir, prefix):
         for i, inst in enumerate(instances_sorted, start=1):
             fname = f"{prefix}_{i:03d}.txt"
             fpath = os.path.join(out_dir, fname)
-            write_test_case(fpath, inst["graph"])
+            write_test_case(fpath, inst["graph"], inst.get("rotation"))
 
             n_faces = len(inst["faces"])
             max_face = max((len(f) for f in inst["faces"]), default=0)
