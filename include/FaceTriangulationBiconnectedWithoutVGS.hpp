@@ -65,7 +65,7 @@ public:
         flip(itrGS); // Flip the edge at the current iterator, and update neighbors accordingly
 
         bool lastChordGS = false;           // Flag to check if the current edge is the last in the generating setlist of all edges
-        Edge *next_chord_gs;                // Pointer to the next chord in the generating set set
+        Edge *next_chord_gs;                // Pointer to the next chord in the generating set
         if (next(itrGS) == GS.end())
         {
             lastChordGS = true; // If it is the last edge, set the flag to true
@@ -77,6 +77,22 @@ public:
 
         Edge *c = *itrGS;              // Current chord to be processed
         list<Edge *>::iterator itrloop; // Iterator for looping through the generating set
+        if (itrGS == GS.begin())
+        {
+            itrloop = next(itrGS); // if it is the first edge, start from the next edge
+        }
+        else
+        {
+            auto prevItrGS = prev(itrGS);
+            if ((*prevItrGS)->second == min(c->first, c->second))
+            {
+                itrloop = prevItrGS; // if the immidiate previous edge has the same second vertex, start from the previous edge
+            }
+            else
+            {
+                itrloop = next(itrGS); // else start from the next edge
+            }
+        }
 
         GS.erase(itrGS);   // Remove the current edge from the generating set
 
