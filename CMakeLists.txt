@@ -1,33 +1,91 @@
 cmake_minimum_required(VERSION 3.16)
-project(PlaneGraphTriangulationBenchmark LANGUAGES CXX)
+project(TriangulationBench CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard (raise if your algorithm headers need it)")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_BUILD_TYPE Release)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 endif()
 
-# --- Google Benchmark (pinned for reproducibility) ---------------------------
+# ---- where your algorithm headers live (GraphTriangulation.hpp, Edge.hpp, ...)
+set(TRI_SRC_DIR "" CACHE PATH "Directory containing GraphTriangulation.hpp and the other algorithm headers")
+if(NOT TRI_SRC_DIR OR NOT EXISTS "${TRI_SRC_DIR}/GraphTriangulation.hpp")
+  message(FATAL_ERROR "Pass -DTRI_SRC_DIR=<dir containing GraphTriangulation.hpp>")
+endif()
+
+# ---- speed options
+option(TRI_NATIVE "Tune for this CPU (-march=native); binary is NOT portable" ON)
+option(TRI_LTO    "Link-time optimisation" ON)
+option(TRI_STATIC "Link statically (-static), removes PLT/dynamic-loader overhead" OFF)
+set(TRI_PGO "OFF" CACHE STRING "Profile-guided optimisation: OFF | GEN | USE")
+set(TRI_ALLOCATOR "system" CACHE STRING "Allocator: system | jemalloc | tcmalloc | mimalloc (must be installed)")
+
+# ---- Google Benchmark (built Release, no tests, LTO)
 include(FetchContent)
 set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
 set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+set(BENCHMARK_ENABLE_LTO ${TRI_LTO} CACHE BOOL "" FORCE)
 FetchContent_Declare(benchmark
   GIT_REPOSITORY https://github.com/google/benchmark.git
   GIT_TAG v1.9.1
   GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(benchmark)
 
-# --- Shared harness (object library so the operator new/delete overrides are
-# always linked into the executables) --------------------------------------
-add_library(bench_common OBJECT bench/MemoryTracker.cpp)
-target_include_directories(bench_common PUBLIC ${CMAKE_SOURCE_DIR}/bench ${CMAKE_SOURCE_DIR}/include)
-target_compile_definitions(bench_common PUBLIC BENCH_PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
-target_link_libraries(bench_common PUBLIC benchmark::benchmark)
+# ---- compile / link flags
+set(TRI_COPTS "")
+set(TRI_LOPTS "")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  list(APPEND TRI_COPTS -O3 -DNDEBUG -fomit-frame-pointer -fno-plt)
+  if(TRI_NATIVE)
+    list(APPEND TRI_COPTS -march=native -mtune=native)
+  endif()
+  if(TRI_PGO STREQUAL "GEN")
+    list(APPEND TRI_COPTS -fprofile-generate)
+    list(APPEND TRI_LOPTS -fprofile-generate)
+  elseif(TRI_PGO STREQUAL "USE")
+    list(APPEND TRI_COPTS -fprofile-use -fprofile-correction -Wno-missing-profile)
+    list(APPEND TRI_LOPTS -fprofile-use)
+  endif()
+  if(TRI_STATIC)
+    list(APPEND TRI_LOPTS -static)
+  endif()
+elseif(MSVC)
+  list(APPEND TRI_COPTS /O2 /Ob3 /DNDEBUG)
+endif()
 
-# --- Executables --------------------------------------------------------------
-foreach(target bench_total bench_individual)
-  add_executable(${target} bench/${target}.cpp)
-  target_link_libraries(${target} PRIVATE bench_common)
-endforeach()
+set(TRI_ALLOC_LIB "")
+if(NOT TRI_ALLOCATOR STREQUAL "system")
+  if(TRI_ALLOCATOR STREQUAL "tcmalloc")
+    set(_alloc_name tcmalloc_minimal)
+  else()
+    set(_alloc_name ${TRI_ALLOCATOR})
+  endif()
+  find_library(TRI_ALLOC_LIB NAMES ${_alloc_name} REQUIRED)
+endif()
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT TRI_IPO_OK OUTPUT TRI_IPO_MSG)
+
+function(tri_target tgt)
+  target_include_directories(${tgt} PRIVATE ${TRI_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/bench)
+  target_compile_options(${tgt} PRIVATE ${TRI_COPTS})
+  target_link_options(${tgt} PRIVATE ${TRI_LOPTS})
+  if(TRI_ALLOC_LIB)
+    target_link_libraries(${tgt} PRIVATE ${TRI_ALLOC_LIB})
+  endif()
+  if(TRI_LTO AND TRI_IPO_OK)
+    set_property(TARGET ${tgt} PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
+  endif()
+endfunction()
+
+add_executable(bench_time bench/bench_time.cpp)
+target_link_libraries(bench_time PRIVATE benchmark::benchmark)
+tri_target(bench_time)
+
+add_executable(bench_memory bench/bench_memory.cpp)
+tri_target(bench_memory)
+if(WIN32)
+  target_link_libraries(bench_memory PRIVATE psapi)
+endif()

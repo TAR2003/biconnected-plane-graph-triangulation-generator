@@ -1,3 +1,3 @@
 rm -rf build
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
+cmake -S . -B build -DTRI_SRC_DIR=./src
+cmake --build build -j"$(nproc)"
