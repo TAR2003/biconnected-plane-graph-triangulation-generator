@@ -48,6 +48,7 @@ void runCase(string filename)
     //     cout << endl;
     // }
     GraphTriangulation *gt = new GraphTriangulationBiconnectedPerformance(graph.vertexCount, graph.adjacency, 1000000);
+    cout << "Faces count: " << gt->faces.size() << endl;
     gt->getAllTriangulations();
     // gt->printAllTriangulations();
     // GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(graph.vertexCount, graph.adjacency);
@@ -75,7 +76,7 @@ int main()
     //     runCase(path);
     // }
     // runCase("../test-cases/input/Biconnected/Biconnected_cycle/cycle_n10_0000.txt");
-    runCase("../test-cases/input/Biconnected/Biconnected_delaunay_lattice/delaunay_lattice_n10_0000.txt");
-    // runCase("input/Oneconnected/02_star/star_13.txt");
+    // runCase("../test-cases/input/Biconnected/Biconnected_delaunay_lattice/delaunay_lattice_n10_0000.txt");
+    runCase("input.txt");
     return 0;
 }

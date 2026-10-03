@@ -112,6 +112,10 @@ inline void GraphTriangulation::getNextFaceTriangulation(long long serial)
 
 inline void GraphTriangulation::getAllTriangulations()
 {
+    if (faces.size() == 0)
+    {
+        return;
+    }
     getNextFaceTriangulation(0);
 }
 
