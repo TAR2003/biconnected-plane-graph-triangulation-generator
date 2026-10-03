@@ -20,7 +20,7 @@ public:
     long long successfulChecks = 0;
     long long invalidTraversals = 0;
     long long triangulationLimit;
-
+    
     long long totalTriangulations = 0;
 
     GraphTriangulation(long long totalNodes, const vector<vector<long long>> &adjacency, long long triangulationLimit = LONG_LONG_MAX)
@@ -28,6 +28,15 @@ public:
         this->faces = rotationSystemToFaces(totalNodes, adjacency);
         present = unordered_multiset<pair<long long, long long>, PairHash>();
         initiatePresent();
+        vector<vector<long long>> tempfaces;
+        for (auto face : faces)
+        {
+            if (face.size() > 3)
+            {
+                tempfaces.push_back(face);
+            }
+        }
+        this->faces = tempfaces;
         this->triangulationLimit = triangulationLimit;
         faceTriangulations = vector<FaceTriangulation *>(this->faces.size(), nullptr);
     }

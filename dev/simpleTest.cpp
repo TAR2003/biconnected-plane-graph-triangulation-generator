@@ -47,26 +47,35 @@ void runCase(string filename)
     //     }
     //     cout << endl;
     // }
-    GraphTriangulation *gt = new GraphTriangulationOneconnectedCorrectness(graph.vertexCount, graph.adjacency, 10000000);
+    GraphTriangulation *gt = new GraphTriangulationBiconnectedPerformance(graph.vertexCount, graph.adjacency, 1000000);
     gt->getAllTriangulations();
-    gt->printAllTriangulations();
+    // gt->printAllTriangulations();
     // GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(graph.vertexCount, graph.adjacency);
     // tc->getAllTriangulations();
     // tc->refineTriangulations();
     // tc->removeDuplicated();
-    // tc->printAllTriangulations(); 
+    // tc->printAllTriangulations();
     // delete tc;
     cout << "Total triangulations for : " << filename << " : " << gt->totalTriangulations << endl;
     cout << "invalid traversals for : " << filename << " : " << gt->invalidTraversals << endl;
     cout << "success percentage for traversal : " << filename << " : " << (double)(gt->totalTriangulations) / (double)(gt->totalTriangulations + gt->invalidTraversals) * 100.0 << endl;
-   
+    cout << "Total face builds for : " << filename << " : " << gt->faceBuild << endl;
+    cout << "Total face count for : " << filename << " : " << gt->faces.size() << endl;
     delete gt;
 }
 
-int main ()
+int main()
 {
-    runCase("input/Oneconnected/02_star/star_12.txt");
-    runCase("input/Oneconnected/02_star/star_13.txt");
-    return 0;
+    // std::vector<int> arr = {10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
 
+    // for (const auto &s : arr) // 'const auto &' is better here since 's' is not modified
+    // {
+    //     std::string path = "../test-cases/input/Biconnected/Biconnected_delaunay_lattice/delaunay_lattice_n" + std::to_string(s) + "_0000.txt";
+
+    //     runCase(path);
+    // }
+    // runCase("../test-cases/input/Biconnected/Biconnected_cycle/cycle_n10_0000.txt");
+    runCase("../test-cases/input/Biconnected/Biconnected_delaunay_lattice/delaunay_lattice_n10_0000.txt");
+    // runCase("input/Oneconnected/02_star/star_13.txt");
+    return 0;
 }
