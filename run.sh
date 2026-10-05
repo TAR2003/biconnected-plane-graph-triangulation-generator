@@ -18,7 +18,9 @@ find . -type f -name "case_manifest.txt" -delete
 
 
              
-./build/bench_time --tri_algos=Biconnected          --tri_input=./test-cases/input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=1,10,100,1000,10000,100000,1000000
+# ./build/bench_time --tri_algos=Biconnected          --tri_input=./input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=1,10,100,1000,10000,100000,1000000,10000000,100000000,1000000000
+
+./build/bench_time --tri_algos=Biconnected          --tri_input=./input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=10000000
 
 # ./build/bench_time --tri_algos=Biconnected          --tri_input=./test-cases/input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=1,10,100,1000,10000,100000,1000000,10000000
 
