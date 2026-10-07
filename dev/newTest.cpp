@@ -1,7 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
-#include "GraphTriangulation.hpp"
-#include "GraphTriangulationTriconnected.hpp"
+#include "GenerateTriangulations.hpp"
 
 struct InputGraph
 {
@@ -47,9 +46,9 @@ void runCase(string filename)
     //     }
     //     cout << endl;
     // }
-    GraphTriangulation *gt = new GraphTriangulationBiconnectedPerformance(graph.vertexCount, graph.adjacency, 1000000);
+    GenerateTriangulations *gt = new GenerateTriangulations(graph.vertexCount, graph.adjacency, 1000000);
     cout << "Faces count: " << gt->faces.size() << endl;
-    gt->getAllTriangulations();
+    gt->generateAllTriangulations();
     // gt->printAllTriangulations();
     // GraphTriangulationTriconnected *tc = new GraphTriangulationTriconnected(graph.vertexCount, graph.adjacency);
     // tc->getAllTriangulations();
@@ -58,9 +57,9 @@ void runCase(string filename)
     // tc->printAllTriangulations();
     // delete tc;
     cout << "Total triangulations for : " << filename << " : " << gt->totalTriangulations << endl;
-    cout << "invalid traversals for : " << filename << " : " << gt->invalidTraversals << endl;
-    cout << "success percentage for traversal : " << filename << " : " << (double)(gt->totalTriangulations) / (double)(gt->totalTriangulations + gt->invalidTraversals) * 100.0 << endl;
-    cout << "Total face builds for : " << filename << " : " << gt->faceBuild << endl;
+    // cout << "invalid traversals for : " << filename << " : " << gt->invalidTraversals << endl;
+    // cout << "success percentage for traversal : " << filename << " : " << (double)(gt->totalTriangulations) / (double)(gt->totalTriangulations + gt->invalidTraversals) * 100.0 << endl;
+    // cout << "Total face builds for : " << filename << " : " << gt->faceBuild << endl;
     cout << "Total face count for : " << filename << " : " << gt->faces.size() << endl;
     delete gt;
 }
@@ -75,8 +74,8 @@ int main()
 
     //     runCase(path);
     // }
-    runCase("../test-cases/input/Biconnected/Biconnected_cycle/cycle_n10_0000.txt");
+    // runCase("../test-cases/input/Biconnected/Biconnected_cycle/cycle_n10_0000.txt");
     // runCase("../test-cases/input/Biconnected/Biconnected_delaunay_lattice/delaunay_lattice_n10_0000.txt");
-    // runCase("input.txt");
+    runCase("input.txt");
     return 0;
 }
