@@ -12,6 +12,7 @@ graph*/
 test-cases/input/
 test-cases/output-images/
 test-cases/plantri
+input*/
 
 
 *.exe
