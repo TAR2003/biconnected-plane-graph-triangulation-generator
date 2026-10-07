@@ -75,8 +75,8 @@ int main()
 
     //     runCase(path);
     // }
-    runCase("../test-cases/input/Biconnected/Biconnected_cycle/cycle_n10_0000.txt");
+    // runCase("../test-cases/input/Biconnected/Biconnected_cycle/cycle_n10_0000.txt");
     // runCase("../test-cases/input/Biconnected/Biconnected_delaunay_lattice/delaunay_lattice_n10_0000.txt");
-    // runCase("input.txt");
+    runCase("input.txt");
     return 0;
 }
