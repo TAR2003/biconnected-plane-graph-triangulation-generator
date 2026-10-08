@@ -2,9 +2,8 @@
 #include <filesystem>
 #include <chrono>
 #include <unistd.h>
-
-#include "GraphTriangulation.hpp"
 #include "GenerateTriangulations.hpp"
+#include "GraphTriangulation.hpp"
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -62,7 +61,7 @@ int main()
 {
     string rootDir = "./input/Biconnected/";
     string csvFile = "benchmark_results.csv";
-    const long long LIMIT = 1000000;
+    const long long LIMIT = 100000;
 
     // Read already processed test cases from CSV to skip them
     unordered_set<string> processedFiles;

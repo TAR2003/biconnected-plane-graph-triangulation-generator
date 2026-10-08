@@ -2,7 +2,6 @@
 using namespace std;
 #include "Common.hpp"
 
-
 class GenerateTriangulations
 {
 public:
@@ -88,7 +87,7 @@ public:
 
     void generateAllTriangulations()
     {
-        if(faces.size() == 0)
+        if (faces.size() == 0)
         {
             totalTriangulations = 0;
             return;
@@ -224,7 +223,7 @@ public:
                 return;
             }
             generateChildTriangulations(faceIndex, itr);
-            itr = itr->nextVGS;
+            itr = itr->nextGS;
         }
     }
 

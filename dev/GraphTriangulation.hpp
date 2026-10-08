@@ -1,9 +1,10 @@
+#pragma once
 #include <bits/stdc++.h>
 using namespace std;
 #pragma once
 #include "Edge.hpp"
 #include "PairHash.hpp"
-#include "RotationSystem.hpp"
+#include "Common.hpp"
 #include <functional>
 
 // Forward declaration to avoid circular dependency
