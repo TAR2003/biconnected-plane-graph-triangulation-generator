@@ -2,8 +2,7 @@
 #include <filesystem>
 #include <chrono>
 #include <unistd.h>
-#include "PlanarTriangulationGenerator.hpp"
-// #include "GenerateTriangulations.hpp"
+#include "GenerateBiconnectedTriangulations.hpp"
 #include "GraphTriangulation.hpp"
 
 namespace fs = std::filesystem;
@@ -14,6 +13,20 @@ struct InputGraph
 {
     long long vertexCount;
     vector<vector<long long>> adjacency;
+};
+
+struct AlgorithmResult
+{
+    long long count = 0;
+    double timeMs = 0.0;
+    double peakMemMB = 0.0;
+};
+
+// Represents a unified interface for any triangulation algorithm
+struct BenchmarkRunner
+{
+    string name;
+    function<AlgorithmResult(InputGraph &, long long limit)> run;
 };
 
 // Returns Peak RAM (VmHWM) in Megabytes for Linux/WSL
@@ -62,16 +75,74 @@ int main()
 {
     string rootDir = "./input/Biconnected/9_general_biconnected/";
     string csvFile = "benchmark_results.csv";
-    const long long LIMIT = 100000;
+    const long long LIMIT = 1000000;
 
-    // Read already processed test cases from CSV to skip them
+    // Define all algorithms to benchmark in order
+    // (Note: InputGraph is passed as non-const reference to accommodate non-const constructors)
+    vector<BenchmarkRunner> algorithms = {
+        {"Old_Biconnected",
+         [](InputGraph &g, long long limit)
+         {
+             double memBefore = getPeakMemoryMB();
+             auto start = high_resolution_clock::now();
+
+             auto *gt = new GraphTriangulationBiconnectedPerformance(g.vertexCount, g.adjacency, limit);
+             gt->getAllTriangulations();
+
+             auto end = high_resolution_clock::now();
+             long long count = gt->totalTriangulations;
+             double timeMs = duration<double, milli>(end - start).count();
+             double memUsed = max(0.0, getPeakMemoryMB() - memBefore);
+
+             delete gt;
+             return AlgorithmResult{count, timeMs, memUsed};
+         }},
+        {"WithoutVGS",
+         [](InputGraph &g, long long limit)
+         {
+             double memBefore = getPeakMemoryMB();
+             auto start = high_resolution_clock::now();
+
+             auto *gt = new GenerateBiconnectedTriangulationsWithoutVGS(g.vertexCount, g.adjacency, limit);
+             gt->generateAllTriangulations();
+
+             auto end = high_resolution_clock::now();
+             long long count = gt->totalTriangulations;
+             double timeMs = duration<double, milli>(end - start).count();
+             double memUsed = max(0.0, getPeakMemoryMB() - memBefore);
+
+             delete gt;
+             return AlgorithmResult{count, timeMs, memUsed};
+         }},
+        {"WithVGS",
+         [](InputGraph &g, long long limit)
+         {
+             double memBefore = getPeakMemoryMB();
+             auto start = high_resolution_clock::now();
+
+             auto *gt = new GenerateBiconnectedTriangulationsWithVGS(g.vertexCount, g.adjacency, limit);
+             gt->generateAllTriangulations();
+
+             auto end = high_resolution_clock::now();
+             long long count = gt->totalTriangulations;
+             double timeMs = duration<double, milli>(end - start).count();
+             double memUsed = max(0.0, getPeakMemoryMB() - memBefore);
+
+             delete gt;
+             return AlgorithmResult{count, timeMs, memUsed};
+         }}
+        // To add future algorithms, simply add a new entry here:
+        // { "AlgoName", [](InputGraph& g, long long limit) { ... } }
+    };
+
+    // Check existing CSV to skip processed files
     unordered_set<string> processedFiles;
     bool csvExists = fs::exists(csvFile);
     if (csvExists)
     {
         ifstream csvIn(csvFile);
         string line;
-        getline(csvIn, line); // Skip CSV header
+        getline(csvIn, line); // Skip header
         while (getline(csvIn, line))
         {
             stringstream ss(line);
@@ -87,10 +158,17 @@ int main()
     ofstream csvOut(csvFile, ios::app);
     if (!csvExists)
     {
-        csvOut << "TestFile,OldCount,NewCount,OldTimeMS,NewTimeMS,OldPeakMemMB,NewPeakMemMB,Status\n";
+        csvOut << "TestFile";
+        for (const auto &algo : algorithms)
+        {
+            csvOut << "," << algo.name << "_Count"
+                   << "," << algo.name << "_TimeMS"
+                   << "," << algo.name << "_MemMB";
+        }
+        csvOut << ",Status\n";
     }
 
-    // Collect all input files
+    // Collect and sort test files
     vector<string> testFiles;
     for (const auto &entry : fs::recursive_directory_iterator(rootDir))
     {
@@ -101,24 +179,25 @@ int main()
     }
     sort(testFiles.begin(), testFiles.end());
 
-    cout << left << setw(45) << "Test File"
-         << setw(10) << "Old Count"
-         << setw(10) << "New Count"
-         << setw(10) << "Old(ms)"
-         << setw(10) << "New(ms)"
-         << setw(12) << "OldMem(MB)"
-         << setw(12) << "NewMem(MB)"
-         << "Status" << endl;
-    cout << string(110, '-') << endl;
+    // Print Header
+    cout << left << setw(35) << "Test File";
+    for (const auto &algo : algorithms)
+    {
+        cout << setw(14) << ("Count(" + algo.name + ")")
+             << setw(12) << (algo.name + "(ms)")
+             << setw(12) << (algo.name + "(MB)");
+    }
+    cout << "Status" << endl;
+    cout << string(35 + algorithms.size() * 38 + 10, '-') << endl;
 
+    // Run Benchmarks
     for (const auto &filePath : testFiles)
     {
         string shortName = fs::relative(filePath, rootDir).string();
 
-        // Skip already benchmarked runs
         if (processedFiles.count(shortName))
         {
-            cout << left << setw(45) << shortName << "[SKIPPED - Already in CSV]" << endl;
+            cout << left << setw(35) << shortName << "[SKIPPED - Already in CSV]" << endl;
             continue;
         }
 
@@ -126,50 +205,41 @@ int main()
         if (graph.vertexCount <= 0)
             continue;
 
-        // --- Run Old Algorithm ---
-        double memBeforeOld = getPeakMemoryMB();
-        auto start1 = high_resolution_clock::now();
-        GraphTriangulation *gtOld = new GraphTriangulationBiconnectedPerformance(graph.vertexCount, graph.adjacency, LIMIT);
-        gtOld->getAllTriangulations();
-        auto end1 = high_resolution_clock::now();
-        long long oldCount = gtOld->totalTriangulations;
-        double oldTime = duration<double, milli>(end1 - start1).count();
-        double oldMem = getPeakMemoryMB() - memBeforeOld;
-        delete gtOld;
+        vector<AlgorithmResult> results;
+        bool allMatch = true;
 
-        // --- Run New Algorithm ---
-        double memBeforeNew = getPeakMemoryMB();
-        auto start2 = high_resolution_clock::now();
-        GenerateTriangulations *gtNew = new GenerateTriangulations(graph.vertexCount, graph.adjacency, LIMIT);
-        gtNew->generateAllTriangulations();
-        auto end2 = high_resolution_clock::now();
-        long long newCount = gtNew->totalTriangulations;
-        double newTime = duration<double, milli>(end2 - start2).count();
-        double newMem = getPeakMemoryMB() - memBeforeNew;
-        delete gtNew;
+        for (size_t i = 0; i < algorithms.size(); ++i)
+        {
+            AlgorithmResult res = algorithms[i].run(graph, LIMIT);
+            results.push_back(res);
 
-        bool match = (oldCount == newCount);
-        string status = match ? "OK" : "MISMATCH";
+            if (i > 0 && res.count != results[0].count)
+            {
+                allMatch = false;
+            }
+        }
 
-        // Print to Terminal
-        cout << left << setw(45) << (shortName.length() > 43 ? shortName.substr(0, 40) + "..." : shortName)
-             << setw(10) << oldCount
-             << setw(10) << newCount
-             << setw(10) << fixed << setprecision(1) << oldTime
-             << setw(10) << fixed << setprecision(1) << newTime
-             << setw(12) << fixed << setprecision(2) << max(0.0, oldMem)
-             << setw(12) << fixed << setprecision(2) << max(0.0, newMem)
-             << "[" << status << "]" << endl;
+        string status = allMatch ? "OK" : "MISMATCH";
 
-        // Save immediately to CSV
-        csvOut << shortName << ","
-               << oldCount << ","
-               << newCount << ","
-               << oldTime << ","
-               << newTime << ","
-               << max(0.0, oldMem) << ","
-               << max(0.0, newMem) << ","
-               << status << "\n";
+        // Terminal Output
+        cout << left << setw(35) << (shortName.length() > 33 ? shortName.substr(0, 30) + "..." : shortName);
+        for (const auto &res : results)
+        {
+            cout << setw(14) << res.count
+                 << setw(12) << fixed << setprecision(1) << res.timeMs
+                 << setw(12) << fixed << setprecision(2) << res.peakMemMB;
+        }
+        cout << "[" << status << "]" << endl;
+
+        // CSV Output
+        csvOut << shortName;
+        for (const auto &res : results)
+        {
+            csvOut << "," << res.count
+                   << "," << res.timeMs
+                   << "," << res.peakMemMB;
+        }
+        csvOut << "," << status << "\n";
         csvOut.flush();
     }
 

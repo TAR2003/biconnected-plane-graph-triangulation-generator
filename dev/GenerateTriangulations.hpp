@@ -17,8 +17,9 @@ public:
     vector<Chord *> headVGS;
     FlatChordMap present;
     string result;
-    GenerateTriangulations(long long totalVertices, vector<vector<long long>> &adjacentSet, long long triangulationLimit = LONG_LONG_MAX) : present((int)totalVertices)
+    GenerateTriangulations(long long totalVertices, const vector<vector<long long>> &adjacentSet, long long triangulationLimit = LONG_LONG_MAX) : present((int)totalVertices)
     {
+        cout << "In parent class triangulations" << endl;
         this->totalVertices = totalVertices;
         this->triangulationLimit = triangulationLimit;
         this->adjacentSet = adjacentSet;
@@ -88,9 +89,9 @@ public:
 
     void generateAllTriangulations()
     {
-        if(faces.size() == 0)
+        if (faces.size() == 0)
         {
-            totalTriangulations = 0;
+            totalTriangulations = 1;
             return;
         }
         generateFaceTriangulations(0);
@@ -145,49 +146,10 @@ public:
         }
     }
 
-    void setupVGS(long long faceIndex)
+    virtual void setupRootTriangulation(long long faceIndex)
     {
-        headVGS[faceIndex] = nullptr;
-        auto tempGS = headGS[faceIndex];
-        auto tempVGS = headVGS[faceIndex];
-        while (tempGS != nullptr)
-        {
-            if (!present.find({positions[faceIndex][tempGS->oppositeFirst], positions[faceIndex][tempGS->oppositeSecond]}))
-            {
-                tempGS->isValid = true;
-                if (headVGS[faceIndex] == nullptr)
-                {
-                    headVGS[faceIndex] = tempGS;
-                    tempVGS = headVGS[faceIndex];
-                    tempVGS->prevVGS = nullptr;
-                    tempVGS->nextVGS = nullptr;
-                }
-                else
-                {
-                    tempVGS->nextVGS = tempGS;
-                    tempGS->prevVGS = tempVGS;
-                    tempGS->nextVGS = nullptr;
-                    tempVGS = tempGS;
-                }
-            }
-            else
-            {
-                tempGS->isValid = false;
-            }
-            tempGS = tempGS->nextGS;
-        }
-        if (headVGS[faceIndex] != nullptr)
-        {
-            headVGS[faceIndex]->prevVGS = nullptr;
-        }
-    }
-
-    void setupRootTriangulation(long long faceIndex)
-    {
-
         setupChords(faceIndex);
         setupGS(faceIndex);
-        setupVGS(faceIndex);
     }
 
     void cleanUpChords(long long faceIndex)
@@ -215,7 +177,7 @@ public:
         return totalTriangulations >= triangulationLimit;
     }
 
-    void visitAllBranches(long long faceIndex, Chord *itr)
+    virtual void visitAllBranches(long long faceIndex, Chord *itr)
     {
         while (itr != nullptr)
         {
@@ -224,8 +186,13 @@ public:
                 return;
             }
             generateChildTriangulations(faceIndex, itr);
-            itr = itr->nextVGS;
+            itr = itr->nextGS;
         }
+    }
+
+    virtual void updateAssociatedChord(long long faceIndex, Chord *c, Chord *itr)
+    {
+        updateOppositePair(faceIndex, c, itr);
     }
 
     void updateOppositePair(long long faceIndex, Chord *c, Chord *itr)
@@ -259,32 +226,14 @@ public:
         {
             itr->oppositeSecond = after;
         }
-        if (itr->isValid && present.find({positions[faceIndex][itr->oppositeFirst], positions[faceIndex][itr->oppositeSecond]}))
-        {
-            itr->isValid = false;
-            removeChordFromVGS(faceIndex, itr);
-        }
-        if (!itr->isValid && !present.find({positions[faceIndex][itr->oppositeFirst], positions[faceIndex][itr->oppositeSecond]}))
-        {
-            itr->isValid = true;
-            if (itr->prevGS == c)
-            {
-                itr->prevVGS = c;
-                itr->nextVGS = c->nextVGS;
-            }
-            if (itr->nextGS == c)
-            {
-                itr->nextVGS = c;
-                itr->prevVGS = c->prevVGS;
-            }
-            addChordToVGS(faceIndex, itr);
-        }
     }
+
+
 
     void updateAssociatedChords(long long faceIndex, Chord *c)
     {
-        updateOppositePair(faceIndex, c, c->nextGS);
-        updateOppositePair(faceIndex, c, c->prevGS);
+        updateAssociatedChord(faceIndex, c, c->nextGS);
+        updateAssociatedChord(faceIndex, c, c->prevGS);
     }
 
     void flip(long long faceIndex, Chord *c)
@@ -311,25 +260,9 @@ public:
         }
     }
 
-    void removeChordFromVGS(long long faceIndex, Chord *c)
-    {
-        if (c->prevVGS != nullptr)
-        {
-            c->prevVGS->nextVGS = c->nextVGS;
-        }
-        else
-        {
-            headVGS[faceIndex] = c->nextVGS;
-        }
-        if (c->nextVGS != nullptr)
-        {
-            c->nextVGS->prevVGS = c->prevVGS;
-        }
-    }
-    void removeChord(long long faceIndex, Chord *c)
+    virtual void removeChord(long long faceIndex, Chord *c)
     {
         removeChordFromGS(faceIndex, c);
-        removeChordFromVGS(faceIndex, c);
     }
 
     void addChordToGS(long long faceIndex, Chord *c)
@@ -348,42 +281,33 @@ public:
         }
     }
 
-    void addChordToVGS(long long faceIndex, Chord *c)
-    {
-        if (c->prevVGS != nullptr)
-        {
-            c->prevVGS->nextVGS = c;
-        }
-        else
-        {
-            headVGS[faceIndex] = c;
-        }
-        if (c->nextVGS != nullptr)
-        {
-            c->nextVGS->prevVGS = c;
-        }
-    }
-
-    void addChord(long long faceIndex, Chord *c)
+    virtual void addChord(long long faceIndex, Chord *c)
     {
         addChordToGS(faceIndex, c);
-        addChordToVGS(faceIndex, c);
     }
 
+    virtual bool isValidChildTriangulation(long long faceIndex, Chord *c)
+    {
+        return true;
+    }
+
+    virtual Chord *getChordToFlip(long long faceIndex, Chord *c)
+    {
+        if(c == nullptr) return headGS[faceIndex];
+        if(c->prevGS != nullptr) return c->prevGS;
+        return c->nextGS;
+    }
     void generateChildTriangulations(long long faceIndex, Chord *itr)
     {
+        if (!isValidChildTriangulation(faceIndex, itr))
+        {
+            return;
+        }
         flip(faceIndex, itr);
         updateAssociatedChords(faceIndex, itr);
         removeChord(faceIndex, itr);
         output(faceIndex);
-        if (itr->prevGS != nullptr && itr->prevGS->isValid)
-        {
-            visitAllBranches(faceIndex, itr->prevGS);
-        }
-        else
-        {
-            visitAllBranches(faceIndex, itr->nextVGS);
-        }
+        visitAllBranches(faceIndex, getChordToFlip(faceIndex, itr));
         flip(faceIndex, itr);
         addChord(faceIndex, itr);
         updateAssociatedChords(faceIndex, itr);
@@ -394,12 +318,23 @@ public:
         findSafeRoot(faceIndex);
         setupRootTriangulation(faceIndex);
         output(faceIndex);
-        auto tempVGS = headVGS[faceIndex];
-        visitAllBranches(faceIndex, tempVGS);
+        visitAllBranches(faceIndex, getChordToFlip(faceIndex, nullptr));
         removeCurrentChordsFromPresent(faceIndex);
         cleanUpChords(faceIndex);
     }
 
+    void output(long long faceIndex)
+    {
+        if (faceIndex == faces.size() - 1)
+        {
+            totalTriangulations++;
+            return;
+        }
+        else
+        {
+            generateFaceTriangulations(faceIndex + 1);
+        }
+    }
     void printTriangulation()
     {
 
@@ -424,18 +359,6 @@ public:
         printPresent();
     }
 
-    void output(long long faceIndex)
-    {
-        if (faceIndex == faces.size() - 1)
-        {
-            totalTriangulations++;
-            return;
-        }
-        else
-        {
-            generateFaceTriangulations(faceIndex + 1);
-        }
-    }
 
     void printFaces()
     {
