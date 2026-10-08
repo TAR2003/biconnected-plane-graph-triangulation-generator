@@ -223,8 +223,14 @@ public:
                 return;
             }
             generateChildTriangulations(faceIndex, itr);
-            itr = itr->nextGS;
+            itr = itr->nextVGS;
         }
+    }
+
+    void updateAssociatedChord(long long faceIndex, Chord *c, Chord *itr)
+    {
+        updateOppositePair(faceIndex, c, itr);
+        updateVGSForAssociatedChord(faceIndex, c, itr);
     }
 
     void updateOppositePair(long long faceIndex, Chord *c, Chord *itr)
@@ -258,6 +264,14 @@ public:
         {
             itr->oppositeSecond = after;
         }
+    }
+
+    void updateVGSForAssociatedChord(long long faceIndex, Chord *c, Chord *itr)
+    {
+        if (itr == nullptr)
+        {
+            return;
+        }
         if (itr->isValid && present.find({positions[faceIndex][itr->oppositeFirst], positions[faceIndex][itr->oppositeSecond]}))
         {
             itr->isValid = false;
@@ -282,8 +296,8 @@ public:
 
     void updateAssociatedChords(long long faceIndex, Chord *c)
     {
-        updateOppositePair(faceIndex, c, c->nextGS);
-        updateOppositePair(faceIndex, c, c->prevGS);
+        updateAssociatedChord(faceIndex, c, c->nextGS);
+        updateAssociatedChord(faceIndex, c, c->prevGS);
     }
 
     void flip(long long faceIndex, Chord *c)
@@ -369,8 +383,13 @@ public:
         addChordToVGS(faceIndex, c);
     }
 
+    bool isValidChildTriangulation(long long faceIndex, Chord *c)
+    {
+        return true;
+    }
     void generateChildTriangulations(long long faceIndex, Chord *itr)
     {
+
         flip(faceIndex, itr);
         updateAssociatedChords(faceIndex, itr);
         removeChord(faceIndex, itr);

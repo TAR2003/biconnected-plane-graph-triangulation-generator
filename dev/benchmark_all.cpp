@@ -2,7 +2,8 @@
 #include <filesystem>
 #include <chrono>
 #include <unistd.h>
-#include "GenerateTriangulations.hpp"
+#include "PlanarTriangulationGenerator.hpp"
+// #include "GenerateTriangulations.hpp"
 #include "GraphTriangulation.hpp"
 
 namespace fs = std::filesystem;
@@ -59,7 +60,7 @@ InputGraph readInput(const string &filename)
 
 int main()
 {
-    string rootDir = "./input/Biconnected/";
+    string rootDir = "./input/Biconnected/9_general_biconnected/";
     string csvFile = "benchmark_results.csv";
     const long long LIMIT = 100000;
 
