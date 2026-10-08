@@ -6,12 +6,11 @@ using namespace std;
 class Chord
 {
 public:
-    long long first, second;
-    long long oppositeFirst, oppositeSecond;
-    Chord *nextChord, *prevChord;
-    Chord *nextGS, *prevGS;
-    Chord *nextVGS, *prevVGS;
-    long long faceIndex;
+    long long first = -1, second = -1, oppositeFirst = -1, oppositeSecond = -1;
+    Chord *nextChord = nullptr, *prevChord = nullptr;
+    Chord *nextGS = nullptr, *prevGS = nullptr;
+    Chord *nextVGS = nullptr, *prevVGS = nullptr;
+    long long faceIndex = -1;
     bool isValid = false;
     Chord(long long a = 0, long long b = 0, long long c = 0, long long d = 0) : first(a), second(b), oppositeFirst(c), oppositeSecond(d) {}
     // ~Chord() {
@@ -134,8 +133,8 @@ public:
                 temp = temp->nextChord;
             }
         }
-        
-        for (int i = 0 ; i < adjacentSet.size(); i++)
+
+        for (int i = 0; i < adjacentSet.size(); i++)
         {
             auto adjList = adjacentSet[i];
             for (auto adj : adjList)
@@ -152,10 +151,12 @@ public:
 
     void generateAllTriangulations()
     {
-        cout << "Generating all triangulations" << endl;
+        if(faces.size() == 0)
+        {
+            totalTriangulations = 0;
+            return;
+        }
         generateFaceTriangulations(0);
-        cout << "Total triangulations generated: " << totalTriangulations << endl;
-        cout << result << endl;
     }
 
     void findSafeRoot(long long faceIndex)
@@ -164,8 +165,6 @@ public:
         long long endIndex = faces[faceIndex].size() - 2;
         while (startIndex < endIndex - 1)
         {
-            cout << "Finding safe root for face: " << faceIndex << " with startIndex: " << startIndex << " and endIndex: " << endIndex << endl;
-            cout << "Checking if edge exists for face: " << faceIndex << " with first: " << faces[faceIndex][startIndex] << " and second: " << faces[faceIndex][endIndex] << endl;
             if (present.find({faces[faceIndex][startIndex], faces[faceIndex][endIndex]}) || faces[faceIndex][startIndex] == faces[faceIndex][endIndex])
             {
                 startIndex++;
@@ -175,8 +174,6 @@ public:
                 endIndex--;
             }
         }
-        // start Index is the safe root
-        cout << "Safe root: " << faces[faceIndex][startIndex] << endl;
         for (long long i = 0; i < faces[faceIndex].size(); i++)
         {
             positions[faceIndex][i] = faces[faceIndex][(startIndex + i) % faces[faceIndex].size()];
@@ -248,7 +245,6 @@ public:
         }
     }
 
-
     void setupRootTriangulation(long long faceIndex)
     {
 
@@ -301,22 +297,6 @@ public:
         {
             return;
         }
-        cout << "-=-=-=-=-= Updating opposite pair -=-=-=-" << endl;
-
-        cout << "The current new chord: " << c->first << " and " << c->second << endl;
-        cout << "the before chord: " << c->oppositeFirst << " and " << c->oppositeSecond << endl;
-        if (itr == nullptr)
-        {
-            cout << "The iterator is null" << endl;
-        }
-        cout << "The opposite pair to update: " << itr->oppositeFirst << " and " << itr->oppositeSecond << endl;
-        cout << "The current chord to update: " << itr->first << " and " << itr->second << endl;
-
-        cout << "Before the opposite pair was: " << itr->oppositeFirst << " and " << itr->oppositeSecond << endl;
-        if (itr == nullptr)
-        {
-            return;
-        }
         long long before, after;
         if (c->oppositeFirst == itr->first || c->oppositeFirst == itr->second)
         {
@@ -342,24 +322,21 @@ public:
         {
             itr->oppositeSecond = after;
         }
-        cout << "After the opposite pair is: " << itr->oppositeFirst << " and " << itr->oppositeSecond << endl;
-        cout << "Updating opposite pair for face: " << faceIndex << " with first: " << itr->first << " and second: " << itr->second << endl;
         if (itr->isValid && present.find({positions[faceIndex][itr->oppositeFirst], positions[faceIndex][itr->oppositeSecond]}))
         {
-            cout << "Removing from VGS as this was found on present" << endl;
             itr->isValid = false;
             removeChordFromVGS(faceIndex, itr);
         }
         if (!itr->isValid && !present.find({positions[faceIndex][itr->oppositeFirst], positions[faceIndex][itr->oppositeSecond]}))
         {
-            cout << "Adding to VGS as this was not found on present" << endl;
             itr->isValid = true;
-            if(itr->prevGS == c) 
+            if (itr->prevGS == c)
             {
                 itr->prevVGS = c;
                 itr->nextVGS = c->nextVGS;
             }
-            if(itr->nextGS == c) {
+            if (itr->nextGS == c)
+            {
                 itr->nextVGS = c;
                 itr->prevVGS = c->prevVGS;
             }
@@ -369,7 +346,6 @@ public:
 
     void updateAssociatedChords(long long faceIndex, Chord *c)
     {
-        cout << "Update associate chords" << endl;
         updateOppositePair(faceIndex, c, c->nextGS);
         updateOppositePair(faceIndex, c, c->prevGS);
     }
@@ -378,49 +354,40 @@ public:
     {
 
         present.erase({positions[faceIndex][c->first], positions[faceIndex][c->second]});
-
-        cout << "FLIPPED" << endl;
         c->flip();
         present.insert({positions[faceIndex][c->first], positions[faceIndex][c->second]});
     }
 
     void removeChordFromGS(long long faceIndex, Chord *c)
     {
-        cout << "Need to remove chord " << c->first << " and " << c->second << "From GS" << endl;
-        printGS();
         if (c->prevGS != nullptr)
         {
             c->prevGS->nextGS = c->nextGS;
-            
         }
-        else {
+        else
+        {
             headGS[faceIndex] = c->nextGS;
         }
         if (c->nextGS != nullptr)
         {
             c->nextGS->prevGS = c->prevGS;
         }
-        cout << "Removal Complete" << endl;
-        printGS();
     }
 
     void removeChordFromVGS(long long faceIndex, Chord *c)
     {
-        cout << "Need to remove chord " << c->first << " and " << c->second << "From VGS" << endl;
-        printVGS();
         if (c->prevVGS != nullptr)
         {
             c->prevVGS->nextVGS = c->nextVGS;
         }
-        else {
+        else
+        {
             headVGS[faceIndex] = c->nextVGS;
         }
         if (c->nextVGS != nullptr)
         {
             c->nextVGS->prevVGS = c->prevVGS;
         }
-        cout << "Removal Complete" << endl;
-        printVGS();
     }
     void removeChord(long long faceIndex, Chord *c)
     {
@@ -434,7 +401,7 @@ public:
         {
             c->prevGS->nextGS = c;
         }
-        else 
+        else
         {
             headGS[faceIndex] = c;
         }
@@ -450,7 +417,8 @@ public:
         {
             c->prevVGS->nextVGS = c;
         }
-        else {
+        else
+        {
             headVGS[faceIndex] = c;
         }
         if (c->nextVGS != nullptr)
@@ -467,15 +435,9 @@ public:
 
     void generateChildTriangulations(long long faceIndex, Chord *itr)
     {
-        printVariables();
-        cout << "Front flip begin for face: " << faceIndex << " with first: " << itr->first << " and second: " << itr->second << " and opposite first: " << itr->oppositeFirst << " and opposite second: " << itr->oppositeSecond << endl;
         flip(faceIndex, itr);
-        cout << "after the flipping, before remove chord, the present map is: " << endl;
-        printPresent();
         updateAssociatedChords(faceIndex, itr);
         removeChord(faceIndex, itr);
-        cout << "Front flip end" << endl;
-        printVariables();
         output(faceIndex);
         if (itr->prevGS != nullptr && itr->prevGS->isValid)
         {
@@ -485,28 +447,19 @@ public:
         {
             visitAllBranches(faceIndex, itr->nextVGS);
         }
-        cout << "Back flip begin for face: " << faceIndex << " with first: " << itr->first << " and second: " << itr->second << " and opposite first: " << itr->oppositeFirst << " and opposite second: " << itr->oppositeSecond << endl;
         flip(faceIndex, itr);
         addChord(faceIndex, itr);
         updateAssociatedChords(faceIndex, itr);
-        cout << "Back flip end" << endl;
-        printVariables();
     }
 
     void generateFaceTriangulations(long long faceIndex)
     {
-        cout << "Generating triangulations for face: " << faceIndex << endl;
         findSafeRoot(faceIndex);
-        cout << "Safe root found for face: " << faceIndex << endl;
         setupRootTriangulation(faceIndex);
-        cout << "Root triangulation setup for face: " << faceIndex << endl;
         output(faceIndex);
         auto tempVGS = headVGS[faceIndex];
-        cout << "Before visint all branches the present map is: " << endl;
-        printVariables();
         visitAllBranches(faceIndex, tempVGS);
         removeCurrentChordsFromPresent(faceIndex);
-        cout << "Finished generating triangulations for face: " << faceIndex << endl;
         cleanUpChords(faceIndex);
     }
 
@@ -536,15 +489,9 @@ public:
 
     void output(long long faceIndex)
     {
-        cout << "output for face: " << faceIndex << "=========================================================================" << endl;
-        // printVariables();
         if (faceIndex == faces.size() - 1)
         {
             totalTriangulations++;
-            printTriangulation();
-            printPresent();
-            printGS();
-            printVGS();
             return;
         }
         else
@@ -555,111 +502,111 @@ public:
 
     void printFaces()
     {
-        // cout << "Printing faces: " << endl;
-        // for (int i = 0; i < faces.size(); i++)
-        // {
-        //     cout << "Face: " << i << " : ";
-        //     for (auto v : faces[i])
-        //     {
-        //         cout << v << " ";
-        //     }
-        //     cout << endl;
-        // }
+        cout << "Printing faces: " << endl;
+        for (int i = 0; i < faces.size(); i++)
+        {
+            cout << "Face: " << i << " : ";
+            for (auto v : faces[i])
+            {
+                cout << v << " ";
+            }
+            cout << endl;
+        }
     }
 
     void printPositions()
     {
-        // cout << "Printing positions: " << endl;
-        // for (int i = 0; i < positions.size(); i++)
-        // {
-        //     cout << "Face: " << i << " : ";
-        //     for (auto v : positions[i])
-        //     {
-        //         cout << v << " ";
-        //     }
-        //     cout << endl;
-        // }
+        cout << "Printing positions: " << endl;
+        for (int i = 0; i < positions.size(); i++)
+        {
+            cout << "Face: " << i << " : ";
+            for (auto v : positions[i])
+            {
+                cout << v << " ";
+            }
+            cout << endl;
+        }
     }
 
     void printChords()
     {
-        // cout << "Printing all chords: " << endl;
-        // for (int i = 0; i < faces.size(); i++)
-        // {
-        //     cout << "Face: " << i << " : ";
-        //     auto tempChord = headChord[i];
-        //     while (tempChord != nullptr)
-        //     {
-        //         cout << "(" << tempChord->first << "," << tempChord->second << ") ";
-        //         tempChord = tempChord->nextChord;
-        //     }
-        //     cout << endl;
-        // }
-        // cout << "Printing their opposite pairs: " << endl;
-        // for (int i = 0; i < faces.size(); i++)
-        // {
-        //     cout << "Face: " << i << " : ";
-        //     auto tempChord = headChord[i];
-        //     while (tempChord != nullptr)
-        //     {
-        //         cout << "(" << tempChord->oppositeFirst << "," << tempChord->oppositeSecond << ") ";
-        //         tempChord = tempChord->nextChord;
-        //     }
-        //     cout << endl;
-        // }
+        cout << "Printing all chords: " << endl;
+        for (int i = 0; i < faces.size(); i++)
+        {
+            cout << "Face: " << i << " : ";
+            auto tempChord = headChord[i];
+            while (tempChord != nullptr)
+            {
+                cout << "(" << tempChord->first << "," << tempChord->second << ") ";
+                tempChord = tempChord->nextChord;
+            }
+            cout << endl;
+        }
+        cout << "Printing their opposite pairs: " << endl;
+        for (int i = 0; i < faces.size(); i++)
+        {
+            cout << "Face: " << i << " : ";
+            auto tempChord = headChord[i];
+            while (tempChord != nullptr)
+            {
+                cout << "(" << tempChord->oppositeFirst << "," << tempChord->oppositeSecond << ") ";
+                tempChord = tempChord->nextChord;
+            }
+            cout << endl;
+        }
     }
 
     void printGS()
     {
-        // cout << "Printing all GS: " << endl;
-        // for (int i = 0; i < faces.size(); i++)
-        // {
-        //     cout << "Face: " << i << " : ";
-        //     auto tempGS = headGS[i];
-        //     while (tempGS != nullptr)
-        //     {
-        //         cout << "(" << tempGS->first << "," << tempGS->second << ") ";
-        //         tempGS = tempGS->nextGS;
-        //     }
-        //     cout << endl;
-        // }
+        cout << "Printing all GS: " << endl;
+        for (int i = 0; i < faces.size(); i++)
+        {
+            cout << "Face: " << i << " : ";
+            auto tempGS = headGS[i];
+            while (tempGS != nullptr)
+            {
+                cout << "(" << tempGS->first << "," << tempGS->second << ") ";
+                tempGS = tempGS->nextGS;
+            }
+            cout << endl;
+        }
     }
 
     void printVGS()
     {
-        // cout << "Printing all VGS: " << endl;
-        // for (int i = 0; i < faces.size(); i++)
-        // {
-        //     cout << "Face: " << i << " : ";
-        //     auto tempVGS = headVGS[i];
-        //     while (tempVGS != nullptr)
-        //     {
-        //         cout << "(" << tempVGS->first << "," << tempVGS->second << ") ";
-        //         tempVGS = tempVGS->nextVGS;
-        //     }
-        //     cout << endl;
-        // }
+        cout << "Printing all VGS: " << endl;
+        for (int i = 0; i < faces.size(); i++)
+        {
+            cout << "Face: " << i << " : ";
+            auto tempVGS = headVGS[i];
+            while (tempVGS != nullptr)
+            {
+                cout << "(" << tempVGS->first << "," << tempVGS->second << ") ";
+                tempVGS = tempVGS->nextVGS;
+            }
+            cout << endl;
+        }
     }
 
     void printPresent()
     {
-        // cout << "Printing all present: " << endl;
-        // for (auto p : present.presentChords)
-        // {
-        //     cout << "(" << p.first << "," << p.second << ") ";
-        // }
-        // cout << endl;
+        cout << "Printing all present: " << endl;
+        for (auto p : present.presentChords)
+        {
+            cout << "(" << p.first << "," << p.second << ") ";
+        }
+        cout << endl;
     }
 
     void printVariables()
     {
-        // cout << "-=================== Printing variables =================-" << endl;
-        // printFaces();
-        // printPositions();
-        // printChords();
-        // printGS();
-        // printVGS();
-        // printPresent();
-        // cout << "-=================== End of variables ==================-" << endl;
+        cout << "-=================== Printing variables =================-" << endl;
+        printFaces();
+        printPositions();
+        printChords();
+        printGS();
+        printVGS();
+        printPresent();
+        cout << "-=================== End of variables ==================-" << endl;
     }
 };
