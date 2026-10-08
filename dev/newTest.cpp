@@ -46,7 +46,7 @@ void runCase(string filename)
     //     }
     //     cout << endl;
     // }
-    GenerateTriangulations *gt = new GenerateTriangulations(graph.vertexCount, graph.adjacency, 1000000);
+    GenerateTriangulations *gt = new GenerateTriangulations(graph.vertexCount, graph.adjacency, 10000000);
     cout << "Faces count: " << gt->faces.size() << endl;
     gt->generateAllTriangulations();
     // gt->printAllTriangulations();

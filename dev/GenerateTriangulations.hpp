@@ -29,6 +29,155 @@ public:
     }
 };
 
+
+struct ChordEntry
+{
+    static constexpr uint32_t EMPTY = UINT32_MAX;
+    uint32_t u = EMPTY, v = 0;
+    int32_t face[2] = {-1, -1};
+    uint8_t cnt = 0; // 0, 1 or 2 occurrences
+
+    void addFace(int f)
+    {
+        if (cnt == 0)
+            face[0] = f;
+        else
+            face[1] = f;
+        ++cnt;
+    }
+    void removeFace(int f)
+    { // returns with cnt decremented
+        if (face[1] == f)
+            face[1] = -1;
+        else
+        {
+            face[0] = face[1];
+            face[1] = -1;
+        }
+        if (--cnt == 0)
+            face[0] = -1;
+    }
+};
+
+inline void normPair(long long a, long long b, uint32_t &u, uint32_t &v)
+{
+    if (a > b)
+        swap(a, b);
+    u = (uint32_t)a;
+    v = (uint32_t)b;
+}
+inline uint64_t packKey(uint32_t u, uint32_t v) { return ((uint64_t)u << 32) | v; }
+
+class FlatChordMap
+{
+    vector<ChordEntry> t;
+    size_t mask;
+    int shift;
+
+    size_t home(uint32_t u, uint32_t v) const
+    {
+        return (packKey(u, v) * 0x9E3779B97F4A7C15ULL) >> shift;
+    }
+    ChordEntry *locate(uint32_t u, uint32_t v)
+    {
+        size_t i = home(u, v);
+        while (t[i].u != ChordEntry::EMPTY)
+        {
+            if (t[i].u == u && t[i].v == v)
+                return &t[i];
+            i = (i + 1) & mask;
+        }
+        return nullptr;
+    }
+    void removeAt(size_t i)
+    { // backward-shift deletion
+        size_t j = i;
+        for (;;)
+        {
+            j = (j + 1) & mask;
+            if (t[j].u == ChordEntry::EMPTY)
+                break;
+            size_t h = home(t[j].u, t[j].v);
+            bool stays = (i <= j) ? (i < h && h <= j) : (i < h || h <= j);
+            if (stays)
+                continue;
+            t[i] = t[j];
+            i = j;
+        }
+        t[i] = ChordEntry();
+    }
+
+public:
+    explicit FlatChordMap(int n)
+    {
+        size_t maxChords = max(3 * (size_t)n, (size_t)8);
+        int bits = 1;
+        while ((1ULL << bits) < 2 * maxChords)
+            ++bits;
+        t.assign(1ULL << bits, ChordEntry());
+        mask = (1ULL << bits) - 1;
+        shift = 64 - bits;
+    }
+    void insert(pair<long long, long long> p, int face = -1)
+    {
+        uint32_t u, v;
+        normPair(p.first, p.second, u, v);
+        if (ChordEntry *e = locate(u, v))
+        {
+            e->addFace(face);
+            return;
+        }
+        size_t i = home(u, v);
+        while (t[i].u != ChordEntry::EMPTY)
+            i = (i + 1) & mask;
+        t[i].u = u;
+        t[i].v = v;
+        t[i].addFace(face);
+    }
+    void erase(pair<long long, long long> p, int face = -1)
+    {
+        uint32_t u, v;
+        normPair(p.first, p.second, u, v);
+        size_t i = home(u, v);
+        while (t[i].u != ChordEntry::EMPTY)
+        {
+            if (t[i].u == u && t[i].v == v)
+            {
+                t[i].removeFace(face);
+                if (t[i].cnt == 0)
+                    removeAt(i);
+                return;
+            }
+            i = (i + 1) & mask;
+        }
+    }
+    bool find(pair<long long, long long> p)
+    {
+        uint32_t u, v;
+        normPair(p.first, p.second, u, v);
+        return locate(u, v) != nullptr;
+    }
+    // up to two face ids; returns how many
+    int faces(pair<long long, long long> p, int out[2])
+    {
+        uint32_t u, v;
+        normPair(p.first, p.second, u, v);
+        ChordEntry *e = locate(u, v);
+        if (!e)
+            return 0;
+        out[0] = e->face[0];
+        out[1] = e->face[1];
+        return e->cnt;
+    }
+    void print()
+    {
+        for (auto &e : t)
+            if (e.u != ChordEntry::EMPTY)
+                cout << "(" << e.u << ", " << e.v << ") ";
+        cout << endl;
+    }
+};
+
 class CustomHashMap
 {
 public:
@@ -64,6 +213,12 @@ public:
         makeSortedPair(p);
         return presentChords.find(p) != presentChords.end();
     }
+    void print() {
+        for (auto &p : presentChords) {
+            cout << "(" << p.first << ", " << p.second << ") ";
+        }
+        cout << endl;
+    }
 };
 
 class GenerateTriangulations
@@ -78,15 +233,15 @@ public:
     vector<Chord *> headChord;
     vector<Chord *> headGS;
     vector<Chord *> headVGS;
-    CustomHashMap present;
+    FlatChordMap present;
     string result;
-    GenerateTriangulations(long long totalVertices, vector<vector<long long>> &adjacentSet, long long triangulationLimit = LONG_LONG_MAX)
+    GenerateTriangulations(long long totalVertices, vector<vector<long long>> &adjacentSet, long long triangulationLimit = LONG_LONG_MAX) : present((int)totalVertices)
     {
         this->totalVertices = totalVertices;
         this->triangulationLimit = triangulationLimit;
         this->adjacentSet = adjacentSet;
         this->totalTriangulations = 0;
-        this->present = CustomHashMap();
+        // this->present = FlatChordMap((int) totalVertices);
         this->result = "";
         auto tempfaces = rotationSystemToFaces(totalVertices, adjacentSet);
 
@@ -590,12 +745,7 @@ public:
 
     void printPresent()
     {
-        cout << "Printing all present: " << endl;
-        for (auto p : present.presentChords)
-        {
-            cout << "(" << p.first << "," << p.second << ") ";
-        }
-        cout << endl;
+        present.print();
     }
 
     void printVariables()
