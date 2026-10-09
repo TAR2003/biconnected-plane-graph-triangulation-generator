@@ -131,5 +131,14 @@ ONECONNECTED.update({
     "comet": g_comet, "hub_asymmetric": g_hub_asymmetric,
 })
 
+# Edit these values to configure runs in code; matching command-line options override them.
+GENERATION_CONFIG = {
+    "out": "inputs/oneconnected",
+    "sizes": [3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 30, 50, 100, 200, 500, 1000],
+    "count": 10,
+    "seed": 12345,
+    "families": None,
+}
+
 if __name__ == "__main__":
-    run("oneconnected", ONECONNECTED)
+    run("oneconnected", ONECONNECTED, defaults=GENERATION_CONFIG)

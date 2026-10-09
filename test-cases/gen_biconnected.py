@@ -166,5 +166,14 @@ BICONNECTED = {
     "sparse_delaunay": g_sparse_delaunay, "sparse_stacked": g_sparse_stacked,
 }
 
+# Edit these values to configure runs in code; matching command-line options override them.
+GENERATION_CONFIG = {
+    "out": "inputs/biconnected",
+    "sizes": [3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 30, 50, 100, 200, 500, 1000],
+    "count": 10,
+    "seed": 12345,
+    "families": None,
+}
+
 if __name__ == "__main__":
-    run("biconnected", BICONNECTED)
+    run("biconnected", BICONNECTED, defaults=GENERATION_CONFIG)

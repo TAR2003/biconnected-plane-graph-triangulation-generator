@@ -1,29 +1,7 @@
 
 find . -type f -name "case_manifest.txt" -delete
 
-# ./build/bench_time --tri_algos=Biconnected           --tri_input=./test-cases/input/Biconnected --tri_cpu=2 --tri_csv=t_bic.csv &
-# ./build/bench_time --tri_algos=BiconnectedWithoutVGS --tri_input=./test-cases/input/Biconnected --tri_cpu=4 --tri_csv=t_vgs.csv &
-# ./build/bench_time --tri_algos=Oneconnected          --tri_input=./test-cases/input/Oneconnected --tri_cpu=6 --tri_csv=t_one.csv &
-# wait
+# ./build/bench_time --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected --tri_input=./input --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=10000000
 
 
-
-# # Run with custom command-line flags defined in your setup (e.g., input directory and limits)
-# ./bench_time --benchmark_counters_tabular=true \
-#              --benchmark_out=results_time.csv \
-#              --benchmark_out_format=csv \
-#              --input_dir=/path/to/input_data \
-#              --limit=100
-
-
-
-             
-# ./build/bench_time --tri_algos=Biconnected          --tri_input=./input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=1,10,100,1000,10000,100000,1000000,10000000,100000000,1000000000
-
-./build/bench_time --tri_algos=Biconnected          --tri_input=./input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=10000000
-
-# ./build/bench_time --tri_algos=Biconnected          --tri_input=./test-cases/input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=1,10,100,1000,10000,100000,1000000,10000000
-
-# ./build/bench_time --tri_algos=BiconnectedWithoutVGS          --tri_input=./test-cases/input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=1,10,100,1000,10000,100000,1000000,10000000
-
-# ./build/bench_time --tri_algos=Biconnected          --tri_input=./test-cases/input/Biconnected --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=1,10,100,1000,10000,100000,1000000,10000000
+./build/bench_time --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS --tri_input=./test-cases/input --tri_cpu=2 --tri_csv=./benchmark-results/results_time.csv --tri_limits=1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536,131072,262144,524288,1048576,2097152,4194304,8388608,16777216,33554432,67108864,134217728,268435456,536870912,1073741824

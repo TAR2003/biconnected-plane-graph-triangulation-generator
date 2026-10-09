@@ -7,10 +7,18 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
 endif()
 
-# ---- where your algorithm headers live (GraphTriangulation.hpp, Edge.hpp, ...)
-set(TRI_SRC_DIR "" CACHE PATH "Directory containing GraphTriangulation.hpp and the other algorithm headers")
-if(NOT TRI_SRC_DIR OR NOT EXISTS "${TRI_SRC_DIR}/GraphTriangulation.hpp")
-  message(FATAL_ERROR "Pass -DTRI_SRC_DIR=<dir containing GraphTriangulation.hpp>")
+# ---- where the triangulation algorithm headers live
+set(TRI_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src" CACHE PATH "Directory containing the triangulation algorithm headers")
+if(NOT TRI_SRC_DIR)
+  set(TRI_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+elseif(NOT IS_ABSOLUTE "${TRI_SRC_DIR}")
+  get_filename_component(TRI_SRC_DIR "${TRI_SRC_DIR}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+endif()
+set(TRI_SRC_DIR "${TRI_SRC_DIR}" CACHE PATH "Directory containing the triangulation algorithm headers" FORCE)
+if(NOT EXISTS "${TRI_SRC_DIR}/GenerateTriangulations.hpp" OR
+   NOT EXISTS "${TRI_SRC_DIR}/GenerateBiconnectedTriangulations.hpp" OR
+   NOT EXISTS "${TRI_SRC_DIR}/GenerateOneconnectedTriangulations.hpp")
+  message(FATAL_ERROR "TRI_SRC_DIR must contain the current triangulation generator headers")
 endif()
 
 # ---- speed options
@@ -80,11 +88,21 @@ function(tri_target tgt)
   endif()
 endfunction()
 
+add_library(triangulation_adapters STATIC
+  bench/AlgorithmAdaptersBiconnected.cpp
+  bench/AlgorithmAdapterOneconnected.cpp)
+target_include_directories(triangulation_adapters PRIVATE ${TRI_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/bench)
+target_compile_options(triangulation_adapters PRIVATE ${TRI_COPTS})
+if(TRI_LTO AND TRI_IPO_OK)
+  set_property(TARGET triangulation_adapters PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
+
 add_executable(bench_time bench/bench_time.cpp)
-target_link_libraries(bench_time PRIVATE benchmark::benchmark)
+target_link_libraries(bench_time PRIVATE benchmark::benchmark triangulation_adapters)
 tri_target(bench_time)
 
 add_executable(bench_memory bench/bench_memory.cpp)
+target_link_libraries(bench_memory PRIVATE triangulation_adapters)
 tri_target(bench_memory)
 if(WIN32)
   target_link_libraries(bench_memory PRIVATE psapi)

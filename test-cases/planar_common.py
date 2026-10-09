@@ -104,14 +104,15 @@ def write_graph(rot, path, base=0):
             f.write(" ".join([str(len(r))] + [str(w + base) for w in r]) + "\n")
 
 
-def run(kind, gens, argv=None):
+def run(kind, gens, argv=None, defaults=None):
+    defaults = defaults or {}
     ap = argparse.ArgumentParser(description=f"Generate {kind} plane graphs (rotation-system txt files)")
-    ap.add_argument("--out", default=f"inputs/{kind}")
+    ap.add_argument("--out", default=defaults.get("out", f"inputs/{kind}"))
     ap.add_argument("--sizes", type=int, nargs="+",
-                    default=[3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 30, 50, 100, 200, 500, 1000])
-    ap.add_argument("--count", type=int, default=10, help="graphs per (family,size)")
-    ap.add_argument("--seed", type=int, default=12345)
-    ap.add_argument("--families", nargs="+", default=None)
+                    default=defaults.get("sizes", [3, 4, 5, 6, 7, 8, 10, 12, 16, 20, 30, 50, 100, 200, 500, 1000]))
+    ap.add_argument("--count", type=int, default=defaults.get("count", 10), help="graphs per (family,size)")
+    ap.add_argument("--seed", type=int, default=defaults.get("seed", 12345))
+    ap.add_argument("--families", nargs="+", default=defaults.get("families"))
     ap.add_argument("--orientation", choices=["cw", "ccw", "mixed"], default="mixed",
                     help="mixed = random per FILE (never within a file)")
     ap.add_argument("--no-relabel", action="store_true", help="keep generator's vertex labels")

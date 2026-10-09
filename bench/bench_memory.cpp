@@ -112,32 +112,30 @@ static int workerMain(char **argv)
     mem::resetPeak();
     size_t baseline = mem::currentRss();
 
-    long long tri, totalChecks, okChecks, invalid;
+    tb::GeneratorStats stats;
     bool hit;
     size_t peak;
     {
+        tb::CoutSilencer silence;
         auto gt = tb::makeGraph(algo, g, limit);
-        gt->getAllTriangulations();
+        gt->generateAllTriangulations();
         peak = mem::peakRss(); // read before destruction (peak is monotonic anyway)
-        tri = gt->totalTriangulations;
-        totalChecks = gt->totalChecks;
-        okChecks = gt->successfulChecks;
-        invalid = gt->invalidTraversals;
-        hit = tb::limitHit(*gt, limit);
+        stats = gt->stats();
+        hit = tb::limitHit(stats, limit);
     }
 
     std::ofstream out(resultPath, std::ios::trunc);
     if (!out.is_open())
         return 4;
     out << "vertices=" << g.vertexCount << '\n'
-        << "triangulations=" << tri << '\n'
+        << "triangulations=" << stats.triangulations << '\n'
         << "status=" << tb::statusString(hit) << '\n'
         << "peakRssBytes=" << peak << '\n'
         << "baselineRssBytes=" << baseline << '\n'
         << "peakDeltaBytes=" << (peak > baseline ? peak - baseline : 0) << '\n'
-        << "totalChecks=" << totalChecks << '\n'
-        << "successfulChecks=" << okChecks << '\n'
-        << "invalidTraversals=" << invalid << '\n';
+        << "totalChecks=" << (stats.checksAvailable ? std::to_string(stats.totalChecks) : "") << '\n'
+        << "successfulChecks=" << (stats.checksAvailable ? std::to_string(stats.successfulChecks) : "") << '\n'
+        << "invalidTraversals=\n";
     return 0;
 }
 
@@ -211,7 +209,7 @@ static std::string humanBytes(double b)
 }
 
 static const char *kHeader =
-    "algorithm,category,filename,limit,vertices,triangulations,status,"
+    "algorithm,category,filename,limit,triangulationLimit,vertices,triangulations,status,"
     "peakDeltaBytes,peakDeltaMiB,peakRssBytes,baselineRssBytes,childMaxRssBytes,peakDeltaBytesPerVertex,"
     "totalChecks,successfulChecks,invalidTraversals,timestamp";
 
@@ -221,6 +219,12 @@ int main(int argc, char **argv)
         return workerMain(argv);
 
     tb::Config cfg;
+    // Code-configured run settings. Edit these values for repeatable runs;
+    // matching --tri_* command-line flags still take precedence.
+    cfg.inputRoot = "input";
+    cfg.algos = {tb::Algo::BiconnectedWithoutVGS, tb::Algo::BiconnectedWithVGS, tb::Algo::Oneconnected};
+    cfg.limits = {10, 100, 1000, 10000, 100000, 1000000};
+    cfg.csv = "benchmark-results/results_memory.csv";
     if (!tb::parseConfig(argc, argv, cfg, "benchmark-results/results_memory.csv"))
         return 1;
     if (argc > 1)
@@ -263,7 +267,7 @@ int main(int argc, char **argv)
 
         std::string catCsv = tb::getCategoryCsvPath(cfg.csv, c.algo, c.category);
         std::vector<std::string> fields = {
-            tb::algoName(c.algo), c.category, c.file, std::to_string(c.limit),
+            tb::algoName(c.algo), c.category, c.file, std::to_string(c.limit), std::to_string(c.limit),
             std::to_string(verts), kv["triangulations"], kv["status"],
             std::to_string(delta), tb::fmtD(delta / 1048576.0, 4),
             kv["peakRssBytes"], kv["baselineRssBytes"], std::to_string(childMax),

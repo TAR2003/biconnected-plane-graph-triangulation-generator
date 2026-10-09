@@ -2,20 +2,20 @@
 
 A C++17 implementation and benchmark suite for enumerating triangulations of plane graphs. The project works directly from a rotation system: each vertex is described by its neighbors in cyclic order, so the embedding is part of the input rather than reconstructed from an abstract graph.
 
-The repository contains three independently selectable enumeration algorithms:
+The repository benchmarks three independently selectable enumeration algorithms from `src/`:
 
-- **Biconnected**: `GraphTriangulationBiconnected`, using `FaceTriangulationBiconnected` and its VGS bookkeeping.
-- **BiconnectedWithoutVGS**: `GraphTriangulationBiconnectedWithoutVGS`, using the alternative face traversal that does not maintain the valid-generating-set list.
-- **Oneconnected**: `GraphTriangulationOneconnected`, using the additional conflict checks required when faces share cut vertices.
+- **BiconnectedWithVGS**: `GenerateBiconnectedTriangulationsWithVGS`.
+- **BiconnectedWithoutVGS**: `GenerateBiconnectedTriangulationsWithoutVGS`.
+- **Oneconnected**: `GenerateOneconnectedTriangulations`.
 
-All three algorithms use the same input cases, result schema, benchmark drivers, and plotting pipeline. Their outputs are kept in separate result directories so runs can be resumed independently.
+The benchmark adapters live under `bench/`; the algorithm headers in `src/` are used directly and are not modified by the benchmark.
 
 ## Repository Layout
 
 | Path | Purpose |
 | --- | --- |
-| `include/` | Header-only triangulation algorithms and shared graph data structures. |
-| `bench/` | Google Benchmark drivers for total-run and per-triangulation timing. |
+| `src/` | Header-only triangulation algorithms and shared graph data structures. |
+| `bench/` | Google Benchmark timing driver, memory driver, and adapters for the `src/` algorithms. |
 | `test-cases/` | Python input generators, validation, and generator documentation. |
 | `dev/` | Correctness checks, experimental programs, visualizers, and development utilities. |
 | `plot.py` | Generates comparison graphs from benchmark CSV files. |
@@ -49,8 +49,8 @@ cmake --build build --config Release
 
 The build creates:
 
-- `bench_total`: total enumeration time and peak allocation measurements.
-- `bench_individual`: timestamps for every generated triangulation.
+- `bench_time`: total enumeration time measurements.
+- `bench_memory`: peak resident-memory measurements.
 
 For a clean rebuild, remove the build directory and run the commands again. Do not reuse a CMake cache created from a different operating-system path or generator.
 
@@ -93,58 +93,50 @@ input/
 
 ## Benchmark CLI
 
-Both benchmark executables accept the same algorithm and case-selection options:
+Both benchmark executables accept:
 
 ```text
---algo=biconnected
---algo=biconnected-without-vgs
---algo=oneconnected
---cases=biconnected|oneconnected|all
---runs=N
---limit=N
---input=DIR
---output=DIR
+--tri_input=DIR
+--tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected
+--tri_limits=10,100,...
+--tri_categories=category1,category2
+--tri_csv=FILE
+--tri_cpu=N
 ```
 
-`--algo` is required. The aliases `biconnected_without_vgs` and `biconnectedWithoutVGS` are also accepted for the third algorithm.
+For source-configured runs, edit the settings block near the start of `main()` in
+[`bench/bench_time.cpp`](bench/bench_time.cpp) or
+[`bench/bench_memory.cpp`](bench/bench_memory.cpp). For example, set
+`cfg.limits = {100, 1000};` to run those two triangulation limits, or adjust
+`cfg.inputRoot`, `cfg.algos`, and `cfg.csv` there. The existing `--tri_*` flags
+remain available and override the corresponding code-configured values.
 
-`--cases` controls which input folders are discovered; it does not select the algorithm. This makes it possible to compare every algorithm on the same biconnected inputs, the same one-connected inputs, or both.
+By default `--tri_input=input` discovers `input/Biconnected` for both biconnected algorithms and `input/Oneconnected` for the one-connected algorithm. If `--tri_input` already names one of those algorithm-specific directories, that directory is used as-is. Existing benchmark results are used to resume incomplete runs.
 
-### Total benchmark
-
+### Timing benchmark
 ```bash
-./build/bench_total --algo=biconnected --cases=all --runs=3 --limit=10000000
-./build/bench_total --algo=biconnected-without-vgs --cases=all --runs=3 --limit=10000000
-./build/bench_total --algo=oneconnected --cases=all --runs=3 --limit=10000000
+./build/bench_time --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected --tri_input=./input --tri_limits=1000000
 ```
 
-Each run records total triangulations, elapsed seconds, peak tracked allocation, memory per vertex, check counters, traversal counters, timestamps, and status. Output is stored under:
-
-```text
-benchmark-results/<Algorithm>/total/<InputFamily>__<category>.csv
-```
-
-The benchmark is resumable. Existing rows are counted per case and only missing repetitions are registered.
-
-### Individual benchmark
-
+### Memory benchmark
 ```bash
-./build/bench_individual --algo=biconnected --cases=all --limit=5000
-./build/bench_individual --algo=biconnected-without-vgs --cases=all --limit=5000
-./build/bench_individual --algo=oneconnected --cases=all --limit=5000
+./build/bench_memory --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected --tri_input=./input --tri_limits=1000000
 ```
 
-This records `run`, `triangulation`, `cumulativeNs`, and `deltaNs` for every generated triangulation. Output is stored under:
+CSV output is split by algorithm and input category under:
 
 ```text
-benchmark-results/<Algorithm>/individual/<InputFamily>__<category>/<case>.csv
+benchmark-results/<Algorithm>Algo/results_<category>.csv
 ```
 
-The three algorithm names in the directory structure are:
+The actual file name preserves the requested CSV stem, for example
+`results_time_<category>.csv` or `results_memory_<category>.csv`.
+
+The algorithm names are also the accepted `--tri_algos` values:
 
 ```text
-Biconnected/
 BiconnectedWithoutVGS/
+BiconnectedWithVGS/
 Oneconnected/
 ```
 
@@ -165,21 +157,11 @@ The plotting code discovers all three result directories and includes them in:
 - pairwise scatter and Bland-Altman comparisons;
 - pairwise triangulation-count and speed-ratio charts.
 
-The pairwise charts compare every combination: Biconnected versus BiconnectedWithoutVGS, Biconnected versus Oneconnected, and BiconnectedWithoutVGS versus Oneconnected. Missing data is skipped without preventing plots for pairs that are available.
+The plotting scripts may require adaptation to consume the current benchmark CSV schema and algorithm names.
 
 ## Algorithm Structure
 
-`GraphTriangulation` owns the graph-level traversal. It traces faces, initializes the existing-edge multiset, creates one face triangulator at a time, and forwards completed combinations to `storeTriangulation()`.
-
-The graph-level subclasses select the face implementation:
-
-- `GraphTriangulationBiconnected` -> `FaceTriangulationBiconnected`.
-- `GraphTriangulationBiconnectedWithoutVGS` -> `FaceTriangulationBiconnectedWithoutVGS`.
-- `GraphTriangulationOneconnected` -> `FaceTriangulationOneconnected`.
-
-Performance subclasses override `storeTriangulation()` with an empty method so enumeration cost is measured without materializing every result. Correctness subclasses call `addTriangulation()` so complete triangulations can be compared. Individual-performance subclasses record timestamps through `GenerationTimeline`.
-
-The face triangulators use a rooted polygon representation. Chords are flipped recursively, and `Edge` stores the neighboring endpoints needed to update opposite edges after a flip. The VGS variant maintains a list of currently valid generating-set edges. The WithoutVGS variant keeps only the generating set and performs the corresponding traversal without maintaining that auxiliary list. The Oneconnected variant additionally tracks conflicts within the current face and the graph-wide present-edge multiset.
+The benchmark uses separate adapter translation units because the algorithm headers in `src/` include their shared base header directly. The adapters expose the common `generateAllTriangulations()` entry point to both benchmark executables without changing those algorithms.
 
 ## Correctness Checks
 
@@ -197,14 +179,12 @@ When comparing results, canonicalize every edge as `(min(u, v), max(u, v))`, sor
 
 ## Metrics and Interpretation
 
-Total benchmark CSV columns include:
-
-- `triangulations`: completed valid triangulations.
-- `timeSeconds`: measured enumeration duration.
-- `peakMemoryBytes`, `memoryPerVertex`: allocation-window measurements.
-- `totalChecks`, `successfulChecks`, `failedChecks`, `checkSuccessRate`: face-level candidate checks.
-- `invalidTraversals`, `totalTraversalsExtended`, `traversalSuccessRate`: accepted versus rejected graph-level traversals.
-- `startTime`, `endTime`, `status`: run bookkeeping.
+The timing and memory CSVs both record `limit` and `triangulationLimit` (the
+configured maximum for that run). The timing CSV records CPU and real time,
+triangulation count, limit status, and check counters where the selected source algorithm exposes them. Unsupported
+check and traversal metrics are left blank rather than reported as zero. The
+memory CSV records peak RSS, baseline RSS, and peak delta; child RSS is only
+available on platforms where the process runner reports it.
 
 A triangulation limit bounds enumeration for large cases. A run reaching the limit is not a complete count of all triangulations and should be reported as truncated in analysis.
 

@@ -41,6 +41,23 @@ python gen_biconnected.py --list          # family names
 Total graphs = (families that support the size) x (number of sizes) x `--count`.
 Sizes a family cannot produce (e.g. prism needs even n >= 6) are skipped and printed.
 
+### Configure sizes and count in code
+
+The `GENERATION_CONFIG` dictionary near the bottom of
+[`gen_biconnected.py`](gen_biconnected.py) and
+[`gen_oneconnected.py`](gen_oneconnected.py) provides the same settings as
+the corresponding command-line options. Edit `sizes` and `count` there to
+change the default run without adding command-line arguments:
+
+```python
+"sizes": [10, 100, 1000],
+"count": 20,
+```
+
+The command-line interface is unchanged; for example, `--sizes 5 50 --count 3`
+overrides those code defaults for that invocation. Output path, seed, and
+families can also be configured in the same dictionary.
+
 ### Output format
 
 ```

@@ -1,8 +1,6 @@
 // BenchCommon.hpp - shared helpers for bench_time (Google Benchmark) and
 // bench_memory (peak-memory runner). Does NOT modify your algorithm code.
 #pragma once
-#include "GraphTriangulation.hpp" // pulls in all three algorithm variants
-
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
@@ -25,11 +23,52 @@ namespace tb
 {
     namespace fs = std::filesystem;
 
+    struct GeneratorStats
+    {
+        long long triangulations = 0;
+        bool checksAvailable = false;
+        long long totalChecks = 0;
+        long long successfulChecks = 0;
+    };
+
+    class GeneratorRun
+    {
+    public:
+        virtual ~GeneratorRun() = default;
+        virtual void generateAllTriangulations() = 0;
+        virtual GeneratorStats stats() const = 0;
+    };
+
+    std::unique_ptr<GeneratorRun> makeBiconnectedWithoutVGS(
+        long long vertexCount, const std::vector<std::vector<long long>> &adjacency, long long limit);
+    std::unique_ptr<GeneratorRun> makeBiconnectedWithVGS(
+        long long vertexCount, const std::vector<std::vector<long long>> &adjacency, long long limit);
+    std::unique_ptr<GeneratorRun> makeOneconnected(
+        long long vertexCount, const std::vector<std::vector<long long>> &adjacency, long long limit);
+
+    class CoutSilencer
+    {
+        class NullBuffer : public std::streambuf
+        {
+        protected:
+            int overflow(int ch) override { return traits_type::not_eof(ch); }
+        };
+
+        NullBuffer sink_;
+        std::streambuf *previous_;
+
+    public:
+        CoutSilencer() : previous_(std::cout.rdbuf(&sink_)) {}
+        ~CoutSilencer() { std::cout.rdbuf(previous_); }
+        CoutSilencer(const CoutSilencer &) = delete;
+        CoutSilencer &operator=(const CoutSilencer &) = delete;
+    };
+
     // ------------------------------------------------------------------ algos
     enum class Algo
     {
-        Biconnected,
         BiconnectedWithoutVGS,
+        BiconnectedWithVGS,
         Oneconnected
     };
 
@@ -37,10 +76,10 @@ namespace tb
     {
         switch (a)
         {
-        case Algo::Biconnected:
-            return "Biconnected";
         case Algo::BiconnectedWithoutVGS:
             return "BiconnectedWithoutVGS";
+        case Algo::BiconnectedWithVGS:
+            return "BiconnectedWithVGS";
         case Algo::Oneconnected:
             return "Oneconnected";
         }
@@ -49,7 +88,7 @@ namespace tb
 
     inline bool parseAlgo(const std::string &s, Algo &out)
     {
-        for (Algo a : {Algo::Biconnected, Algo::BiconnectedWithoutVGS, Algo::Oneconnected})
+        for (Algo a : {Algo::BiconnectedWithoutVGS, Algo::BiconnectedWithVGS, Algo::Oneconnected})
             if (s == algoName(a))
             {
                 out = a;
@@ -86,25 +125,24 @@ namespace tb
         return g;
     }
 
-    // "Performance" variants: storeTriangulation() is a no-op, exactly like
-    // your original timing driver, so we measure the algorithm, not storage.
-    inline std::unique_ptr<GraphTriangulation> makeGraph(Algo a, const InputGraph &g, long long limit)
+    // The source generators count results without retaining each triangulation.
+    inline std::unique_ptr<GeneratorRun> makeGraph(Algo a, const InputGraph &g, long long limit)
     {
         switch (a)
         {
-        case Algo::Biconnected:
-            return std::make_unique<GraphTriangulationBiconnectedPerformance>(g.vertexCount, g.adjacency, limit);
         case Algo::BiconnectedWithoutVGS:
-            return std::make_unique<GraphTriangulationBiconnectedWithoutVGSPerformance>(g.vertexCount, g.adjacency, limit);
+            return makeBiconnectedWithoutVGS(g.vertexCount, g.adjacency, limit);
+        case Algo::BiconnectedWithVGS:
+            return makeBiconnectedWithVGS(g.vertexCount, g.adjacency, limit);
         case Algo::Oneconnected:
-            return std::make_unique<GraphTriangulationOneconnectedPerformance>(g.vertexCount, g.adjacency, limit);
+            return makeOneconnected(g.vertexCount, g.adjacency, limit);
         }
         return nullptr;
     }
 
-    inline bool limitHit(const GraphTriangulation &gt, long long limit)
+    inline bool limitHit(const GeneratorStats &stats, long long limit)
     {
-        return gt.totalTriangulations >= limit;
+        return stats.triangulations >= limit;
     }
     inline const char *statusString(bool hit)
     {
@@ -115,10 +153,10 @@ namespace tb
     struct Config
     {
         std::string inputRoot = "input";
-        std::string dirBiconnected = "Biconnected";   // used by Biconnected + WithoutVGS
+        std::string dirBiconnected = "Biconnected";   // used by both biconnected variants
         std::string dirOneconnected = "Oneconnected"; // used by Oneconnected
         std::vector<long long> limits{10, 100, 1000, 10000, 100000, 1000000};
-        std::vector<Algo> algos{Algo::Biconnected, Algo::BiconnectedWithoutVGS, Algo::Oneconnected};
+        std::vector<Algo> algos{Algo::BiconnectedWithoutVGS, Algo::BiconnectedWithVGS, Algo::Oneconnected};
         std::vector<std::string> categories; // empty = all
         std::string csv;
         int cpu = -1;
@@ -150,11 +188,11 @@ namespace tb
             << "Triangulation benchmark flags (for " << prog << "):\n"
             << "  --tri_input=<dir>            exact input folder to scan (default: input)\n"
             << "                               layout: <dir>/<category>/<files>\n"
-            << "  --tri_dir_biconnected=<name> sub-folder for Biconnected + WithoutVGS (default: Biconnected)\n"
+            << "  --tri_dir_biconnected=<name> sub-folder for both biconnected variants (default: Biconnected)\n"
             << "  --tri_dir_oneconnected=<name> sub-folder for Oneconnected (default: Oneconnected)\n"
             << "  --tri_limits=10,100,...      triangulation limits, each is a separate pass\n"
             << "                               (default: 10,100,1000,10000,100000,1000000)\n"
-            << "  --tri_algos=A,B,...          Biconnected,BiconnectedWithoutVGS,Oneconnected (default: all)\n"
+            << "  --tri_algos=A,B,...          BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected (default: all)\n"
             << "  --tri_categories=c1,c2       only these category folders (default: all)\n"
             << "  --tri_csv=<file>             results CSV, also used for resume (default: " << defCsv << ")\n"
             << "  --tri_cpu=<n>                pin to CPU core n (Linux only)\n"
@@ -164,7 +202,8 @@ namespace tb
     // Consumes the --tri_* flags from argv (compacting it) and leaves the rest.
     inline bool parseConfig(int &argc, char **argv, Config &cfg, const std::string &defaultCsv)
     {
-        cfg.csv = defaultCsv;
+        if (cfg.csv.empty())
+            cfg.csv = defaultCsv;
         int w = 1;
         try
         {
@@ -296,6 +335,8 @@ namespace tb
         return out;
     }
 
+    inline std::string csvRow(const std::vector<std::string> &fields);
+
     inline void appendCsvRow(const std::string &path, const std::string &header, const std::vector<std::string> &fields)
     {
         std::error_code ec;
@@ -306,6 +347,104 @@ namespace tb
             return;
         }
         bool needHeader = !fs::exists(path) || fs::file_size(path) == 0;
+        if (!needHeader)
+        {
+            // Upgrade older benchmark CSVs by inserting the new limit alias after "limit".
+            std::ifstream existing(path);
+            std::string oldHeader;
+            if (!existing.is_open() || !std::getline(existing, oldHeader))
+            {
+                std::cerr << "Error: cannot read CSV header from " << path << "\n";
+                return;
+            }
+            if (oldHeader != header)
+            {
+                auto oldColumns = csvSplit(oldHeader);
+                auto newColumns = csvSplit(header);
+                auto limitColumn = std::find(newColumns.begin(), newColumns.end(), "limit");
+                auto oldLimitColumn = std::find(oldColumns.begin(), oldColumns.end(), "limit");
+                auto extraColumn = std::find(newColumns.begin(), newColumns.end(), "triangulationLimit");
+                bool compatible = extraColumn != newColumns.end() &&
+                                  oldColumns.size() + 1 == newColumns.size() &&
+                                  oldLimitColumn != oldColumns.end() &&
+                                  std::find(oldColumns.begin(), oldColumns.end(), "triangulationLimit") == oldColumns.end();
+                size_t newIndex = 0;
+                for (const auto &column : oldColumns)
+                {
+                    if (newIndex == (size_t)(extraColumn - newColumns.begin()))
+                        ++newIndex;
+                    if (newIndex >= newColumns.size() || newColumns[newIndex] != column)
+                    {
+                        compatible = false;
+                        break;
+                    }
+                    ++newIndex;
+                }
+                if (limitColumn == newColumns.end() || !compatible || newIndex != newColumns.size())
+                {
+                    std::cerr << "Error: CSV header in " << path << " does not match the current benchmark schema\n";
+                    return;
+                }
+
+                std::vector<std::vector<std::string>> oldRows;
+                std::string line;
+                while (std::getline(existing, line))
+                    oldRows.push_back(csvSplit(line));
+                existing.close();
+
+                auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
+                fs::path tempPath = path + ".upgrade." + std::to_string(stamp);
+                fs::path backupPath = path + ".backup." + std::to_string(stamp);
+                std::ofstream upgraded(tempPath, std::ios::trunc);
+                if (!upgraded.is_open())
+                {
+                    std::cerr << "Error: cannot create upgraded CSV " << tempPath.string() << "\n";
+                    return;
+                }
+                upgraded << csvRow(newColumns) << '\n';
+                for (const auto &oldRow : oldRows)
+                {
+                    if (oldRow.size() != oldColumns.size())
+                    {
+                        std::cerr << "Error: malformed CSV row in " << path << "; leaving it unchanged\n";
+                        upgraded.close();
+                        fs::remove(tempPath, ec);
+                        return;
+                    }
+                    std::vector<std::string> expandedRow = oldRow;
+                    expandedRow.insert(expandedRow.begin() + (extraColumn - newColumns.begin()),
+                                       oldRow[oldLimitColumn - oldColumns.begin()]);
+                    upgraded << csvRow(expandedRow) << '\n';
+                }
+                upgraded.close();
+                if (!upgraded)
+                {
+                    std::cerr << "Error: failed while writing upgraded CSV " << tempPath.string() << "\n";
+                    fs::remove(tempPath, ec);
+                    return;
+                }
+                fs::rename(path, backupPath, ec);
+                if (ec)
+                {
+                    std::cerr << "Error: cannot preserve existing CSV " << path << ": " << ec.message() << "\n";
+                    fs::remove(tempPath, ec);
+                    return;
+                }
+                fs::rename(tempPath, path, ec);
+                if (ec)
+                {
+                    std::error_code restoreError;
+                    fs::rename(backupPath, path, restoreError);
+                    std::cerr << "Error: cannot install upgraded CSV " << path << ": " << ec.message();
+                    if (restoreError)
+                        std::cerr << " (also failed to restore original: " << restoreError.message() << ")";
+                    std::cerr << "\n";
+                    return;
+                }
+                fs::remove(backupPath, ec);
+                needHeader = false;
+            }
+        }
         std::ofstream out(path, std::ios::app);
         if (!out.is_open())
         {
@@ -439,8 +578,10 @@ namespace tb
 
     inline fs::path algoInputDir(const Config &c, Algo a)
     {
-        (void)a;
-        return fs::path(c.inputRoot);
+        fs::path root(c.inputRoot);
+        fs::path algorithmDir = root /
+                                (a == Algo::Oneconnected ? c.dirOneconnected : c.dirBiconnected);
+        return fs::is_directory(algorithmDir) ? algorithmDir : root;
     }
 
     inline std::string getCategoryCsvPath(const std::string &baseCsv, Algo algo, const std::string &category)
@@ -519,12 +660,35 @@ namespace tb
                     --previous;
                     std::vector<std::string> copied = previous->second;
                     copied[results.limitIndex] = std::to_string(limit);
-                    if (results.statusIndex >= 0 && results.statusIndex < (int)copied.size())
-                        copied[results.statusIndex] = "Completed";
-                    if (results.timestampIndex >= 0 && results.timestampIndex < (int)copied.size())
-                        copied[results.timestampIndex] = nowString();
+                    std::vector<std::string> columns = csvSplit(results.header);
+                    auto triangulationLimit = std::find(columns.begin(), columns.end(), "triangulationLimit");
+                    bool needsTriangulationLimit = triangulationLimit == columns.end();
+                    std::string outputHeader = results.header;
+                    if (needsTriangulationLimit)
+                    {
+                        size_t insertAt = (size_t)results.limitIndex + 1;
+                        columns.insert(columns.begin() + insertAt, "triangulationLimit");
+                        copied.insert(copied.begin() + insertAt, std::to_string(limit));
+                        outputHeader = csvRow(columns);
+                    }
+                    else
+                    {
+                        copied[(size_t)(triangulationLimit - columns.begin())] = std::to_string(limit);
+                    }
+                    int statusIndex = results.statusIndex + (needsTriangulationLimit ? 1 : 0);
+                    if (statusIndex >= 0 && statusIndex < (int)copied.size())
+                        copied[statusIndex] = "Completed";
+                    int timestampIndex = results.timestampIndex + (needsTriangulationLimit ? 1 : 0);
+                    if (timestampIndex >= 0 && timestampIndex < (int)copied.size())
+                        copied[timestampIndex] = nowString();
                     std::string csvPath = getCategoryCsvPath(cfg.csv, c.algo, c.category);
-                    appendCsvRow(csvPath, results.header, copied);
+                    appendCsvRow(csvPath, outputHeader, copied);
+                    if (needsTriangulationLimit)
+                    {
+                        results.header = outputHeader;
+                        results.statusIndex = statusIndex;
+                        results.timestampIndex = timestampIndex;
+                    }
                     completed[limit] = copied;
                     results.done.insert(caseKey(c));
                     skipped++;
