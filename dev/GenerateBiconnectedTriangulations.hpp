@@ -5,7 +5,7 @@ using namespace std;
 class GenerateBiconnectedTriangulationsWithoutVGS : public GenerateTriangulations
 {
 public:
-    long long totalChecks = 0, unsuccessfulChecks = 0;
+    long long totalChecks = 0, unsuccessfulChecks = 0, successfulChecks = 0;
     GenerateBiconnectedTriangulationsWithoutVGS(long long totalVertices, const vector<vector<long long>> &adjacentSet, long long triangulationLimit = LONG_LONG_MAX) : GenerateTriangulations(totalVertices, adjacentSet, triangulationLimit)
     {
     }
@@ -23,6 +23,7 @@ public:
             unsuccessfulChecks++;
             return false;
         }
+        successfulChecks++;
         return true;
     }
 };

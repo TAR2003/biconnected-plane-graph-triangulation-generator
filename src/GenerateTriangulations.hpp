@@ -117,14 +117,14 @@ public:
         }
     }
 
-    void setupChords(long long faceIndex)
+    virtual void setupChords(long long faceIndex)
     {
         auto temp = headChord[faceIndex];
         for (int i = 0; i < faces[faceIndex].size() - 3; i++)
         {
             temp->first = 0;
             temp->second = i + 2;
-            present.insert({positions[faceIndex][temp->first], positions[faceIndex][temp->second]});
+            present.insert({positions[faceIndex][temp->first], positions[faceIndex][temp->second]}, faceIndex);
             temp->oppositeFirst = (i + 1) % faces[faceIndex].size();
             temp->oppositeSecond = (i + 3) % faces[faceIndex].size();
             temp->faceIndex = faceIndex;
@@ -166,7 +166,7 @@ public:
         auto temp = headChord[faceIndex];
         while (temp != nullptr)
         {
-            present.erase({positions[faceIndex][temp->first], positions[faceIndex][temp->second]});
+            present.erase({positions[faceIndex][temp->first], positions[faceIndex][temp->second]}, faceIndex);
             temp = temp->nextChord;
         }
     }
@@ -235,12 +235,12 @@ public:
         updateAssociatedChord(faceIndex, c, c->prevGS);
     }
 
-    void flip(long long faceIndex, Chord *c)
+    virtual void flip(long long faceIndex, Chord *c)
     {
 
-        present.erase({positions[faceIndex][c->first], positions[faceIndex][c->second]});
+        present.erase({positions[faceIndex][c->first], positions[faceIndex][c->second]}, faceIndex);
         c->flip();
-        present.insert({positions[faceIndex][c->first], positions[faceIndex][c->second]});
+        present.insert({positions[faceIndex][c->first], positions[faceIndex][c->second]}, faceIndex);
     }
 
     void removeChordFromGS(long long faceIndex, Chord *c)
@@ -322,7 +322,7 @@ public:
         cleanUpChords(faceIndex);
     }
 
-    void output(long long faceIndex)
+    virtual void output(long long faceIndex)
     {
         if (faceIndex == faces.size() - 1)
         {

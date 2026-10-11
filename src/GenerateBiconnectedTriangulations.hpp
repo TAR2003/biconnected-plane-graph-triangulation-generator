@@ -5,14 +5,13 @@ using namespace std;
 class GenerateBiconnectedTriangulationsWithoutVGS : public GenerateTriangulations
 {
 public:
-    long long totalChecks = 0, unsuccessfulChecks = 0;
+    long long totalChecks = 0, unsuccessfulChecks = 0, successfulChecks = 0;
     GenerateBiconnectedTriangulationsWithoutVGS(long long totalVertices, const vector<vector<long long>> &adjacentSet, long long triangulationLimit = LONG_LONG_MAX) : GenerateTriangulations(totalVertices, adjacentSet, triangulationLimit)
     {
     }
 
     ~GenerateBiconnectedTriangulationsWithoutVGS()
     {
-
     }
 
     bool isValidChildTriangulation(long long faceIndex, Chord *c)
@@ -23,6 +22,7 @@ public:
             unsuccessfulChecks++;
             return false;
         }
+        successfulChecks++;
         return true;
     }
 };
@@ -167,7 +167,7 @@ public:
         }
     }
 
-     void addChord(long long faceIndex, Chord *c)
+    void addChord(long long faceIndex, Chord *c)
     {
         addChordToGS(faceIndex, c);
         addChordToVGS(faceIndex, c);
