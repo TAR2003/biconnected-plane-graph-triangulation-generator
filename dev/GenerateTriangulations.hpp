@@ -124,7 +124,7 @@ public:
         {
             temp->first = 0;
             temp->second = i + 2;
-            present.insert({positions[faceIndex][temp->first], positions[faceIndex][temp->second]});
+            present.insert({positions[faceIndex][temp->first], positions[faceIndex][temp->second]}, faceIndex);
             temp->oppositeFirst = (i + 1) % faces[faceIndex].size();
             temp->oppositeSecond = (i + 3) % faces[faceIndex].size();
             temp->faceIndex = faceIndex;
@@ -166,7 +166,7 @@ public:
         auto temp = headChord[faceIndex];
         while (temp != nullptr)
         {
-            present.erase({positions[faceIndex][temp->first], positions[faceIndex][temp->second]});
+            present.erase({positions[faceIndex][temp->first], positions[faceIndex][temp->second]}, faceIndex);
             temp = temp->nextChord;
         }
     }
@@ -322,7 +322,7 @@ public:
         cleanUpChords(faceIndex);
     }
 
-    void output(long long faceIndex)
+    virtual void output(long long faceIndex)
     {
         if (faceIndex == faces.size() - 1)
         {
