@@ -23,7 +23,7 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 
 print_stage "SETTING UP THE PYTHON ENVIRONMENT"
-uv venv "$ROOT_DIR/.venv" --python 3.10
+uv venv "$ROOT_DIR/.venv" --python 3.10 --clear
 uv pip install --python "$ROOT_DIR/.venv/bin/python" \
     networkx numpy scipy matplotlib Pillow reportlab pandas
 
