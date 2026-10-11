@@ -247,103 +247,44 @@ public:
     }
 };
 
-
-
-inline std::vector<std::vector<long long>> rotationSystemToFaces(
-    long long totalNodes, const std::vector<std::vector<long long>> &rawAdjacency)
+inline vector<vector<long long>> rotationSystemToFaces(long long n, const vector<vector<long long>> &adj)
 {
-    struct HalfEdge
-    {
-        long long u;
-        long long v;
-        bool visited = false;
-    };
+    vector<long long> start(n + 1, 0);
+    for (long long u = 0; u < n; ++u)
+        start[u + 1] = start[u] + (long long)adj[u].size();
+    const long long m = start[n];
 
-    std::set<long long> uniqueNodes;
-    for (long long u = 0; u < totalNodes; ++u)
-    {
-        uniqueNodes.insert(u);
-        if (u < static_cast<long long>(rawAdjacency.size()))
+    vector<long long> from(m), to(m), twin(m);
+    vector<pair<long long, long long>> keys(m);
+    for (long long u = 0; u < n; ++u)
+        for (long long i = 0; i < (long long)adj[u].size(); ++i)
         {
-            for (long long v : rawAdjacency[u])
-                uniqueNodes.insert(v);
+            long long e = start[u] + i, v = adj[u][i];
+            from[e] = u;
+            to[e] = v;
+            long long a = min(u, v), b = max(u, v);
+            keys[e] = {((long long)a << 32) | b, e};
         }
-    }
+    sort(keys.begin(), keys.end()); // twins become adjacent
+    for (long long i = 0; i + 1 < m; i += 2)
+        twin[keys[i].second] = keys[i + 1].second,
+        twin[keys[i + 1].second] = keys[i].second;
 
-    std::map<long long, long long> originalToIndex;
-    std::vector<long long> indexToOriginal;
-    for (long long node : uniqueNodes)
+    vector<char> seen(m, 0);
+    vector<vector<long long>> faces;
+    for (long long e0 = 0; e0 < m; ++e0)
     {
-        originalToIndex[node] = static_cast<long long>(indexToOriginal.size());
-        indexToOriginal.push_back(node);
-    }
-
-    const long long nodeCount = static_cast<long long>(indexToOriginal.size());
-    std::vector<std::vector<long long>> adjacency(static_cast<size_t>(nodeCount));
-    for (long long u = 0; u < totalNodes; ++u)
-    {
-        const auto source = originalToIndex.find(u);
-        if (source == originalToIndex.end() || u >= static_cast<long long>(rawAdjacency.size()))
+        if (seen[e0])
             continue;
-
-        for (long long v : rawAdjacency[u])
+        vector<long long> face;
+        for (long long e = e0; !seen[e];)
         {
-            const auto target = originalToIndex.find(v);
-            if (target != originalToIndex.end())
-                adjacency[source->second].push_back(target->second);
+            seen[e] = 1;
+            face.push_back(from[e]);
+            long long t = twin[e], v = to[e];                     // t = v -> from[e]
+            e = (t == start[v]) ? start[v + 1] - 1 : t - 1; // previous in rotation at v
         }
-    }
-
-    std::map<std::pair<long long, long long>, long long> edgeId;
-    std::vector<HalfEdge> halfEdges;
-    for (long long u = 0; u < nodeCount; ++u)
-    {
-        for (long long v : adjacency[u])
-        {
-            if (edgeId.find({u, v}) == edgeId.end())
-            {
-                edgeId[{u, v}] = static_cast<long long>(halfEdges.size());
-                halfEdges.push_back({u, v});
-            }
-        }
-    }
-
-    std::vector<long long> nextEdge(halfEdges.size(), -1);
-    for (long long i = 0; i < static_cast<long long>(halfEdges.size()); ++i)
-    {
-        const long long u = halfEdges[i].u;
-        const long long v = halfEdges[i].v;
-        const auto &neighbors = adjacency[v];
-        if (neighbors.empty())
-            continue;
-
-        const auto it = std::find(neighbors.begin(), neighbors.end(), u);
-        if (it == neighbors.end())
-            continue;
-
-        const long long position = static_cast<long long>(it - neighbors.begin());
-        const long long previous = (position - 1 + neighbors.size()) % neighbors.size();
-        const auto next = edgeId.find({v, neighbors[previous]});
-        if (next != edgeId.end())
-            nextEdge[i] = next->second;
-    }
-
-    std::vector<std::vector<long long>> faces;
-    for (long long i = 0; i < static_cast<long long>(halfEdges.size()); ++i)
-    {
-        if (halfEdges[i].visited || nextEdge[i] == -1)
-            continue;
-
-        std::vector<long long> face;
-        long long current = i;
-        while (current != -1 && !halfEdges[current].visited)
-        {
-            halfEdges[current].visited = true;
-            face.push_back(indexToOriginal[halfEdges[current].u]);
-            current = nextEdge[current];
-        }
-        if (!face.empty())
-            faces.push_back(std::move(face));
+        faces.push_back(std::move(face));
     }
     return faces;
 }

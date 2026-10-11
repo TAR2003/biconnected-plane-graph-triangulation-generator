@@ -49,7 +49,6 @@ public:
             unsuccessfulChecks++;
             return false;
         }
-        // cout << "On the matter of flipping the chord: " << oppositePair.first << " " << oppositePair.second << endl;
         if (present.find(oppositePair))
         {
             if (oppositePair.first != positions[faceIndex][0] && oppositePair.second != positions[faceIndex][0])
