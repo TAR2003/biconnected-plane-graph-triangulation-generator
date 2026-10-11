@@ -20,7 +20,8 @@ The benchmark adapters live under `bench/`; the algorithm headers in `src/` are 
 | `dev/` | Correctness checks, experimental programs, visualizers, and development utilities. |
 | `plot.py` | Generates comparison graphs from benchmark CSV files. |
 | `CMakeLists.txt` | CMake project definition and pinned Google Benchmark dependency. |
-| `run.sh` | Example benchmark commands for the three algorithms. |
+| `run_all.sh` | Runs the full build, input-generation, benchmark, and plotting pipeline. |
+| `scripts/` | Individual shell modules called by `run_all.sh`. |
 | `benchmark-results/` | Benchmark CSV output. |
 | `graphs_output/` | Generated PNG graphs. |
 
@@ -53,6 +54,28 @@ The build creates:
 - `bench_memory`: peak resident-memory measurements.
 
 For a clean rebuild, remove the build directory and run the commands again. Do not reuse a CMake cache created from a different operating-system path or generator.
+
+## Run the automation pipeline
+
+On Linux, run the complete pipeline from the repository root with:
+
+```bash
+chmod +x run_all.sh scripts/*.sh
+./run_all.sh
+```
+
+The root `run_all.sh` creates a Python 3.10 environment with `uv`, installs the
+Python dependencies, and invokes these modules in order:
+
+1. `scripts/1_build_cpp.sh` configures and builds the CMake targets.
+2. `scripts/2_generate_test_cases.sh` regenerates inputs, imports Plantri cases,
+   and renders visualizations.
+3. `scripts/3_run_benchmarks.sh` runs `bench_time`.
+4. `scripts/4_generate_plots.sh` runs the root `plot.py`.
+
+The test-case module recreates `test-cases/input/`; existing generated input
+files there are removed. The benchmark module expects the C++ target and input
+directory to have been created by the preceding modules.
 
 ## Input Format
 
