@@ -135,7 +135,12 @@ static int workerMain(char **argv)
         << "peakDeltaBytes=" << (peak > baseline ? peak - baseline : 0) << '\n'
         << "totalChecks=" << (stats.checksAvailable ? std::to_string(stats.totalChecks) : "") << '\n'
         << "successfulChecks=" << (stats.checksAvailable ? std::to_string(stats.successfulChecks) : "") << '\n'
-        << "invalidTraversals=\n";
+        << "unsuccessfulChecks="
+        << (stats.checksAvailable ? std::to_string(stats.totalChecks - stats.successfulChecks) : "") << '\n'
+        << "totalTraversals=" << (stats.traversalsAvailable ? std::to_string(stats.totalTraversals) : "") << '\n'
+        << "successfulTraversals=" << (stats.traversalsAvailable ? std::to_string(stats.successfulTraversals) : "") << '\n'
+        << "unsuccessfulTraversals="
+        << (stats.traversalsAvailable ? std::to_string(stats.totalTraversals - stats.successfulTraversals) : "") << '\n';
     return 0;
 }
 
@@ -211,7 +216,7 @@ static std::string humanBytes(double b)
 static const char *kHeader =
     "algorithm,category,filename,limit,triangulationLimit,vertices,triangulations,status,"
     "peakDeltaBytes,peakDeltaMiB,peakRssBytes,baselineRssBytes,childMaxRssBytes,peakDeltaBytesPerVertex,"
-    "totalChecks,successfulChecks,invalidTraversals,timestamp";
+    "totalChecks,successfulChecks,unsuccessfulChecks,totalTraversals,successfulTraversals,unsuccessfulTraversals,timestamp";
 
 int main(int argc, char **argv)
 {
@@ -272,7 +277,8 @@ int main(int argc, char **argv)
             std::to_string(delta), tb::fmtD(delta / 1048576.0, 4),
             kv["peakRssBytes"], kv["baselineRssBytes"], std::to_string(childMax),
             tb::fmtD(verts ? (double)delta / verts : 0.0, 3),
-            kv["totalChecks"], kv["successfulChecks"], kv["invalidTraversals"], tb::nowString()};
+            kv["totalChecks"], kv["successfulChecks"], kv["unsuccessfulChecks"],
+            kv["totalTraversals"], kv["successfulTraversals"], kv["unsuccessfulTraversals"], tb::nowString()};
         tb::appendCsvRow(catCsv, kHeader, fields);
         std::cout << "CSV append [" << catCsv << "]: " << tb::csvRow(fields) << '\n';
         std::cout << kv["status"] << ", " << kv["triangulations"] << " triangulations, peak +"

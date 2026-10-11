@@ -20,7 +20,8 @@ static std::unordered_map<std::string, tb::Case> g_cases; // benchmark name -> c
 
 static const char *kHeader =
     "algorithm,category,filename,limit,triangulationLimit,vertices,cpuTimeSeconds,realTimeSeconds,triangulations,status,"
-    "totalChecks,successfulChecks,failedChecks,checkSuccessRate,invalidTraversals,timestamp";
+    "totalChecks,successfulChecks,unsuccessfulChecks,checkSuccessRate,"
+    "totalTraversals,successfulTraversals,unsuccessfulTraversals,traversalSuccessRate,timestamp";
 
 static void runCase(benchmark::State &state, const tb::Case &c)
 {
@@ -48,6 +49,11 @@ static void runCase(benchmark::State &state, const tb::Case &c)
         {
             state.counters["totalChecks"] = (double)stats.totalChecks;
             state.counters["successfulChecks"] = (double)stats.successfulChecks;
+        }
+        if (stats.traversalsAvailable)
+        {
+            state.counters["totalTraversals"] = (double)stats.totalTraversals;
+            state.counters["successfulTraversals"] = (double)stats.successfulTraversals;
         }
     }
     // Timers are stopped here; counters and destruction are not measured.
@@ -77,7 +83,9 @@ public:
             };
             double iters = r.iterations > 0 ? (double)r.iterations : 1.0;
             const bool checksAvailable = r.counters.find("totalChecks") != r.counters.end();
+            const bool traversalsAvailable = r.counters.find("totalTraversals") != r.counters.end();
             long long total = cnt("totalChecks"), ok = cnt("successfulChecks");
+            long long totalTraversals = cnt("totalTraversals"), successfulTraversals = cnt("successfulTraversals");
             std::string catCsv = tb::getCategoryCsvPath(csv_, c.algo, c.category);
             std::vector<std::string> fields = {
                 tb::algoName(c.algo), c.category, c.file, std::to_string(c.limit), std::to_string(c.limit),
@@ -90,7 +98,11 @@ public:
                 checksAvailable ? std::to_string(ok) : "",
                 checksAvailable ? std::to_string(total - ok) : "",
                 checksAvailable ? tb::fmtD(total > 0 ? 100.0 * ok / total : 0.0, 2) : "",
-                "", tb::nowString()};
+                traversalsAvailable ? std::to_string(totalTraversals) : "",
+                traversalsAvailable ? std::to_string(successfulTraversals) : "",
+                traversalsAvailable ? std::to_string(totalTraversals - successfulTraversals) : "",
+                traversalsAvailable ? tb::fmtD(totalTraversals > 0 ? 100.0 * successfulTraversals / totalTraversals : 0.0, 2) : "",
+                tb::nowString()};
             tb::appendCsvRow(catCsv, kHeader, fields);
             std::cout << "CSV append [" << catCsv << "]: " << tb::csvRow(fields) << '\n';
         }

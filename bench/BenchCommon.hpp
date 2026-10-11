@@ -29,6 +29,9 @@ namespace tb
         bool checksAvailable = false;
         long long totalChecks = 0;
         long long successfulChecks = 0;
+        bool traversalsAvailable = false;
+        long long totalTraversals = 0;
+        long long successfulTraversals = 0;
     };
 
     class GeneratorRun
@@ -349,7 +352,6 @@ namespace tb
         bool needHeader = !fs::exists(path) || fs::file_size(path) == 0;
         if (!needHeader)
         {
-            // Upgrade older benchmark CSVs by inserting the new limit alias after "limit".
             std::ifstream existing(path);
             std::string oldHeader;
             if (!existing.is_open() || !std::getline(existing, oldHeader))
@@ -357,33 +359,39 @@ namespace tb
                 std::cerr << "Error: cannot read CSV header from " << path << "\n";
                 return;
             }
-            if (oldHeader != header)
+            auto oldColumns = csvSplit(oldHeader);
+            auto newColumns = csvSplit(header);
+            if (oldColumns != newColumns)
             {
-                auto oldColumns = csvSplit(oldHeader);
-                auto newColumns = csvSplit(header);
-                auto limitColumn = std::find(newColumns.begin(), newColumns.end(), "limit");
-                auto oldLimitColumn = std::find(oldColumns.begin(), oldColumns.end(), "limit");
-                auto extraColumn = std::find(newColumns.begin(), newColumns.end(), "triangulationLimit");
-                bool compatible = extraColumn != newColumns.end() &&
-                                  oldColumns.size() + 1 == newColumns.size() &&
-                                  oldLimitColumn != oldColumns.end() &&
-                                  std::find(oldColumns.begin(), oldColumns.end(), "triangulationLimit") == oldColumns.end();
-                size_t newIndex = 0;
-                for (const auto &column : oldColumns)
+                auto hasColumn = [](const std::vector<std::string> &columns, const char *name)
                 {
-                    if (newIndex == (size_t)(extraColumn - newColumns.begin()))
-                        ++newIndex;
-                    if (newIndex >= newColumns.size() || newColumns[newIndex] != column)
-                    {
-                        compatible = false;
-                        break;
-                    }
-                    ++newIndex;
-                }
-                if (limitColumn == newColumns.end() || !compatible || newIndex != newColumns.size())
+                    return std::find(columns.begin(), columns.end(), name) != columns.end();
+                };
+                const bool compatible =
+                    hasColumn(oldColumns, "algorithm") && hasColumn(newColumns, "algorithm") &&
+                    hasColumn(oldColumns, "category") && hasColumn(newColumns, "category") &&
+                    hasColumn(oldColumns, "filename") && hasColumn(newColumns, "filename") &&
+                    hasColumn(oldColumns, "limit") && hasColumn(newColumns, "limit") &&
+                    hasColumn(oldColumns, "status") && hasColumn(newColumns, "status") &&
+                    hasColumn(oldColumns, "timestamp") && hasColumn(newColumns, "timestamp");
+                if (!compatible)
                 {
                     std::cerr << "Error: CSV header in " << path << " does not match the current benchmark schema\n";
                     return;
+                }
+
+                std::vector<int> sourceIndices;
+                sourceIndices.reserve(newColumns.size());
+                for (const auto &column : newColumns)
+                {
+                    auto source = std::find(oldColumns.begin(), oldColumns.end(), column);
+                    if (source == oldColumns.end() && column == "triangulationLimit")
+                        source = std::find(oldColumns.begin(), oldColumns.end(), "limit");
+                    if (source == oldColumns.end() && column == "unsuccessfulChecks")
+                        source = std::find(oldColumns.begin(), oldColumns.end(), "failedChecks");
+                    if (source == oldColumns.end() && column == "unsuccessfulTraversals")
+                        source = std::find(oldColumns.begin(), oldColumns.end(), "invalidTraversals");
+                    sourceIndices.push_back(source == oldColumns.end() ? -1 : (int)(source - oldColumns.begin()));
                 }
 
                 std::vector<std::vector<std::string>> oldRows;
@@ -411,9 +419,10 @@ namespace tb
                         fs::remove(tempPath, ec);
                         return;
                     }
-                    std::vector<std::string> expandedRow = oldRow;
-                    expandedRow.insert(expandedRow.begin() + (extraColumn - newColumns.begin()),
-                                       oldRow[oldLimitColumn - oldColumns.begin()]);
+                    std::vector<std::string> expandedRow;
+                    expandedRow.reserve(sourceIndices.size());
+                    for (int index : sourceIndices)
+                        expandedRow.push_back(index >= 0 ? oldRow[index] : "");
                     upgraded << csvRow(expandedRow) << '\n';
                 }
                 upgraded.close();

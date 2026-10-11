@@ -18,7 +18,8 @@ namespace tb
 
             GeneratorStats stats() const override
             {
-                return {generator_.totalTriangulations, false, 0, 0};
+                return {generator_.totalTriangulations, true, generator_.totalChecks, generator_.successfulChecks,
+                        true, generator_.totalTraversals, generator_.successfulTraversals};
             }
         };
     } // namespace

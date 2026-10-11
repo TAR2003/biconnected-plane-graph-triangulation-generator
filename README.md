@@ -181,10 +181,15 @@ When comparing results, canonicalize every edge as `(min(u, v), max(u, v))`, sor
 
 The timing and memory CSVs both record `limit` and `triangulationLimit` (the
 configured maximum for that run). The timing CSV records CPU and real time,
-triangulation count, limit status, and check counters where the selected source algorithm exposes them. Unsupported
-check and traversal metrics are left blank rather than reported as zero. The
-memory CSV records peak RSS, baseline RSS, and peak delta; child RSS is only
-available on platforms where the process runner reports it.
+triangulation count, limit status, and total, successful, and unsuccessful
+check counters for `BiconnectedWithoutVGS` and `Oneconnected`. It also records
+total, successful, and unsuccessful traversal counters for `Oneconnected`.
+The memory CSV records the same check and traversal counts alongside peak RSS,
+baseline RSS, and peak delta; child RSS is only available on platforms where
+the process runner reports it. Metrics not exposed by an algorithm are left
+blank rather than reported as zero. Existing benchmark CSVs are upgraded
+automatically when a new row is appended; historical rows keep their prior
+values, with newly introduced metrics left blank.
 
 A triangulation limit bounds enumeration for large cases. A run reaching the limit is not a complete count of all triangulations and should be reported as truncated in analysis.
 
