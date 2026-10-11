@@ -81,9 +81,9 @@ fi
 
 echo "[-] Importing Plantri benchmark datasets..."
 uv run python plantri_import.py --plantri "$PLANTRI" --kind biconnected \
-    --nmin 4 --nmax 9 --out input/Biconnected/Biconnected_plantri --seed 42
+    --nmin 4 --nmax 7 --out input/Biconnected/Biconnected_plantri --seed 42
 uv run python plantri_import.py --plantri "$PLANTRI" --kind oneconnected \
-    --nmin 3 --nmax 8 --out input/Oneconnected/Oneconnected_plantri --seed 42
+    --nmin 3 --nmax 7 --out input/Oneconnected/Oneconnected_plantri --seed 42
 
 # if [[ -f "$TEST_CASES_DIR/visualizer.py" ]]; then
 #     echo "[-] Rendering test-case visualizations..."

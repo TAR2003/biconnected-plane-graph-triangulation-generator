@@ -1,239 +1,217 @@
-# Plane Graph Triangulation Generator
+# Biconnected plane graph triangulation generator
 
-A C++17 implementation and benchmark suite for enumerating triangulations of plane graphs. The project works directly from a rotation system: each vertex is described by its neighbors in cyclic order, so the embedding is part of the input rather than reconstructed from an abstract graph.
+Header-only C++17 algorithms that enumerate triangulations of a **plane graph** given as a **rotation system** (cyclic neighbor order at each vertex). The repository ships a Google Benchmark harness, Python input generators, correctness utilities under `dev/`, and plotting for benchmark CSVs.
 
-The repository benchmarks three independently selectable enumeration algorithms from `src/`:
+Three enumeration backends live in `src/` and are wired through `bench/` adapters:
 
-- **BiconnectedWithVGS**: `GenerateBiconnectedTriangulationsWithVGS`.
-- **BiconnectedWithoutVGS**: `GenerateBiconnectedTriangulationsWithoutVGS`.
-- **Oneconnected**: `GenerateOneconnectedTriangulations`.
+| Algorithm | Class | Typical input |
+| --- | --- | --- |
+| **BiconnectedWithVGS** | `GenerateBiconnectedTriangulationsWithVGS` | 2-connected plane graphs |
+| **BiconnectedWithoutVGS** | `GenerateBiconnectedTriangulationsWithoutVGS` | same biconnected inputs |
+| **Oneconnected** | `GenerateOneconnectedTriangulations` | connected graphs with cut vertices |
 
-The benchmark adapters live under `bench/`; the algorithm headers in `src/` are used directly and are not modified by the benchmark.
+`BiconnectedWithoutVGS` and **Oneconnected** record **check** counters during search; **Oneconnected** also records **traversal** counters. **BiconnectedWithVGS** does not expose those metrics in the benchmark CSV (fields are left empty).
 
-## Repository Layout
+---
 
-| Path | Purpose |
-| --- | --- |
-| `src/` | Header-only triangulation algorithms and shared graph data structures. |
-| `bench/` | Google Benchmark timing driver, memory driver, and adapters for the `src/` algorithms. |
-| `test-cases/` | Python input generators, validation, and generator documentation. |
-| `dev/` | Correctness checks, experimental programs, visualizers, and development utilities. |
-| `plot.py` | Generates comparison graphs from benchmark CSV files. |
-| `CMakeLists.txt` | CMake project definition and pinned Google Benchmark dependency. |
-| `run_all.sh` | Runs the full build, input-generation, benchmark, and plotting pipeline. |
-| `scripts/` | Individual shell modules called by `run_all.sh`. |
-| `benchmark-results/` | Benchmark CSV output. |
-| `graphs_output/` | Generated PNG graphs. |
+## Quick start (full pipeline)
 
-Generated build and result directories are working data, not required source dependencies.
-
-## Requirements
-
-- CMake 3.16 or newer.
-- A C++17 compiler.
-- Git, because CMake fetches Google Benchmark v1.9.1 with `FetchContent`.
-- Python 3 for plotting.
-- Python packages for plotting: `numpy`, `pandas`, `matplotlib`, and `scipy`.
-- Python package `networkx` for most input generators.
-- Optional: `plantri` for exhaustive small-input generation.
-
-On Windows, use a configured Visual Studio developer prompt, or another CMake generator whose compiler is available. A MinGW build may require disabling or adjusting warning-as-error settings in the vendored Google Benchmark dependency, depending on the compiler version.
-
-## Build
-
-From the repository root:
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
-```
-
-The build creates:
-
-- `bench_time`: total enumeration time measurements.
-- `bench_memory`: peak resident-memory measurements.
-
-For a clean rebuild, remove the build directory and run the commands again. Do not reuse a CMake cache created from a different operating-system path or generator.
-
-## Run the automation pipeline
-
-On Linux, run the complete pipeline from the repository root with:
+On Linux or WSL, from the repository root:
 
 ```bash
 chmod +x run_all.sh scripts/*.sh
 ./run_all.sh
 ```
 
-The root `run_all.sh` creates a Python 3.10 environment with `uv`, installs the
-Python dependencies, and invokes these modules in order:
+`run_all.sh` runs the end-to-end workflow:
 
-1. `scripts/1_build_cpp.sh` configures and builds the CMake targets.
-2. `scripts/2_generate_test_cases.sh` regenerates inputs, imports Plantri cases,
-   and renders visualizations.
-3. `scripts/3_run_benchmarks.sh` runs `bench_time`.
-4. `scripts/4_generate_plots.sh` runs the root `plot.py`.
+1. Creates a Python 3.10 virtual environment with [uv](https://github.com/astral-sh/uv) and installs `networkx`, `numpy`, `scipy`, `matplotlib`, `pandas`, `Pillow`, and `reportlab`.
+2. **`scripts/1_build_cpp.sh`** — clean CMake configure/build of `bench_time` and `bench_memory`.
+3. **`scripts/2_generate_test_cases.sh`** — rebuilds `test-cases/input/` (generators, optional Plantri import, dev seed cases).
+4. **`scripts/3_run_benchmarks.sh`** — runs `bench_time` on all three algorithms.
+5. **`scripts/4_generate_plots.sh`** — runs root **`plot.py`** and writes PNGs under `graph-biconnected-out/`.
 
-The test-case module recreates `test-cases/input/`; existing generated input
-files there are removed. The benchmark module expects the C++ target and input
-directory to have been created by the preceding modules.
+Individual stages can be run by executing the corresponding script under `scripts/` after dependencies are installed.
 
-## Input Format
+---
 
-Each input file is a rotation system:
+## Repository layout
+
+| Path | Role |
+| --- | --- |
+| `src/` | Core headers: `Common.hpp`, `GenerateTriangulations.hpp`, biconnected and one-connected generators |
+| `bench/` | `bench_time.cpp`, `bench_memory.cpp`, `BenchCommon.hpp`, algorithm adapters |
+| `test-cases/` | Input generators (`gen_biconnected.py`, `gen_oneconnected.py`, …) — see [test-cases/README.md](test-cases/README.md) |
+| `dev/` | Correctness checks, legacy benchmarks, notebooks, visualizers (not part of the default CMake targets) |
+| `plot.py` | Comparison plots from `benchmark-results/` |
+| `run_all.sh` | Orchestrates build → inputs → benchmark → plots |
+| `scripts/` | Shell modules invoked by `run_all.sh` |
+| `benchmark-results/` | CSV output (created by benchmarks; may be empty in a fresh clone) |
+| `graph-biconnected-out/` | PNG plots (created by `plot.py`) |
+| `build/` | CMake build tree (created by `scripts/1_build_cpp.sh`) |
+
+---
+
+## Requirements
+
+- **CMake** ≥ 3.16, **Git** (Google Benchmark is fetched with `FetchContent`)
+- **C++17** compiler (GCC/Clang; MSVC with a suitable developer environment on Windows)
+- **bash**, **curl**, and **uv** (or let `run_all.sh` install uv)
+- **Python 3.10+** with packages listed above for generators and plotting
+- Optional: **plantri** (built automatically by `2_generate_test_cases.sh` when possible) for exhaustive small instances
+
+---
+
+## Build (manual)
+
+```bash
+cmake -S . -B build -DTRI_SRC_DIR=./src
+cmake --build build --parallel
+```
+
+Executables:
+
+- `build/bench_time` — CPU/real time per full enumeration (primary benchmark)
+- `build/bench_memory` — peak RSS during enumeration
+
+CMake options include `TRI_NATIVE`, `TRI_LTO`, `TRI_PGO`, and `TRI_ALLOCATOR` (see `CMakeLists.txt`).
+
+---
+
+## Input format
+
+Each benchmark file is a rotation system:
 
 ```text
 N
 degree_0 neighbor_0 neighbor_1 ...
 degree_1 neighbor_0 neighbor_1 ...
 ...
-degree_N-1 neighbor_0 neighbor_1 ...
 ```
 
-`N` is the number of vertices. Each following line gives the degree and the cyclic neighbor order for one vertex. Neighbor labels must match the convention used by the generator, normally `0` through `N - 1`.
+`N` is the vertex count. Line `i+1` lists the degree of vertex `i` and its neighbors in **cyclic order** around that vertex. Labels are typically `0 … N-1` and must match what the generators emit.
 
-The shared reader validates the file shape while `rotationSystemToFaces` traces the embedded faces. The algorithms then work on those faces and a shared multiset of already-present boundary edges.
+On disk, inputs are grouped as:
 
-## Generate Test Cases
+```text
+test-cases/input/Biconnected/<category>/…/*.txt
+test-cases/input/Oneconnected/<category>/…/*.txt
+```
 
-The generator package lives under `test-cases/`. A typical setup is:
+Both biconnected algorithms read from `Biconnected/`; **Oneconnected** reads from `Oneconnected/`.
+
+---
+
+## Benchmark CLI
+
+Shared flags (see `bench/BenchCommon.hpp`):
+
+| Flag | Meaning |
+| --- | --- |
+| `--tri_input=DIR` | Root input directory (default `input`; pipeline uses `test-cases/input`) |
+| `--tri_algos=A,B,C` | `BiconnectedWithoutVGS`, `BiconnectedWithVGS`, `Oneconnected` |
+| `--tri_limits=…` | Triangulation caps tried outermost (resume skips completed `(algo, category, file, limit)` rows) |
+| `--tri_categories=…` | Optional filter |
+| `--tri_csv=FILE` | Base CSV path; per-algorithm/per-category files are derived automatically |
+| `--tri_cpu=N` | Pin benchmark thread to CPU `N` when supported |
+
+Example:
 
 ```bash
-cd test-cases
-python main.py
+./build/bench_time \
+  --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected \
+  --tri_input=./test-cases/input \
+  --tri_csv=./benchmark-results/results_time.csv \
+  --tri_limits=10000000
+```
+
+### CSV layout
+
+Rows are appended under:
+
+```text
+benchmark-results/<AlgorithmName>Algo/results_time_<category>.csv
+```
+
+Timing CSV columns include:
+
+`algorithm`, `category`, `filename`, `limit`, `triangulationLimit`, `vertices`, `cpuTimeSeconds`, `realTimeSeconds`, `triangulations`, `status`, `totalChecks`, `successfulChecks`, `unsuccessfulChecks`, `checkSuccessRate`, `totalTraversals`, `successfulTraversals`, `unsuccessfulTraversals`, `traversalSuccessRate`, `timestamp`.
+
+Check and traversal fields are populated for **BiconnectedWithoutVGS** and **Oneconnected** only. A run that hits the triangulation limit is marked accordingly and represents a **truncated** enumeration, not a full count.
+
+Default limits and paths are also editable in the `cfg` block at the top of `main()` in `bench/bench_time.cpp` and `bench/bench_memory.cpp`; CLI flags override those defaults.
+
+---
+
+## Plotting
+
+After benchmarks finish:
+
+```bash
+python plot.py
+```
+
+(or `uv run python plot.py` as in `scripts/4_generate_plots.sh`)
+
+**Inputs:** `benchmark-results/BiconnectedWithoutVGSAlgo/`, `BiconnectedWithVGSAlgo/`, and `OneconnectedAlgo/` (`results_time_*.csv`).
+
+**Outputs:**
+
+- `graph-biconnected-out/<category>/` — per-category charts (plots `1`–`5b` compare all three algorithms; optional `6`–`7` for metric views on one-connected categories)
+- `graph-biconnected-out/_combined/` — all categories overlaid
+- `graph-biconnected-out/_metrics/` — **additional** charts (existing `1`–`5b` filenames unchanged):
+  - check success rate vs average time per triangulation (**Without VGS** and **Oneconnected**)
+  - check success rate vs time ratio to **With VGS** (matched biconnected cases; one-connected where the same `(category, file)` exists in both trees)
+  - **Oneconnected** traversal success rate vs average time per triangulation
+
+Algorithm colours in plots: **Without VGS** blue, **With VGS** orange, **Oneconnected** green.
+
+Configure `TIME_COL`, log axes, and limit filtering at the top of `plot.py`.
+
+---
+
+## Algorithms (high level)
+
+All variants extend `GenerateTriangulations`, which builds faces from the rotation system and searches chord insertions subject to a triangulation limit.
+
+- **With VGS** uses virtual good-substructure (VGS) bookkeeping for faster pruning on biconnected instances.
+- **Without VGS** uses explicit validity checks (`isValidChildTriangulation`); the benchmark records how often those checks succeed.
+- **Oneconnected** handles graphs with cut vertices; it records both check and internal traversal outcomes.
+
+Implementation details and shared chord/face structures are in `src/GenerateTriangulations.hpp` and the specialized headers.
+
+---
+
+## Correctness and development
+
+Programs under `dev/` (e.g. `correctnessCheckBiconnected.cpp`, `correctnessCheckOneconnected.cpp`) compare enumerator output against reference constructions. They are **not** built by default; compile manually with `-I src` (and `-I dev` where needed).
+
+When diffing triangulations, canonicalize undirected edges as `(min(u,v), max(u,v))`, sort edges within each triangulation, and sort the list of triangulations so order-only differences do not fail the comparison.
+
+---
+
+## Test-case generators
+
+From `test-cases/`:
+
+```bash
 python gen_biconnected.py --out input/Biconnected --seed 42
 python gen_oneconnected.py --out input/Oneconnected --seed 42
 ```
 
-The generated layout is compatible with the benchmark harness:
+Family lists, validation rules, and Plantri import are documented in [test-cases/README.md](test-cases/README.md). The automated pipeline uses fixed size grids and counts defined in `scripts/2_generate_test_cases.sh`.
 
-```text
-input/
-  Biconnected/<category>/<case>.txt
-  Oneconnected/<category>/<case>.txt
-```
+---
 
-`gen_biconnected.py` provides biconnected stress families such as cycles, wheels, grids, prisms, outerplanar graphs, stacked triangulations, and Delaunay-derived graphs. `gen_oneconnected.py` provides trees, cacti, block trees, pendant structures, and other graphs with cut vertices. See [test-cases/README.md](test-cases/README.md) for generator options, validation rules, and family details.
+## Interpreting results
 
-## Benchmark CLI
+- **Average time per triangulation** = `cpuTimeSeconds / triangulations` (primary scaling metric in plots).
+- **Check success rate** = `100 × successfulChecks / totalChecks` when checks are recorded; higher rates mean fewer pruned branches failed late in the search.
+- **Traversal success rate** (**Oneconnected** only) reflects how often internal traversals complete successfully; lower rates often correlate with harder search structure and can track higher per-triangulation cost on the same inputs.
+- Timing depends on compiler flags, CPU, and I/O; use the same build and `--tri_cpu` pinning for reproducible comparisons.
 
-Both benchmark executables accept:
+---
 
-```text
---tri_input=DIR
---tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected
---tri_limits=10,100,...
---tri_categories=category1,category2
---tri_csv=FILE
---tri_cpu=N
-```
+## License and attribution
 
-For source-configured runs, edit the settings block near the start of `main()` in
-[`bench/bench_time.cpp`](bench/bench_time.cpp) or
-[`bench/bench_memory.cpp`](bench/bench_memory.cpp). For example, set
-`cfg.limits = {100, 1000};` to run those two triangulation limits, or adjust
-`cfg.inputRoot`, `cfg.algos`, and `cfg.csv` there. The existing `--tri_*` flags
-remain available and override the corresponding code-configured values.
-
-By default `--tri_input=input` discovers `input/Biconnected` for both biconnected algorithms and `input/Oneconnected` for the one-connected algorithm. If `--tri_input` already names one of those algorithm-specific directories, that directory is used as-is. Existing benchmark results are used to resume incomplete runs.
-
-### Timing benchmark
-```bash
-./build/bench_time --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected --tri_input=./input --tri_limits=1000000
-```
-
-### Memory benchmark
-```bash
-./build/bench_memory --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected --tri_input=./input --tri_limits=1000000
-```
-
-CSV output is split by algorithm and input category under:
-
-```text
-benchmark-results/<Algorithm>Algo/results_<category>.csv
-```
-
-The actual file name preserves the requested CSV stem, for example
-`results_time_<category>.csv` or `results_memory_<category>.csv`.
-
-The algorithm names are also the accepted `--tri_algos` values:
-
-```text
-BiconnectedWithoutVGS/
-BiconnectedWithVGS/
-Oneconnected/
-```
-
-## Plotting
-
-After benchmark CSVs exist, generate the complete comparison suite:
-
-```bash
-python plot.py --root ./benchmark-results --outdir ./graphs_output
-```
-
-The plotting code discovers all three result directories and includes them in:
-
-- overall scaling, memory, timing, checks, traversal, and status charts;
-- per-category comparisons;
-- per-case individual timing charts;
-- algorithm-scope overlays;
-- pairwise scatter and Bland-Altman comparisons;
-- pairwise triangulation-count and speed-ratio charts.
-
-The plotting scripts may require adaptation to consume the current benchmark CSV schema and algorithm names.
-
-## Algorithm Structure
-
-The benchmark uses separate adapter translation units because the algorithm headers in `src/` include their shared base header directly. The adapters expose the common `generateAllTriangulations()` entry point to both benchmark executables without changing those algorithms.
-
-## Correctness Checks
-
-The development correctness programs compare generated triangulations against `GraphTriangulationTriconnected`, which uses `ParvezRahmanNakano` to enumerate local polygon triangulations and then filters invalid combinations.
-
-The reusable correctness classes are:
-
-- `GraphTriangulationBiconnectedCorrectness`.
-- `GraphTriangulationBiconnectedWithoutVGSCorrectness`.
-- `GraphTriangulationOneconnectedCorrectness`.
-
-The correctness programs are development utilities rather than CMake targets. Compile them with the project include directory and run them from a directory containing the expected `input/` tree. The existing biconnected and one-connected checkers can be extended or invoked with the corresponding correctness class when validating a new case.
-
-When comparing results, canonicalize every edge as `(min(u, v), max(u, v))`, sort the edges inside each triangulation, and sort the triangulation list. This avoids differences caused only by traversal order or edge orientation.
-
-## Metrics and Interpretation
-
-The timing and memory CSVs both record `limit` and `triangulationLimit` (the
-configured maximum for that run). The timing CSV records CPU and real time,
-triangulation count, limit status, and total, successful, and unsuccessful
-check counters for `BiconnectedWithoutVGS` and `Oneconnected`. It also records
-total, successful, and unsuccessful traversal counters for `Oneconnected`.
-The memory CSV records the same check and traversal counts alongside peak RSS,
-baseline RSS, and peak delta; child RSS is only available on platforms where
-the process runner reports it. Metrics not exposed by an algorithm are left
-blank rather than reported as zero. Existing benchmark CSVs are upgraded
-automatically when a new row is appended; historical rows keep their prior
-values, with newly introduced metrics left blank.
-
-A triangulation limit bounds enumeration for large cases. A run reaching the limit is not a complete count of all triangulations and should be reported as truncated in analysis.
-
-Peak allocation is measured by the benchmark memory tracker and should be interpreted as the tracker window's peak, not a complete operating-system memory profile. Timing results are sensitive to compiler, optimization level, CPU frequency, filesystem state, and input ordering.
-
-## Development Notes
-
-- Public implementations are header-only under `include/`; keep changes consistent with the existing include order and virtual dispatch model.
-- Use separate result directories for algorithm variants. Do not mix CSV schemas from unrelated experiments.
-- Keep generated benchmark output out of source edits unless a result artifact is intentionally being updated.
-- For reproducible experiments, record the generator seed, input manifest, compiler, build type, algorithm name, limit, and run count.
-- Large triangulation counts can grow rapidly. Use a finite `--limit` and isolated runs for stress cases.
-
-## Validation Commands
-
-Useful lightweight checks are:
-
-```bash
-python -m py_compile plot.py
-g++ -std=c++17 -fsyntax-only -Iinclude -Ibench bench/bench_total.cpp
-g++ -std=c++17 -fsyntax-only -Iinclude -Ibench bench/bench_individual.cpp
-```
-
-The normal end-to-end check is a CMake build followed by a small benchmark invocation against a small generated input directory. The build must use a compiler and generator supported by the host environment.
+See repository history and upstream references in `dev/` and generator scripts. For thesis-related experiments, see `dev/thesis-triangulation-generation.ipynb`.
