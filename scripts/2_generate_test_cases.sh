@@ -85,9 +85,9 @@ uv run python plantri_import.py --plantri "$PLANTRI" --kind biconnected \
 uv run python plantri_import.py --plantri "$PLANTRI" --kind oneconnected \
     --nmin 3 --nmax 8 --out input/Oneconnected/Oneconnected_plantri --seed 42
 
-if [[ -f "$TEST_CASES_DIR/visualizer.py" ]]; then
-    echo "[-] Rendering test-case visualizations..."
-    uv run python visualizer.py --input input --output output-images
-fi
+# if [[ -f "$TEST_CASES_DIR/visualizer.py" ]]; then
+#     echo "[-] Rendering test-case visualizations..."
+#     uv run python visualizer.py --input input --output output-images
+# fi
 
 echo "[+] Test-case generation and visualization complete."
