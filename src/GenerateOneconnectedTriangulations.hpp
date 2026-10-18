@@ -26,7 +26,7 @@ public:
 
         pair<long long, long long> oldPair = {positions[faceIndex][c->oppositeFirst], positions[faceIndex][c->oppositeSecond]};
         pair<long long, long long> newPair = {positions[faceIndex][c->first], positions[faceIndex][c->second]};
-        if ( oldPair.first == oldPair.second || present.find(oldPair))
+        if (oldPair.first == oldPair.second || present.find(oldPair))
         {
             problems--;
         }
@@ -34,8 +34,6 @@ public:
         {
             problems++;
         }
-
-
 
         present.insert({positions[faceIndex][c->first], positions[faceIndex][c->second]}, faceIndex);
     }
@@ -56,7 +54,8 @@ public:
                 unsuccessfulChecks++;
                 return false; // that means it does not conflict with any of the root triangulation generating set
             }
-            if (present.find(oppositePair, faceIndex))
+            // Reject external conflicts (border / other faces). Allow only if already a chord of this face.
+            if (!present.find(oppositePair, faceIndex))
             {
                 unsuccessfulChecks++;
                 return false; // that means it might have a conflict with the border chord or other edges from other faces
@@ -81,7 +80,7 @@ public:
             temp->oppositeFirst = (i + 1) % faces[faceIndex].size();
             temp->oppositeSecond = (i + 3) % faces[faceIndex].size();
             temp->faceIndex = faceIndex;
-            
+
             temp = temp->nextChord;
         }
     }
@@ -92,7 +91,7 @@ public:
         setupGS(faceIndex);
     }
 
-    void output(long long faceIndex) 
+    void output(long long faceIndex)
     {
         totalTraversals++;
         if (problems == 0)
@@ -106,9 +105,10 @@ public:
             else
             {
                 generateFaceTriangulations(faceIndex + 1);
+                problems = 0;
             }
         }
-        else 
+        else
         {
             unsuccessfulTraversals++;
         }
