@@ -16,7 +16,7 @@ Writes a Graphs/ tree (replaced on every run):
     Graphs/Comparison/OneconnectedInput/<Category>/
     Graphs/Comparison/OneconnectedInput/combined/
     Graphs/Comparison/Combined/
-    Graphs/VGSvsnonVGS/BiconnectedInput/<Category>/
+    Graphs/VGSvsnonVGS/BiconnectedInput/<Category>/          11 charts + VGS comparisons
     Graphs/VGSvsnonVGS/BiconnectedInput/combined/
 
 Category names keep their input-type prefix (Biconnected_plantri and
@@ -48,6 +48,8 @@ Run from anywhere:
 import glob
 import os
 import shutil
+import zlib
+from collections import Counter
 
 import matplotlib
 
@@ -83,9 +85,9 @@ ALGO_LABEL = {
     "Oneconnected": "Oneconnected",
 }
 ALGO_COLOR = {
-    "BiconnectedWithoutVGS": "#1f77b4",
-    "BiconnectedWithVGS": "#e8590c",
-    "Oneconnected": "#2ca02c",
+    "BiconnectedWithoutVGS": "#1d4ed8",
+    "BiconnectedWithVGS": "#ea580c",
+    "Oneconnected": "#15803d",
 }
 ALGO_MARKER = {
     "BiconnectedWithoutVGS": "o",
@@ -468,15 +470,51 @@ def save_fig(fig, folder, name):
 # ------------------------------------------------------------------------------
 # Generic XY charts
 # ------------------------------------------------------------------------------
-def _draw_order(series, ycol):
-    """Draw higher series first so lower points are painted afterwards and stay visible."""
-    def height(item):
-        sub = item[4]
-        if sub.empty or ycol not in sub.columns:
-            return 0.0
-        return float(np.nanmedian(sub[ycol].to_numpy(dtype=float)))
+def _face_edge(color, alpha=0.62):
+    """Translucent fill plus a solid darker outline, so stacked points stay crisp."""
+    rgb = mcolors.to_rgb(color)
+    face = (rgb[0], rgb[1], rgb[2], alpha)
+    edge = tuple(max(0.0, c * 0.32) for c in rgb)
+    return face, edge
 
-    return sorted(series, key=height, reverse=True)
+
+def _spread(xvals, yvals, logx, logy, label, dodge):
+    """Separate points that land on the same spot, and nudge whole series apart."""
+    xvals = np.asarray(xvals, dtype=float).copy()
+    yvals = np.asarray(yvals, dtype=float).copy()
+    if len(xvals) == 0:
+        return xvals, yvals
+    if dodge:
+        if logx:
+            xvals = xvals * (10.0 ** dodge)
+        else:
+            span = float(np.nanmax(xvals) - np.nanmin(xvals))
+            xvals = xvals + dodge * (span if span > 0 else 1.0)
+
+    def _key(vals, log_scale):
+        if log_scale:
+            return np.round(np.log10(np.clip(vals, 1e-30, None)), 3)
+        return np.round(vals, 4)
+
+    keys = list(zip(_key(xvals, logx), _key(yvals, logy)))
+    counts = Counter(keys)
+    mask = np.fromiter((counts[k] > 1 for k in keys), dtype=bool, count=len(keys))
+    n_hit = int(mask.sum())
+    if n_hit:
+        rng = np.random.default_rng(zlib.adler32(str(label).encode("utf-8")) & 0xFFFFFFFF)
+        jx = rng.uniform(-1.0, 1.0, n_hit)
+        jy = rng.uniform(-1.0, 1.0, n_hit)
+        if logx:
+            xvals[mask] *= np.power(10.0, jx * 0.014)
+        else:
+            span = float(np.nanmax(xvals) - np.nanmin(xvals))
+            xvals[mask] = xvals[mask] + jx * 0.007 * (span if span > 0 else 1.0)
+        if logy:
+            yvals[mask] *= np.power(10.0, jy * 0.012)
+        else:
+            span = float(np.nanmax(yvals) - np.nanmin(yvals))
+            yvals[mask] = yvals[mask] + jy * 0.007 * (span if span > 0 else 1.0)
+    return xvals, yvals
 
 
 def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None,
@@ -498,9 +536,12 @@ def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None,
     fig, ax = plt.subplots(figsize=(8.4, 5.6))
     kind = spec["kind"]
     mean_by_x = spec.get("mean_by_x", False)
-    # Semi-transparent markers, highest values underneath, so a point does not
-    # erase the points that sit below it.
-    for _label, color, marker, ls, sub in _draw_order(series, y):
+    logx = spec.get("logx", False)
+    logy = spec.get("logy", False)
+    nser = sum(1 for _lab, _c, _m, _ls, sub in series if not sub.empty)
+    # A small x nudge only when a few series share the axes (algorithm comparisons).
+    # Many categories stay on their true x and are told apart by colour.
+    for i, (label, color, marker, ls, sub) in enumerate(series):
         if mean_by_x:
             drawn = sub.groupby(x, as_index=False)[y].mean().sort_values(x)
         elif kind == "points":
@@ -509,15 +550,21 @@ def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None,
             drawn = sub.sort_values([x, y])
         if drawn.empty:
             continue
+        face, edge = _face_edge(color, 0.72 if kind == "points" else 1.0)
         if kind == "points":
+            dodge = 0.0
+            if 1 < nser <= 4:
+                dodge = (i - (nser - 1) / 2.0) * 0.016
+            xs, ys = _spread(drawn[x], drawn[y], logx, logy, label, dodge)
             ax.scatter(
-                drawn[x], drawn[y], s=13, color=color, marker=marker,
-                alpha=0.45, linewidths=0, zorder=3,
+                xs, ys, s=22, marker=marker, facecolors=face, edgecolors=edge,
+                linewidths=0.75, zorder=3,
             )
         else:
             ax.plot(
                 drawn[x], drawn[y], color=color, marker=marker, linestyle=ls,
-                lw=1.15, ms=3.2, markeredgewidth=0, alpha=0.55, zorder=3,
+                lw=1.6, ms=5.5, markerfacecolor=color, markeredgecolor=edge,
+                markeredgewidth=0.7, zorder=3,
             )
     if vline is not None:
         ax.axvline(vline, color="#444444", ls="--", lw=1.1, zorder=2)
@@ -628,12 +675,12 @@ def plot_trav_vs_check_colored(df, folder, title_prefix):
     sc = None
     for inp in present:
         part = sub[sub["input_type"] == inp].sort_values("check_rate", ascending=False)
+        dodge = 0.0 if len(present) < 2 else (-0.012 if inp == "Biconnected" else 0.012)
+        xs, ys = _spread(part["trav_rate"], part["check_rate"], False, False, inp, dodge)
         sc = ax.scatter(
-            part["trav_rate"], part["check_rate"],
-            c=part["avg_tpt"], cmap=cmap, norm=norm,
-            marker=INPUT_MARKER[inp], s=18, alpha=0.55,
-            linewidths=0, zorder=3,
-            label=f"{inp} input",
+            xs, ys, c=part["avg_tpt"], cmap=cmap, norm=norm,
+            marker=INPUT_MARKER[inp], s=20, linewidths=0.55,
+            edgecolors="#1a1a1a", zorder=3, label=f"{inp} input",
         )
     cbar = fig.colorbar(sc, ax=ax)
     cbar.set_label(
@@ -714,8 +761,8 @@ def plot_trav_vs_check_idw(df, folder, title_prefix):
         part = sub[sub["input_type"] == inp]
         ax.scatter(
             part["trav_rate"], part["check_rate"],
-            s=10, marker=INPUT_MARKER[inp], facecolors="none",
-            edgecolors="black", linewidths=0.4, alpha=0.55, zorder=3,
+            s=12, marker=INPUT_MARKER[inp], facecolors="none",
+            edgecolors="black", linewidths=0.65, zorder=3,
             label=f"{inp} input",
         )
     cbar = fig.colorbar(image, ax=ax)
@@ -820,7 +867,9 @@ def plot_vgs_folder(matched, folder, mode, title_prefix):
         pieces_avg.append(a[["category", "filename", "check_rate", "avg_tpt", "algo", "input_type"]])
     time_long = pd.concat(pieces_time, ignore_index=True)
     avg_long = pd.concat(pieces_avg, ignore_index=True)
-    draw_mode = "by_algo" if mode == "single" else "by_algo_category"
+    # Colour is the algorithm. Category symbols and their legend are omitted so
+    # the axes keep the space.
+    draw_mode = "by_algo"
 
     both = [
         dict(name="01_points_total_time_vs_check_success.png", kind="points", ydf=time_long,
@@ -849,7 +898,7 @@ def plot_vgs_folder(matched, folder, mode, title_prefix):
     ratio["time_ratio"] = ratio["time_w"] / ratio["time_wo"]
     ratio["check_rate"] = ratio["check_rate_wo"]
     ratio["input_type"] = "Biconnected"
-    ratio_mode = "single" if mode == "single" else "by_category"
+    ratio_mode = "single"
     for kind, name in (
         ("points", "05_points_time_ratio_vs_check_success.png"),
         ("line", "06_line_time_ratio_vs_check_success.png"),
@@ -980,9 +1029,9 @@ def make_comparison(time_df, mem_df):
         folder = os.path.join(OUT_ROOT, "Comparison", f"{inp}Input", "combined")
         title = f"Comparison · {inp} inputs · all categories"
         print(f"  {os.path.relpath(folder, OUT_ROOT)}")
-        plot_suite(t_in, m_in, folder, "by_algo_category", title)
+        plot_suite(t_in, m_in, folder, "by_algo", title)
         if inp == "Biconnected":
-            plot_traversal_algorithm_comparison(t_in, folder, "by_algo_category", title)
+            plot_traversal_algorithm_comparison(t_in, folder, "by_algo", title)
 
     folder = os.path.join(OUT_ROOT, "Comparison", "Combined")
     title = "Comparison · all inputs  (colour = algorithm, symbol = input type)"
@@ -991,25 +1040,37 @@ def make_comparison(time_df, mem_df):
     # Traversal-rate comparison only exists where all three algorithms ran (biconnected inputs).
     plot_traversal_algorithm_comparison(
         time_df[time_df["input_type"] == "Biconnected"],
-        folder, "by_algo_category",
+        folder, "by_algo",
         "Comparison · all inputs · cases run by all three algorithms",
     )
 
 
-def make_vgs(time_df):
-    matched = vgs_matched(time_df)
-    if matched.empty:
-        print("  no paired with-VGS / without-VGS rows")
+def make_vgs(time_df, mem_df):
+    pair = ["BiconnectedWithoutVGS", "BiconnectedWithVGS"]
+    t_pair = time_df[time_df["algo"].isin(pair)] if not time_df.empty else time_df
+    m_pair = mem_df[mem_df["algo"].isin(pair)] if not mem_df.empty else mem_df
+    matched = vgs_matched(time_df) if not time_df.empty else pd.DataFrame()
+    cats = sorted(set(_cats(t_pair)) | set(_cats(m_pair)))
+    if not cats:
+        print("  no with-VGS / without-VGS rows")
         return
-    for cat in sorted(matched["category"].unique()):
+    for cat in cats:
         folder = os.path.join(OUT_ROOT, "VGSvsnonVGS", "BiconnectedInput", cat)
         title = f"With VGS vs without VGS · {cat}"
         print(f"  {os.path.relpath(folder, OUT_ROOT)}")
-        plot_vgs_folder(matched[matched["category"] == cat], folder, "single", title)
+        plot_suite(
+            t_pair[t_pair["category"] == cat],
+            m_pair[m_pair["category"] == cat],
+            folder, "by_algo", title,
+        )
+        if not matched.empty:
+            plot_vgs_folder(matched[matched["category"] == cat], folder, "single", title)
     folder = os.path.join(OUT_ROOT, "VGSvsnonVGS", "BiconnectedInput", "combined")
     title = "With VGS vs without VGS · all biconnected categories"
     print(f"  {os.path.relpath(folder, OUT_ROOT)}")
-    plot_vgs_folder(matched, folder, "by_category", title)
+    plot_suite(t_pair, m_pair, folder, "by_algo", title)
+    if not matched.empty:
+        plot_vgs_folder(matched, folder, "single", title)
 
 
 def main():
@@ -1036,7 +1097,7 @@ def main():
     print("Comparison charts...")
     make_comparison(time_df, mem_df)
     print("VGS vs without-VGS charts...")
-    make_vgs(time_df)
+    make_vgs(time_df, mem_df)
 
     n_png = sum(1 for _root, _dirs, files in os.walk(OUT_ROOT) for f in files if f.endswith(".png"))
     print(f"Done. {n_png} plots in {OUT_ROOT}")
