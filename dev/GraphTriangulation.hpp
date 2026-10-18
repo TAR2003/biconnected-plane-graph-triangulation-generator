@@ -23,6 +23,7 @@ public:
     long long triangulationLimit;
     long long faceBuild = 0; // Counter for the number of face triangulations built
     long long totalTriangulations = 0;
+    long long totalTraversals = 0;
 
     GraphTriangulation(long long totalNodes, const vector<vector<long long>> &adjacency, long long triangulationLimit = LONG_LONG_MAX)
     {
@@ -201,6 +202,10 @@ public:
 
 inline void GraphTriangulationOneconnectedPerformance::storeTriangulation()
 {
+    if (totalTriangulations % 1 == 0)
+    {
+        cout << "Triangulation: " << totalTriangulations << ", totalTraversals: " << totalTraversals << endl;
+    }
 }
 
 class GraphTriangulationBiconnectedCorrectness : public GraphTriangulationBiconnected

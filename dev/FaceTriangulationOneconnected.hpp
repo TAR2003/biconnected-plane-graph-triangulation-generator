@@ -201,6 +201,8 @@ public:
     void output()
     {
         // cout << "Problems: " << problems << endl;
+        gt->totalTraversals++;
+        
         if (problems == 0)
         {
             gt->output(serial);
