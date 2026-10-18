@@ -28,7 +28,7 @@ chmod +x run_all.sh scripts/*.sh
 1. Creates a Python 3.10 virtual environment with [uv](https://github.com/astral-sh/uv) and installs `networkx`, `numpy`, `scipy`, `matplotlib`, `pandas`, `Pillow`, and `reportlab`.
 2. **`scripts/1_build_cpp.sh`** — clean CMake configure/build of `bench_time` and `bench_memory`.
 3. **`scripts/2_generate_test_cases.sh`** — rebuilds `test-cases/input/` (generators, optional Plantri import, dev seed cases).
-4. **`scripts/3_run_benchmarks.sh`** — runs `bench_time` on all three algorithms.
+4. **`scripts/3_run_benchmarks.sh`** — runs `bench_time` on all three algorithms. The biconnected algorithms use only `test-cases/input/Biconnected/`; **Oneconnected** uses inputs from both `Biconnected/` and `Oneconnected/`.
 5. **`scripts/4_generate_plots.sh`** — runs root **`plot.py`** and writes PNGs under `graph-biconnected-out/`.
 
 Individual stages can be run by executing the corresponding script under `scripts/` after dependencies are installed.
@@ -98,7 +98,7 @@ test-cases/input/Biconnected/<category>/…/*.txt
 test-cases/input/Oneconnected/<category>/…/*.txt
 ```
 
-Both biconnected algorithms read from `Biconnected/`; **Oneconnected** reads from `Oneconnected/`.
+Both biconnected algorithms read only from `Biconnected/`. **Oneconnected** reads from both `Biconnected/` and `Oneconnected/`, since biconnected graphs are also valid connected inputs.
 
 ---
 
@@ -132,6 +132,8 @@ Rows are appended under:
 ```text
 benchmark-results/<AlgorithmName>Algo/results_time_<category>.csv
 ```
+
+Each algorithm gets its own results folder. The biconnected result folders contain CSVs only for biconnected input categories; the Oneconnected folder contains CSVs for categories from both input trees. If a category name exists in both trees, the Oneconnected CSV category is prefixed with its input folder name to keep results separate.
 
 Timing CSV columns include:
 

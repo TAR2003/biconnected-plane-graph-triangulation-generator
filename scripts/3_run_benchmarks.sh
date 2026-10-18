@@ -18,6 +18,13 @@ mkdir -p "$ROOT_DIR/benchmark-results"
 echo "[-] Running time and state benchmarks..."
 "$BENCHMARK" \
     --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected \
+    --tri_input="$ROOT_DIR/test-cases/input/Biconnected" \
+    --tri_cpu=2 \
+    --tri_csv="$ROOT_DIR/benchmark-results/results_time.csv" \
+    --tri_limits=10000000
+
+"$BENCHMARK" \
+    --tri_algos=BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected \
     --tri_input="$ROOT_DIR/test-cases/input" \
     --tri_cpu=2 \
     --tri_csv="$ROOT_DIR/benchmark-results/results_time.csv" \

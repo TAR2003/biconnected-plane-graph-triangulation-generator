@@ -190,9 +190,10 @@ namespace tb
         std::cerr
             << "Triangulation benchmark flags (for " << prog << "):\n"
             << "  --tri_input=<dir>            exact input folder to scan (default: input)\n"
-            << "                               layout: <dir>/<category>/<files>\n"
+            << "                               layout: <dir>/Biconnected/<category>/<files> and\n"
+            << "                                       <dir>/Oneconnected/<category>/<files>\n"
             << "  --tri_dir_biconnected=<name> sub-folder for both biconnected variants (default: Biconnected)\n"
-            << "  --tri_dir_oneconnected=<name> sub-folder for Oneconnected (default: Oneconnected)\n"
+            << "  --tri_dir_oneconnected=<name> additional input sub-folder for Oneconnected (default: Oneconnected)\n"
             << "  --tri_limits=10,100,...      triangulation limits, each is a separate pass\n"
             << "                               (default: 10,100,1000,10000,100000,1000000)\n"
             << "  --tri_algos=A,B,...          BiconnectedWithoutVGS,BiconnectedWithVGS,Oneconnected (default: all)\n"
@@ -585,12 +586,26 @@ namespace tb
         return loadCsvResults(csvPath).done;
     }
 
-    inline fs::path algoInputDir(const Config &c, Algo a)
+    inline std::vector<fs::path> algoInputDirs(const Config &c, Algo a)
     {
         fs::path root(c.inputRoot);
-        fs::path algorithmDir = root /
-                                (a == Algo::Oneconnected ? c.dirOneconnected : c.dirBiconnected);
-        return fs::is_directory(algorithmDir) ? algorithmDir : root;
+        fs::path biconnectedDir = root / c.dirBiconnected;
+        if (a != Algo::Oneconnected)
+        {
+            if (!fs::is_directory(biconnectedDir) && fs::is_directory(root / c.dirOneconnected))
+                return {biconnectedDir};
+            return {fs::is_directory(biconnectedDir) ? biconnectedDir : root};
+        }
+
+        fs::path oneconnectedDir = root / c.dirOneconnected;
+        std::vector<fs::path> dirs;
+        if (fs::is_directory(biconnectedDir))
+            dirs.push_back(biconnectedDir);
+        if (oneconnectedDir != biconnectedDir && fs::is_directory(oneconnectedDir))
+            dirs.push_back(oneconnectedDir);
+        if (dirs.empty())
+            dirs.push_back(root);
+        return dirs;
     }
 
     inline std::string getCategoryCsvPath(const std::string &baseCsv, Algo algo, const std::string &category)
@@ -618,33 +633,51 @@ namespace tb
         std::map<std::string, CsvResults> resultsPerAlgoCat;
         for (Algo a : cfg.algos)
         {
-            fs::path dir = algoInputDir(cfg, a);
-            if (!fs::is_directory(dir))
+            struct CategoryDir
             {
-                std::cerr << "Warning: " << dir.string() << " not found, skipping " << algoName(a) << "\n";
-                continue;
+                fs::path path;
+                std::string name;
+                std::string source;
+            };
+            std::vector<CategoryDir> categoryDirs;
+            std::map<std::string, size_t> categoryCounts;
+            for (const fs::path &dir : algoInputDirs(cfg, a))
+            {
+                if (!fs::is_directory(dir))
+                {
+                    std::cerr << "Warning: " << dir.string() << " not found, skipping " << algoName(a) << "\n";
+                    continue;
+                }
+                for (auto &e : fs::directory_iterator(dir))
+                    if (e.is_directory() && e.path().filename().string()[0] != '.')
+                    {
+                        std::string name = e.path().filename().string();
+                        categoryDirs.push_back({e.path(), name, dir.filename().string()});
+                        ++categoryCounts[name];
+                    }
             }
-            std::vector<std::string> cats;
-            for (auto &e : fs::directory_iterator(dir))
-                if (e.is_directory() && e.path().filename().string()[0] != '.')
-                    cats.push_back(e.path().filename().string());
-            std::sort(cats.begin(), cats.end());
-            for (auto &cat : cats)
+            std::sort(categoryDirs.begin(), categoryDirs.end(), [](const CategoryDir &left, const CategoryDir &right)
+                      { return left.path < right.path; });
+            for (const CategoryDir &categoryDir : categoryDirs)
             {
-                if (!cfg.categories.empty() && std::find(cfg.categories.begin(), cfg.categories.end(), cat) == cfg.categories.end())
+                if (!cfg.categories.empty() &&
+                    std::find(cfg.categories.begin(), cfg.categories.end(), categoryDir.name) == cfg.categories.end())
                     continue;
 
+                std::string cat = categoryDir.name;
+                if (categoryCounts[cat] > 1)
+                    cat = categoryDir.source + "_" + cat;
                 std::string algoCat = std::string(algoName(a)) + "|" + cat;
                 if (resultsPerAlgoCat.find(algoCat) == resultsPerAlgoCat.end())
                     resultsPerAlgoCat[algoCat] = loadCsvResults(getCategoryCsvPath(cfg.csv, a, cat));
 
                 std::vector<std::string> files;
-                for (auto &e : fs::recursive_directory_iterator(dir / cat))
+                for (auto &e : fs::recursive_directory_iterator(categoryDir.path))
                     if (e.is_regular_file() && e.path().filename().string()[0] != '.')
-                        files.push_back(fs::relative(e.path(), dir / cat).generic_string());
+                        files.push_back(fs::relative(e.path(), categoryDir.path).generic_string());
                 std::sort(files.begin(), files.end());
                 for (auto &f : files)
-                    items.push_back({a, cat, f, (dir / cat / f).string()});
+                    items.push_back({a, cat, f, (categoryDir.path / f).string()});
             }
         }
         std::vector<Case> cases;
