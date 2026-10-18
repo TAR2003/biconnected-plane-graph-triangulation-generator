@@ -397,7 +397,7 @@ def _proxy(color, marker, ls, label):
     )
 
 
-def add_legend(ax, series, mode, vline_label=None):
+def add_legend(ax, series, mode, vline_label=None, hline_label=None):
     if mode == "single":
         handles = []
     elif mode == "by_algo_category":
@@ -428,6 +428,8 @@ def add_legend(ax, series, mode, vline_label=None):
 
     if vline_label:
         handles.append(Line2D([0], [0], color="#444444", ls="--", lw=1.2, label=vline_label))
+    if hline_label:
+        handles.append(Line2D([0], [0], color="#444444", ls="-.", lw=1.2, label=hline_label))
     if not handles:
         return False
     outside = len(handles) > 6
@@ -466,7 +468,19 @@ def save_fig(fig, folder, name):
 # ------------------------------------------------------------------------------
 # Generic XY charts
 # ------------------------------------------------------------------------------
-def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None):
+def _draw_order(series, ycol):
+    """Draw higher series first so lower points are painted afterwards and stay visible."""
+    def height(item):
+        sub = item[4]
+        if sub.empty or ycol not in sub.columns:
+            return 0.0
+        return float(np.nanmedian(sub[ycol].to_numpy(dtype=float)))
+
+    return sorted(series, key=height, reverse=True)
+
+
+def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None,
+            hline=None, hline_label=None):
     x, y = spec["x"], spec["y"]
     if df is None or df.empty or x not in df.columns or y not in df.columns:
         return False
@@ -484,26 +498,31 @@ def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None):
     fig, ax = plt.subplots(figsize=(8.4, 5.6))
     kind = spec["kind"]
     mean_by_x = spec.get("mean_by_x", False)
-    for _label, color, marker, ls, sub in series:
+    # Semi-transparent markers, highest values underneath, so a point does not
+    # erase the points that sit below it.
+    for _label, color, marker, ls, sub in _draw_order(series, y):
         if mean_by_x:
             drawn = sub.groupby(x, as_index=False)[y].mean().sort_values(x)
+        elif kind == "points":
+            drawn = sub.sort_values(y, ascending=False)
         else:
             drawn = sub.sort_values([x, y])
         if drawn.empty:
             continue
         if kind == "points":
             ax.scatter(
-                drawn[x], drawn[y], s=22, color=color, marker=marker,
-                alpha=0.8, linewidths=0.3, edgecolors="white", zorder=3,
+                drawn[x], drawn[y], s=13, color=color, marker=marker,
+                alpha=0.45, linewidths=0, zorder=3,
             )
         else:
             ax.plot(
                 drawn[x], drawn[y], color=color, marker=marker, linestyle=ls,
-                lw=1.4, ms=4.5, markeredgecolor="white", markeredgewidth=0.3,
-                alpha=0.9, zorder=3,
+                lw=1.15, ms=3.2, markeredgewidth=0, alpha=0.55, zorder=3,
             )
     if vline is not None:
         ax.axvline(vline, color="#444444", ls="--", lw=1.1, zorder=2)
+    if hline is not None:
+        ax.axhline(hline, color="#444444", ls="-.", lw=1.1, zorder=2)
 
     rate_x = x in ("check_rate", "trav_rate")
     rate_y = y in ("check_rate", "trav_rate")
@@ -514,7 +533,10 @@ def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None):
         spec.get("logx", False), spec.get("logy", False),
         rate_x=rate_x, rate_y=rate_y,
     )
-    outside = add_legend(ax, [] if mode == "single" else series, mode, vline_label=vline_label)
+    outside = add_legend(
+        ax, [] if mode == "single" else series, mode,
+        vline_label=vline_label, hline_label=hline_label,
+    )
     if not outside:
         fig.tight_layout()
     save_fig(fig, folder, spec["name"])
@@ -601,14 +623,16 @@ def plot_trav_vs_check_colored(df, folder, title_prefix):
 
     fig, ax = plt.subplots(figsize=(8.6, 5.8))
     present = [it for it in ("Biconnected", "Oneconnected") if (sub["input_type"] == it).any()]
+    # Higher check-success points first, so points lower on the chart stay visible.
+    present.sort(key=lambda it: float(sub.loc[sub["input_type"] == it, "check_rate"].median()), reverse=True)
     sc = None
     for inp in present:
-        part = sub[sub["input_type"] == inp]
+        part = sub[sub["input_type"] == inp].sort_values("check_rate", ascending=False)
         sc = ax.scatter(
             part["trav_rate"], part["check_rate"],
             c=part["avg_tpt"], cmap=cmap, norm=norm,
-            marker=INPUT_MARKER[inp], s=36, alpha=0.88,
-            edgecolors="black", linewidths=0.35, zorder=3,
+            marker=INPUT_MARKER[inp], s=18, alpha=0.55,
+            linewidths=0, zorder=3,
             label=f"{inp} input",
         )
     cbar = fig.colorbar(sc, ax=ax)
@@ -627,6 +651,90 @@ def plot_trav_vs_check_colored(df, folder, title_prefix):
     )
     fig.tight_layout()
     save_fig(fig, folder, "14_traversal_vs_check_colored_by_avg_time.png")
+
+
+def _idw_grid(x, y, values, res=130, k=24, power=1.0):
+    """Inverse-distance field. Weight of a sample is 1/distance**power.
+
+    Coincident samples must already be averaged. Each cell uses its nearest
+    samples, so a point 5 units away outweighs a point 7 units away by 7/5.
+    """
+    pts = np.column_stack([np.asarray(x, float), np.asarray(y, float)])
+    values = np.asarray(values, float)
+    n = len(values)
+    k = max(1, min(k, n))
+    gx = np.linspace(-3, 103, res)
+    gy = np.linspace(-3, 103, res)
+    xx, yy = np.meshgrid(gx, gy)
+    flat = np.column_stack([xx.ravel(), yy.ravel()])
+    out = np.empty(flat.shape[0], dtype=float)
+    for start in range(0, len(flat), 2000):
+        block = flat[start:start + 2000]
+        dist = np.sqrt(((block[:, None, :] - pts[None, :, :]) ** 2).sum(axis=2))
+        if k < n:
+            nearest = np.argpartition(dist, k - 1, axis=1)[:, :k]
+            dist = np.take_along_axis(dist, nearest, axis=1)
+            picked = values[nearest]
+        else:
+            picked = np.broadcast_to(values, dist.shape)
+        weights = 1.0 / np.maximum(dist, 1e-3) ** power
+        out[start:start + len(block)] = (weights * picked).sum(axis=1) / weights.sum(axis=1)
+    return out.reshape(xx.shape)
+
+
+def plot_trav_vs_check_idw(df, folder, title_prefix):
+    """Fill the traversal/check plane from nearby cases, weighted by 1/distance."""
+    need = ["trav_rate", "check_rate", "avg_tpt", "input_type"]
+    if df is None or df.empty or any(c not in df.columns for c in need):
+        return
+    sub = df.dropna(subset=["trav_rate", "check_rate", "avg_tpt"])
+    sub = sub[sub["avg_tpt"] > 0]
+    if sub.empty:
+        return
+    sub = sub.copy()
+    sub["trav_rate"] = sub["trav_rate"].round(2)
+    sub["check_rate"] = sub["check_rate"].round(2)
+    averaged = sub.groupby(["trav_rate", "check_rate"], as_index=False)["avg_tpt"].mean()
+
+    vmin = float(averaged["avg_tpt"].min())
+    vmax = float(averaged["avg_tpt"].max())
+    use_log = vmin > 0 and vmax / vmin >= 20 and vmin != vmax
+    norm = mcolors.LogNorm(vmin=vmin, vmax=vmax) if use_log else mcolors.Normalize(vmin=vmin, vmax=vmax)
+    cmap = plt.colormaps["RdYlGn_r"]
+    field = _idw_grid(averaged["trav_rate"], averaged["check_rate"], averaged["avg_tpt"])
+    field = np.clip(field, vmin, vmax)
+
+    fig, ax = plt.subplots(figsize=(8.6, 5.8))
+    image = ax.imshow(
+        field, origin="lower", extent=(-3, 103, -3, 103),
+        cmap=cmap, norm=norm, aspect="auto", interpolation="bilinear", zorder=1,
+    )
+    present = [it for it in ("Biconnected", "Oneconnected") if (sub["input_type"] == it).any()]
+    for inp in present:
+        part = sub[sub["input_type"] == inp]
+        ax.scatter(
+            part["trav_rate"], part["check_rate"],
+            s=10, marker=INPUT_MARKER[inp], facecolors="none",
+            edgecolors="black", linewidths=0.4, alpha=0.55, zorder=3,
+            label=f"{inp} input",
+        )
+    cbar = fig.colorbar(image, ax=ax)
+    cbar.set_label(
+        "estimated avg time per triangulation (s)"
+        + (" — log scale, " if use_log else " — ")
+        + "green = low, red = high"
+    )
+    if len(present) > 1:
+        ax.legend(title="input type", fontsize=8, framealpha=0.92)
+    style_ax(
+        ax,
+        f"{title_prefix}\ntraversal vs check success, field weighted by 1/distance",
+        "traversal success rate (%)",
+        "check success rate (%)",
+        logx=False, logy=False, rate_x=True, rate_y=True,
+    )
+    fig.tight_layout()
+    save_fig(fig, folder, "15_traversal_vs_check_idw_avg_time.png")
 
 
 def _wide_merge(df):
@@ -756,6 +864,23 @@ def plot_vgs_folder(matched, folder, mode, title_prefix):
             ratio_mode, title_prefix, vline=1.0, vline_label="equal total time",
         )
 
+    # Same check-success x as the other VGS charts. Y is how many times slower
+    # without VGS is than with VGS on that case.
+    ratio["wo_over_w"] = ratio["time_wo"] / ratio["time_w"]
+    for kind, name in (
+        ("points", "07_points_without_over_with_time_vs_check_success.png"),
+        ("line", "08_line_without_over_with_time_vs_check_success.png"),
+    ):
+        plot_xy(
+            ratio, folder,
+            dict(name=name, kind=kind, x="check_rate", y="wo_over_w",
+                 xlabel="check success rate of without VGS (%)",
+                 ylabel="total time without VGS / total time with VGS (log scale)",
+                 title="without-VGS / with-VGS time vs check success",
+                 logx=False, logy=True),
+            ratio_mode, title_prefix, hline=1.0, hline_label="equal total time",
+        )
+
 
 def vgs_matched(df):
     wo = df[df["algo"] == "BiconnectedWithoutVGS"][[
@@ -805,6 +930,7 @@ def make_algorithmwise(time_df, mem_df):
                 if algo == "Oneconnected":
                     plot_trav_avg(t_in[t_in["category"] == cat], folder, "single", title)
                     plot_trav_vs_check_colored(t_in[t_in["category"] == cat], folder, title)
+                    plot_trav_vs_check_idw(t_in[t_in["category"] == cat], folder, title)
 
             folder = os.path.join(OUT_ROOT, "Algorithmwise", ALGO_OUT[algo], in_folder, "combined")
             title = f"{ALGO_LABEL[algo]} · {inp} inputs · all categories"
@@ -815,6 +941,7 @@ def make_algorithmwise(time_df, mem_df):
             if algo == "Oneconnected":
                 plot_trav_avg(t_in, folder, "by_category", title)
                 plot_trav_vs_check_colored(t_in, folder, title)
+                plot_trav_vs_check_idw(t_in, folder, title)
 
         folder = os.path.join(OUT_ROOT, "Algorithmwise", ALGO_OUT[algo], "combined")
         title = f"{ALGO_LABEL[algo]} · all inputs"
@@ -829,6 +956,7 @@ def make_algorithmwise(time_df, mem_df):
         if algo == "Oneconnected":
             plot_trav_avg(t_algo, folder, mode, title)
             plot_trav_vs_check_colored(t_algo, folder, title)
+            plot_trav_vs_check_idw(t_algo, folder, title)
 
 
 def make_comparison(time_df, mem_df):
