@@ -158,22 +158,33 @@ Block sizes, bridge probability and attachment position are re-drawn for every g
 
 ## 4. Small-n exhaustive inputs (`plantri_import.py`)
 
-Random sampling can miss rare small topologies. `plantri` (Brinkmann and McKay) enumerates
-planar graphs exhaustively and is compiled from its own source.
+`plantri -p` lists simple plane graphs. Below connectivity 3 it counts **embeddings**:
+the same abstract graph can appear more than once, and `-o` would also split mirror
+images. The importer keeps one embedding per abstract isomorphism class and exits if
+that count disagrees with the census.
+
+| n | biconnected (`plantri -p -c2`) | one-connected (`plantri -p -c1x`, `-c1` at n=3) |
+|---|---|---|
+| 3 | 1 | 1 |
+| 4 | 3 | 3 |
+| 5 | 9 | 11 |
+| 6 | 44 | 55 |
+| 7 | 294 | 352 |
+
+Biconnected counts are OEIS A021103. One-connected counts are connected planar graphs
+(A003094) minus the biconnected ones. At 7 vertices plantri itself reports 564 embedded
+2-connected maps; those collapse to the 294 classes above. Maximal triangulations
+(`plantri 7`, 5 graphs) and disk triangulations (`plantri -P 7`, 27 graphs) are different
+families and are not written here.
 
 ```bash
-python plantri_import.py --plantri ./plantri --kind biconnected  --nmin 4 --nmax 10 --out inputs/plantri_bicon
-python plantri_import.py --plantri ./plantri --kind oneconnected --nmin 3 --nmax 9  --out inputs/plantri_onecon
+python plantri_import.py --plantri ./plantri --kind biconnected  --nmin 3 --nmax 7 --out input/Biconnected/Biconnected_plantri
+python plantri_import.py --plantri ./plantri --kind oneconnected --nmin 3 --nmax 7 --out input/Oneconnected/Oneconnected_plantri
 ```
 
-It runs `plantri -pc2m2a N` (biconnected) or `-pc1m1a N` (connected) and parses the ASCII
-lines (`<n> bcd,adc,...`, each list a vertex's neighbours in rotation order). Every graph passes
-through `validate()`; for `oneconnected`, output graphs that turn out to be biconnected are rejected.
-
-**Status:** parsing and validation were tested on a hand-written K4 line. `plantri` itself was
-**not** available in the development environment. Run it for small n and check the reported
-counts against the plantri guide. If the flags differ in your build, only the `flags` line changes.
-Growth is fast: keep n small (about <= 10-12) or use `--max-files`.
+Ascii lines (`<n> bcdefg,agfdc,...`) are parsed as clockwise rotations and passed through
+`validate()`. Growth is fast past n = 7; raise `--nmax` only with `--max-files` if you
+need a sample rather than the full class list.
 
 ---
 

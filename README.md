@@ -23,9 +23,11 @@ chmod +x run_all.sh scripts/*.sh
 ./run_all.sh
 ```
 
+On Windows, run `run_all.bat` from the repository root or by double-clicking it. The batch file starts the pipeline in your default WSL Linux distribution; install and configure WSL first if needed.
+
 `run_all.sh` runs the end-to-end workflow:
 
-1. Creates a Python 3.10 virtual environment with [uv](https://github.com/astral-sh/uv) and installs `networkx`, `numpy`, `scipy`, `matplotlib`, `pandas`, `Pillow`, and `reportlab`.
+1. Creates (or reuses) a Python 3.10 virtual environment at `.venv-wsl/` with [uv](https://github.com/astral-sh/uv) and installs `networkx`, `numpy`, `scipy`, `matplotlib`, `pandas`, `Pillow`, and `reportlab`. This Linux environment is separate from a Windows `.venv/` and is never cleared by the pipeline.
 2. **`scripts/1_build_cpp.sh`** — clean CMake configure/build of `bench_time` and `bench_memory`.
 3. **`scripts/2_generate_test_cases.sh`** — rebuilds `test-cases/input/` (generators, optional Plantri import, dev seed cases).
 4. **`scripts/3_run_benchmarks.sh`** — runs `bench_time` on all three algorithms. The biconnected algorithms use only `test-cases/input/Biconnected/`; **Oneconnected** uses inputs from both `Biconnected/` and `Oneconnected/`.
@@ -56,7 +58,7 @@ Individual stages can be run by executing the corresponding script under `script
 
 - **CMake** ≥ 3.16, **Git** (Google Benchmark is fetched with `FetchContent`)
 - **C++17** compiler (GCC/Clang; MSVC with a suitable developer environment on Windows)
-- **bash**, **curl**, and **uv** (or let `run_all.sh` install uv)
+- **bash**, **curl**, and **uv** (or let `run_all.sh` install uv); on Windows, the batch entry point requires WSL with a default Linux distribution
 - **Python 3.10+** with packages listed above for generators and plotting
 - Optional: **plantri** (built automatically by `2_generate_test_cases.sh` when possible) for exhaustive small instances
 

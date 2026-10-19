@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 BENCHMARK="$ROOT_DIR/build/bench_time"
-
+LIMIT=1000000000
 if [[ ! -x "$BENCHMARK" ]]; then
     echo "Benchmark executable not found at $BENCHMARK. Run scripts/1_build_cpp.sh first." >&2
     exit 1
@@ -21,14 +21,14 @@ echo "[-] Running time and state benchmarks..."
     --tri_input="$ROOT_DIR/test-cases/input/Biconnected" \
     --tri_cpu=2 \
     --tri_csv="$ROOT_DIR/benchmark-results/results_time.csv" \
-    --tri_limits=10000000
+    --tri_limits=$LIMIT
 
 "$BENCHMARK" \
     --tri_algos=Oneconnected \
     --tri_input="$ROOT_DIR/test-cases/input" \
     --tri_cpu=2 \
     --tri_csv="$ROOT_DIR/benchmark-results/results_time.csv" \
-    --tri_limits=10000000
+    --tri_limits=$LIMIT
 
 
 
@@ -40,14 +40,14 @@ echo "[-] Running time and state benchmarks..."
     --tri_input="$ROOT_DIR/test-cases/input/Biconnected" \
     --tri_cpu=2 \
     --tri_csv="$ROOT_DIR/benchmark-results-memory/results_time.csv" \
-    --tri_limits=10000000
+    --tri_limits=$LIMIT
 
 "$BENCHMARK" \
     --tri_algos=Oneconnected \
     --tri_input="$ROOT_DIR/test-cases/input" \
     --tri_cpu=2 \
     --tri_csv="$ROOT_DIR/benchmark-results-memory/results_time.csv" \
-    --tri_limits=10000000
+    --tri_limits=$LIMIT
 
 
     

@@ -5,14 +5,14 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_CASES_DIR="$ROOT_DIR/test-cases"
 INPUT_DIR="$TEST_CASES_DIR/input"
 PLANTRI="$TEST_CASES_DIR/plantri"
-SIZES = [
-    8, 16, 24, 32, 40, 48, 56, 64, 
-    80, 96, 112, 128, 160, 192, 224, 256, 
-    320, 384, 448, 512, 576, 640, 704, 768, 
-    832, 896, 960, 1024, 1152, 1280, 1408, 1536, 
-    1664, 1792, 1920, 2048, 2304, 2560, 2816, 3072, 
-    3584, 4096
-]
+SIZES=(
+    8 16 24 32 40 48 56 64
+    80 96 112 128 160 192 224 256
+    320 384 448 512 576 640 704 768
+    832 896 960 1024 1152 1280 1408 1536
+    1664 1792 1920 2048 2304 2560 2816 3072
+    3584 4096
+)
 
 for tool in uv python3; do
     command -v "$tool" >/dev/null 2>&1 || {
@@ -88,9 +88,9 @@ fi
 
 echo "[-] Importing Plantri benchmark datasets..."
 uv run python plantri_import.py --plantri "$PLANTRI" --kind biconnected \
-    --nmin 4 --nmax 7 --out input/Biconnected/Biconnected_plantri --seed 42
+    --nmin 3 --nmax 9 --out input/Biconnected/Biconnected_plantri --seed 42
 uv run python plantri_import.py --plantri "$PLANTRI" --kind oneconnected \
-    --nmin 3 --nmax 7 --out input/Oneconnected/Oneconnected_plantri --seed 42
+    --nmin 3 --nmax 9 --out input/Oneconnected/Oneconnected_plantri --seed 42
 
 # if [[ -f "$TEST_CASES_DIR/visualizer.py" ]]; then
 #     echo "[-] Rendering test-case visualizations..."
