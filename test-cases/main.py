@@ -59,11 +59,13 @@ CATEGORY_LABELS = {
     "2_triangulation_subdivide_2": "Category 2: Delaunay triangulation, subdivide each edge twice",
     "3_triangulation_subdivide_3": "Category 3: Delaunay triangulation, subdivide each edge three times",
     "4_halin": "Category 4: Halin graphs (random tree + leaf cycle)",
-    "5_cycles": "Category 5: Cycles C_n, n = 3..15",
-    "6_cycle_union": "Category 6: Union of k cycles (k=2..4, sizes 4..12)",
-    "7_snowflake": "Category 7: Snowflake graphs (edge-apex transformation / fully triangulated)",
-    "8_chord_sequence": "Category 8: Incremental chord-triangulation sequences (fixed n-cycle, one chord added at a time until fully triangulated)",
+    "5_cycles": "Category 5: Cycles C_n of any order",
+    "6_cycle_union": "Category 6: Chain of any number of cycles of any orders",
+    "7_snowflake": "Category 7: Snowflake graphs of any order (random outer ears)",
+    "8_chord_sequence": "Category 8: Cycle plus a random number of non-crossing chords",
+    "9_two_cycles_two_bridges": "Category 9: Two cycles joined by two bridges",
 }
+
 
 
 def load_config(config_path, cli_defaults):
