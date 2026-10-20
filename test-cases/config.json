@@ -1,40 +1,54 @@
 {
-  "_comment": "Face-count and face-size caps are off. Orders are drawn at random up to max_vertices. Set max_faces or max_vertices_in_face to a number only when you want that ceiling back. Each category can override any subset of: count, max_faces, max_vertices_in_face, max_vertices, min_vertices, seed.",
+  "_comment": "Global defaults apply to every category unless overridden below. Each category can override any subset of: count, max_faces, max_vertices_in_face, max_vertices, min_vertices, seed.",
   "defaults": {
     "count": 100,
-    "max_faces": null,
-    "max_vertices_in_face": null,
-    "max_vertices": 256,
+    "max_faces": 20,
+    "max_vertices_in_face": 20,
+    "max_vertices": 300,
     "min_vertices": 3,
     "seed": 42
   },
   "categories": {
     "1_triangulation_subdivide_1": {
+      "_comment": "Delaunay triangulation, subdivide each edge once. Leave empty {} to use defaults, or override any field below.",
       "count": 100
     },
     "2_triangulation_subdivide_2": {
       "count": 100
     },
     "3_triangulation_subdivide_3": {
-      "count": 100
+      "count": 100,
+      "_comment_example": "subdividing 3x triples face-boundary lengths, so this category often needs a larger max_vertices_in_face than the others -- e.g. uncomment below.",
+      "max_vertices_in_face": 40
     },
     "4_halin": {
-      "count": 100
+      "count": 100,
+      "_comment_example": "Halin graphs need max_faces >= 4 (mathematical minimum, see gen_halin.py).",
+      "max_faces": 15,
+      "max_vertices_in_face": 15
     },
     "5_cycles": {
-      "count": 100
+      "count": 100,
+      "max_vertices_in_face": 200,
+      "_comment_example": "Only 13 distinct (non-isomorphic) cycle graphs exist (n=3..15), so requesting more than 13 here will always produce a shortfall warning -- see gen_cycles.py."
     },
     "6_cycle_union": {
-      "count": 100
+      "count": 100,
+      "_comment_example": "Cycle unions only reach k in [2,4], so max_faces above 5 has no effect on this category (faces = k+1)."
     },
     "7_snowflake": {
-      "count": 100
+      "_comment_example": "Snowflake = outer n-cycle kept fully intact, interior fully triangulated (every inner face is EXACTLY a triangle, none larger). Needs max_faces >= 3 (mathematical minimum: n=4 vertices -> 2 inner triangles + 1 outer 4-cycle). faces = n_vertices - 1 here, and -- important -- the OUTER face always has size exactly n, so max_vertices_in_face must be set to at least max_faces + 1 or it will silently cap the reachable range from below (inner faces are always triangles and never bind on this constraint, only the outer cycle does).",
+      "count": 100,
+      "max_faces": 500000,
+      "max_vertices_in_face": 10000,
+      "max_vertices": 10000
     },
     "8_chord_sequence": {
-      "count": 100
-    },
-    "9_two_cycles_two_bridges": {
-      "count": 100
+      "_comment_example": "Fixed n-cycle, one chord added per step until fully triangulated (n-2 graphs per sequence, faces going 2,3,...,n-1). Same constraint shape as category 7: outer face is always size n, so max_vertices_in_face must be >= max_faces + 1 or it silently caps which n values are reachable. 'count' here counts TOTAL GRAPHS across all sequences, not number of sequences.",
+      "count": 100,
+      "max_faces": 20,
+      "max_vertices_in_face": 25,
+      "max_vertices": 300
     }
   }
 }

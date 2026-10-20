@@ -1,10 +1,7 @@
 """
-Main driver: generates valid biconnected test-case graphs and writes them
-in the input format, sorted ascending by (#faces, max face size).
-
-Orders are drawn from the full vertex range. The old fixed bands (cycles
-only up to 15, cycle unions of 2..4 cycles of size 4..12, one chord
-sequence on a single n, snowflakes only at n = 3*2^s) are not applied.
+Main driver: generates valid test-case graphs for each of the 7
+categories, subject to constraints, and writes them to disk in the
+required input format, sorted ascending by (#faces, max face size).
 
 CONSTRAINTS CAN BE SET GLOBALLY *AND* OVERRIDDEN PER CATEGORY.
 
@@ -62,11 +59,10 @@ CATEGORY_LABELS = {
     "2_triangulation_subdivide_2": "Category 2: Delaunay triangulation, subdivide each edge twice",
     "3_triangulation_subdivide_3": "Category 3: Delaunay triangulation, subdivide each edge three times",
     "4_halin": "Category 4: Halin graphs (random tree + leaf cycle)",
-    "5_cycles": "Category 5: Cycles C_n of any order",
-    "6_cycle_union": "Category 6: Chain of any number of cycles of any orders",
-    "7_snowflake": "Category 7: Snowflake graphs of any order (random outer ears)",
-    "8_chord_sequence": "Category 8: Cycle plus a random number of non-crossing chords",
-    "9_two_cycles_two_bridges": "Category 9: Two cycles joined by two bridges",
+    "5_cycles": "Category 5: Cycles C_n, n = 3..15",
+    "6_cycle_union": "Category 6: Union of k cycles (k=2..4, sizes 4..12)",
+    "7_snowflake": "Category 7: Snowflake graphs (edge-apex transformation / fully triangulated)",
+    "8_chord_sequence": "Category 8: Incremental chord-triangulation sequences (fixed n-cycle, one chord added at a time until fully triangulated)",
 }
 
 
@@ -165,9 +161,9 @@ def main():
                               "if missing, falls back to CLI flags / built-in defaults)")
     parser.add_argument("--count", type=int, default=100, help="global default: graphs per category")
     parser.add_argument("--out", type=str, default="input/Biconnected", help="input root folder")
-    parser.add_argument("--max-faces", type=int, default=None, help="global default: max faces incl. outer face (omit for no cap)")
-    parser.add_argument("--max-face-vertices", type=int, default=None, help="global default: max vertices in any single face (omit for no cap)")
-    parser.add_argument("--max-vertices", type=int, default=256, help="global default: max total vertices in graph")
+    parser.add_argument("--max-faces", type=int, default=15, help="global default: max faces incl. outer face")
+    parser.add_argument("--max-face-vertices", type=int, default=40, help="global default: max vertices in any single face")
+    parser.add_argument("--max-vertices", type=int, default=200, help="global default: max total vertices in graph")
     parser.add_argument("--seed", type=int, default=42, help="global default: base random seed")
     args = parser.parse_args()
 

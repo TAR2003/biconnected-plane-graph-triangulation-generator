@@ -16,7 +16,7 @@ Category 4:
 import random
 import networkx as nx
 
-from common import collect_distinct, validate_graph, relabel_consecutive, vertex_limit
+from common import Constraints, validate_graph, relabel_consecutive, build_face_count_plan, DedupTracker
 
 
 def _random_tree_with_exact_leaves(target_leaves, rng, max_attempts=400):
@@ -211,44 +211,103 @@ def build_halin(target_leaves, rng):
     return H
 
 
-def generate_category(count, constraints, seed=0):
-    """Halin graphs whose leaf counts are drawn from the full feasible range.
+def generate_one_targeted(target_faces, constraints: Constraints, rng, dedup: DedupTracker, max_attempts=500):
+    """
+    Generate a single Halin graph with EXACTLY `target_faces` faces.
 
-    A Halin graph has at least 3 leaves (K4). The outer cycle has one vertex
-    per leaf, and the tree on L leaves has at most about 2L - 2 vertices, so
-    the leaf ceiling follows the vertex ceiling rather than a fixed face list.
+    KEY RELATIONSHIP (verified empirically and structurally): for any
+    Halin graph H = T + C, the number of faces equals (number of leaves
+    of T) + 1. So targeting a face count directly translates to targeting
+    an exact leaf count: leaves = target_faces - 1.
+
+    The absolute minimum face count for ANY Halin graph is 4 (the
+    smallest case: a single internal hub connected to exactly 3 leaves,
+    i.e. K4). Face counts 2 and 3 are structurally impossible for Halin
+    graphs -- this is a mathematical fact of the definition, not a
+    generator limitation, so callers should not request target_faces < 4.
+
+    Rejects (and retries) any candidate isomorphic to a graph already
+    accepted for this category, via `dedup`.
+    """
+    target_leaves = target_faces - 1
+    if target_leaves < 3:
+        return None, None, None  # impossible: Halin graphs need >=3 leaves
+
+    for _ in range(max_attempts):
+        H = build_halin(target_leaves, rng)
+        if H is None:
+            continue
+        H, _ = relabel_consecutive(H)
+
+        ok, faces, reason = validate_graph(H, constraints)
+        if ok and len(faces) == target_faces:
+            if dedup.try_add(H):
+                return H, faces, {"target_leaves": target_leaves, "target_faces": target_faces}
+            # isomorphic duplicate -- discard and try a different random tree
+    return None, None, None
+
+
+def generate_category(count, constraints: Constraints, seed=0):
+    """
+    Generates up to `count` Halin graphs with target face counts spread
+    evenly across the achievable range [4, constraints.max_faces]. 4 is
+    the mathematical minimum (see generate_one_targeted); if max_faces < 4,
+    no Halin graph can satisfy the constraint at all and we raise a clear
+    error rather than hanging or silently skewing results.
+
+    DUPLICATE HANDLING: every accepted graph is checked against every
+    previously accepted graph via exact isomorphism (common.DedupTracker).
+    If a face-count target runs out of distinct graphs before its quota
+    is filled, the shortfall is redistributed to other feasible targets.
+    Only if every feasible target is simultaneously exhausted do we stop
+    early with a clear warning, rather than crash or emit a duplicate.
     """
     rng = random.Random(seed)
-    hi_leaves = max(3, (vertex_limit(constraints) + 2) // 2)
-    if constraints.max_vertices_in_face is not None:
-        hi_leaves = min(hi_leaves, constraints.max_vertices_in_face)
-    if constraints.max_faces is not None:
-        hi_leaves = min(hi_leaves, constraints.max_faces - 1)
-    if hi_leaves < 3:
+
+    min_faces = 4
+    if constraints.max_faces is not None and constraints.max_faces < min_faces:
         raise RuntimeError(
-            "Halin graphs need at least 3 leaves (K4, 4 faces). The current "
-            "face or vertex limits leave no feasible leaf count."
+            f"max_faces={constraints.max_faces} is below the mathematical "
+            f"minimum of {min_faces} faces for any Halin graph (the smallest "
+            f"Halin graph is K4: a 3-leaf star plus its triangle cycle, which "
+            f"has 4 faces). Raise max_faces to at least {min_faces}."
         )
 
-    def build():
-        leaves = rng.randint(3, hi_leaves)
-        H = build_halin(leaves, rng)
-        if H is None:
-            return None
-        H, _ = relabel_consecutive(H)
-        ok, faces, reason = validate_graph(H, constraints)
-        if not ok:
-            return None
-        return {
-            "graph": H,
-            "faces": faces,
-            "meta": {"target_leaves": leaves, "n": H.number_of_nodes()},
-        }
+    max_faces = constraints.max_faces if constraints.max_faces is not None else min_faces + 20
+    plan = build_face_count_plan(count, min_faces, max_faces, seed=seed)
+    feasible_targets = list(range(min_faces, max_faces + 1))
 
-    instances = collect_distinct(count, build)
+    instances = []
+    dedup = DedupTracker()
+
+    from collections import deque
+    queue = deque(plan)
+    exhausted_targets = set()
+
+    while queue and len(instances) < count:
+        target_faces = queue.popleft()
+        if target_faces not in exhausted_targets:
+            H, faces, meta = generate_one_targeted(target_faces, constraints, rng, dedup)
+            if H is not None:
+                instances.append({"graph": H, "faces": faces, "meta": meta})
+                continue
+            exhausted_targets.add(target_faces)
+
+        remaining_targets = [f for f in feasible_targets if f not in exhausted_targets]
+        if not remaining_targets:
+            break
+        fallback_target = remaining_targets[len(instances) % len(remaining_targets)]
+        queue.append(fallback_target)
+
     if len(instances) < count:
         print(
             f"  [warning] Halin category: only {len(instances)} distinct "
-            f"graphs out of the requested {count} under the current constraints."
+            f"(non-isomorphic) graphs could be generated out of the "
+            f"requested {count} -- all feasible face-count targets "
+            f"{sorted(exhausted_targets)} ran out of structurally distinct "
+            f"Halin graphs under the current constraints. Consider loosening "
+            f"max_vertices / max_vertices_in_face, or reducing the requested "
+            f"count."
         )
+
     return instances
