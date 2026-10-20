@@ -42,7 +42,7 @@ print_stage "MODULE 1: BUILDING THE C++ CORE"
 bash "$SCRIPTS_DIR/1_build_cpp.sh"
 
 print_stage "MODULE 2: GENERATING TEST CASES"
-# bash "$SCRIPTS_DIR/2_generate_test_cases.sh"
+bash "$SCRIPTS_DIR/2_generate_test_cases.sh"
 
 print_stage "MODULE 3: RUNNING BENCHMARKS"
 bash "$SCRIPTS_DIR/3_run_benchmarks.sh"

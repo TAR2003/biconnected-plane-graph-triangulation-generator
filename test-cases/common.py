@@ -242,6 +242,39 @@ class DedupTracker:
             return False
         bucket.append(G)
         return True
+def vertex_limit(constraints, fallback=256):
+    """Largest order a generator may sample.
+
+    Face-count and face-size limits are optional and are not applied here.
+    An omitted max_vertices falls back so a run stays finite.
+    """
+    if getattr(constraints, "max_vertices", None) is None:
+        return fallback
+    return constraints.max_vertices
+
+
+def collect_distinct(count, build, attempts=None):
+    """Call `build()` until `count` non-isomorphic graphs are kept.
+
+    `build()` returns an instance dict with a 'graph' key, or None to skip
+    that draw. Isomorphism is exact within a Weisfeiler-Lehman bucket.
+    """
+    dedup = DedupTracker()
+    if attempts is None:
+        attempts = max(400, count * 50)
+    instances = []
+    for _ in range(attempts):
+        if len(instances) >= count:
+            break
+        item = build()
+        if item is None:
+            continue
+        if not dedup.try_add(item["graph"]):
+            continue
+        instances.append(item)
+    return instances
+
+
 
 
 def build_face_count_plan(count, min_faces, max_faces, seed=0):
