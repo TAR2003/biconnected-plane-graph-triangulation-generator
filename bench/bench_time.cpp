@@ -7,6 +7,8 @@
 //   Wall time is also stored (realTimeSeconds) only for reference.
 // * Timed region = construct the selected source generator and enumerate all
 //   triangulations. Input parsing and object destruction are NOT timed.
+// * One input file at a time: parse it, run every algorithm and limit for that
+//   file, then drop it. The full suite is never registered or loaded up front.
 // * Memory is deliberately NOT measured here (see bench_memory.cpp).
 // * Every finished case is appended to the CSV immediately; on start-up all
 //   cases already present in the CSV are not even registered.
@@ -18,6 +20,9 @@
 
 static std::unordered_map<std::string, tb::Case> g_cases; // benchmark name -> case
 
+// Graph for the file currently being benchmarked. The next file replaces it.
+static tb::InputGraph g_loaded;
+
 static const char *kHeader =
     "algorithm,category,filename,limit,triangulationLimit,vertices,cpuTimeSeconds,realTimeSeconds,triangulations,status,"
     "totalChecks,successfulChecks,unsuccessfulChecks,checkSuccessRate,"
@@ -25,7 +30,10 @@ static const char *kHeader =
 
 static void runCase(benchmark::State &state, const tb::Case &c)
 {
-    tb::InputGraph g = tb::readInput(c.path); // untimed: before the loop
+    // Parsed already, just before this file's benchmarks were started.
+    const tb::InputGraph &g = g_loaded;
+    std::cerr << ">> " << tb::algoName(c.algo) << "/" << c.category << "/" << c.file
+              << " limit=" << c.limit << std::endl;
     if (g.vertexCount == 0)
     {
         state.SkipWithError("invalid or empty input file");
@@ -64,6 +72,15 @@ class CsvAppendReporter : public benchmark::ConsoleReporter
 {
 public:
     explicit CsvAppendReporter(std::string csv) : csv_(std::move(csv)) {}
+
+    // RunSpecifiedBenchmarks is called once per file. Print the host banner once.
+    bool ReportContext(const Context &context) override
+    {
+        if (reportedContext_)
+            return true;
+        reportedContext_ = true;
+        return ConsoleReporter::ReportContext(context);
+    }
 
     void ReportRuns(const std::vector<Run> &runs) override
     {
@@ -110,6 +127,7 @@ public:
 
 private:
     std::string csv_;
+    bool reportedContext_ = false;
 };
 
 int main(int argc, char **argv)
@@ -135,21 +153,57 @@ int main(int argc, char **argv)
         std::cerr << "Nothing to do - all requested cases are already completed.\n";
         return 0;
     }
-    for (const tb::Case &c : cases)
+    // Group by input path so each file stays resident for all of its cases.
+    // planCases walks limit-major; running that order would reload every file
+    // once per limit. Within a file the original order (ascending limits) stays.
+    std::vector<std::string> inputOrder;
+    std::unordered_map<std::string, std::vector<size_t>> casesByInput;
+    for (size_t i = 0; i < cases.size(); ++i)
     {
-        std::string name = std::string(tb::algoName(c.algo)) + "/" + c.category + "/" + c.file +
-                           "/limit:" + std::to_string(c.limit);
-        g_cases.emplace(name, c);
-        benchmark::RegisterBenchmark(name, [c](benchmark::State &st)
-                                     { runCase(st, c); })
-            ->Iterations(1)
-            ->Repetitions(1)
-            ->MeasureProcessCPUTime() // CPU time of the whole process, never wall time
-            ->Unit(benchmark::kMillisecond);
+        const std::string &path = cases[i].path;
+        auto it = casesByInput.find(path);
+        if (it == casesByInput.end())
+        {
+            inputOrder.push_back(path);
+            casesByInput[path].push_back(i);
+        }
+        else
+            it->second.push_back(i);
     }
+    std::cerr << "Distinct inputs: " << inputOrder.size()
+              << ". Each file is parsed when its turn starts, then its cases run.\n";
 
     CsvAppendReporter reporter(cfg.csv);
-    benchmark::RunSpecifiedBenchmarks(&reporter);
+    for (size_t fileIndex = 0; fileIndex < inputOrder.size(); ++fileIndex)
+    {
+        const std::string &path = inputOrder[fileIndex];
+        const std::vector<size_t> &indexes = casesByInput.find(path)->second;
+        std::cerr << "[" << (fileIndex + 1) << "/" << inputOrder.size() << "] parsing " << path
+                  << " (" << indexes.size() << " cases)" << std::endl;
+        g_loaded = tb::readInput(path);
+        if (g_loaded.vertexCount == 0)
+        {
+            std::cerr << "  invalid or empty input, skipping" << std::endl;
+            continue;
+        }
+
+        g_cases.clear();
+        for (size_t i : indexes)
+        {
+            const tb::Case &c = cases[i];
+            std::string name = std::string(tb::algoName(c.algo)) + "/" + c.category + "/" + c.file +
+                               "/limit:" + std::to_string(c.limit);
+            g_cases.emplace(name, c);
+            benchmark::RegisterBenchmark(name, [c](benchmark::State &st)
+                                         { runCase(st, c); })
+                ->Iterations(1)
+                ->Repetitions(1)
+                ->MeasureProcessCPUTime() // CPU time of the whole process, never wall time
+                ->Unit(benchmark::kMillisecond);
+        }
+        benchmark::RunSpecifiedBenchmarks(&reporter);
+        benchmark::ClearRegisteredBenchmarks();
+    }
     benchmark::Shutdown();
     return 0;
 }
