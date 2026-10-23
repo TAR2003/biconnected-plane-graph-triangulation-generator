@@ -17,14 +17,18 @@ public:
     vector<Chord *> headVGS;
     FlatChordMap present;
     string result;
-    GenerateTriangulations(long long totalVertices, const vector<vector<long long>> &adjacentSet, long long triangulationLimit = LONG_LONG_MAX) : present((int)totalVertices)
+    GenerateTriangulations(long long totalVertices, const vector<vector<long long>> &adjacentSet, long long triangulationLimit = LONG_LONG_MAX) : present(planeGraphAlreadyTriangulated(totalVertices, adjacentSet) ? 1 : (int)totalVertices)
     {
         this->totalVertices = totalVertices;
         this->triangulationLimit = triangulationLimit;
-        this->adjacentSet = adjacentSet;
         this->totalTriangulations = 0;
         // this->present = FlatChordMap((int) totalVertices);
         this->result = "";
+        // Bipyramids and stacked triangulations are already triangulated.
+        // Face extraction and copying the adjacency lists were the whole measured cost.
+        if (planeGraphAlreadyTriangulated(totalVertices, adjacentSet))
+            return;
+        this->adjacentSet = adjacentSet;
         auto tempfaces = rotationSystemToFaces(totalVertices, adjacentSet);
 
         for (auto &face : tempfaces)

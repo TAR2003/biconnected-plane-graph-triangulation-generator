@@ -247,6 +247,19 @@ public:
     }
 };
 
+// A simple connected plane graph is a triangulation exactly when E = 3V - 6:
+// every face, including the outer face, is a triangle, so the graph already
+// has its only triangulation and no chord has to be added.
+inline bool planeGraphAlreadyTriangulated(long long n, const vector<vector<long long>> &adj)
+{
+    if (n < 3)
+        return false;
+    long long degreeSum = 0;
+    for (const auto &neighbors : adj)
+        degreeSum += (long long)neighbors.size();
+    return degreeSum == 6 * n - 12;
+}
+
 inline vector<vector<long long>> rotationSystemToFaces(long long n, const vector<vector<long long>> &adj)
 {
     vector<long long> start(n + 1, 0);

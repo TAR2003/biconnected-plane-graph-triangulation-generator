@@ -27,6 +27,15 @@ public:
 
     GraphTriangulation(long long totalNodes, const vector<vector<long long>> &adjacency, long long triangulationLimit = LONG_LONG_MAX)
     {
+        this->triangulationLimit = triangulationLimit;
+        // Already a triangulation (bipyramid, stacked triangulation, ...):
+        // the only triangulation is the graph itself. Skip face extraction.
+        if (planeGraphAlreadyTriangulated(totalNodes, adjacency))
+        {
+            faces.clear();
+            faceTriangulations.clear();
+            return;
+        }
         this->faces = rotationSystemToFaces(totalNodes, adjacency);
         present = unordered_multiset<pair<long long, long long>, PairHash>();
         initiatePresent();
@@ -39,7 +48,6 @@ public:
             }
         }
         this->faces = tempfaces;
-        this->triangulationLimit = triangulationLimit;
         faceTriangulations = vector<FaceTriangulation *>(this->faces.size(), nullptr);
     }
 
@@ -116,6 +124,9 @@ inline void GraphTriangulation::getAllTriangulations()
 {
     if (faces.size() == 0)
     {
+        // No face has a missing chord, so the graph is already its only triangulation.
+        totalTriangulations = 1;
+        storeTriangulation();
         return;
     }
     getNextFaceTriangulation(0);

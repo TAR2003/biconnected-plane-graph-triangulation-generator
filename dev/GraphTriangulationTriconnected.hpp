@@ -16,6 +16,16 @@ public:
 
     GraphTriangulationTriconnected(long long totalNodes, const vector<vector<long long>> &adjacency)
     {
+        // Same shortcut as GraphTriangulation: E = 3V - 6 means every face is
+        // already a triangle, so there is one triangulation and no chords.
+        long long degreeSum = 0;
+        for (const auto &neighbors : adjacency)
+            degreeSum += (long long)neighbors.size();
+        if (totalNodes >= 3 && degreeSum == 6 * totalNodes - 12)
+        {
+            faces.clear();
+            return;
+        }
         this->faces = rotationSystemToFaces(totalNodes, adjacency);
 
         present = unordered_set<pair<long long, long long>, PairHash>();
