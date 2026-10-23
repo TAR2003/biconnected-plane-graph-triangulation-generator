@@ -56,7 +56,7 @@ Biconnected 2D maps (vertices vs triangulations, both log, colour = avg time):
     14 points  coloured points
     15 field   1/distance area, with points in their own colour
     16 field   1/distance area only
-Point outlines use the point colour. Green is a low average time, red is high.
+Points have no outline. Green is a low average time, red is high.
 
 Run from anywhere:
     python plot.py
@@ -400,7 +400,7 @@ def build_series(df, mode):
 def _proxy(color, marker, ls, label):
     return Line2D(
         [0], [0], color=color, marker=marker, linestyle=ls,
-        lw=1.8, ms=6, label=label, markeredgecolor="white", markeredgewidth=0.4,
+        lw=1.8, ms=6, label=label, markeredgewidth=0,
     )
 
 
@@ -425,7 +425,7 @@ def add_legend(ax, series, mode, vline_label=None, hline_label=None, swatch="col
             seen_a.add(algo_name)
             algos.append(_proxy(color, marker, ls, algo_name))
         if algos:
-            algo_title = "algorithm (edge)" if swatch == "edge" else "algorithm (colour)"
+            algo_title = "algorithm" if swatch == "marker" else "algorithm (colour)"
             ax.legend(handles=algos, title=algo_title, fontsize=8, framealpha=0.92)
         return False
     else:
@@ -524,7 +524,7 @@ def _add_count_colorbar(fig, ax, norm, use_log):
     return cbar
 
 
-def _scatter_by_count(ax, xs, ys, counts, norm, marker, size, edge, zorder=3):
+def _scatter_by_count(ax, xs, ys, counts, norm, marker, size, zorder=3):
     """Colour finite positive counts. Return how many points were drawn that way."""
     counts = np.asarray(counts, dtype=float)
     ok = np.isfinite(counts) & (counts > 0)
@@ -533,18 +533,16 @@ def _scatter_by_count(ax, xs, ys, counts, norm, marker, size, edge, zorder=3):
     ax.scatter(
         np.asarray(xs)[ok], np.asarray(ys)[ok],
         c=counts[ok], cmap=_COUNT_CMAP, norm=norm,
-        s=size, marker=marker, linewidths=0.9, edgecolors=edge,
+        s=size, marker=marker, linewidths=0, edgecolors="none",
         alpha=0.92, zorder=zorder,
     )
     return int(ok.sum())
 
 
-def _face_edge(color, alpha=0.62):
-    """Translucent fill plus a solid darker outline, so stacked points stay crisp."""
+def _point_face(color, alpha=0.92):
+    """Fill only. Points are drawn with no outline."""
     rgb = mcolors.to_rgb(color)
-    face = (rgb[0], rgb[1], rgb[2], alpha)
-    edge = tuple(max(0.0, c * 0.32) for c in rgb)
-    return face, edge
+    return (rgb[0], rgb[1], rgb[2], alpha)
 
 
 def _spread(xvals, yvals, logx, logy, label, dodge):
@@ -620,7 +618,7 @@ def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None,
             drawn = sub.sort_values([x, y])
         if drawn.empty:
             continue
-        face, edge = _face_edge(color, 0.72 if kind == "points" else 1.0)
+        face = _point_face(color)
         use_counts = count_scale is not None and "triangulations" in drawn.columns
         if kind == "points":
             dodge = 0.0
@@ -628,28 +626,25 @@ def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None,
                 dodge = (i - (nser - 1) / 2.0) * 0.016
             xs, ys = _spread(drawn[x], drawn[y], logx, logy, label, dodge)
             if use_counts:
-                # Outline keeps the series colour when several series share the axes.
-                rim = "#333333" if mode == "single" else color
                 colored += _scatter_by_count(
-                    ax, xs, ys, drawn["triangulations"], count_scale[0], marker, 22, rim,
+                    ax, xs, ys, drawn["triangulations"], count_scale[0], marker, 22,
                 )
             else:
                 ax.scatter(
-                    xs, ys, s=22, marker=marker, facecolors=face, edgecolors=edge,
-                    linewidths=0.75, zorder=3,
+                    xs, ys, s=22, marker=marker, facecolors=face,
+                    edgecolors="none", linewidths=0, zorder=3,
                 )
         else:
             ax.plot(
                 drawn[x], drawn[y], color=color,
                 marker=None if use_counts else marker, linestyle=ls,
-                lw=1.6, ms=5.5, markerfacecolor=color, markeredgecolor=edge,
-                markeredgewidth=0.7, zorder=3,
+                lw=1.6, ms=5.5, markerfacecolor=color, markeredgewidth=0,
+                zorder=3,
             )
             if use_counts:
-                rim = "#333333" if mode == "single" else color
                 colored += _scatter_by_count(
                     ax, drawn[x], drawn[y], drawn["triangulations"],
-                    count_scale[0], marker, 30, rim, zorder=4,
+                    count_scale[0], marker, 30, zorder=4,
                 )
     if vline is not None:
         ax.axvline(vline, color="#444444", ls="--", lw=1.1, zorder=2)
@@ -670,7 +665,7 @@ def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None,
     outside = add_legend(
         ax, [] if mode == "single" else series, mode,
         vline_label=vline_label, hline_label=hline_label,
-        swatch="edge" if count_scale is not None and colored and kind == "points" else "colour",
+        swatch="marker" if count_scale is not None and colored and kind == "points" else "colour",
     )
     if not outside:
         fig.tight_layout()
@@ -807,10 +802,10 @@ def _idw_grid(x, y, values, res=130, k=24, power=1.0):
 
 
 def _scatter_by_time(ax, xs, ys, times, cmap, norm, marker, size, label=None):
-    """Point outline matches the average-time colour. No dark ring."""
+    """Filled points only. The colour is the average time, with no outline."""
     return ax.scatter(
         xs, ys, c=np.asarray(times, float), cmap=cmap, norm=norm,
-        marker=marker, s=size, linewidths=0.45, edgecolors="face",
+        marker=marker, s=size, linewidths=0, edgecolors="none",
         zorder=3, label=label, rasterized=True,
     )
 
