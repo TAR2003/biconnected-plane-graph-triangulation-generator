@@ -25,8 +25,9 @@ echo "[-] Recreating test-case input directories..."
 rm -rf "$INPUT_DIR"
 mkdir -p "$INPUT_DIR/Biconnected" "$INPUT_DIR/Oneconnected"
 
-if [[ -d "$ROOT_DIR/dev/input/Biconnected/9_general_biconnected" ]]; then
-    cp -R "$ROOT_DIR/dev/input/Biconnected/9_general_biconnected" "$INPUT_DIR/Biconnected/"
+
+if [[ -d "$ROOT_DIR/dev/input/Biconnected/Biconnected_9_general_biconnected" ]]; then
+    cp -R "$ROOT_DIR/dev/input/Biconnected/Biconnected_9_general_biconnected" "$INPUT_DIR/Biconnected/"
 fi
 if [[ -d "$ROOT_DIR/dev/input/Oneconnected" ]]; then
     cp -R "$ROOT_DIR/dev/input/Oneconnected/." "$INPUT_DIR/Oneconnected/"
@@ -88,9 +89,9 @@ fi
 
 echo "[-] Importing Plantri benchmark datasets..."
 uv run python plantri_import.py --plantri "$PLANTRI" --kind biconnected \
-    --nmin 3 --nmax 9 --out input/Biconnected/Biconnected_plantri --seed 42
+    --nmin 3 --nmax 8 --out input/Biconnected/Biconnected_plantri --seed 42
 uv run python plantri_import.py --plantri "$PLANTRI" --kind oneconnected \
-    --nmin 3 --nmax 9 --out input/Oneconnected/Oneconnected_plantri --seed 42
+    --nmin 3 --nmax 8 --out input/Oneconnected/Oneconnected_plantri --seed 42
 
 # if [[ -f "$TEST_CASES_DIR/visualizer.py" ]]; then
 #     echo "[-] Rendering test-case visualizations..."

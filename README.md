@@ -73,7 +73,7 @@ cmake --build build --parallel
 
 Executables:
 
-- `build/bench_time` — CPU/real time per full enumeration (primary benchmark)
+- `build/bench_time` — process CPU time per full enumeration (primary benchmark)
 - `build/bench_memory` — peak RSS during enumeration
 
 CMake options include `TRI_NATIVE`, `TRI_LTO`, `TRI_PGO`, and `TRI_ALLOCATOR` (see `CMakeLists.txt`).
@@ -139,7 +139,9 @@ Each algorithm gets its own results folder. The biconnected result folders conta
 
 Timing CSV columns include:
 
-`algorithm`, `category`, `filename`, `limit`, `triangulationLimit`, `vertices`, `cpuTimeSeconds`, `realTimeSeconds`, `triangulations`, `status`, `totalChecks`, `successfulChecks`, `unsuccessfulChecks`, `checkSuccessRate`, `totalTraversals`, `successfulTraversals`, `unsuccessfulTraversals`, `traversalSuccessRate`, `timestamp`.
+`algorithm`, `category`, `filename`, `limit`, `triangulationLimit`, `vertices`, `cpuTimeSeconds`, `triangulations`, `status`, `totalChecks`, `successfulChecks`, `unsuccessfulChecks`, `checkSuccessRate`, `totalTraversals`, `successfulTraversals`, `unsuccessfulTraversals`, `traversalSuccessRate`, `timestamp`.
+
+`cpuTimeSeconds` is Google Benchmark process CPU time, in seconds, for constructing the generator and then calling `generateAllTriangulations()`. Input parsing and object destruction are excluded.
 
 Check and traversal fields are populated for **BiconnectedWithoutVGS** and **Oneconnected** only. A run that hits the triangulation limit is marked accordingly and represents a **truncated** enumeration, not a full count.
 
@@ -209,7 +211,7 @@ Family lists, validation rules, and Plantri import are documented in [test-cases
 
 ## Interpreting results
 
-- **Average time per triangulation** = `cpuTimeSeconds / triangulations` (primary scaling metric in plots).
+- **Average time per triangulation** = `cpuTimeSeconds / triangulations` (primary scaling metric in plots). `cpuTimeSeconds` is Google Benchmark process CPU time for generator construction and `generateAllTriangulations()`.
 - **Check success rate** = `100 × successfulChecks / totalChecks` when checks are recorded; higher rates mean fewer pruned branches failed late in the search.
 - **Traversal success rate** (**Oneconnected** only) reflects how often internal traversals complete successfully; lower rates often correlate with harder search structure and can track higher per-triangulation cost on the same inputs.
 - Timing depends on compiler flags, CPU, and I/O; use the same build and `--tri_cpu` pinning for reproducible comparisons.

@@ -2,11 +2,14 @@
 //
 // * One Google Benchmark per (limit, algorithm, category, file) case.
 // * Iterations(1): each case is a single, complete enumeration (it is far too
-//   long/heavy to be repeated); Google Benchmark's own timers measure it.
-// * CPU time (not wall time) is what ends up in the CSV as cpuTimeSeconds.
-//   Wall time is also stored (realTimeSeconds) only for reference.
-// * Timed region = construct the selected source generator and enumerate all
-//   triangulations. Input parsing and object destruction are NOT timed.
+//   long/heavy to be repeated).
+// * The only time written to the CSV is cpuTimeSeconds: Google Benchmark's
+//   process CPU time (user + kernel, all threads), in seconds. MeasureProcessCPUTime
+//   selects that clock; the value is Run::cpu_accumulated_time.
+// * The timed region is two phases and nothing else: constructing the generator
+//   (rotation system to faces and the rest of the class), then
+//   generateAllTriangulations(). Those phases are not stored as their own columns.
+//   Input parsing and object destruction stay outside the timer.
 // * One input file at a time: parse it, run every algorithm and limit for that
 //   file, then drop it. The full suite is never registered or loaded up front.
 // * Memory is deliberately NOT measured here (see bench_memory.cpp).
@@ -24,7 +27,7 @@ static std::unordered_map<std::string, tb::Case> g_cases; // benchmark name -> c
 static tb::InputGraph g_loaded;
 
 static const char *kHeader =
-    "algorithm,category,filename,limit,triangulationLimit,vertices,cpuTimeSeconds,realTimeSeconds,triangulations,status,"
+    "algorithm,category,filename,limit,triangulationLimit,vertices,cpuTimeSeconds,triangulations,status,"
     "totalChecks,successfulChecks,unsuccessfulChecks,checkSuccessRate,"
     "totalTraversals,successfulTraversals,unsuccessfulTraversals,traversalSuccessRate,timestamp";
 
@@ -43,7 +46,7 @@ static void runCase(benchmark::State &state, const tb::Case &c)
     {
         tb::CoutSilencer silence;
         std::unique_ptr<tb::GeneratorRun> gt;
-        for (auto _ : state) // <- the only timed region
+        for (auto _ : state) // build, then generation; Google Benchmark times both
         {
             gt = tb::makeGraph(c.algo, g, c.limit);
             gt->generateAllTriangulations();
@@ -99,6 +102,9 @@ public:
                 return f == r.counters.end() ? 0 : (long long)f->second.value;
             };
             double iters = r.iterations > 0 ? (double)r.iterations : 1.0;
+            // cpu_accumulated_time is seconds. MeasureProcessCPUTime makes it
+            // process CPU time of the iteration (build + generation).
+            const double cpuSeconds = r.cpu_accumulated_time / iters;
             const bool checksAvailable = r.counters.find("totalChecks") != r.counters.end();
             const bool traversalsAvailable = r.counters.find("totalTraversals") != r.counters.end();
             long long total = cnt("totalChecks"), ok = cnt("successfulChecks");
@@ -107,8 +113,7 @@ public:
             std::vector<std::string> fields = {
                 tb::algoName(c.algo), c.category, c.file, std::to_string(c.limit), std::to_string(c.limit),
                 std::to_string(cnt("vertices")),
-                tb::fmtD(r.cpu_accumulated_time / iters, 9),
-                tb::fmtD(r.real_accumulated_time / iters, 9),
+                tb::fmtD(cpuSeconds, 9),
                 std::to_string(cnt("triangulations")),
                 tb::statusString(cnt("limit_hit") != 0),
                 checksAvailable ? std::to_string(total) : "",
@@ -198,8 +203,8 @@ int main(int argc, char **argv)
                                          { runCase(st, c); })
                 ->Iterations(1)
                 ->Repetitions(1)
-                ->MeasureProcessCPUTime() // CPU time of the whole process, never wall time
-                ->Unit(benchmark::kMillisecond);
+                ->MeasureProcessCPUTime() // process CPU time, reported below in seconds
+                ->Unit(benchmark::kSecond);
         }
         benchmark::RunSpecifiedBenchmarks(&reporter);
         benchmark::ClearRegisteredBenchmarks();
