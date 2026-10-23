@@ -34,7 +34,8 @@ Time charts use cpuTimeSeconds, Google Benchmark process CPU time in seconds.
 
     On every avg-time chart whose x-axis is not total triangulations, each point
     is coloured red (fewer triangulations) to green (more). The colour bar is the
-    count scale. Markers, lines, and outlines still identify the series.
+    count scale. Comparison charts use colour and marker for the algorithm.
+    A chart that stacks many categories uses one marker for all of them.
 
 Memory charts (5), peak memory = peakDeltaMiB, per-vertex = peakDeltaBytesPerVertex:
     07 points  peak memory vs triangulations             (log x)
@@ -114,9 +115,6 @@ ALGO_MARKER = {
 }
 INPUT_MARKER = {"Biconnected": "o", "Oneconnected": "s"}
 INPUT_LS = {"Biconnected": "-", "Oneconnected": "--"}
-
-MARKERS = ["o", "s", "^", "D", "v", "P", "X", "*", "h", "<", ">", "p", "d", "H", "8"]
-LINESTYLES = ["-", "--", "-.", ":"]
 DPI = 110
 
 # The only timed column is cpuTimeSeconds (process CPU time, seconds).
@@ -327,36 +325,6 @@ def load_memory():
 # ------------------------------------------------------------------------------
 # Styles
 # ------------------------------------------------------------------------------
-def _hex(rgb):
-    return mcolors.to_hex(tuple(float(c) for c in list(rgb)[:3]))
-
-
-def hsv_palette(n, hue0, hue1):
-    if n <= 0:
-        return []
-    colors = []
-    for i in range(n):
-        span = 0 if n == 1 else (i % 8) / 7
-        hue = (hue0 + (hue1 - hue0) * span) % 1.0
-        band = i // 8
-        sat = 0.88 - 0.18 * (band % 2)
-        val = 0.42 + 0.18 * (band % 3)
-        colors.append(_hex(mcolors.hsv_to_rgb((hue, sat, val))))
-    return colors
-
-
-def qual_colors(n):
-    raw = []
-    for name in ("tab20", "tab20b", "tab20c"):
-        cmap = plt.colormaps[name]
-        raw.extend(cmap(i) for i in range(cmap.N))
-    ordered = raw[0::2] + raw[1::2]
-    if n <= len(ordered):
-        return [_hex(c) for c in ordered[:n]]
-    extra = hsv_palette(n - len(ordered), 0.0, 0.9)
-    return [_hex(c) for c in ordered] + extra
-
-
 def build_series(df, mode):
     """Return list of (label, color, marker, linestyle, frame)."""
     if df is None or df.empty:
@@ -366,37 +334,22 @@ def build_series(df, mode):
         return [("result", "#1f77b4", "o", "-", df)]
 
     if mode == "by_category":
-        cats = sorted(df["category"].unique())
-        colors = qual_colors(len(cats))
+        # One marker and one colour. Categories stay separate series so a line
+        # does not jump from one category to another, but they are not labelled.
         series = []
-        for i, cat in enumerate(cats):
+        for cat in sorted(df["category"].unique()):
             sub = df[df["category"] == cat]
-            series.append((
-                cat,
-                colors[i],
-                MARKERS[i % len(MARKERS)],
-                LINESTYLES[(i // len(MARKERS)) % len(LINESTYLES)],
-                sub,
-            ))
+            series.append((cat, "#1f77b4", "o", "-", sub))
         return series
 
     if mode == "by_input_family":
+        family_color = {"Biconnected": "#1d4ed8", "Oneconnected": "#b91c1c"}
         series = []
-        for family, hue0, hue1 in (
-            ("Biconnected", 0.50, 0.72),
-            ("Oneconnected", 0.00, 0.08),
-        ):
+        for family in ("Biconnected", "Oneconnected"):
             cats = sorted(df.loc[df["input_type"] == family, "category"].unique())
-            colors = hsv_palette(len(cats), hue0, hue1)
-            for i, cat in enumerate(cats):
+            for cat in cats:
                 sub = df[df["category"] == cat]
-                series.append((
-                    cat,
-                    colors[i],
-                    MARKERS[i % len(MARKERS)],
-                    LINESTYLES[(i // len(MARKERS)) % len(LINESTYLES)],
-                    sub,
-                ))
+                series.append((family, family_color[family], "o", "-", sub))
         return series
 
     if mode == "by_algo":
@@ -412,15 +365,15 @@ def build_series(df, mode):
         cats = sorted(df["category"].unique())
         series = []
         for algo in ALGO_ORDER:
-            for i, cat in enumerate(cats):
+            for cat in cats:
                 sub = df[(df["algo"] == algo) & (df["category"] == cat)]
                 if sub.empty:
                     continue
                 series.append((
                     f"{ALGO_LABEL[algo]} | {cat}",
                     ALGO_COLOR[algo],
-                    MARKERS[i % len(MARKERS)],
-                    LINESTYLES[(i // len(MARKERS)) % len(LINESTYLES)],
+                    ALGO_MARKER[algo],
+                    "-",
                     sub,
                 ))
         return series
@@ -452,32 +405,29 @@ def _proxy(color, marker, ls, label):
 
 
 def add_legend(ax, series, mode, vline_label=None, hline_label=None, swatch="colour"):
-    if mode == "single":
+    if mode in ("single", "by_category"):
         handles = []
+    elif mode == "by_input_family":
+        handles = []
+        seen = set()
+        for label, color, marker, ls, _sub in series:
+            if label in seen:
+                continue
+            seen.add(label)
+            handles.append(_proxy(color, marker, ls, f"{label} input"))
     elif mode == "by_algo_category":
         algos = []
-        cats = []
-        seen_a, seen_c = set(), set()
+        seen_a = set()
         for label, color, marker, ls, _sub in series:
-            algo_name, cat = label.split(" | ", 1)
-            if algo_name not in seen_a:
-                seen_a.add(algo_name)
-                algos.append(_proxy(color, "o", "-", algo_name))
-            if cat not in seen_c:
-                seen_c.add(cat)
-                cats.append(_proxy("black", marker, ls, cat))
+            algo_name = label.split(" | ", 1)[0]
+            if algo_name in seen_a:
+                continue
+            seen_a.add(algo_name)
+            algos.append(_proxy(color, marker, ls, algo_name))
         if algos:
             algo_title = "algorithm (edge)" if swatch == "edge" else "algorithm (colour)"
-            leg = ax.legend(handles=algos, title=algo_title, loc="upper left",
-                            bbox_to_anchor=(1.01, 1.0), fontsize=8, framealpha=0.92)
-            ax.add_artist(leg)
-        if cats:
-            ax.legend(handles=cats, title="category (symbol)", loc="upper left",
-                      bbox_to_anchor=(1.01, 0.72), fontsize=6.5, framealpha=0.92,
-                      ncol=1 if len(cats) < 20 else 2)
-        if vline_label:
-            pass
-        return len(series) > 8
+            ax.legend(handles=algos, title=algo_title, fontsize=8, framealpha=0.92)
+        return False
     else:
         handles = [_proxy(c, m, ls, lab) for lab, c, m, ls, _ in series]
 
@@ -661,7 +611,6 @@ def plot_xy(df, folder, spec, mode, title_prefix, vline=None, vline_label=None,
     colored = 0
     nser = sum(1 for _lab, _c, _m, _ls, sub in series if not sub.empty)
     # A small x nudge only when a few series share the axes (algorithm comparisons).
-    # Many categories stay on their true x and are told apart by colour.
     for i, (label, color, marker, ls, sub) in enumerate(series):
         if mean_by_x:
             drawn = sub.groupby(x, as_index=False)[y].mean().sort_values(x)
@@ -1095,7 +1044,7 @@ def plot_traversal_algorithm_comparison(df, folder, mode, title_prefix):
         return
     matched = matched.dropna(subset=["trav_rate_oc"])
 
-    # Category comparison uses algorithm colour; category is the marker when several are present.
+    # Colour and marker are the algorithm. Categories are not given their own symbols.
     draw_mode = "by_algo" if mode == "by_algo" else "by_algo_category"
     shorts = (("oc", "Oneconnected"), ("wo", "BiconnectedWithoutVGS"), ("w", "BiconnectedWithVGS"))
     for metric in TIME_METRICS:
