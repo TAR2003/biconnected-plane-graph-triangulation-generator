@@ -8,6 +8,9 @@
 // graph. Check counters are the algorithm's own total / successful / unsuccessful
 // counts for that whole enumeration.
 //
+// Each cycle is limited to 1 billion triangulations. If the limit interrupts a
+// cycle, its partial results are recorded with a partial_limit_reached status.
+//
 // Results are appended to a CSV. Orders already present in that CSV are skipped,
 // so a later run continues with the remaining cycles.
 //
@@ -25,10 +28,11 @@ using namespace std;
 namespace fs = std::filesystem;
 
 static const long long MAX_N = 20;
+static const long long MAX_TRIANGULATION_LIMIT = 1'000'000'000LL;
 static const char *CSV_HEADER =
     "n,first_face_triangulations,min_second_face_triangulations,max_second_face_triangulations,"
     "avg_second_face_triangulations,total_triangulations,total_checks,successful_checks,unsuccessful_checks,"
-    "percentage_of_successful_checks,time_seconds";
+    "percentage_of_successful_checks,time_seconds,enumeration_status";
 
 struct CycleResult
 {
@@ -42,6 +46,7 @@ struct CycleResult
     long long successfulChecks = 0;
     long long unsuccessfulChecks = 0;
     double timeSeconds = 0;
+    bool complete = false;
 };
 
 class CycleSecondFaceExperiment : public GenerateBiconnectedTriangulationsWithoutVGS
@@ -51,10 +56,26 @@ public:
     long long minSecondFace = LLONG_MAX;
     long long maxSecondFace = 0;
     long long sumSecondFace = 0;
+    bool limitInterruptedEnumeration = false;
 
-    CycleSecondFaceExperiment(long long totalVertices, const vector<vector<long long>> &adjacentSet)
-        : GenerateBiconnectedTriangulationsWithoutVGS(totalVertices, adjacentSet)
+    CycleSecondFaceExperiment(long long totalVertices, const vector<vector<long long>> &adjacentSet,
+                              long long triangulationLimit)
+        : GenerateBiconnectedTriangulationsWithoutVGS(totalVertices, adjacentSet, triangulationLimit)
     {
+    }
+
+    void visitAllBranches(long long faceIndex, Chord *itr) override
+    {
+        while (itr != nullptr)
+        {
+            if (limitExceeded())
+            {
+                limitInterruptedEnumeration = true;
+                return;
+            }
+            generateChildTriangulations(faceIndex, itr);
+            itr = itr->nextGS;
+        }
     }
 
     void output(long long faceIndex) override
@@ -197,7 +218,8 @@ static void appendResult(ofstream &out, const CycleResult &row)
         << row.successfulChecks << ","
         << row.unsuccessfulChecks << ","
         << percentage.str() << ","
-        << seconds.str() << "\n";
+        << seconds.str() << ","
+        << (row.complete ? "complete" : "partial_limit_reached") << "\n";
     out.flush();
 }
 
@@ -214,16 +236,17 @@ static void printResult(const CycleResult &row)
          << " unsuccessful=" << row.unsuccessfulChecks
          << " successful percentage=" << fixed << setprecision(2)
          << successfulCheckPercentage(row) << "%"
+         << "  status=" << (row.complete ? "complete" : "partial_limit_reached")
          << "  time=" << setprecision(3) << row.timeSeconds << "s\n"
          << flush;
 }
 
-static CycleResult runCycle(long long n)
+static CycleResult runCycle(long long n, long long triangulationLimit = MAX_TRIANGULATION_LIMIT)
 {
     cout << "Running C_" << n << " ...\n" << flush;
     auto adjacency = cycleAdjacency(n);
     auto started = chrono::steady_clock::now();
-    CycleSecondFaceExperiment generator(n, adjacency);
+    CycleSecondFaceExperiment generator(n, adjacency, triangulationLimit);
     if (n == 3)
     {
         if (!generator.faces.empty())
@@ -253,6 +276,7 @@ static CycleResult runCycle(long long n)
         row.maxSecondFace = 1;
         row.avgSecondFace = 1;
         row.totalTriangulations = generator.totalTriangulations;
+        row.complete = true;
         if (row.totalTriangulations != 1)
             throw runtime_error("an already triangulated cycle should have one triangulation");
     }
@@ -263,16 +287,18 @@ static CycleResult runCycle(long long n)
         if (generator.sumSecondFace != generator.totalTriangulations)
             throw runtime_error("second-face counts do not sum to the total triangulation count");
         long long expectedFirst = catalan(n - 2);
-        if (generator.firstFaceTriangulations != expectedFirst)
+        if (generator.firstFaceTriangulations > expectedFirst)
         {
-            throw runtime_error("first-face count " + to_string(generator.firstFaceTriangulations) +
-                                " does not match Catalan C_" + to_string(n - 2) + " = " + to_string(expectedFirst));
+            throw runtime_error("first-face count exceeds Catalan C_" + to_string(n - 2) +
+                                " = " + to_string(expectedFirst));
         }
         row.firstFaceTriangulations = generator.firstFaceTriangulations;
         row.minSecondFace = generator.minSecondFace;
         row.maxSecondFace = generator.maxSecondFace;
         row.avgSecondFace = (double)generator.sumSecondFace / (double)generator.firstFaceTriangulations;
         row.totalTriangulations = generator.totalTriangulations;
+        row.complete = !generator.limitInterruptedEnumeration &&
+                       generator.firstFaceTriangulations == expectedFirst;
     }
     return row;
 }
