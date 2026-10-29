@@ -28,7 +28,7 @@ using namespace std;
 namespace fs = std::filesystem;
 
 static const long long MAX_N = 20;
-static const long long MAX_TRIANGULATION_LIMIT = 1'000'000'000LL;
+static const long long MAX_TRIANGULATION_LIMIT = LONG_LONG_MAX;
 static const char *CSV_HEADER =
     "n,first_face_triangulations,min_second_face_triangulations,max_second_face_triangulations,"
     "avg_second_face_triangulations,total_triangulations,total_checks,successful_checks,unsuccessful_checks,"
@@ -91,12 +91,12 @@ public:
                 minSecondFace = produced;
             if (produced > maxSecondFace)
                 maxSecondFace = produced;
-            if (firstFaceTriangulations % 1000 == 0)
-            {
-                cout << "  C_" << totalVertices << ": " << firstFaceTriangulations
-                     << " first-face triangulations done\n"
-                     << flush;
-            }
+            // if (firstFaceTriangulations % 1000 == 0)
+            // {
+            //     cout << "  C_" << totalVertices << ": " << firstFaceTriangulations
+            //          << " first-face triangulations done\n"
+            //          << flush;
+            // }
             return;
         }
         GenerateTriangulations::output(faceIndex);
